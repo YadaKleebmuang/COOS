@@ -1,10 +1,16 @@
-const UserModel = require('../models/user.model');
+const UserModel = require("../models/user.model");
 
 // GET /users
 exports.getUsers = async (req, res) => {
   try {
-    const users = await UserModel.findAll();
-    res.json(users);
+    const user = await UserModel.findAll();
+    // เช็คว่ามี user ไหม
+    if (!user || user.length === 0) {
+      return res.status(404).json({
+        message: "User not found!",
+      }); 
+    }
+    res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -13,10 +19,11 @@ exports.getUsers = async (req, res) => {
 // GET /users/:id
 exports.getUserById = async (req, res) => {
   try {
+    // หา user ตาม id
     const user = await UserModel.findById(req.params.id);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json(user);
@@ -28,22 +35,57 @@ exports.getUserById = async (req, res) => {
 // POST /users
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // รับค่าจาก body
+    const {
+      userFirstName,
+      userLastName,
+      userEmail,
+      userPassword,
+      userPhone,
+      userAddress,
+      userRole,
+    } = req.body;
 
-    // basic validation
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    // ตรวจสอบค่าที่จำเป็น ตรวจสอบว่าข้อมูลสำคัญครบหรือไม่
+    if (!userFirstName || !userLastName || !userEmail || !userPassword) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // บันทึกข้อมูล user ใหม่
     const userId = await UserModel.create({
-      name,
-      email,
-      password, // ❗ hash ก่อนใช้จริง
+      userFirstName,
+      userLastName,
+      userEmail,
+      userPassword,
+      userPhone,
+      userAddress,
+      userRole,
     });
 
     res.status(201).json({
-      message: 'User created',
+      message: "User created",
       id: userId,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// PATCH /users/:id
+exports.updateUser = async (req, res) => {
+  try {
+    // รับ id จาก params
+    const { id } = req.params;
+    // เรียก Model เพื่ออัปเดตข้อมูล
+    const result = await UserModel.update(id, req.body);
+    // ตรวจสอบว่ามีการอัปเดตหรือไม่
+    if (!result) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      message: "User updated successfully",
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -53,13 +95,15 @@ exports.createUser = async (req, res) => {
 // DELETE /users/:id
 exports.deleteUser = async (req, res) => {
   try {
+    // เรียก Model เพื่อลบข้อมูลผู้ใช้
     const affected = await UserModel.remove(req.params.id);
 
+    // ตรวจสอบว่าพบผู้ใช้หรือไม่
     if (!affected) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: 'User deleted' });
+    res.json({ message: "User deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
