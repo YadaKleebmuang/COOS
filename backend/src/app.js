@@ -5,8 +5,9 @@ const loadRoutes = require('./routes/index.route');
 const { testConnection } = require('../src/config/db');
 
 const app = express();
+
+app.use(corsMiddleware);
 app.use(express.json());
-// app.use(corsMiddleware);
 
 testConnection();
 
