@@ -1,7 +1,8 @@
-const cors = require('cors');
+const cors = require('cors')
 
 module.exports = cors({
-  origin: '*', // change to specific domain in production
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: ['http://localhost:8888'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-});
+  credentials: false
+})

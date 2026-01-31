@@ -2,13 +2,14 @@ const UserModel = require("../models/user.model");
 
 // GET /users
 exports.getUsers = async (req, res) => {
+  // console.log('GET USERS controller start');
   try {
     const user = await UserModel.findAll();
     // เช็คว่ามี user ไหม
     if (!user || user.length === 0) {
       return res.status(404).json({
         message: "User not found!",
-      }); 
+      });
     }
     res.status(200).json(user);
   } catch (err) {

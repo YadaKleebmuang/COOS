@@ -37,6 +37,25 @@ exports.findById = async (id) => {
   return rows[0];
 };
 
+// get user by email
+exports.findByEmail = async (email) => {
+  const [rows] = await pool.query(
+    `SELECT
+      userId,
+      userFirstName,
+      userLastName,
+      userEmail,
+      userPassword,
+      userPhone,
+      userAddress,
+      userRole,
+      userCreatedAt
+    FROM users WHERE userEmail = ?`,
+    [email]
+  );
+  return rows[0];
+};
+
 // create user
 exports.create = async (data) => {
   const [result] = await pool.query(
