@@ -48,6 +48,70 @@ CREATE TABLE IF NOT EXISTS `packages` (
   INDEX `idx_packageIsActive` (`packageIsActive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- galleryImages Table
+CREATE TABLE IF NOT EXISTS `galleryImages` (
+  `imageId`           INT AUTO_INCREMENT PRIMARY KEY,
+  `imageUrl`          VARCHAR(255) NOT NULL,
+  `workTypeId`        INT NOT NULL,
+  `imageTitle`        VARCHAR(150) NULL,
+  `imageDescription`  TEXT NULL,
+  `imageIsActive`     TINYINT(1) NOT NULL DEFAULT 1,
+  `imageCreatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `imageUpdatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX `idx_workTypeId` (`workTypeId`),
+  INDEX `idx_imageIsActive` (`imageIsActive`),
+
+  CONSTRAINT `fk_gallery_workType`
+    FOREIGN KEY (`workTypeId`)
+    REFERENCES `workTypes`(`workTypeId`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- tags Table
+CREATE TABLE IF NOT EXISTS `tags` (
+  `tagId`         INT AUTO_INCREMENT PRIMARY KEY,
+  `tagName`       VARCHAR(100) NOT NULL,
+  `tagCreatedAt`  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE `uq_tagName` (`tagName`),
+  INDEX `idx_tagName` (`tagName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- galleryImageTags Table (Many-to-Many Relationship)
+CREATE TABLE IF NOT EXISTS `galleryImageTags` (
+  `id`        INT AUTO_INCREMENT PRIMARY KEY,
+  `imageId`   INT NOT NULL,
+  `tagId`     INT NOT NULL,
+
+  UNIQUE `uq_image_tag` (`imageId`, `tagId`),
+  INDEX `idx_imageId` (`imageId`),
+  INDEX `idx_tagId` (`tagId`),
+
+  CONSTRAINT `fk_git_image`
+    FOREIGN KEY (`imageId`)
+    REFERENCES `galleryImages`(`imageId`)
+    ON DELETE CASCADE,
+
+  CONSTRAINT `fk_git_tag`
+    FOREIGN KEY (`tagId`)
+    REFERENCES `tags`(`tagId`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- policies Table
+CREATE TABLE IF NOT EXISTS `policies` (
+  `policyId`        INT AUTO_INCREMENT PRIMARY KEY,
+  `policyTitle`     VARCHAR(150) NOT NULL,
+  `policyContent`   TEXT NOT NULL,
+  `policyType`      ENUM('refund', 'terms', 'privacy') NOT NULL,
+  `policyIsActive`  TINYINT(1) NOT NULL DEFAULT 1,
+  `policyCreatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `policyUpdatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX `idx_policyType` (`policyType`),
+  INDEX `idx_policyIsActive` (`policyIsActive`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Sample Data (Optional)
 -- Insert sample users
@@ -70,3 +134,26 @@ VALUES
   ('Basic',    10, 'FullHD', 5,  199.00),
   ('Standard', 20, 'FullHD', 7,  399.00),
   ('Pro',      30, '4K',    10, 599.00);
+
+-- Example Query
+-- Select gallery images with their work type and associated tags
+SELECT 
+  gi.imageId,
+  gi.imageTitle,
+  gi.imageUrl,
+  wt.workTypeName,
+  GROUP_CONCAT(t.tagName) AS tags
+FROM galleryImages gi
+JOIN workTypes wt ON gi.workTypeId = wt.workTypeId
+LEFT JOIN galleryImageTags git ON gi.imageId = git.imageId
+LEFT JOIN tags t ON git.tagId = t.tagId
+WHERE gi.imageIsActive = 1
+GROUP BY gi.imageId;
+
+-- filter by work type + tag
+SELECT DISTINCT gi.*
+FROM galleryImages gi
+JOIN galleryImageTags git ON gi.imageId = git.imageId
+JOIN tags t ON git.tagId = t.tagId
+WHERE gi.workTypeId = 1
+  AND t.tagName = 'anime';
