@@ -3,6 +3,7 @@ const userRoutes = require("./user.route");
 const auth = require("./auth.route");
 const packageRoutes = require("./packages.route");
 const workTypeRoutes = require("./workTypes.route");
+const orderRoutes = require("./orders.route");
 const authMiddleware = require("../../middlewares/auth.middleware");
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.use(authMiddleware);
 router.use("/users", userRoutes);
 router.use("/packages", packageRoutes);
 router.use("/work-types", workTypeRoutes);
+router.use("/orders", orderRoutes);
 
 module.exports = router;
