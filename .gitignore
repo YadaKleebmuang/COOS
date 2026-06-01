@@ -11,4 +11,4 @@ frontend/.cache
 frontend/.env
 
 # Documentation
-SETUP.md
+/docs
