@@ -1,5 +1,6 @@
-# Backend
+# Environment variables
 backend/.env
+frontend/.env
 
 # Frontend
 frontend/node_modules
@@ -8,7 +9,6 @@ frontend/.nuxt
 frontend/.nitro
 frontend/dist
 frontend/.cache
-frontend/.env
 
 # Documentation
-SETUP.md
+/docs
