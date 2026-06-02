@@ -1,5 +1,6 @@
 # Backend
 backend/.env
+backend/node_modules
 
 # Frontend
 frontend/node_modules
@@ -12,3 +13,6 @@ frontend/.env
 
 # Documentation
 /docs
+
+# Docker
+db_data/

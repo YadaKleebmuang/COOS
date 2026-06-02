@@ -1,0 +1,66 @@
+services:
+  # ===== MySQL (แทน XAMPP) =====
+  db:
+    image: mysql:8.0
+    container_name: coos-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: coosdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== Backend (Node.js + Express) =====
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: coos-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root1234
+      DB_NAME: coosdb
+      DB_PORT: 3306
+      PORT: 3000
+      JWT_SECRET: supersecretkey123
+      JWT_EXPIRES_IN: 1d
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ===== Frontend (Nuxt 3) =====
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: coos-frontend
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:3000/api/v1
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./frontend/app:/app/app
+      - ./frontend/pages:/app/pages
+      - ./frontend/composables:/app/composables
+      - ./frontend/assets:/app/assets
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
