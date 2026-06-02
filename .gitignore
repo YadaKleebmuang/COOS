@@ -1,5 +1,8 @@
-# Backend
+# Environment variables
 backend/.env
+frontend/.env
+
+# Backend
 backend/node_modules
 
 # Frontend
@@ -9,10 +12,6 @@ frontend/.nuxt
 frontend/.nitro
 frontend/dist
 frontend/.cache
-frontend/.env
-
-# Documentation
-/docs
 
 # Docker
-db_data/
+db_data/
