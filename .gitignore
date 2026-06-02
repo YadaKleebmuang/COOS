@@ -2,6 +2,9 @@
 backend/.env
 frontend/.env
 
+# Backend
+backend/node_modules
+
 # Frontend
 frontend/node_modules
 frontend/.output
@@ -10,5 +13,5 @@ frontend/.nitro
 frontend/dist
 frontend/.cache
 
-# Documentation
-/docs
+# Docker
+db_data/

@@ -18,7 +18,7 @@ async function testConnection() {
     const conn = await pool.getConnection();
     await conn.ping();
     conn.release();
-    console.log("✅ MySQL connected (XAMPP)");
+    console.log("✅ MySQL connected");
   } catch (err) {
     console.error("❌ MySQL connection failed:", err.message);
     process.exit(1);
