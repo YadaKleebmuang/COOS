@@ -6,7 +6,7 @@ const VALID_RESOLUTIONS = ["FullHD", "4K"];
 exports.getAll = async (req, res) => {
   try {
     const includeInactive =
-      req.query.all === "true" && req.user?.role === "admin";
+      req.query.all === "true" && req.session?.userRole === "admin";
     const [rows] = await PackageModel.findAll(includeInactive);
 
     if (!rows || rows.length === 0) {

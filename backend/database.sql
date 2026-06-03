@@ -14,8 +14,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `userPassword` VARCHAR(255) NOT NULL,
   `userPhone` VARCHAR(20),
   `userAddress` TEXT,
+  `userProfileImage` VARCHAR(500) NULL,                    -- URL รูปโปรไฟล์
+  `userContactChannels` JSON NULL,                         -- ช่องทางโซเชียล เช่น {"line":"@coos","facebook":"coos.studio","instagram":"coos_art"}
   `userRole` ENUM('admin', 'customer', 'editor') DEFAULT 'customer',
+  `userResetToken` VARCHAR(255) NULL,                      -- Token สำหรับกู้คืนรหัสผ่าน
+  `userResetTokenExpiry` TIMESTAMP NULL,                   -- วันหมดอายุของ Token
   `userCreatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `userUpdatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_userEmail` (`userEmail`),
   INDEX `idx_userRole` (`userRole`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
