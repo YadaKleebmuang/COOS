@@ -1,14 +1,16 @@
 const express = require("express");
 const controller = require("../../controllers/user.controller");
+const adminOnly = require("../../middlewares/admin.middleware");
 
 const router = express.Router();
 
-// route ย่อยสำหรับ user (เช่น ดึงข้อมูล user, สร้าง user, ลบ user, อัปเดต user)
+// route ย่อยสำหรับ user
 router.get("/", controller.getUsers);
-
 router.get("/:id", controller.getUserById);
-router.post("/", controller.createUser);
-router.delete("/:id", controller.deleteUser);
-router.patch("/:id", controller.updateUser);
+
+// Admin only
+router.post("/", adminOnly, controller.createUser);
+router.patch("/:id", adminOnly, controller.updateUser);
+router.delete("/:id", adminOnly, controller.deleteUser);
 
 module.exports = router;
