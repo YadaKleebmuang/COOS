@@ -13,6 +13,7 @@ interface AuthResponse {
 }
 
 export const authService = {
+  // register
   async register(form: RegisterForm) {
     const { apiFetch } = useApi();
 
@@ -30,6 +31,7 @@ export const authService = {
     });
   },
 
+  // login
   async login(email: string, password: string) {
     const { apiFetch } = useApi();
 
@@ -54,9 +56,32 @@ export const authService = {
     return data;
   },
 
+  // logout
   async logout() {
     // ไม่เรียก backend
     const token = useCookie<string | null>("token");
     token.value = null;
+  },
+
+  // forgot password
+  async forgotPassword(email: string) {
+    const { apiFetch } = useApi();
+
+    return await apiFetch<{ message: string; resetToken: string; expiresAt: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ userEmail: email }),
+      headers: { "Content-Type": "application/json" },
+    });
+  },
+
+  // reset password
+  async resetPassword(token: string, newPassword: string) {
+    const { apiFetch } = useApi();
+
+    return await apiFetch<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, newPassword }),
+      headers: { "Content-Type": "application/json" },
+    });
   },
 };
