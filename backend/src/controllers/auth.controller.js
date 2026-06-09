@@ -94,6 +94,7 @@ exports.login = async (req, res) => {
         userLastName: user.userLastName,
         userRole: user.userRole,
         userEmail: user.userEmail,
+        userProfileImage: user.userProfileImage,
       },
       process.env.JWT_SECRET,
       {
@@ -111,6 +112,7 @@ exports.login = async (req, res) => {
         userLastName: user.userLastName,
         userEmail: user.userEmail,
         userRole: user.userRole,
+        userProfileImage: user.userProfileImage,
       },
     });
   } catch (err) {

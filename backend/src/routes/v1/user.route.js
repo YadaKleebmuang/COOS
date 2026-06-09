@@ -5,6 +5,11 @@ const adminOnly = require("../../middlewares/admin.middleware");
 const router = express.Router();
 
 // route ย่อยสำหรับ user
+
+// /me routes — ต้องอยู่ก่อน /:id เพื่อไม่ให้ "me" ถูกตีความเป็น id
+router.get("/me", controller.getMyProfile);
+router.patch("/me", controller.updateMyProfile);
+
 router.get("/", controller.getUsers);
 router.get("/:id", controller.getUserById);
 
