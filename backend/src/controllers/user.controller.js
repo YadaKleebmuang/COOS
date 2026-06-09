@@ -44,6 +44,8 @@ exports.createUser = async (req, res) => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole,
     } = req.body;
 
@@ -60,6 +62,8 @@ exports.createUser = async (req, res) => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole,
     });
 
@@ -105,6 +109,86 @@ exports.deleteUser = async (req, res) => {
     }
 
     res.json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// PATCH /users/me  — อัปเดตโปรไฟล์ตัวเอง (ไม่รวม role และ email)
+exports.updateMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId; // จาก JWT middleware
+    const {
+      userFirstName,
+      userLastName,
+      userPhone,
+      userAddress,
+      userProfileImage,
+      userContactChannels,
+    } = req.body;
+
+    if (!userFirstName || !userLastName) {
+      return res.status(400).json({ message: "Missing required fields (firstName, lastName)" });
+    }
+
+    const result = await UserModel.updateProfile(userId, {
+      userFirstName,
+      userLastName,
+      userPhone,
+      userAddress,
+      userProfileImage,
+      userContactChannels,
+    });
+
+    if (!result) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ดึงข้อมูล user ที่อัปเดตแล้วส่งกลับ
+    const updatedUser = await UserModel.findById(userId);
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        userId: updatedUser.userId,
+        userFirstName: updatedUser.userFirstName,
+        userLastName: updatedUser.userLastName,
+        userEmail: updatedUser.userEmail,
+        userPhone: updatedUser.userPhone,
+        userAddress: updatedUser.userAddress,
+        userProfileImage: updatedUser.userProfileImage,
+        userContactChannels: updatedUser.userContactChannels,
+        userRole: updatedUser.userRole,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /users/me  — ดึงข้อมูลโปรไฟล์ตัวเอง
+exports.getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId; // จาก JWT middleware
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ส่งข้อมูลกลับโดยไม่รวม password
+    res.status(200).json({
+      userId: user.userId,
+      userFirstName: user.userFirstName,
+      userLastName: user.userLastName,
+      userEmail: user.userEmail,
+      userPhone: user.userPhone,
+      userAddress: user.userAddress,
+      userProfileImage: user.userProfileImage,
+      userContactChannels: user.userContactChannels,
+      userRole: user.userRole,
+      userCreatedAt: user.userCreatedAt,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
