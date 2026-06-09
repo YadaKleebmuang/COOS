@@ -1,6 +1,7 @@
 const express = require("express");
 const controller = require("../../controllers/user.controller");
 const adminOnly = require("../../middlewares/admin.middleware");
+const { uploadProfile } = require("../../config/upload");
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 
 // /me routes — ต้องอยู่ก่อน /:id เพื่อไม่ให้ "me" ถูกตีความเป็น id
 router.get("/me", controller.getMyProfile);
-router.patch("/me", controller.updateMyProfile);
+router.patch("/me", uploadProfile.single("profileImage"), controller.updateMyProfile);
 
 router.get("/", controller.getUsers);
 router.get("/:id", controller.getUserById);

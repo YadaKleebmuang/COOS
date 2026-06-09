@@ -117,13 +117,12 @@ exports.deleteUser = async (req, res) => {
 // PATCH /users/me  — อัปเดตโปรไฟล์ตัวเอง (ไม่รวม role และ email)
 exports.updateMyProfile = async (req, res) => {
   try {
-    const userId = req.user.userId; // จาก JWT middleware
+    const userId = req.session.userId; // จาก JWT middleware
     const {
       userFirstName,
       userLastName,
       userPhone,
       userAddress,
-      userProfileImage,
       userContactChannels,
     } = req.body;
 
@@ -131,13 +130,32 @@ exports.updateMyProfile = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields (firstName, lastName)" });
     }
 
+    // จัดการรูปโปรไฟล์ — ถ้ามีการอัปโหลดไฟล์ใหม่ ใช้ path จาก multer
+    let profileImageUrl = req.body.userProfileImage || null;
+    if (req.file) {
+      profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    // จัดการ contactChannels — multipart form ส่งมาเป็น string
+    let parsedContactChannels = null;
+    if (userContactChannels) {
+      try {
+        parsedContactChannels =
+          typeof userContactChannels === "string"
+            ? JSON.parse(userContactChannels)
+            : userContactChannels;
+      } catch {
+        return res.status(400).json({ message: "userContactChannels must be valid JSON" });
+      }
+    }
+
     const result = await UserModel.updateProfile(userId, {
       userFirstName,
       userLastName,
       userPhone,
       userAddress,
-      userProfileImage,
-      userContactChannels,
+      userProfileImage: profileImageUrl,
+      userContactChannels: parsedContactChannels,
     });
 
     if (!result) {
@@ -169,7 +187,7 @@ exports.updateMyProfile = async (req, res) => {
 // GET /users/me  — ดึงข้อมูลโปรไฟล์ตัวเอง
 exports.getMyProfile = async (req, res) => {
   try {
-    const userId = req.user.userId; // จาก JWT middleware
+    const userId = req.session.userId; // จาก JWT middleware
     const user = await UserModel.findById(userId);
 
     if (!user) {
