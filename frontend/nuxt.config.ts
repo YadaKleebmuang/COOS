@@ -1,27 +1,27 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  srcDir: "app/",
+
   modules: [
     "@nuxt/eslint",
     "@nuxt/hints",
     "@nuxt/image",
     "@nuxt/scripts",
     "@nuxt/test-utils",
-    "@nuxtjs/tailwindcss",
+    "@nuxtjs/tailwindcss"
   ],
-
-  appDir: "app",
 
   devServer: {
     host: "0.0.0.0",
-    port: 8888,
+    port: 8888
   },
 
   devtools: {
-    enabled: true,
+    enabled: true
   },
 
   routeRules: {
-    "/": { prerender: true },
+    "/": { prerender: true }
   },
 
   compatibilityDate: "2025-01-15",
@@ -30,15 +30,14 @@ export default defineNuxtConfig({
     config: {
       stylistic: {
         commaDangle: "never",
-        braceStyle: "1tbs",
-      },
-    },
+        braceStyle: "1tbs"
+      }
+    }
   },
 
-  // ⭐ เพิ่มตรงนี้
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:3000/api/v1",
-    },
-  },
-});
+      apiBase: "http://localhost:3000/api/v1"
+    }
+  }
+})

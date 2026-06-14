@@ -7,7 +7,7 @@ import type {
   OrderSummary,
   OrderDetail,
   OrderStatus,
-} from "~/app/types/order.types"
+} from "~/types/order.types"
 
 export const orderService = {
   /**
@@ -114,6 +114,45 @@ export const orderService = {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderStatus, logNote }),
+    })
+  },
+
+  /**
+   * อัปโหลดรูปภาพเดี่ยวโดยใช้ช่องทางแกลเลอรี (สำหรับ Editor อัปโหลดรูปที่แต่งเสร็จแล้ว)
+   */
+  async uploadGeneratedImageFile(file: File): Promise<string> {
+    const { apiFetch } = useApi()
+    const formData = new FormData()
+    formData.append("image", file)
+    const res = await apiFetch<{ url: string }>("/upload/gallery", {
+      method: "POST",
+      body: formData,
+    })
+    return res.url
+  },
+
+  /**
+   * แนบรูปภาพที่สร้างขึ้นหรือรูปภาพสุดท้ายเข้ากับออเดอร์ พร้อมระบุ AI Parameters
+   */
+  async addOrderImage(
+    orderId: number,
+    payload: {
+      imageType: "ai_generated" | "selected_final" | "source";
+      imageUrl: string;
+      imageThumbnailUrl?: string;
+      aiEngine?: string;
+      positivePrompt?: string;
+      negativePrompt?: string;
+      cfgScale?: number;
+      steps?: number;
+      seed?: number;
+    }
+  ): Promise<any> {
+    const { apiFetch } = useApi()
+    return await apiFetch(`/orders/${orderId}/images`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     })
   }
 }

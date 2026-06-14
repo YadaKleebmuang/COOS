@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
-import { authService } from "~/app/services/auth.service";
+import { authService } from "~/services/auth.service";
 
 const router = useRouter();
+
+definePageMeta({
+  layout: "auth",
+  middleware: ["guest"],
+})
 
 const form = reactive({
   firstName: "",
@@ -46,8 +51,7 @@ const register = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-2xl font-bold text-gray-900">สร้างบัญชีใหม่</h1>
@@ -147,5 +151,4 @@ const register = async () => {
         </NuxtLink>
       </p>
     </div>
-  </div>
 </template>
