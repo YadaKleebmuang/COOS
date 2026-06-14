@@ -166,6 +166,9 @@ git status
 git checkout feature/backend
 git pull origin main
 # หรือ git merge main เพื่อให้ได้โค้ดชุดล่าสุด
+
+# แก้ Git merge ค้าง หลังจาก git pull origin main
+1. กดปุ่ม Esc พิมพ์ :wq แล้วกด Enter
 ```
 
 ---
