@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { orderService } from "~/app/services/order.service"
-import type { OrderDetail, OrderStatus, Payment } from "~/app/types/order.types"
+import { orderService } from "~/services/order.service"
+import type { OrderDetail, OrderStatus, Payment } from "~/types/order.types"
 
 // ── Auth & Route ──
 const token = useCookie<string | null>("token")
 const route = useRoute()
 const router = useRouter()
 const orderId = route.params.id as string
+
+definePageMeta({
+  layout: "customer",
+  middleware: ["auth", "customer"],
+})
 
 // ── State ──
 const order = ref<OrderDetail | null>(null)
@@ -231,12 +236,11 @@ const formatDate = (dateStr?: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4 sm:px-6">
-    <div class="max-w-5xl mx-auto">
+  <div class="max-w-5xl mx-auto">
       
       <!-- Nav Header -->
       <div class="mb-8 flex items-center justify-between">
-        <NuxtLink to="/my-orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-indigo-600 transition">
+        <NuxtLink to="/customer/orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-indigo-600 transition">
           <svg class="w-4.5 h-4.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -266,7 +270,7 @@ const formatDate = (dateStr?: string) => {
         </div>
         <h3 class="text-lg font-bold text-red-600 mb-1">ไม่สามารถเปิดหน้านี้ได้</h3>
         <p class="text-gray-500 text-sm mb-6">{{ error || 'ไม่พบข้อมูลออเดอร์นี้' }}</p>
-        <NuxtLink to="/my-orders" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
+        <NuxtLink to="/customer/orders" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
           กลับไปหน้าประวัติออเดอร์
         </NuxtLink>
       </div>
@@ -614,5 +618,4 @@ const formatDate = (dateStr?: string) => {
 
       </div>
     </div>
-  </div>
 </template>

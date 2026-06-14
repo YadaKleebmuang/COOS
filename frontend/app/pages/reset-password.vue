@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { authService } from "~/app/services/auth.service";
+import { authService } from "~/services/auth.service";
 
 const router = useRouter();
 const route = useRoute();
+
+definePageMeta({
+  layout: "auth",
+  middleware: ["guest"],
+})
 
 const token = ref((route.query.token as string) || "");
 const newPassword = ref("");
@@ -46,8 +51,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-2xl font-bold text-gray-900">รีเซ็ตรหัสผ่าน</h1>
@@ -142,5 +146,4 @@ const submit = async () => {
         </NuxtLink>
       </p>
     </div>
-  </div>
 </template>

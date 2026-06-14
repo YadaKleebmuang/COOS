@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue"
-import { orderService } from "~/app/services/order.service"
+import { orderService } from "~/services/order.service"
 import type {
   WorkType,
   Package,
   OrderFormPayload,
   OrderCreateResponse,
-} from "~/app/types/order.types"
+} from "~/types/order.types"
+
+definePageMeta({
+  layout: "customer",
+  middleware: ["auth", "customer"],
+})
 
 // ── Router & Auth ──
 const token = useCookie<string | null>("token")
@@ -239,8 +244,7 @@ const formatPrice = (n: number) =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4">
-    <div class="max-w-4xl mx-auto">
+  <div class="max-w-4xl mx-auto">
 
       <!-- Header -->
       <div class="mb-8 text-center">
@@ -801,7 +805,6 @@ const formatPrice = (n: number) =>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

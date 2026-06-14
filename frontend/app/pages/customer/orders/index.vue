@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { orderService } from "~/app/services/order.service"
-import type { OrderSummary, OrderStatus } from "~/app/types/order.types"
+import { orderService } from "~/services/order.service"
+import type { OrderSummary, OrderStatus } from "~/types/order.types"
 
 // ── Auth & Cookies ──
 const token = useCookie<string | null>("token")
 const router = useRouter()
+
+definePageMeta({
+  layout: "customer",
+  middleware: ["auth", "customer"],
+})
 
 // ── State ──
 const orders = ref<OrderSummary[]>([])
@@ -143,9 +148,8 @@ const filterTabs = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4 sm:px-6">
-    <div class="max-w-5xl mx-auto">
-      <!-- Header -->
+  <div class="max-w-5xl mx-auto">
+    <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <NuxtLink to="/" class="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 transition mb-3">
@@ -158,7 +162,7 @@ const filterTabs = [
           <p class="text-gray-500 mt-1">ติดตามสถานะ สลิปโอนเงิน และดาวน์โหลดไฟล์ผลงานทั้งหมดของคุณ</p>
         </div>
         <div>
-          <NuxtLink to="/create-order" class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-200 transition text-sm">
+          <NuxtLink to="/customer/orders/create" class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-200 transition text-sm">
             ➕ สั่งงานภาพใหม่
           </NuxtLink>
         </div>
@@ -206,7 +210,7 @@ const filterTabs = [
         <div class="text-5xl mb-4">🎨</div>
         <h3 class="text-lg font-bold text-gray-700 mb-1">ไม่พบคำสั่งงาน</h3>
         <p class="text-gray-500 text-sm mb-6">คุณยังไม่มีการสั่งงานในหมวดหมู่นี้</p>
-        <NuxtLink to="/create-order" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl transition text-sm">
+        <NuxtLink to="/customer/orders/create" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl transition text-sm">
           สั่งงานแรกของคุณเลย
         </NuxtLink>
       </div>
@@ -216,7 +220,7 @@ const filterTabs = [
         <NuxtLink
           v-for="order in filteredOrders"
           :key="order.orderId"
-          :to="`/orders/${order.orderId}`"
+          :to="`/customer/orders/${order.orderId}`"
           class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col group cursor-pointer"
         >
           <!-- Order Card Top Header -->
@@ -270,5 +274,4 @@ const filterTabs = [
         </NuxtLink>
       </div>
     </div>
-  </div>
 </template>
