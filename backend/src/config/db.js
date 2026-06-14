@@ -13,15 +13,23 @@ const pool = mysql.createPool({
   timezone: "+07:00",
 });
 
-async function testConnection() {
-  try {
-    const conn = await pool.getConnection();
-    await conn.ping();
-    conn.release();
-    console.log("✅ MySQL connected");
-  } catch (err) {
-    console.error("❌ MySQL connection failed:", err.message);
-    process.exit(1);
+async function testConnection(retries = 10, delay = 3000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      const conn = await pool.getConnection();
+      await conn.ping();
+      conn.release();
+      console.log("✅ MySQL connected");
+      return;
+    } catch (err) {
+      console.error(`❌ MySQL connection failed (attempt ${i}/${retries}):`, err.message);
+      if (i === retries) {
+        console.error("💀 ไม่สามารถเชื่อมต่อ MySQL ได้ — ปิดโปรแกรม");
+        process.exit(1);
+      }
+      console.log(`⏳ รอ ${delay / 1000} วินาทีแล้วลองใหม่...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
 }
 

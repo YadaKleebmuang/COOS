@@ -1,6 +1,7 @@
 const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 // POST /auth/register
 exports.register = async (req, res) => {
@@ -93,6 +94,7 @@ exports.login = async (req, res) => {
         userLastName: user.userLastName,
         userRole: user.userRole,
         userEmail: user.userEmail,
+        userProfileImage: user.userProfileImage,
       },
       process.env.JWT_SECRET,
       {
@@ -110,8 +112,75 @@ exports.login = async (req, res) => {
         userLastName: user.userLastName,
         userEmail: user.userEmail,
         userRole: user.userRole,
+        userProfileImage: user.userProfileImage,
       },
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// POST /auth/forgot-password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { userEmail } = req.body;
+
+    if (!userEmail) {
+      return res.status(400).json({ message: "กรุณากรอก email" });
+    }
+
+    // ตรวจสอบว่ามี user นี้ในระบบหรือไม่
+    const user = await UserModel.findByEmail(userEmail);
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบ email นี้ในระบบ" });
+    }
+
+    // สร้าง random token (32 bytes → 64 hex chars)
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // ตั้งวันหมดอายุ 1 ชั่วโมง
+    const expiry = new Date(Date.now() + 60 * 60 * 1000);
+
+    // บันทึกลง DB
+    await UserModel.saveResetToken(userEmail, resetToken, expiry);
+
+    // (dev mode) ส่ง token กลับใน response — ระบบจริงจะส่ง email
+    res.status(200).json({
+      message: "สร้าง reset token สำเร็จ",
+      resetToken: resetToken,
+      expiresAt: expiry,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// POST /auth/reset-password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "กรุณากรอก token และรหัสผ่านใหม่" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" });
+    }
+
+    // ค้นหา user จาก token ที่ยังไม่หมดอายุ
+    const user = await UserModel.findByResetToken(token);
+    if (!user) {
+      return res.status(400).json({ message: "Token ไม่ถูกต้องหรือหมดอายุแล้ว" });
+    }
+
+    // Hash password ใหม่
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // อัปเดต password + ลบ token
+    await UserModel.resetPassword(user.userId, hashedPassword);
+
+    res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
