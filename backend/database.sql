@@ -5,7 +5,7 @@
 CREATE DATABASE IF NOT EXISTS `coosdb`;
 USE `coosdb`;
 
--- Users Table
+-- 1. Users Table
 CREATE TABLE IF NOT EXISTS `users` (
   `userId` INT AUTO_INCREMENT PRIMARY KEY,
   `userFirstName` VARCHAR(100) NOT NULL,
@@ -14,13 +14,18 @@ CREATE TABLE IF NOT EXISTS `users` (
   `userPassword` VARCHAR(255) NOT NULL,
   `userPhone` VARCHAR(20),
   `userAddress` TEXT,
+  `userProfileImage` VARCHAR(500) NULL,                    -- URL รูปโปรไฟล์
+  `userContactChannels` JSON NULL,                         -- ช่องทางโซเชียล เช่น {"line":"@coos","facebook":"coos.studio","instagram":"coos_art"}
   `userRole` ENUM('admin', 'customer', 'editor') DEFAULT 'customer',
+  `userResetToken` VARCHAR(255) NULL,                      -- Token สำหรับกู้คืนรหัสผ่าน
+  `userResetTokenExpiry` TIMESTAMP NULL,                   -- วันหมดอายุของ Token
   `userCreatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `userUpdatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_userEmail` (`userEmail`),
   INDEX `idx_userRole` (`userRole`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Work Types Table
+-- 2. Work Types Table
 CREATE TABLE IF NOT EXISTS `workTypes` (
   `workTypeId`          INT           AUTO_INCREMENT PRIMARY KEY,
   `workTypeName`        VARCHAR(100)  NOT NULL,
@@ -31,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `workTypes` (
   UNIQUE `uq_workTypeName` (`workTypeName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Packages Table
+-- 3. Packages Table
 CREATE TABLE IF NOT EXISTS `packages` (
   `packageId`               INT             AUTO_INCREMENT PRIMARY KEY,
   `packageName`             VARCHAR(100)    NOT NULL,
@@ -48,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `packages` (
   INDEX `idx_packageIsActive` (`packageIsActive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- galleryImages Table
+-- 4. galleryImages Table
 CREATE TABLE IF NOT EXISTS `galleryImages` (
   `imageId`           INT AUTO_INCREMENT PRIMARY KEY,
   `imageUrl`          VARCHAR(255) NOT NULL,
@@ -69,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `galleryImages` (
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- policies Table
+-- 5. policies Table
 CREATE TABLE IF NOT EXISTS `policies` (
   `policyId`        INT AUTO_INCREMENT PRIMARY KEY,
   `policyTitle`     VARCHAR(150) NOT NULL,
@@ -83,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `policies` (
   INDEX `idx_policyIsActive` (`policyIsActive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 1. ตารางคำสั่งงานสั่งสร้างภาพ (Orders)
+-- 6. Orders Table
 CREATE TABLE IF NOT EXISTS `orders` (
   `orderId`             INT AUTO_INCREMENT PRIMARY KEY,
   `customerId`          INT NOT NULL,
@@ -122,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   INDEX `idx_orderStatus` (`orderStatus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2. ตารางเก็บไฟล์รูปภาพประกอบคำสั่งงาน + Prompt การสร้างภาพ (Order Images & AI Prompt)
+-- 7. Order Images & AI Prompt Table
 CREATE TABLE IF NOT EXISTS `orderImages` (
   `orderImageId`        INT AUTO_INCREMENT PRIMARY KEY,
   `orderId`             INT NOT NULL,
@@ -143,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `orderImages` (
   FOREIGN KEY (`orderId`) REFERENCES `orders`(`orderId`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. ตารางบันทึกการชำระเงิน (Payments)
+-- 8. Payments Table
 CREATE TABLE IF NOT EXISTS `payments` (
   `paymentId`           INT AUTO_INCREMENT PRIMARY KEY,
   `orderId`             INT NOT NULL,
@@ -159,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   FOREIGN KEY (`verifiedByAdminId`) REFERENCES `users`(`userId`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 4. ตารางบันทึกประวัติการเปลี่ยนสถานะการทำงาน (Workflow Logs)
+-- 9. Workflow Logs Table
 CREATE TABLE IF NOT EXISTS `workflowLogs` (
   `logId`               INT AUTO_INCREMENT PRIMARY KEY,
   `orderId`             INT NOT NULL,

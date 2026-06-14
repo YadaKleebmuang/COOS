@@ -11,6 +11,8 @@ exports.findAll = async () => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole,
       userCreatedAt
     FROM users`
@@ -29,6 +31,8 @@ exports.findById = async (id) => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole,
       userCreatedAt
     FROM users WHERE userId = ?`,
@@ -48,6 +52,8 @@ exports.findByEmail = async (email) => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole,
       userCreatedAt
     FROM users WHERE userEmail = ?`,
@@ -66,15 +72,19 @@ exports.create = async (data) => {
       userPassword,
       userPhone,
       userAddress,
+      userProfileImage,
+      userContactChannels,
       userRole
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.userFirstName,
       data.userLastName,
       data.userEmail,
       data.userPassword,
-      data.userPhone,
-      data.userAddress,
+      data.userPhone || null,
+      data.userAddress || null,
+      data.userProfileImage || null,
+      data.userContactChannels ? JSON.stringify(data.userContactChannels) : null,
       data.userRole || "customer",
     ]
   );
@@ -105,6 +115,8 @@ exports.update = async (id, data) => {
       userEmail = ?,
       userPhone = ?,
       userAddress = ?,
+      userProfileImage = ?,
+      userContactChannels = ?,
       userRole = ?
     WHERE userId = ?`,
     [
@@ -113,10 +125,74 @@ exports.update = async (id, data) => {
       data.userEmail,
       data.userPhone,
       data.userAddress,
+      data.userProfileImage || null,
+      data.userContactChannels ? JSON.stringify(data.userContactChannels) : null,
       data.userRole,
       id,
     ]
   );
 
+  return result.affectedRows;
+};
+
+// อัปเดตโปรไฟล์ของ user เอง (ไม่รวม role)
+exports.updateProfile = async (id, data) => {
+  const [rows] = await pool.query("SELECT userId FROM users WHERE userId = ?", [
+    id,
+  ]);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const [result] = await pool.query(
+    `UPDATE users SET
+      userFirstName = ?,
+      userLastName = ?,
+      userPhone = ?,
+      userAddress = ?,
+      userProfileImage = ?,
+      userContactChannels = ?
+    WHERE userId = ?`,
+    [
+      data.userFirstName,
+      data.userLastName,
+      data.userPhone || null,
+      data.userAddress || null,
+      data.userProfileImage || null,
+      data.userContactChannels ? JSON.stringify(data.userContactChannels) : null,
+      id,
+    ]
+  );
+
+  return result.affectedRows;
+};
+
+// บันทึก reset token + วันหมดอายุ
+exports.saveResetToken = async (email, token, expiry) => {
+  const [result] = await pool.query(
+    `UPDATE users SET userResetToken = ?, userResetTokenExpiry = ? WHERE userEmail = ?`,
+    [token, expiry, email]
+  );
+  return result.affectedRows;
+};
+
+// ค้นหา user จาก reset token ที่ยังไม่หมดอายุ
+exports.findByResetToken = async (token) => {
+  const [rows] = await pool.query(
+    `SELECT userId, userEmail, userFirstName, userLastName
+     FROM users
+     WHERE userResetToken = ? AND userResetTokenExpiry > NOW()`,
+    [token]
+  );
+  return rows[0];
+};
+
+// รีเซ็ตรหัสผ่าน + ลบ token
+exports.resetPassword = async (userId, hashedPassword) => {
+  const [result] = await pool.query(
+    `UPDATE users SET userPassword = ?, userResetToken = NULL, userResetTokenExpiry = NULL WHERE userId = ?`,
+    [hashedPassword, userId]
+  );
   return result.affectedRows;
 };
