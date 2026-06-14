@@ -4,6 +4,7 @@ const auth = require("./auth.route");
 const packageRoutes = require("./packages.route");
 const workTypeRoutes = require("./workTypes.route");
 const orderRoutes = require("./orders.route");
+const uploadRoutes = require("./upload.route");
 const galleryImageRoutes = require("./galleryImages.route");
 const policyRoutes = require("./policies.route");
 const authMiddleware = require("../../middlewares/auth.middleware");
@@ -24,5 +25,6 @@ router.use("/users", userRoutes);
 router.use("/packages", packageRoutes);
 router.use("/work-types", workTypeRoutes);
 router.use("/orders", orderRoutes);
+router.use("/upload", uploadRoutes);
 
 module.exports = router;

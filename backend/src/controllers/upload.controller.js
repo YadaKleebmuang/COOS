@@ -1,0 +1,61 @@
+const path = require("path");
+
+/**
+ * POST /api/v1/upload
+ * รับไฟล์รูปภาพ 1 ไฟล์ (field: "image") แล้วส่ง URL กลับ
+ * ต้องผ่าน auth middleware ก่อน (ใน index.js)
+ */
+exports.uploadSingle = (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "กรุณาเลือกไฟล์ที่ต้องการอัปโหลด" });
+    }
+
+    // สร้าง public URL สำหรับเข้าถึงไฟล์
+    // app.js serve /uploads ด้วย express.static แล้ว
+    const protocol = req.protocol;
+    const host = req.get("host");
+    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+    return res.status(201).json({
+      message: "อัปโหลดไฟล์สำเร็จ",
+      url: fileUrl,
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * POST /api/v1/upload/multiple
+ * รับไฟล์หลายไฟล์ (field: "images", max 10) แล้วส่ง URL array กลับ
+ */
+exports.uploadMultiple = (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "กรุณาเลือกไฟล์อย่างน้อย 1 ไฟล์" });
+    }
+
+    const protocol = req.protocol;
+    const host = req.get("host");
+
+    const files = req.files.map((file) => ({
+      url: `${protocol}://${host}/uploads/${file.filename}`,
+      filename: file.filename,
+      originalname: file.originalname,
+      size: file.size,
+      mimetype: file.mimetype,
+    }));
+
+    return res.status(201).json({
+      message: `อัปโหลดสำเร็จ ${files.length} ไฟล์`,
+      files,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
