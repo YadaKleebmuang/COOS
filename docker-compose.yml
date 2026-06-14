@@ -56,9 +56,6 @@ services:
       - "8888:8888"
     volumes:
       - ./frontend/app:/app/app
-      - ./frontend/pages:/app/pages
-      - ./frontend/composables:/app/composables
-      - ./frontend/assets:/app/assets
       - ./frontend/public:/app/public
     depends_on:
       - backend
