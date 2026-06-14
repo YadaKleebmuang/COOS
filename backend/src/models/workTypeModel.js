@@ -2,14 +2,14 @@ const { pool } = require("../config/db");
 
 exports.findAll = async (includeInactive = false) => {
   const sql = includeInactive
-    ? "SELECT * FROM worktypes ORDER BY workTypeId ASC"
-    : "SELECT * FROM worktypes WHERE workTypeIsActive = 1 ORDER BY workTypeId ASC";
+    ? "SELECT * FROM workTypes ORDER BY workTypeId ASC"
+    : "SELECT * FROM workTypes WHERE workTypeIsActive = 1 ORDER BY workTypeId ASC";
   return pool.query(sql);
 };
 
 exports.findById = async (id) => {
   const [rows] = await pool.query(
-    "SELECT * FROM worktypes WHERE workTypeId = ?",
+    "SELECT * FROM workTypes WHERE workTypeId = ?",
     [id],
   );
   return rows[0];
@@ -17,7 +17,7 @@ exports.findById = async (id) => {
 
 exports.findByName = async (name) => {
   const [rows] = await pool.query(
-    "SELECT * FROM worktypes WHERE workTypeName = ?",
+    "SELECT * FROM workTypes WHERE workTypeName = ?",
     [name],
   );
   return rows[0];
@@ -25,7 +25,7 @@ exports.findByName = async (name) => {
 
 exports.create = async (workTypeName, workTypeDescription) => {
   const [result] = await pool.query(
-    "INSERT INTO worktypes (workTypeName, workTypeDescription) VALUES (?, ?)",
+    "INSERT INTO workTypes (workTypeName, workTypeDescription) VALUES (?, ?)",
     [workTypeName, workTypeDescription || null],
   );
   return [result];
@@ -33,7 +33,7 @@ exports.create = async (workTypeName, workTypeDescription) => {
 
 exports.update = async (id, fields) => {
   const sql = `
-    UPDATE worktypes
+    UPDATE workTypes
     SET
       workTypeName = COALESCE(?, workTypeName),
       workTypeDescription = COALESCE(?, workTypeDescription),
@@ -51,8 +51,9 @@ exports.update = async (id, fields) => {
 
 exports.delete = async (id) => {
   const [result] = await pool.query(
-    "DELETE FROM worktypes WHERE workTypeId = ?",
+    "DELETE FROM workTypes WHERE workTypeId = ?",
     [id],
   );
   return [result];
 };
+

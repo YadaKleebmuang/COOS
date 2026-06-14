@@ -13,6 +13,11 @@ app.use(express.json());
 
 // Serve ไฟล์รูปภาพที่อัปโหลด (เข้าถึงผ่าน /uploads/...)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/profiles')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/slips')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/sources')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/ai-generated')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads/gallery')));
 
 testConnection();
 
