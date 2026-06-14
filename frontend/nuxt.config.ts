@@ -2,6 +2,10 @@
 export default defineNuxtConfig({
   srcDir: "app/",
 
+  css: [
+    "~/assets/css/main.css"
+  ],
+
   modules: [
     "@nuxt/eslint",
     "@nuxt/hints",

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, onBeforeUnmount } from "vue"
 import { useApi } from "~/composables/useApi"
+import { authService } from "~/services/auth.service"
 
 const token = useCookie<string | null>("token")
 const router = useRouter()
 const { apiFetch } = useApi()
 
 const currentUser = ref<any>(null)
+const dropdownOpen = ref(false)
 
 const checkAuth = async () => {
   if (token.value) {
@@ -21,11 +23,19 @@ const checkAuth = async () => {
   }
 }
 
-const logout = () => {
-  token.value = null
-  const userRole = useCookie("userRole")
-  userRole.value = null
+const toggleDropdown = (e: Event) => {
+  e.stopPropagation()
+  dropdownOpen.value = !dropdownOpen.value
+}
+
+const closeDropdown = () => {
+  dropdownOpen.value = false
+}
+
+const logout = async () => {
+  await authService.logout()
   currentUser.value = null
+  dropdownOpen.value = false
   router.push("/")
   // Reload current page if already on root to refresh states
   if (router.currentRoute.value.path === "/") {
@@ -35,6 +45,11 @@ const logout = () => {
 
 onMounted(() => {
   checkAuth()
+  window.addEventListener("click", closeDropdown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener("click", closeDropdown)
 })
 </script>
 
@@ -63,13 +78,20 @@ onMounted(() => {
         <template v-if="currentUser">
           <div class="flex items-center gap-3">
             <span class="text-sm font-medium text-slate-600 hidden sm:inline">สวัสดี, {{ currentUser.userFirstName }}</span>
-            <div class="relative group">
-              <button class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 hover:ring-2 hover:ring-indigo-300 transition-all duration-300">
+            <div class="relative">
+              <button 
+                @click="toggleDropdown"
+                class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 hover:ring-2 hover:ring-indigo-300 transition-all duration-300"
+              >
                 {{ currentUser.userFirstName[0].toUpperCase() }}
               </button>
-              <!-- Dropdown on Hover -->
-              <div class="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 hidden group-hover:block transition-all duration-300">
-                <NuxtLink to="/customer/orders" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">ประวัติออเดอร์</NuxtLink>
+              <!-- Dropdown on Click -->
+              <div 
+                v-if="dropdownOpen"
+                class="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 z-50"
+                @click.stop
+              >
+                <NuxtLink to="/customer/orders" @click="closeDropdown" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition">ประวัติออเดอร์</NuxtLink>
                 <div class="border-t border-slate-100 my-1"></div>
                 <button @click="logout" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">ออกจากระบบ</button>
               </div>
