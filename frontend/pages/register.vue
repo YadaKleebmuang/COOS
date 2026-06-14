@@ -93,18 +93,6 @@ const register = async () => {
           />
         </div>
 
-        <!-- Phone -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทร <span class="text-gray-400 font-normal">(ไม่บังคับ)</span></label>
-          <input
-            id="register-phone"
-            v-model="form.phone"
-            type="tel"
-            placeholder="08x-xxx-xxxx"
-            class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-          />
-        </div>
-
         <!-- Password -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
