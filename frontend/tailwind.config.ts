@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
-export default {
-  content: [
-    "./app.vue",
-    "./app/pages/**/*.{vue,js,ts}",
-    "./app/components/**/*.{vue,js,ts}",
-  ],
+export default <Partial<Config>>{
   theme: {
-    extend: {},
-  },
-  plugins: [],
-} satisfies Config;
+    extend: {
+      fontFamily: {
+        sans: ['"Noto Sans Thai"', '"Inter"', "sans-serif"],
+        display: ['"Noto Sans Thai"', '"Inter"', "sans-serif"],
+        number: ['"Inter"', '"Noto Sans Thai"', "sans-serif"]
+      }
+    }
+  }
+}

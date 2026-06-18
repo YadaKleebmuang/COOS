@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue"
-import { orderService } from "~/app/services/order.service"
+import { orderService } from "~/services/order.service"
 import type {
   WorkType,
   Package,
   OrderFormPayload,
   OrderCreateResponse,
-} from "~/app/types/order.types"
+} from "~/types/order.types"
+
+definePageMeta({
+  layout: "customer",
+  middleware: ["auth", "customer"],
+})
 
 // ── Router & Auth ──
 const token = useCookie<string | null>("token")
@@ -43,6 +48,63 @@ const submitting = ref(false)
 const submitError = ref("")
 const submitSuccess = ref(false)
 const createdOrder = ref<OrderCreateResponse | null>(null)
+
+// ── Upload & Disclaimer state ──
+const fileInput = ref<HTMLInputElement | null>(null)
+const dragOver = ref(false)
+const uploadingSource = ref(false)
+const uploadError = ref("")
+const sourceImageUrls = ref<string[]>([])
+const acceptedDisclaimer = ref(false)
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    uploadFiles(Array.from(target.files))
+  }
+}
+
+const handleDrop = (event: DragEvent) => {
+  dragOver.value = false
+  if (event.dataTransfer?.files) {
+    uploadFiles(Array.from(event.dataTransfer.files))
+  }
+}
+
+const uploadFiles = async (files: File[]) => {
+  const validFiles = files.filter(f => f.type.startsWith("image/"))
+  if (validFiles.length === 0) {
+    uploadError.value = "กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น"
+    return
+  }
+
+  if (sourceImageUrls.value.length + validFiles.length > 10) {
+    uploadError.value = "สามารถอัปโหลดรูปภาพได้สูงสุด 10 รูป"
+    return
+  }
+
+  uploadError.value = ""
+  uploadingSource.value = true
+  try {
+    const urls = await orderService.uploadSourceImages(validFiles)
+    sourceImageUrls.value.push(...urls)
+  } catch (err: any) {
+    uploadError.value = err?.message || "ไม่สามารถอัปโหลดไฟล์บางไฟล์ได้"
+  } finally {
+    uploadingSource.value = false
+    if (fileInput.value) {
+      fileInput.value.value = ""
+    }
+  }
+}
+
+const removeImage = (index: number) => {
+  sourceImageUrls.value.splice(index, 1)
+}
 
 // ── Computed helpers ──
 const selectedWorkType = computed(() =>
@@ -114,6 +176,11 @@ const submitOrder = async () => {
   if (submitting.value) return
   if (!selectedPackageId.value || !selectedWorkTypeId.value) return
 
+  if (!acceptedDisclaimer.value) {
+    submitError.value = "กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อตกลงก่อนกดยืนยัน"
+    return
+  }
+
   submitting.value = true
   submitError.value = ""
 
@@ -131,6 +198,11 @@ const submitOrder = async () => {
     if (form.orderColorTone.trim()) payload.orderColorTone = form.orderColorTone.trim()
     if (form.orderComposition.trim()) payload.orderComposition = form.orderComposition.trim()
     if (form.orderNote.trim()) payload.orderNote = form.orderNote.trim()
+    
+    // ใส่รูปภาพต้นฉบับที่อัปโหลด
+    if (sourceImageUrls.value.length > 0) {
+      payload.sourceImageUrls = sourceImageUrls.value
+    }
 
     const result = await orderService.createOrder(payload)
     createdOrder.value = result
@@ -172,8 +244,7 @@ const formatPrice = (n: number) =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-indigo-50 py-8 px-4">
-    <div class="max-w-4xl mx-auto">
+  <div class="max-w-4xl mx-auto">
 
       <!-- Header -->
       <div class="mb-8 text-center">
@@ -447,6 +518,63 @@ const formatPrice = (n: number) =>
               <!-- Spacer on desktop -->
               <div class="hidden md:block" />
 
+              <!-- อัปโหลดรูปภาพต้นฉบับ -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  🖼️ รูปภาพต้นฉบับ/รูปอ้างอิง (สูงสุด 10 รูป)
+                </label>
+                
+                <div
+                  @dragover.prevent="dragOver = true"
+                  @dragleave.prevent="dragOver = false"
+                  @drop.prevent="handleDrop"
+                  @click="triggerFileInput"
+                  class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200"
+                  :class="dragOver ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-300 hover:border-indigo-400 bg-gray-50/50'"
+                >
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    multiple
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleFileSelect"
+                  />
+                  <div class="flex flex-col items-center justify-center space-y-2">
+                    <div class="text-3xl text-indigo-500">📤</div>
+                    <p class="text-sm font-medium text-gray-700">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                    <p class="text-xs text-gray-400">รองรับไฟล์ JPEG, PNG, WebP (สูงสุด 20MB ต่อไฟล์)</p>
+                  </div>
+                </div>
+
+                <!-- Upload progress / error -->
+                <div v-if="uploadingSource" class="mt-3 flex items-center justify-center gap-2 text-sm text-indigo-600 font-medium">
+                  <div class="animate-spin w-4 h-4 border-2 border-indigo-200 border-t-indigo-600 rounded-full"></div>
+                  กำลังอัปโหลดรูปภาพ...
+                </div>
+                <p v-if="uploadError" class="mt-2 text-xs text-red-600 font-medium">⚠️ {{ uploadError }}</p>
+
+                <!-- Previews -->
+                <div v-if="sourceImageUrls.length > 0" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
+                  <div
+                    v-for="(url, idx) in sourceImageUrls"
+                    :key="url"
+                    class="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-white"
+                  >
+                    <img :src="url" class="w-full h-full object-cover" />
+                    <button
+                      @click.stop="removeImage(idx)"
+                      class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow transition opacity-90"
+                      title="ลบรูปภาพ"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <!-- Toggle: เร่งด่วน -->
               <div class="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-200">
                 <div>
@@ -602,6 +730,35 @@ const formatPrice = (n: number) =>
                 <p class="text-xs text-gray-400 mt-2">* ราคาสุทธิจะถูกคำนวณอีกครั้งโดยระบบเมื่อยืนยัน</p>
               </div>
 
+              <!-- Privacy Policy & AI Disclaimer -->
+              <div class="space-y-4 border-t border-gray-100 pt-6">
+                <h3 class="font-bold text-gray-800 text-sm">📄 ข้อตกลงและเงื่อนไขการใช้บริการ</h3>
+                
+                <!-- Privacy Card -->
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-800 leading-relaxed text-left">
+                  <p class="font-bold mb-1">นโยบายความเป็นส่วนตัว (Privacy Policy)</p>
+                  <p>รูปภาพต้นฉบับที่ท่านอัปโหลดเข้าระบบ จะถูกนำไปใช้เพื่อการประมวลผลและการตกแต่งภาพตามสั่งเท่านั้น ทางเราจะเก็บรักษาไฟล์ของท่านไว้เป็นความลับ และลบออกจากฐานข้อมูลภายใน 30 วันหลังจากออเดอร์เสร็จสิ้น</p>
+                </div>
+
+                <!-- AI Disclaimer Card -->
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-xs text-amber-800 leading-relaxed text-left">
+                  <p class="font-bold mb-1">ข้อจำกัดความรับผิดชอบและลิขสิทธิ์ AI (AI Disclaimer)</p>
+                  <p>ผลงานภาพชิ้นนี้มีการใช้เทคโนโลยีปัญญาประดิษฐ์ (AI) ในกระบวนการสร้างสรรค์ร่วมกับงานฝีมือของศิลปิน ลิขสิทธิ์ของภาพผลงานขั้นสุดท้ายจะถูกโอนย้ายให้เป็นของท่าน แต่ทางระบบขอสงวนสิทธิ์การนำผลงานไปโชว์ใน Portfolio/Gallery หากท่านได้เลือกรับส่วนลด</p>
+                </div>
+
+                <!-- Disclaimer Checkbox -->
+                <label class="flex items-start gap-2.5 cursor-pointer mt-2 text-left">
+                  <input
+                    type="checkbox"
+                    v-model="acceptedDisclaimer"
+                    class="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-0.5 cursor-pointer"
+                  />
+                  <span class="text-xs font-medium text-gray-600 select-none">
+                    ข้าพเจ้าได้อ่าน เข้าใจ และยอมรับนโยบายความเป็นส่วนตัวและข้อตกลงเกี่ยวกับผลงาน AI เรียบร้อยแล้ว
+                  </span>
+                </label>
+              </div>
+
               <!-- Submit Error -->
               <div v-if="submitError" class="bg-red-50 border border-red-200 rounded-xl p-4">
                 <p class="text-red-600 text-sm font-medium">❌ {{ submitError }}</p>
@@ -635,8 +792,8 @@ const formatPrice = (n: number) =>
             <button
               v-else
               @click="submitOrder"
-              :disabled="submitting"
-              class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold px-8 py-2.5 rounded-xl transition text-sm"
+              :disabled="submitting || !acceptedDisclaimer"
+              class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-2.5 rounded-xl transition text-sm"
             >
               <svg v-if="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -648,7 +805,6 @@ const formatPrice = (n: number) =>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

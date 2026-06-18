@@ -1,16 +1,7 @@
 import { useApi } from "~/composables/useApi";
 
-interface RegisterForm {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
+import type { RegisterForm, AuthResponse } from "~/types/auth.types";
 
-interface AuthResponse {
-  token?: string;
-  user?: any;
-}
 
 export const authService = {
   // register
@@ -51,6 +42,11 @@ export const authService = {
         sameSite: "lax",
       });
       token.value = data.token;
+
+      const userRole = useCookie<string | null>("userRole", {
+        sameSite: "lax",
+      });
+      userRole.value = data.user?.userRole || "customer";
     }
 
     return data;
@@ -61,6 +57,8 @@ export const authService = {
     // ไม่เรียก backend
     const token = useCookie<string | null>("token");
     token.value = null;
+    const userRole = useCookie<string | null>("userRole");
+    userRole.value = null;
   },
 
   // forgot password
