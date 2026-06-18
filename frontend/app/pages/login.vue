@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
-import { authService } from "~/app/services/auth.service";
+import { authService } from "~/services/auth.service";
 
 const router = useRouter();
+
+definePageMeta({
+  layout: "auth",
+  middleware: ["guest"],
+})
 
 const form = reactive({
   email: "",
@@ -23,8 +28,22 @@ const login = async () => {
 
   loading.value = true;
   try {
-    await authService.login(form.email, form.password);
-    await router.push("/");
+    const data = await authService.login(form.email, form.password);
+    const userRole = data?.user?.userRole || "customer";
+    const route = useRoute();
+    const redirect = route.query.redirect as string;
+
+    if (redirect) {
+      await router.push(redirect);
+    } else {
+      if (userRole === "admin") {
+        await router.push("/admin/dashboard");
+      } else if (userRole === "editor") {
+        await router.push("/editor/dashboard");
+      } else {
+        await router.push("/customer/dashboard");
+      }
+    }
   } catch (err: any) {
     error.value = err?.message || "เข้าสู่ระบบไม่สำเร็จ";
   } finally {
@@ -34,8 +53,7 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h1>
@@ -103,5 +121,4 @@ const login = async () => {
         </NuxtLink>
       </p>
     </div>
-  </div>
 </template>
