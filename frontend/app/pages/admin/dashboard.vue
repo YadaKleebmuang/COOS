@@ -189,25 +189,25 @@ const getStatusLabel = (status: string) => {
 
 const getStatusClass = (status: string) => {
   switch (status) {
-    case "waiting_deposit": return "bg-slate-50 text-slate-500 border-slate-200"
+    case "waiting_deposit": return "bg-gray-50 text-gray-500 border-gray-200"
     case "waiting_assignment":
-    case "waiting_to_start": return "bg-blue-50 text-blue-600 border-blue-100"
-    case "in_progress": return "bg-slate-100 text-slate-700 border-slate-200"
-    case "waiting_selection": return "bg-slate-50 text-slate-500 border-slate-200"
+    case "waiting_to_start": return "bg-gray-100 text-gray-700 border-gray-200"
+    case "in_progress": return "bg-gray-900 text-white border-gray-800"
+    case "waiting_selection": return "bg-gray-100 text-gray-700 border-gray-200"
     case "waiting_final_payment": return "bg-amber-50 text-amber-600 border-amber-100"
     case "delivered":
     case "completed": return "bg-emerald-50 text-emerald-700 border-emerald-100"
-    default: return "bg-slate-50 text-slate-500 border-slate-200"
+    default: return "bg-gray-50 text-gray-500 border-gray-200"
   }
 }
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl space-y-6 font-sans text-slate-900">
+  <div class="mx-auto max-w-7xl space-y-6 font-sans text-gray-900">
     <!-- Loading State -->
-    <div v-if="loading" class="rounded-3xl border border-slate-200 bg-white p-16 text-center shadow-sm">
-      <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600"></div>
-      <p class="text-sm font-medium text-slate-500">กำลังโหลดข้อมูลแดชบอร์ดผู้ดูแลระบบ...</p>
+    <div v-if="loading" class="rounded-3xl border border-gray-200 bg-white p-16 text-center shadow-sm">
+      <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
+      <p class="text-sm font-medium text-gray-500">กำลังโหลดข้อมูลแดชบอร์ดผู้ดูแลระบบ...</p>
     </div>
 
     <!-- Error State -->
@@ -219,28 +219,25 @@ const getStatusClass = (status: string) => {
     <!-- Main Dashboard -->
     <div v-else class="space-y-6">
       <!-- Header Section -->
-      <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div class="relative bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 px-6 py-7 text-white">
-          <div class="absolute right-0 top-0 h-32 w-32 rounded-full bg-indigo-500/20 blur-3xl"></div>
-          <div class="absolute bottom-0 right-24 h-24 w-24 rounded-full bg-violet-500/20 blur-2xl"></div>
-
-          <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+        <div class="bg-gray-900 px-6 py-7 text-white">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-[0.25em] text-indigo-200">
+              <p class="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">
                 Admin Workspace
               </p>
               <h1 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">
                 แผงควบคุมผู้ดูแลระบบ
               </h1>
-              <p class="mt-2 max-w-2xl text-sm text-slate-300">
+              <p class="mt-2 max-w-2xl text-sm text-gray-400">
                 ภาพรวมคำสั่งซื้อ ผู้ใช้งาน ทีม Editor และสถานะการดำเนินงานทั้งหมดของระบบ COOS Studio
               </p>
             </div>
 
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur">
-              <p class="text-xs text-slate-300">สถานะระบบ</p>
+            <div class="rounded-2xl border border-white/10 bg-white/10 px-5 py-4">
+              <p class="text-xs text-gray-400">สถานะระบบ</p>
               <div class="mt-1 flex items-center gap-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.15)]"></span>
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                 <span class="text-sm font-bold">Normal</span>
               </div>
             </div>
@@ -250,98 +247,94 @@ const getStatusClass = (status: string) => {
 
       <!-- KPI Cards -->
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ลูกค้าทั้งหมด</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-slate-900">{{ displayStats.totalCustomers }}</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ลูกค้าทั้งหมด</p>
+              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalCustomers }}</p>
             </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-xl text-indigo-600">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
               👥
             </div>
           </div>
-          <p class="mt-4 text-xs font-medium text-slate-400">Total Customers</p>
+          <p class="mt-4 text-xs font-medium text-gray-400">Total Customers</p>
         </div>
 
-        <div
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ออเดอร์ทั้งหมด</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-slate-900">{{ displayStats.totalOrders }}</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ออเดอร์ทั้งหมด</p>
+              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalOrders }}</p>
             </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-xl text-violet-600">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
               📦
             </div>
           </div>
-          <p class="mt-4 text-xs font-medium text-slate-400">Total Orders</p>
+          <p class="mt-4 text-xs font-medium text-gray-400">Total Orders</p>
         </div>
 
-        <div
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">ทีม Editor</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-slate-900">{{ displayStats.totalEditors }}</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ทีม Editor</p>
+              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalEditors }}</p>
             </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-700">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
               🎨
             </div>
           </div>
-          <p class="mt-4 text-xs font-medium text-slate-400">Total Editors</p>
+          <p class="mt-4 text-xs font-medium text-gray-400">Total Editors</p>
         </div>
 
-        <div
-          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">งานเสร็จสมบูรณ์</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-slate-900">{{ displayStats.completedOrders }}</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">งานเสร็จสมบูรณ์</p>
+              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.completedOrders }}</p>
             </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-xl text-emerald-600">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
               ✅
             </div>
           </div>
-          <p class="mt-4 text-xs font-medium text-slate-400">Completed Orders</p>
+          <p class="mt-4 text-xs font-medium text-gray-400">Completed Orders</p>
         </div>
       </section>
 
       <!-- Order Pipeline -->
-      <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
         <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-500">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
               Order Pipeline
             </p>
-            <h2 class="mt-1 text-lg font-bold text-slate-900">
+            <h2 class="mt-1 text-lg font-bold text-gray-900">
               สถานะคำสั่งซื้อในระบบ
             </h2>
           </div>
-          <p class="text-xs font-medium text-slate-400">
+          <p class="text-xs font-medium text-gray-400">
             อ้างอิงจากสถานะกลางของออเดอร์
           </p>
         </div>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-slate-400">Pending Deposit</p>
-            <p class="mt-2 text-2xl font-black text-slate-900">{{ displayStats.pendingDeposit }}</p>
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+            <p class="text-[11px] font-bold uppercase text-gray-400">Pending Deposit</p>
+            <p class="mt-2 text-2xl font-black text-gray-900">{{ displayStats.pendingDeposit }}</p>
           </div>
 
-          <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-blue-500">Waiting To Start</p>
-            <p class="mt-2 text-2xl font-black text-blue-700">{{ displayStats.waitingToStart }}</p>
+          <div class="rounded-2xl border border-gray-200 bg-gray-100 p-4">
+            <p class="text-[11px] font-bold uppercase text-gray-500">Waiting To Start</p>
+            <p class="mt-2 text-2xl font-black text-gray-800">{{ displayStats.waitingToStart }}</p>
           </div>
 
-          <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-indigo-500">In Progress</p>
-            <p class="mt-2 text-2xl font-black text-indigo-700">{{ displayStats.inProgress }}</p>
+          <div class="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-white">
+            <p class="text-[11px] font-bold uppercase text-gray-400">In Progress</p>
+            <p class="mt-2 text-2xl font-black">{{ displayStats.inProgress }}</p>
           </div>
 
-          <div class="rounded-2xl border border-violet-100 bg-violet-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-violet-500">Waiting Review</p>
-            <p class="mt-2 text-2xl font-black text-violet-700">{{ displayStats.waitingReview }}</p>
+          <div class="rounded-2xl border border-gray-200 bg-gray-100 p-4">
+            <p class="text-[11px] font-bold uppercase text-gray-500">Waiting Review</p>
+            <p class="mt-2 text-2xl font-black text-gray-800">{{ displayStats.waitingReview }}</p>
           </div>
 
           <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
@@ -354,8 +347,8 @@ const getStatusClass = (status: string) => {
             <p class="mt-2 text-2xl font-black text-emerald-700">{{ displayStats.delivered }}</p>
           </div>
 
-          <div class="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white">
-            <p class="text-[11px] font-bold uppercase text-slate-300">Completed</p>
+          <div class="rounded-2xl border border-gray-200 bg-gray-950 p-4 text-white">
+            <p class="text-[11px] font-bold uppercase text-gray-500">Completed</p>
             <p class="mt-2 text-2xl font-black">{{ displayStats.completed }}</p>
           </div>
         </div>
@@ -364,19 +357,19 @@ const getStatusClass = (status: string) => {
       <!-- Content Grid -->
       <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <!-- Recent Orders -->
-        <div class="xl:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="xl:col-span-2 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
           <div class="mb-5 flex items-center justify-between">
             <div>
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-500">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
                 Recent Orders
               </p>
-              <h2 class="mt-1 text-lg font-black text-slate-900">
+              <h2 class="mt-1 text-lg font-black text-gray-900">
                 ออเดอร์ล่าสุด
               </h2>
             </div>
 
             <button
-              class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+              class="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-600 transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
               @click="router.push('/admin/orders')">
               ดูทั้งหมด
             </button>
@@ -384,17 +377,17 @@ const getStatusClass = (status: string) => {
 
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <article v-for="order in recentOrders" :key="order.orderId"
-              class="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md">
+              class="group rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-md">
               <div
-                class="relative h-36 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-indigo-50">
-                <svg class="absolute inset-0 h-full w-full text-slate-200" preserveAspectRatio="none"
+                class="relative h-36 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+                <svg class="absolute inset-0 h-full w-full text-gray-200" preserveAspectRatio="none"
                   viewBox="0 0 100 100">
                   <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="1" />
                   <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="1" />
                 </svg>
                 <div class="absolute inset-0 flex items-center justify-center">
                   <span
-                    class="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    class="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-gray-400">
                     Preview Image
                   </span>
                 </div>
@@ -403,11 +396,11 @@ const getStatusClass = (status: string) => {
               <div class="mt-4 space-y-2">
                 <div class="flex items-start justify-between gap-3">
                   <div>
-                    <p class="text-sm font-black text-slate-900">{{ order.orderId }}</p>
-                    <p class="mt-1 text-xs font-medium text-slate-500">
+                    <p class="text-sm font-black text-gray-900">{{ order.orderId }}</p>
+                    <p class="mt-1 text-xs font-medium text-gray-500">
                       Customer: {{ order.customerName }}
                     </p>
-                    <p class="text-xs font-medium text-slate-400">
+                    <p class="text-xs font-medium text-gray-400">
                       Package: {{ order.packageName }}
                     </p>
                   </div>
@@ -421,13 +414,13 @@ const getStatusClass = (status: string) => {
                 </div>
 
                 <div class="pt-2">
-                  <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-slate-400">
+                  <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-gray-400">
                     <span>Progress</span>
                     <span>{{ order.progress }}%</span>
                   </div>
-                  <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div class="h-2 overflow-hidden rounded-full bg-gray-100">
                     <div
-                      class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+                      class="h-full rounded-full bg-gray-900 transition-all duration-500"
                       :style="{ width: order.progress + '%' }"></div>
                   </div>
                 </div>
@@ -439,91 +432,91 @@ const getStatusClass = (status: string) => {
         <!-- Right Panel -->
         <div class="space-y-6">
           <!-- Quick Actions -->
-          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <div class="mb-5">
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-500">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
                 Quick Actions
               </p>
-              <h2 class="mt-1 text-lg font-black text-slate-900">
+              <h2 class="mt-1 text-lg font-black text-gray-900">
                 เมนูลัดผู้ดูแลระบบ
               </h2>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <button
-                class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
                 @click="router.push('/admin/users')">
                 <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
                   👤
                 </div>
-                <p class="text-sm font-semibold text-slate-800">จัดการผู้ใช้</p>
-                <p class="mt-1 text-[10px] font-medium text-slate-400">Users</p>
+                <p class="text-sm font-semibold text-gray-800">จัดการผู้ใช้</p>
+                <p class="mt-1 text-[10px] font-medium text-gray-400">Users</p>
               </button>
 
               <button
-                class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
                 @click="router.push('/admin/orders')">
                 <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
                   📦
                 </div>
-                <p class="text-sm font-semibold text-slate-800">จัดการออเดอร์</p>
-                <p class="mt-1 text-[10px] font-medium text-slate-400">Orders</p>
+                <p class="text-sm font-semibold text-gray-800">จัดการออเดอร์</p>
+                <p class="mt-1 text-[10px] font-medium text-gray-400">Orders</p>
               </button>
 
               <button
-                class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
                 @click="router.push('/admin/orders')">
                 <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
                   📝
                 </div>
-                <p class="text-sm font-semibold text-slate-800">มอบหมายงาน</p>
-                <p class="mt-1 text-[10px] font-medium text-slate-400">Assign</p>
+                <p class="text-sm font-semibold text-gray-800">มอบหมายงาน</p>
+                <p class="mt-1 text-[10px] font-medium text-gray-400">Assign</p>
               </button>
 
               <button
-                class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
                 @click="router.push('/admin/packages')">
                 <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
                   💎
                 </div>
-                <p class="text-sm font-semibold text-slate-800">แพ็กเกจ</p>
-                <p class="mt-1 text-[10px] font-medium text-slate-400">Packages</p>
+                <p class="text-sm font-semibold text-gray-800">แพ็กเกจ</p>
+                <p class="mt-1 text-[10px] font-medium text-gray-400">Packages</p>
               </button>
             </div>
           </div>
 
           <!-- Editor Workload -->
-          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <div class="mb-5">
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-500">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
                 Editor Workload
               </p>
-              <h2 class="mt-1 text-lg font-black text-slate-900">
+              <h2 class="mt-1 text-lg font-black text-gray-900">
                 ภาระงานของทีม Editor
               </h2>
             </div>
 
             <div class="space-y-3">
               <div v-for="editor in editorsWorkload" :key="editor.name"
-                class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                class="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-3">
                 <div class="flex min-w-0 items-center gap-3">
                   <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-xs font-black text-white">
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gray-900 text-xs font-black text-white">
                     {{ editor.initials }}
                   </div>
 
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-black text-slate-800">
+                    <p class="truncate text-sm font-black text-gray-800">
                       {{ editor.name }}
                     </p>
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                       Editor
                     </p>
                   </div>
                 </div>
 
                 <span
-                  class="shrink-0 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[10px] font-black text-indigo-600">
+                  class="shrink-0 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-[10px] font-black text-gray-700">
                   {{ editor.activeJobs }} Jobs
                 </span>
               </div>
