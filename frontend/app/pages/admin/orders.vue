@@ -14,8 +14,16 @@ const orders = ref<any[]>([])
 const editors = ref<any[]>([])
 const loading = ref(true)
 const error = ref("")
-const selectedFilter = ref<string>("all")
-const searchOrderId = ref("")
+const selectedFilter = ref("all")
+const searchQuery = ref("")
+const assignLoading = ref<number | null>(null)
+const confirmDialog = ref({
+  open: false,
+  orderId: 0,
+  paymentId: 0,
+  status: "" as "approved" | "rejected",
+  loading: false
+})
 
 const fetchAdminData = async () => {
   loading.value = true
@@ -23,51 +31,73 @@ const fetchAdminData = async () => {
   try {
     const [allUsers, allOrders] = await Promise.all([
       apiFetch("/users"),
-      orderService.getMyOrders() // Admin fetches all
+      orderService.getMyOrders()
     ])
-    
-    // Sort all orders by newest
     orders.value = [...allOrders].sort((a, b) => b.orderId - a.orderId)
     editors.value = allUsers.filter((u: any) => u.userRole === "editor")
   } catch (err: any) {
-    error.value = err?.message || "ไม่สามารถโหลดข้อมูลจัดการคำสั่งงานได้"
+    error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  fetchAdminData()
-})
+onMounted(() => fetchAdminData())
+
+// ── Filters ────────────────────────────────────────────────────
+const countByStatus = (status: string) => orders.value.filter(o => o.orderStatus === status).length
+
+const filterOptions = computed(() => [
+  { key: "all", label: "ทั้งหมด", count: orders.value.length },
+  { key: "waiting_deposit", label: "รอมัดจำ", count: countByStatus("waiting_deposit") },
+  { key: "waiting_assignment", label: "รอมอบหมาย", count: countByStatus("waiting_assignment") },
+  { key: "in_progress", label: "กำลังดำเนินการ", count: countByStatus("in_progress") },
+  { key: "waiting_final_payment", label: "รอชำระส่วนที่เหลือ", count: countByStatus("waiting_final_payment") },
+  { key: "completed", label: "ส่งงานแล้ว", count: orders.value.filter(o => o.orderStatus === "completed" || o.orderStatus === "delivered").length },
+  { key: "cancelled", label: "ยกเลิก", count: countByStatus("cancelled") }
+])
 
 const filteredOrders = computed(() => {
   let result = orders.value
-  
-  if (selectedFilter.value === "waiting_deposit") {
-    result = result.filter(o => o.orderStatus === "waiting_deposit")
-  } else if (selectedFilter.value === "waiting_assignment") {
-    result = result.filter(o => o.orderStatus === "waiting_assignment")
-  } else if (selectedFilter.value === "in_progress") {
-    result = result.filter(o => o.orderStatus === "in_progress")
-  } else if (selectedFilter.value === "waiting_final_payment") {
-    result = result.filter(o => o.orderStatus === "waiting_final_payment")
-  } else if (selectedFilter.value === "completed") {
-    result = result.filter(o => o.orderStatus === "completed" || o.orderStatus === "delivered")
+
+  if (selectedFilter.value !== "all") {
+    if (selectedFilter.value === "completed") {
+      result = result.filter(o => o.orderStatus === "completed" || o.orderStatus === "delivered")
+    } else {
+      result = result.filter(o => o.orderStatus === selectedFilter.value)
+    }
   }
-  
-  if (searchOrderId.value.trim()) {
-    const query = searchOrderId.value.trim()
-    result = result.filter(o => String(o.orderId) === query)
+
+  const q = searchQuery.value.trim()
+  if (q) {
+    result = result.filter(o =>
+      String(o.orderId).includes(q) ||
+      (o.packageName ?? "").toLowerCase().includes(q.toLowerCase()) ||
+      (o.workTypeName ?? "").toLowerCase().includes(q.toLowerCase())
+    )
   }
-  
+
   return result
 })
 
-// Action: Assign Editor
+// ── Table columns ──────────────────────────────────────────────
+const columns = [
+  { key: "orderId", label: "เลขที่" },
+  { key: "workTypeName", label: "ประเภทงาน" },
+  { key: "packageName", label: "แพ็กเกจ" },
+  { key: "orderTotalPrice", label: "ยอดรวม", align: "right" as const },
+  { key: "orderStatus", label: "สถานะ" },
+  { key: "orderRequiredDate", label: "วันที่ต้องการ" },
+  { key: "editorAssign", label: "Editor", width: "160px" },
+  { key: "paymentAction", label: "สลิปเงิน", align: "center" as const },
+  { key: "orderCreatedAt", label: "สั่งเมื่อ" }
+]
+
+// ── Actions ────────────────────────────────────────────────────
 const handleAssignEditor = async (orderId: number, event: Event) => {
   const target = event.target as HTMLSelectElement
   const editorId = target.value ? Number(target.value) : null
-  
+  assignLoading.value = orderId
   try {
     const res = await apiFetch(`/orders/${orderId}/assign`, {
       method: "PATCH",
@@ -78,166 +108,211 @@ const handleAssignEditor = async (orderId: number, event: Event) => {
     fetchAdminData()
   } catch (err: any) {
     alert(err?.message || "มอบหมายงานไม่สำเร็จ")
+  } finally {
+    assignLoading.value = null
   }
 }
 
-// Action: Verify Payment Slip
-const verifyPayment = async (orderId: number, paymentId: number, status: "approved" | "rejected") => {
-  const note = status === "approved" 
-    ? "ผู้ดูแลระบบตรวจสอบหลักฐานการโอนและอนุมัติความถูกต้องแล้ว" 
-    : prompt("กรุณาระบุเหตุผลการปฏิเสธสลิป:")
-    
-  if (status === "rejected" && note === null) return // Canceled prompt
-  
+const openVerifyDialog = (orderId: number, paymentId: number, status: "approved" | "rejected") => {
+  confirmDialog.value = { open: true, orderId, paymentId, status, loading: false }
+}
+
+const confirmVerify = async () => {
+  confirmDialog.value.loading = true
+  const { orderId, paymentId, status } = confirmDialog.value
+  const note = status === "approved"
+    ? "ผู้ดูแลระบบตรวจสอบและอนุมัติแล้ว"
+    : "ผู้ดูแลระบบปฏิเสธการชำระเงิน"
   try {
     const res = await apiFetch(`/orders/${orderId}/payments/${paymentId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentStatus: status, logNote: note })
     })
-    alert(res.message || "ประมวลผลสลิปเงินโอนสำเร็จ")
+    alert(res.message || "บันทึกเรียบร้อย")
+    confirmDialog.value.open = false
     fetchAdminData()
   } catch (err: any) {
-    alert(err?.message || "ไม่สามารถประมวลผลรายการสลิปได้")
+    alert(err?.message || "เกิดข้อผิดพลาด")
+  } finally {
+    confirmDialog.value.loading = false
   }
 }
 
+// ── Formatters ─────────────────────────────────────────────────
 const formatPrice = (n: number) =>
-  Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2 })
+  `฿${Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2 })}`
 
 const formatDate = (dateStr: string) => {
-  if (!dateStr) return "-"
-  const d = new Date(dateStr)
-  return d.toLocaleDateString("th-TH")
+  if (!dateStr) return "—"
+  return new Date(dateStr).toLocaleDateString("th-TH", {
+    day: "numeric", month: "short", year: "2-digit"
+  })
 }
+
+const pendingPayment = (order: any) =>
+  order.payments?.find((p: any) => p.paymentStatus === "pending")
+
+const breadcrumb = [
+  { label: "หน้าแรก", to: "/admin/dashboard" },
+  { label: "คำสั่งงาน" }
+]
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+  <div class="space-y-5 max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">📁 ตรวจสอบและจัดการคำสั่งงาน</h1>
-        <p class="text-slate-500 text-sm mt-1">มอบหมายงานให้ช่างแต่งภาพ (Editors) และอนุมัติสลิปโอนเงินลูกค้า</p>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <h1 class="mt-2 text-xl font-bold text-gray-900">คำสั่งงาน</h1>
+        <p class="mt-0.5 text-sm text-gray-500">มอบหมายงาน, อนุมัติสลิปการโอนเงิน</p>
       </div>
+      <AdminActionButton
+        variant="secondary"
+        size="sm"
+        icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        :loading="loading"
+        @click="fetchAdminData"
+      >
+        รีเฟรช
+      </AdminActionButton>
     </div>
 
-    <!-- Filters & Search Bar -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="bg-white border rounded-xl p-1 flex flex-wrap gap-1 shadow-sm overflow-x-auto">
-        <button @click="selectedFilter = 'all'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">ทั้งหมด ({{ orders.length }})</button>
-        <button @click="selectedFilter = 'waiting_deposit'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'waiting_deposit' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">รอชำระมัดจำ</button>
-        <button @click="selectedFilter = 'waiting_assignment'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'waiting_assignment' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">รอมอบหมายช่าง</button>
-        <button @click="selectedFilter = 'in_progress'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'in_progress' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">กำลังดำเนินการ</button>
-        <button @click="selectedFilter = 'waiting_final_payment'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'waiting_final_payment' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">รอชำระงวดสุดท้าย</button>
-        <button @click="selectedFilter = 'completed'" class="px-4 py-2 text-xs font-bold rounded-lg transition" :class="selectedFilter === 'completed' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'">ส่งงานแล้ว</button>
+    <!-- Filter + Search -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div class="overflow-x-auto flex-1">
+        <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
       </div>
-
-      <div class="flex gap-2">
-        <input v-model="searchOrderId" type="text" placeholder="🔍 ค้นด้วย ID ออเดอร์..." class="px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs w-44" />
-        <button @click="fetchAdminData" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-white border px-3 py-2 rounded-xl transition">🔄 โหลดใหม่</button>
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="bg-white rounded-3xl p-16 text-center border shadow-sm">
-      <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-      <p class="text-slate-400 font-medium">กำลังโหลดข้อมูลการดำเนินงาน...</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 text-red-600 p-6 rounded-2xl border text-center font-bold text-sm">
-      ⚠️ {{ error }}
-    </div>
-
-    <!-- Empty State -->
-    <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-3xl p-16 text-center border shadow-sm space-y-4">
-      <div class="text-5xl">📁</div>
-      <h3 class="text-lg font-bold text-slate-700">ไม่พบข้อมูลใบสั่งงาน</h3>
-      <p class="text-slate-400 text-sm">ไม่มีคำสั่งซื้อที่ตรงกับสถานะดังกล่าวในขณะนี้</p>
-    </div>
-
-    <!-- Orders Cards List -->
-    <div v-else class="space-y-6">
-      <div v-for="order in filteredOrders" :key="order.orderId" class="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-3">
-          <div>
-            <h3 class="font-extrabold text-slate-800 text-lg">ออเดอร์ #{{ order.orderId }}</h3>
-            <p class="text-xs text-slate-400">สั่งซื้อโดยลูกค้า ID: {{ order.customerId }} • วันที่รับงาน: {{ formatDate(order.orderRequiredDate) }}</p>
-          </div>
-          
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold">สถานะ:</span>
-            <span class="px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-100">
-              {{ order.orderStatus.replace('_', ' ') }}
-            </span>
-          </div>
+      <div class="flex-shrink-0">
+        <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="ค้นหาออเดอร์..."
+            class="text-sm text-gray-700 bg-transparent outline-none w-44 placeholder:text-gray-400"
+          />
         </div>
+      </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-          <div>
-            <span class="text-xs text-slate-400 font-bold block mb-1">🎨 ประเภทงาน / แพ็กเกจ</span>
-            <p class="font-bold text-slate-800">ประเภท: {{ order.workTypeName }}</p>
-            <p class="text-slate-500 font-medium">แพ็กเกจ: {{ order.packageName }} • ยอดเงิน: <strong class="text-indigo-600">฿{{ formatPrice(order.orderTotalPrice) }}</strong></p>
-          </div>
+    <!-- Error -->
+    <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+      <button @click="fetchAdminData" class="mt-2 text-xs text-gray-500 underline">ลองใหม่</button>
+    </div>
 
-          <!-- Mapped Editor Selector -->
-          <div>
-            <span class="text-xs text-slate-400 font-bold block mb-1.5">💻 มอบหมายช่างแต่งภาพ (Editor)</span>
-            <select
-              :value="order.editorId || ''"
-              @change="handleAssignEditor(order.orderId, $event)"
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs text-slate-700 transition"
+    <!-- Table -->
+    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <AdminDataTable
+        :columns="columns"
+        :rows="filteredOrders"
+        :loading="loading"
+        row-key="orderId"
+      >
+        <!-- Order ID -->
+        <template #cell-orderId="{ value }">
+          <span class="font-mono text-xs font-semibold text-gray-900">#{{ value }}</span>
+        </template>
+
+        <!-- Work type -->
+        <template #cell-workTypeName="{ value }">
+          <span class="text-xs text-gray-600">{{ value ?? "—" }}</span>
+        </template>
+
+        <!-- Package -->
+        <template #cell-packageName="{ value }">
+          <span class="text-xs text-gray-600">{{ value ?? "—" }}</span>
+        </template>
+
+        <!-- Price -->
+        <template #cell-orderTotalPrice="{ value }">
+          <span class="text-xs font-semibold text-gray-900 font-number">{{ formatPrice(value) }}</span>
+        </template>
+
+        <!-- Status -->
+        <template #cell-orderStatus="{ value }">
+          <AdminStatusBadge :status="value" />
+        </template>
+
+        <!-- Required date -->
+        <template #cell-orderRequiredDate="{ value }">
+          <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
+        </template>
+
+        <!-- Editor Assign dropdown -->
+        <template #cell-editorAssign="{ row }">
+          <select
+            :value="row.editorId || ''"
+            @change="handleAssignEditor(row.orderId, $event)"
+            :disabled="assignLoading === row.orderId"
+            class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:opacity-50"
+          >
+            <option value="">— ยังไม่มอบหมาย —</option>
+            <option v-for="ed in editors" :key="ed.userId" :value="ed.userId">
+              {{ ed.userFirstName }} {{ ed.userLastName }}
+            </option>
+          </select>
+        </template>
+
+        <!-- Payment slip -->
+        <template #cell-paymentAction="{ row }">
+          <div v-if="pendingPayment(row)" class="flex items-center gap-1.5 justify-center">
+            <a
+              :href="pendingPayment(row).paymentSlipUrl"
+              target="_blank"
+              class="text-xs text-gray-500 hover:text-gray-700 underline"
             >
-              <option value="">-- ยังไม่มอบหมายช่าง --</option>
-              <option v-for="ed in editors" :key="ed.userId" :value="ed.userId">
-                {{ ed.userFirstName }} {{ ed.userLastName }}
-              </option>
-            </select>
+              ดูสลิป
+            </a>
+            <AdminActionButton
+              variant="primary"
+              size="sm"
+              @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
+            >
+              อนุมัติ
+            </AdminActionButton>
+            <AdminActionButton
+              variant="danger"
+              size="sm"
+              @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'rejected')"
+            >
+              ปฏิเสธ
+            </AdminActionButton>
           </div>
+          <span v-else class="text-xs text-gray-300 block text-center">—</span>
+        </template>
 
-          <!-- Submitted payments approval section -->
-          <div>
-            <span class="text-xs text-slate-400 font-bold block mb-1.5">🧾 ตรวจสอบยอดเงิน / สลิปโอนเงิน</span>
-            
-            <div v-if="order.payments && order.payments.some((p: any) => p.paymentStatus === 'pending')" class="space-y-3 bg-amber-50/50 border border-amber-200 rounded-2xl p-4">
-              <div v-for="pay in order.payments.filter((p: any) => p.paymentStatus === 'pending')" :key="pay.paymentId" class="space-y-2 text-xs">
-                <div class="flex justify-between">
-                  <span class="font-bold text-slate-800">{{ pay.paymentType === 'deposit' ? 'มัดจำ 30%' : 'ส่วนที่เหลือ 70%' }}</span>
-                  <span class="font-extrabold text-amber-600">฿{{ formatPrice(pay.paymentAmount) }}</span>
-                </div>
-                
-                <a :href="pay.paymentSlipUrl" target="_blank" class="block font-bold text-indigo-600 hover:underline">
-                  📎 เปิดดูรูปสลิปการโอน
-                </a>
-                
-                <div class="flex gap-2 justify-end">
-                  <button @click="verifyPayment(order.orderId, pay.paymentId, 'approved')" class="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg">อนุมัติ</button>
-                  <button @click="verifyPayment(order.orderId, pay.paymentId, 'rejected')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg">ปฏิเสธ</button>
-                </div>
-              </div>
-            </div>
-            
-            <p v-else class="text-slate-400 text-xs italic">ไม่มีประวัติยอดค้างตรวจสอบสลิป</p>
-          </div>
-        </div>
-      </div>
+        <!-- Created at -->
+        <template #cell-orderCreatedAt="{ value }">
+          <span class="text-xs text-gray-400">{{ formatDate(value) }}</span>
+        </template>
+      </AdminDataTable>
+
+      <!-- Empty state -->
+      <AdminEmptyState
+        v-if="!loading && filteredOrders.length === 0"
+        title="ไม่พบคำสั่งงาน"
+        description="ไม่มีคำสั่งงานที่ตรงกับเงื่อนไขที่เลือก ลองเปลี่ยนตัวกรองใหม่"
+        icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+      />
     </div>
+
+    <!-- Confirm Dialog -->
+    <AdminConfirmDialog
+      :open="confirmDialog.open"
+      :title="confirmDialog.status === 'approved' ? 'ยืนยันการอนุมัติสลิป' : 'ยืนยันการปฏิเสธสลิป'"
+      :message="confirmDialog.status === 'approved'
+        ? 'คุณยืนยันว่าตรวจสอบหลักฐานการโอนเงินและอนุมัติความถูกต้องแล้ว?'
+        : 'คุณต้องการปฏิเสธหลักฐานการโอนเงินนี้ใช่หรือไม่?'"
+      :confirm-label="confirmDialog.status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'"
+      :danger="confirmDialog.status === 'rejected'"
+      :loading="confirmDialog.loading"
+      @confirm="confirmVerify"
+      @cancel="confirmDialog.open = false"
+    />
   </div>
 </template>
-
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>
