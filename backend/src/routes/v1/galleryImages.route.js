@@ -8,6 +8,7 @@ const router = express.Router();
 
 // Public routes — ไม่ต้อง login
 router.get("/", controller.getGalleryImages);
+router.get("/tags", controller.getTags);
 router.get("/:id", controller.getGalleryImageById);
 
 // Admin only routes — ต้อง login + ต้องเป็น admin
