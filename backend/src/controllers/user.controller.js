@@ -1,4 +1,5 @@
 const UserModel = require("../models/user.model");
+const bcrypt = require("bcrypt");
 
 // GET /users
 exports.getUsers = async (req, res) => {
@@ -54,12 +55,15 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Hash Password before saving
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+
     // บันทึกข้อมูล user ใหม่
     const userId = await UserModel.create({
       userFirstName,
       userLastName,
       userEmail,
-      userPassword,
+      userPassword: hashedPassword,
       userPhone,
       userAddress,
       userProfileImage,
@@ -81,8 +85,15 @@ exports.updateUser = async (req, res) => {
   try {
     // รับ id จาก params
     const { id } = req.params;
+
+    // ถ้ามีการส่ง password มาให้ทำการ hash ก่อนบันทึก
+    const updateData = { ...req.body };
+    if (updateData.userPassword) {
+      updateData.userPassword = await bcrypt.hash(updateData.userPassword, 10);
+    }
+
     // เรียก Model เพื่ออัปเดตข้อมูล
-    const result = await UserModel.update(id, req.body);
+    const result = await UserModel.update(id, updateData);
     // ตรวจสอบว่ามีการอัปเดตหรือไม่
     if (!result) {
       return res.status(404).json({

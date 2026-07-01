@@ -7,6 +7,10 @@ const orderRoutes = require("./orders.route");
 const uploadRoutes = require("./upload.route");
 const galleryImageRoutes = require("./galleryImages.route");
 const policyRoutes = require("./policies.route");
+const paymentRoutes = require("./payments.route");
+const reportRoutes = require("./reports.route");
+const settingRoutes = require("./settings.route");
+const fileRoutes = require("./files.route");
 const authMiddleware = require("../../middlewares/auth.middleware");
 
 const router = express.Router();
@@ -26,5 +30,9 @@ router.use("/packages", packageRoutes);
 router.use("/work-types", workTypeRoutes);
 router.use("/orders", orderRoutes);
 router.use("/upload", uploadRoutes);
+router.use("/payments", paymentRoutes);
+router.use("/reports", reportRoutes);
+router.use("/settings", settingRoutes);
+router.use("/files", fileRoutes);
 
 module.exports = router;
