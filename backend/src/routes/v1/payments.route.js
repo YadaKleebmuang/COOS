@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const paymentController = require("../controllers/payment.controller");
-const { authenticateJWT, authorizeRoles } = require("../middlewares/auth.middleware");
+const paymentController = require("../../controllers/payment.controller");
+const adminOnly = require("../../middlewares/admin.middleware");
 
-// All routes require admin
-router.use(authenticateJWT);
-router.use(authorizeRoles("admin"));
+// authMiddleware applied globally in index.js — only need adminOnly here
+router.use(adminOnly);
 
 router.get("/", paymentController.getPayments);
 router.patch("/:id/approve", paymentController.approvePayment);

@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const fileController = require("../../controllers/file.controller");
-const { authorizeRoles } = require("../../middlewares/auth.middleware");
+const adminOnly = require("../../middlewares/admin.middleware");
 
-// Require admin access for the global files view
-router.use(authorizeRoles("admin"));
+// authMiddleware applied globally in index.js — only need adminOnly here
+router.use(adminOnly);
 
 router.get("/", fileController.getAllFiles);
 
