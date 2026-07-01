@@ -7,24 +7,31 @@ export function useApi() {
     const options = { ...option };
     const headers = new Headers(option.headers || {});
 
-    // get token from cookie
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    // ใช้ useCookie แทน document.cookie เพื่อรองรับ SSR (Nuxt 3)
+    const tokenCookie = useCookie<string | null>("token");
+    const token = tokenCookie.value;
 
     if (token) {
       headers.set("Authorization", "Bearer " + token);
     }
 
-    // ✅ ต่อ baseURL backend ให้ถูก
-    const response = await fetch(`${config.public.apiBase}${url}`, {
+    // ต่อ baseURL backend: ใช้ internal URL สำหรับ SSR (server→server), public URL สำหรับ browser
+    const baseUrl = import.meta.server
+      ? (process.env.NUXT_INTERNAL_API_BASE || config.public.apiBase)
+      : config.public.apiBase;
+
+    const response = await fetch(`${baseUrl}${url}`, {
       ...options,
       headers,
     });
 
     if (!response.ok) {
-      throw new Error(response.statusText);
+      let errorMessage = response.statusText;
+      try {
+        const errorBody = await response.json();
+        errorMessage = errorBody?.message || errorMessage;
+      } catch {}
+      throw new Error(errorMessage);
     }
 
     return response.json() as Promise<T>;
