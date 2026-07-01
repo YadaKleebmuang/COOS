@@ -6,53 +6,43 @@ definePageMeta({
   middleware: ["auth", "admin"]
 })
 
+const { apiFetch } = useApi()
+
 // ── State ──────────────────────────────────────────────────────
 const loading = ref(true)
 const dateFrom = ref("2025-06-01")
 const dateTo = ref("2025-06-30")
 
-// ── Mock report data ───────────────────────────────────────────
 const reportData = ref({
-  totalOrders: 42,
-  totalRevenue: 185500,
-  completedOrders: 28,
-  cancelledOrders: 4,
-  newCustomers: 15,
-  activeEditors: 4,
-  avgOrderValue: 4416,
-  avgDeliveryDays: 6,
-  ordersByStatus: [
-    { status: "completed", label: "เสร็จสมบูรณ์", count: 28 },
-    { status: "in_progress", label: "กำลังดำเนินการ", count: 8 },
-    { status: "cancelled", label: "ยกเลิก", count: 4 },
-    { status: "waiting_deposit", label: "รอมัดจำ", count: 2 }
-  ],
-  popularPackages: [
-    { name: "Professional", count: 18, revenue: 90000 },
-    { name: "Standard", count: 14, revenue: 56000 },
-    { name: "Basic", count: 10, revenue: 18000 }
-  ],
-  editorWorkload: [
-    { name: "Alex W.", completedJobs: 12, avgDays: 5.2 },
-    { name: "Sarah J.", completedJobs: 10, avgDays: 6.1 },
-    { name: "Mark L.", completedJobs: 4, avgDays: 7.3 },
-    { name: "Chris P.", completedJobs: 2, avgDays: 5.8 }
-  ],
-  revenueByMonth: [
-    { month: "ม.ค.", revenue: 28000 },
-    { month: "ก.พ.", revenue: 32000 },
-    { month: "มี.ค.", revenue: 25000 },
-    { month: "เม.ย.", revenue: 40000 },
-    { month: "พ.ค.", revenue: 38000 },
-    { month: "มิ.ย.", revenue: 22500 }
-  ]
+  totalOrders: 0,
+  totalRevenue: 0,
+  completedOrders: 0,
+  cancelledOrders: 0,
+  newCustomers: 0,
+  activeEditors: 0,
+  avgOrderValue: 0,
+  avgDeliveryDays: 0,
+  ordersByStatus: [] as any[],
+  popularPackages: [] as any[],
+  editorWorkload: [] as any[],
+  revenueByMonth: [] as any[]
 })
 
 const fetchReport = async () => {
   loading.value = true
   try {
-    // Future: const data = await apiFetch(`/reports?from=${dateFrom.value}&to=${dateTo.value}`)
-    await new Promise(r => setTimeout(r, 500))
+    const data = await apiFetch<any>(`/api/v1/reports?from=${dateFrom.value}&to=${dateTo.value}`)
+    reportData.value = {
+      ...reportData.value,
+      ...data,
+      ordersByStatus: data.ordersByStatus?.map((s: any) => ({
+        status: s.status,
+        label: s.status === 'completed' ? 'เสร็จสมบูรณ์' : s.status === 'in_progress' ? 'กำลังดำเนินการ' : s.status === 'cancelled' ? 'ยกเลิก' : s.status === 'waiting_deposit' ? 'รอมัดจำ' : s.status === 'waiting_assignment' ? 'รอมอบหมาย' : s.status === 'final_payment' ? 'รอชำระยอดเหลือ' : s.status,
+        count: s.count
+      })) || []
+    }
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาด: " + error.message)
   } finally {
     loading.value = false
   }
@@ -65,8 +55,11 @@ const exportCsv = () => {
   alert("ฟีเจอร์นี้จะพร้อมใช้งานเร็วๆ นี้")
 }
 
-const formatCurrency = (n: number) => `฿${n.toLocaleString("th-TH")}`
-const maxRevenue = computed(() => Math.max(...reportData.value.revenueByMonth.map(r => r.revenue)))
+const formatCurrency = (n: number) => `฿${Number(n).toLocaleString("th-TH")}`
+const maxRevenue = computed(() => {
+  if (!reportData.value.revenueByMonth || reportData.value.revenueByMonth.length === 0) return 1
+  return Math.max(...reportData.value.revenueByMonth.map(r => Number(r.revenue)))
+})
 
 const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, { label: "รายงาน" }]
 </script>
@@ -103,7 +96,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <AdminStatCard label="คำสั่งงานทั้งหมด" :value="reportData.totalOrders" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-      <AdminStatCard label="รายได้รวม" :value="formatCurrency(reportData.totalRevenue)" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <AdminStatCard label="รายได้รวม" :value="formatCurrency(Number(reportData.totalRevenue))" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       <AdminStatCard label="งานเสร็จสมบูรณ์" :value="reportData.completedOrders" icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
       <AdminStatCard label="ลูกค้าใหม่" :value="reportData.newCustomers" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
     </div>
@@ -117,7 +110,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         <div class="flex items-end gap-3 h-40">
           <div v-for="item in reportData.revenueByMonth" :key="item.month" class="flex-1 flex flex-col items-center gap-1.5 group">
             <span class="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity font-number whitespace-nowrap">{{ formatCurrency(item.revenue) }}</span>
-            <div class="w-full bg-gray-900 rounded-t transition-all hover:bg-gray-700" :style="{ height: `${Math.round((item.revenue / maxRevenue) * 128)}px` }"/>
+            <div class="w-full bg-gray-900 rounded-t transition-all hover:bg-gray-700" :style="{ height: `${Math.round((Number(item.revenue) / maxRevenue) * 128)}px` }"/>
             <span class="text-[10px] text-gray-500">{{ item.month }}</span>
           </div>
         </div>
@@ -134,7 +127,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                 <span class="text-xs font-bold text-gray-900 font-number">{{ s.count }}</span>
               </div>
               <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-gray-900 rounded-full" :style="{ width: `${Math.round((s.count / reportData.totalOrders) * 100)}%` }"/>
+                <div class="h-full bg-gray-900 rounded-full" :style="{ width: reportData.totalOrders ? `${Math.round((s.count / reportData.totalOrders) * 100)}%` : '0%' }"/>
               </div>
             </div>
           </div>
@@ -177,10 +170,10 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
             <span class="text-sm font-medium text-gray-900">{{ value }}</span>
           </template>
           <template #cell-completedJobs="{ value }">
-            <span class="text-sm font-number text-gray-700">{{ value }}</span>
+            <span class="text-sm font-number text-gray-700">{{ value || 0 }}</span>
           </template>
           <template #cell-avgDays="{ value }">
-            <span class="text-sm font-number text-gray-500">{{ value }}</span>
+            <span class="text-sm font-number text-gray-500">{{ Number(value || 0).toFixed(1) }}</span>
           </template>
         </AdminDataTable>
       </div>

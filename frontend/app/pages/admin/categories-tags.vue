@@ -6,27 +6,12 @@ definePageMeta({
   middleware: ["auth", "admin"]
 })
 
+const { apiFetch } = useApi()
+
 // ── Types ──────────────────────────────────────────────────────
 interface Category { categoryId: number; categoryName: string; imageCount: number; createdAt: string }
 interface Hashtag { tagId: number; tagName: string; imageCount: number; createdAt: string }
 
-// ── Mock data ──────────────────────────────────────────────────
-const mockCategories: Category[] = [
-  { categoryId: 1, categoryName: "Realistic", imageCount: 24, createdAt: "2025-01-10" },
-  { categoryId: 2, categoryName: "Anime", imageCount: 18, createdAt: "2025-01-10" },
-  { categoryId: 3, categoryName: "Watercolor", imageCount: 12, createdAt: "2025-02-05" },
-  { categoryId: 4, categoryName: "Abstract", imageCount: 8, createdAt: "2025-03-15" },
-  { categoryId: 5, categoryName: "Fantasy", imageCount: 15, createdAt: "2025-04-01" },
-]
-
-const mockHashtags: Hashtag[] = [
-  { tagId: 1, tagName: "portrait", imageCount: 30, createdAt: "2025-01-10" },
-  { tagId: 2, tagName: "anime", imageCount: 18, createdAt: "2025-01-10" },
-  { tagId: 3, tagName: "realistic", imageCount: 24, createdAt: "2025-01-10" },
-  { tagId: 4, tagName: "nature", imageCount: 10, createdAt: "2025-02-05" },
-  { tagId: 5, tagName: "fantasy", imageCount: 15, createdAt: "2025-03-01" },
-  { tagId: 6, tagName: "character", imageCount: 20, createdAt: "2025-03-15" },
-]
 
 // ── State ──────────────────────────────────────────────────────
 const categories = ref<Category[]>([])
@@ -45,10 +30,26 @@ const tagDelete = ref({ open: false, loading: false, id: 0, name: "" })
 const fetchData = async () => {
   loading.value = true
   try {
-    // Future: parallel API fetch
-    await new Promise(r => setTimeout(r, 300))
-    categories.value = mockCategories
-    hashtags.value = mockHashtags
+    const [cats, tgs] = await Promise.all([
+      apiFetch<any[]>("/api/v1/work-types").catch(() => []),
+      apiFetch<string[]>("/api/v1/gallery-images/tags").catch(() => [])
+    ])
+    
+    categories.value = cats.map(c => ({
+      categoryId: c.typeId,
+      categoryName: c.typeName,
+      imageCount: 0,
+      createdAt: c.createdAt || new Date().toISOString()
+    }))
+
+    hashtags.value = tgs.map((t, idx) => ({
+      tagId: idx + 1,
+      tagName: t,
+      imageCount: 0,
+      createdAt: new Date().toISOString()
+    }))
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
   } finally {
     loading.value = false
   }

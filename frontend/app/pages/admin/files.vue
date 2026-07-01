@@ -6,6 +6,8 @@ definePageMeta({
   middleware: ["auth", "admin"]
 })
 
+const { apiFetch } = useApi()
+
 // ── Types ──────────────────────────────────────────────────────
 interface SystemFile {
   fileId: number
@@ -19,14 +21,6 @@ interface SystemFile {
   status: "active" | "archived"
 }
 
-// ── Mock data ──────────────────────────────────────────────────
-const mockFiles: SystemFile[] = [
-  { fileId: 1, fileName: "order_1024_source.jpg", fileType: "image", orderId: 1024, ownerName: "สมชาย ใจดี", fileSize: 4200000, uploadedAt: "2025-06-28T10:00:00Z", fileUrl: "#", status: "active" },
-  { fileId: 2, fileName: "order_1023_reference.png", fileType: "image", orderId: 1023, ownerName: "นิรมล วงษ์ดี", fileSize: 2100000, uploadedAt: "2025-06-27T14:30:00Z", fileUrl: "#", status: "active" },
-  { fileId: 3, fileName: "slip_payment_1022.jpg", fileType: "image", orderId: 1022, ownerName: "ประทีป มั่นคง", fileSize: 850000, uploadedAt: "2025-06-26T09:00:00Z", fileUrl: "#", status: "active" },
-  { fileId: 4, fileName: "final_output_1021.jpg", fileType: "image", orderId: 1021, ownerName: "Sarah J.", fileSize: 6500000, uploadedAt: "2025-06-25T16:00:00Z", fileUrl: "#", status: "archived" },
-  { fileId: 5, fileName: "policy_draft.pdf", fileType: "document", orderId: null, ownerName: "Admin", fileSize: 120000, uploadedAt: "2025-06-20T08:00:00Z", fileUrl: "#", status: "active" },
-]
 
 // ── State ──────────────────────────────────────────────────────
 const files = ref<SystemFile[]>([])
@@ -40,9 +34,10 @@ const deleteDialog = ref({ open: false, loading: false, fileId: 0, name: "" })
 const fetchFiles = async () => {
   loading.value = true
   try {
-    // Future: const data = await apiFetch("/files")
-    await new Promise(r => setTimeout(r, 350))
-    files.value = mockFiles
+    const data = await apiFetch<SystemFile[]>("/api/v1/files")
+    files.value = data
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการโหลดไฟล์: " + error.message)
   } finally {
     loading.value = false
   }
@@ -90,10 +85,11 @@ const columns = [
 const confirmDelete = async () => {
   deleteDialog.value.loading = true
   try {
-    // Future: await apiFetch(`/files/${deleteDialog.value.fileId}`, { method: "DELETE" })
-    await new Promise(r => setTimeout(r, 400))
+    await apiFetch(`/api/v1/files/${deleteDialog.value.fileId}`, { method: "DELETE" })
     files.value = files.value.filter(f => f.fileId !== deleteDialog.value.fileId)
     deleteDialog.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการลบไฟล์: " + error.message)
   } finally {
     deleteDialog.value.loading = false
   }
