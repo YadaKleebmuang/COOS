@@ -6,6 +6,8 @@ definePageMeta({
   middleware: ["auth", "admin"]
 })
 
+const { apiFetch } = useApi()
+
 // ── Types ──────────────────────────────────────────────────────
 interface SystemSettings {
   maxUploadSizeMb: number
@@ -63,14 +65,68 @@ const adminAccount = reactive<AdminAccount>({
   confirmPassword: ""
 })
 
+const fetchSettings = async () => {
+  try {
+    const data = await apiFetch<any>("/api/v1/settings")
+    if (data) {
+      // update systemSettings
+      if (data.maxUploadSizeMb) systemSettings.maxUploadSizeMb = Number(data.maxUploadSizeMb)
+      if (data.allowedImageTypes) systemSettings.allowedImageTypes = data.allowedImageTypes
+      if (data.orderAutoExpireDays) systemSettings.orderAutoExpireDays = Number(data.orderAutoExpireDays)
+      if (data.depositPercentage) systemSettings.depositPercentage = Number(data.depositPercentage)
+      if (data.maintenanceMode) systemSettings.maintenanceMode = data.maintenanceMode === 'true' || data.maintenanceMode === true
+
+      // update studioInfo
+      if (data.studioName) studioInfo.studioName = data.studioName
+      if (data.studioEmail) studioInfo.studioEmail = data.studioEmail
+      if (data.studioPhone) studioInfo.studioPhone = data.studioPhone
+      if (data.studioAddress) studioInfo.studioAddress = data.studioAddress
+      if (data.studioLineId) studioInfo.studioLineId = data.studioLineId
+      if (data.studioFacebook) studioInfo.studioFacebook = data.studioFacebook
+      if (data.studioInstagram) studioInfo.studioInstagram = data.studioInstagram
+    }
+  } catch (err: any) {
+    console.error("Failed to load settings:", err)
+  }
+}
+
+onMounted(() => {
+  fetchSettings()
+})
+
 // ── Save handlers (API-ready) ──────────────────────────────────
 const saveSection = async (section: string) => {
   saving.value = section
   try {
-    // Future: await apiFetch(`/settings/${section}`, { method: "PATCH", body: JSON.stringify({ ... }) })
-    await new Promise(r => setTimeout(r, 700))
+    let payload = {}
+    if (section === 'system') {
+      payload = {
+        maxUploadSizeMb: String(systemSettings.maxUploadSizeMb),
+        allowedImageTypes: systemSettings.allowedImageTypes,
+        orderAutoExpireDays: String(systemSettings.orderAutoExpireDays),
+        depositPercentage: String(systemSettings.depositPercentage),
+        maintenanceMode: String(systemSettings.maintenanceMode)
+      }
+    } else if (section === 'studio') {
+      payload = { ...studioInfo }
+    } else {
+      // admin account - would hit a different endpoint like /auth/change-password
+      await new Promise(r => setTimeout(r, 700))
+      savedSection.value = section
+      setTimeout(() => { savedSection.value = null }, 2500)
+      saving.value = null
+      return
+    }
+
+    await apiFetch("/api/v1/settings", {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    })
+    
     savedSection.value = section
     setTimeout(() => { savedSection.value = null }, 2500)
+  } catch (err: any) {
+    alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message)
   } finally {
     saving.value = null
   }
