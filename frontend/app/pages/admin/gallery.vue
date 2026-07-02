@@ -18,15 +18,7 @@ interface GalleryImage {
   createdAt: string
 }
 
-// ── Mock data ──────────────────────────────────────────────────
-const mockImages: GalleryImage[] = [
-  { imageId: 1, orderId: 1001, title: "Portrait Realistic Style", category: "Realistic", hashtags: ["portrait", "realistic"], thumbnailUrl: "", isPublic: true, createdAt: "2025-06-20" },
-  { imageId: 2, orderId: 1002, title: "Anime Character Art", category: "Anime", hashtags: ["anime", "character"], thumbnailUrl: "", isPublic: true, createdAt: "2025-06-19" },
-  { imageId: 3, orderId: 1003, title: "Watercolor Landscape", category: "Watercolor", hashtags: ["watercolor", "nature"], thumbnailUrl: "", isPublic: false, createdAt: "2025-06-18" },
-  { imageId: 4, orderId: 1004, title: "Fantasy Portrait", category: "Realistic", hashtags: ["fantasy", "portrait"], thumbnailUrl: "", isPublic: true, createdAt: "2025-06-17" },
-  { imageId: 5, orderId: 1005, title: "Chibi Character", category: "Anime", hashtags: ["chibi", "cute"], thumbnailUrl: "", isPublic: true, createdAt: "2025-06-16" },
-  { imageId: 6, orderId: 1006, title: "Abstract Art", category: "Abstract", hashtags: ["abstract", "art"], thumbnailUrl: "", isPublic: false, createdAt: "2025-06-15" },
-]
+
 
 // ── State ──────────────────────────────────────────────────────
 const images = ref<GalleryImage[]>([])
@@ -41,9 +33,18 @@ const deleteDialog = ref({ open: false, loading: false, imageId: 0 })
 const fetchGallery = async () => {
   loading.value = true
   try {
-    // Future: const data = await apiFetch("/gallery")
-    await new Promise(r => setTimeout(r, 400))
-    images.value = mockImages
+    const { apiFetch } = useApi()
+    const data = await apiFetch<any[]>("/gallery-images")
+    images.value = data.map(img => ({
+      imageId: img.imageId,
+      orderId: 0,
+      title: img.imageTitle || "ไม่มีชื่อภาพ",
+      category: img.workTypeName || "ไม่มีหมวดหมู่",
+      hashtags: img.imageTags ? img.imageTags.split(",").map((t: string) => t.trim()) : [],
+      thumbnailUrl: img.imageUrl,
+      isPublic: img.imageIsActive === 1,
+      createdAt: img.imageCreatedAt
+    }))
   } finally {
     loading.value = false
   }
@@ -73,18 +74,25 @@ const filteredImages = computed(() => {
 const confirmDelete = async () => {
   deleteDialog.value.loading = true
   try {
-    // Future: await apiFetch(`/gallery/${deleteDialog.value.imageId}`, { method: "DELETE" })
-    await new Promise(r => setTimeout(r, 400))
+    const { apiFetch } = useApi()
+    await apiFetch(`/gallery-images/${deleteDialog.value.imageId}`, { method: "DELETE" })
     images.value = images.value.filter(i => i.imageId !== deleteDialog.value.imageId)
     deleteDialog.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการลบรูปภาพ: " + error.message)
   } finally {
     deleteDialog.value.loading = false
   }
 }
 
 const toggleVisibility = async (image: GalleryImage) => {
-  // Future: await apiFetch(`/gallery/${image.imageId}`, { method: "PATCH", body: JSON.stringify({ isPublic: !image.isPublic }) })
-  image.isPublic = !image.isPublic
+  try {
+    const { apiFetch } = useApi()
+    await apiFetch(`/gallery-images/${image.imageId}/toggle`, { method: "PATCH" })
+    image.isPublic = !image.isPublic
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาด: " + error.message)
+  }
 }
 
 const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, { label: "คลังรูปภาพ" }]
@@ -144,7 +152,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       >
         <!-- Thumbnail placeholder -->
         <div class="aspect-square bg-gray-50 flex items-center justify-center border-b border-gray-100 relative overflow-hidden">
-          <svg class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <img v-if="img.thumbnailUrl" :src="img.thumbnailUrl" class="w-full h-full object-cover" />
+          <svg v-else class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
           <!-- Visibility badge -->

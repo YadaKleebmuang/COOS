@@ -20,6 +20,7 @@ const roleFilter = ref("all")
 // Modal
 const modal = ref({ open: false, mode: "add" as "add" | "edit", loading: false })
 const form = ref({ userId: 0, userFirstName: "", userLastName: "", userEmail: "", userPhone: "", userRole: "customer" as "admin" | "editor" | "customer", userPassword: "" })
+const phoneError = ref("")
 
 // Delete confirm
 const deleteDialog = ref({ open: false, loading: false, userId: 0, name: "" })
@@ -73,11 +74,13 @@ const columns = [
 // ── Modal ──────────────────────────────────────────────────────
 const openAdd = () => {
   form.value = { userId: 0, userFirstName: "", userLastName: "", userEmail: "", userPhone: "", userRole: "customer", userPassword: "" }
+  phoneError.value = ""
   modal.value = { open: true, mode: "add", loading: false }
 }
 
 const openEdit = (user: User) => {
   form.value = { userId: user.userId, userFirstName: user.userFirstName, userLastName: user.userLastName, userEmail: user.userEmail, userPhone: user.userPhone ?? "", userRole: user.userRole, userPassword: "" }
+  phoneError.value = ""
   modal.value = { open: true, mode: "edit", loading: false }
 }
 
@@ -86,6 +89,14 @@ const closeModal = () => { modal.value.open = false }
 // Connect to POST /users or PATCH /users/:id
 // Password is sent as plaintext — backend uses bcrypt to hash it
 const saveUser = async () => {
+  // Validate phone
+  const phoneRegex = /^[0-9]{10}$/
+  if (!form.value.userPhone || !phoneRegex.test(form.value.userPhone)) {
+    phoneError.value = "กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก"
+    return
+  }
+  phoneError.value = ""
+
   modal.value.loading = true
   try {
     if (modal.value.mode === "edit") {
@@ -263,7 +274,8 @@ const breadcrumb = [
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">เบอร์โทรศัพท์</label>
-                <input v-model="form.userPhone" type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                <input v-model="form.userPhone" required type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" @input="phoneError = ''" maxlength="10" />
+                <p v-if="phoneError" class="text-xs text-red-500 mt-1">{{ phoneError }}</p>
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">บทบาท (Role)</label>
