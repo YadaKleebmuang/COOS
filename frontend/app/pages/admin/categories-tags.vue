@@ -32,21 +32,21 @@ const fetchData = async () => {
   try {
     const [cats, tgs] = await Promise.all([
       apiFetch<any[]>("/work-types").catch(() => []),
-      apiFetch<string[]>("/gallery-images/tags").catch(() => [])
+      apiFetch<any[]>("/tags").catch(() => [])
     ])
     
     categories.value = cats.map(c => ({
-      categoryId: c.typeId,
-      categoryName: c.typeName,
+      categoryId: c.workTypeId || c.typeId || c.categoryId,
+      categoryName: c.workTypeName || c.typeName || c.categoryName,
       imageCount: 0,
-      createdAt: c.createdAt || new Date().toISOString()
+      createdAt: c.workTypeCreatedAt || c.createdAt || new Date().toISOString()
     }))
 
-    hashtags.value = tgs.map((t, idx) => ({
-      tagId: idx + 1,
-      tagName: t,
+    hashtags.value = tgs.map(t => ({
+      tagId: t.tagId,
+      tagName: t.tagName,
       imageCount: 0,
-      createdAt: new Date().toISOString()
+      createdAt: t.createdAt || new Date().toISOString()
     }))
   } catch (error: any) {
     alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
@@ -65,7 +65,7 @@ const saveCat = async () => {
       await apiFetch(`/work-types/${catModal.value.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ typeName: catModal.value.name, typeDescription: "" })
+        body: JSON.stringify({ workTypeName: catModal.value.name, typeName: catModal.value.name })
       })
       const idx = categories.value.findIndex(c => c.categoryId === catModal.value.id)
       if (idx !== -1) categories.value[idx].categoryName = catModal.value.name
@@ -73,7 +73,7 @@ const saveCat = async () => {
       await apiFetch("/work-types", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ typeName: catModal.value.name, typeDescription: "" })
+        body: JSON.stringify({ workTypeName: catModal.value.name, typeName: catModal.value.name })
       })
       await fetchData()
     }
@@ -100,13 +100,46 @@ const confirmCatDelete = async () => {
 
 // ── Tag CRUD ───────────────────────────────────────────────────
 const saveTag = async () => {
-  alert("ไม่สามารถเพิ่มหรือแก้ไขแฮชแท็กได้โดยตรง แฮชแท็กจะถูกสร้างอัตโนมัติเมื่อมีการเพิ่มแฮชแท็กใหม่ในรูปภาพ")
-  tagModal.value.open = false
+  tagModal.value.loading = true
+  try {
+    const formattedName = tagModal.value.name.trim().replace(/^#/, '')
+    if (!formattedName) throw new Error("กรุณากรอกชื่อแฮชแท็กให้ถูกต้อง")
+
+    if (tagModal.value.mode === "edit") {
+      await apiFetch(`/tags/${tagModal.value.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagName: formattedName })
+      })
+      const idx = hashtags.value.findIndex(t => t.tagId === tagModal.value.id)
+      if (idx !== -1) hashtags.value[idx].tagName = formattedName
+    } else {
+      await apiFetch("/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagName: formattedName })
+      })
+      await fetchData()
+    }
+    tagModal.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาด: " + error.message)
+  } finally {
+    tagModal.value.loading = false
+  }
 }
 
 const confirmTagDelete = async () => {
-  alert("ไม่สามารถลบแฮชแท็กได้โดยตรง แฮชแท็กจะหายไปเองเมื่อไม่มีรูปภาพใดใช้แฮชแท็กนี้")
-  tagDelete.value.open = false
+  tagDelete.value.loading = true
+  try {
+    await apiFetch(`/tags/${tagDelete.value.id}`, { method: "DELETE" })
+    hashtags.value = hashtags.value.filter(t => t.tagId !== tagDelete.value.id)
+    tagDelete.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการลบ: " + error.message)
+  } finally {
+    tagDelete.value.loading = false
+  }
 }
 
 const catColumns = [
@@ -180,8 +213,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           </template>
           <template #cell-action="{ row }">
             <div class="flex items-center justify-center gap-1.5">
-              <AdminActionButton variant="secondary" size="sm" @click="saveTag">แก้ไข</AdminActionButton>
-              <AdminActionButton variant="danger" size="sm" @click="confirmTagDelete">ลบ</AdminActionButton>
+              <AdminActionButton variant="secondary" size="sm" @click="tagModal = { open: true, mode: 'edit', loading: false, id: row.tagId, name: row.tagName }">แก้ไข</AdminActionButton>
+              <AdminActionButton variant="danger" size="sm" @click="tagDelete = { open: true, loading: false, id: row.tagId, name: row.tagName }">ลบ</AdminActionButton>
             </div>
           </template>
         </AdminDataTable>
