@@ -55,6 +55,10 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    if (!userPhone || !/^[0-9]{10}$/.test(userPhone)) {
+      return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+    }
+
     // Hash Password before saving
     const hashedPassword = await bcrypt.hash(userPassword, 10);
 
@@ -88,6 +92,11 @@ exports.updateUser = async (req, res) => {
 
     // ถ้ามีการส่ง password มาให้ทำการ hash ก่อนบันทึก
     const updateData = { ...req.body };
+    
+    if (updateData.userPhone && !/^[0-9]{10}$/.test(updateData.userPhone)) {
+      return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+    }
+
     if (updateData.userPassword) {
       updateData.userPassword = await bcrypt.hash(updateData.userPassword, 10);
     }
