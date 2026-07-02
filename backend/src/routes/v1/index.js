@@ -11,6 +11,7 @@ const paymentRoutes = require("./payments.route");
 const reportRoutes = require("./reports.route");
 const settingRoutes = require("./settings.route");
 const fileRoutes = require("./files.route");
+const tagRoutes = require("./tag.route");
 const authMiddleware = require("../../middlewares/auth.middleware");
 
 const router = express.Router();
@@ -34,5 +35,6 @@ router.use("/payments", paymentRoutes);
 router.use("/reports", reportRoutes);
 router.use("/settings", settingRoutes);
 router.use("/files", fileRoutes);
+router.use("/tags", tagRoutes);
 
 module.exports = router;
