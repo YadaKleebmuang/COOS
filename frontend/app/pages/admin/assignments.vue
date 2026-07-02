@@ -13,7 +13,8 @@ const { apiFetch } = useApi()
 interface WaitingOrder {
   orderId: number
   customerId: number
-  customerName: string
+  customerFirstName?: string
+  customerLastName?: string
   workTypeName: string
   packageName: string
   orderTotalPrice: number
@@ -30,19 +31,7 @@ interface EditorLoad {
   email: string
 }
 
-// ── Mock data ──────────────────────────────────────────────────
-const mockOrders: WaitingOrder[] = [
-  { orderId: 1023, customerId: 12, customerName: "นิรมล วงษ์ดี", workTypeName: "Realistic", packageName: "Professional", orderTotalPrice: 5000, orderRequiredDate: "2025-07-10", orderIsUrgent: 0, orderCreatedAt: "2025-06-27T14:30:00Z" },
-  { orderId: 1019, customerId: 9, customerName: "กมลวรรณ สวย", workTypeName: "Anime", packageName: "Basic", orderTotalPrice: 1800, orderRequiredDate: "2025-07-05", orderIsUrgent: 1, orderCreatedAt: "2025-06-24T10:00:00Z" },
-  { orderId: 1017, customerId: 7, customerName: "เจษฎา ดีมาก", workTypeName: "Watercolor", packageName: "Standard", orderTotalPrice: 3200, orderRequiredDate: "2025-07-08", orderIsUrgent: 0, orderCreatedAt: "2025-06-23T09:00:00Z" },
-]
 
-const mockEditors: EditorLoad[] = [
-  { userId: 1, name: "Alex Watcharaporn", initials: "AW", activeJobs: 8, email: "alex@coos.studio" },
-  { userId: 2, name: "Sarah Jinda", initials: "SJ", activeJobs: 5, email: "sarah@coos.studio" },
-  { userId: 3, name: "Mark Lapanon", initials: "ML", activeJobs: 3, email: "mark@coos.studio" },
-  { userId: 4, name: "Chris Patchara", initials: "CP", activeJobs: 2, email: "chris@coos.studio" },
-]
 
 // ── State ──────────────────────────────────────────────────────
 const waitingOrders = ref<WaitingOrder[]>([])
@@ -57,14 +46,21 @@ const assignModal = ref({ open: false, loading: false, order: null as WaitingOrd
 const fetchData = async () => {
   loading.value = true
   try {
-    // Future: parallel API calls
-    // const [orders, users] = await Promise.all([
-    //   apiFetch("/orders?status=waiting_assignment"),
-    //   apiFetch("/users?role=editor")
-    // ])
-    await new Promise(r => setTimeout(r, 400))
-    waitingOrders.value = mockOrders
-    editors.value = mockEditors
+    const [allOrders, users] = await Promise.all([
+      apiFetch<any[]>("/orders"),
+      apiFetch<any[]>("/users")
+    ])
+    
+    waitingOrders.value = allOrders.filter(o => o.orderStatus === 'waiting_assignment')
+    const inProgressOrders = allOrders.filter(o => o.orderStatus === 'in_progress')
+    
+    editors.value = users.filter(u => u.userRole === 'editor').map(u => ({
+      userId: u.userId,
+      name: `${u.userFirstName} ${u.userLastName}`,
+      initials: `${u.userFirstName?.[0] || ''}${u.userLastName?.[0] || ''}`.toUpperCase(),
+      activeJobs: inProgressOrders.filter(o => o.editorId === u.userId).length,
+      email: u.userEmail
+    }))
   } finally {
     loading.value = false
   }
@@ -82,7 +78,7 @@ const filteredOrders = computed(() => {
   let result = waitingOrders.value
   if (workTypeFilter.value !== "all") result = result.filter(o => o.workTypeName === workTypeFilter.value)
   const q = searchQuery.value.toLowerCase().trim()
-  if (q) result = result.filter(o => String(o.orderId).includes(q) || o.customerName.toLowerCase().includes(q) || o.packageName.toLowerCase().includes(q))
+  if (q) result = result.filter(o => String(o.orderId).includes(q) || (o.customerFirstName + ' ' + o.customerLastName).toLowerCase().includes(q) || o.packageName.toLowerCase().includes(q))
   return result
 })
 
@@ -107,9 +103,12 @@ const handleAssign = async () => {
   if (!assignModal.value.selectedEditorId) return
   assignModal.value.loading = true
   try {
-    // Future: await apiFetch(`/orders/${assignModal.value.order!.orderId}/assign`, { method: "PATCH", ... })
-    await new Promise(r => setTimeout(r, 600))
-    waitingOrders.value = waitingOrders.value.filter(o => o.orderId !== assignModal.value.order!.orderId)
+    await apiFetch(`/orders/${assignModal.value.order!.orderId}/assign`, { 
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ editorId: assignModal.value.selectedEditorId })
+    })
+    await fetchData()
     assignModal.value.open = false
   } finally {
     assignModal.value.loading = false
@@ -155,8 +154,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           <template #cell-orderId="{ value }">
             <span class="font-mono text-xs font-bold text-gray-900">#{{ value }}</span>
           </template>
-          <template #cell-customerName="{ value }">
-            <span class="text-sm text-gray-700">{{ value }}</span>
+          <template #cell-customerName="{ row }">
+            <span class="text-sm text-gray-700">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
           </template>
           <template #cell-workTypeName="{ value }">
             <span class="text-xs text-gray-600">{{ value }}</span>
@@ -210,7 +209,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           <div class="absolute inset-0 bg-black/40" @click="assignModal.open = false" />
           <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md p-6">
             <h3 class="text-sm font-bold text-gray-900 mb-1">มอบหมายงาน #{{ assignModal.order?.orderId }}</h3>
-            <p class="text-xs text-gray-400 mb-5">{{ assignModal.order?.customerName }} — {{ assignModal.order?.packageName }}</p>
+            <p class="text-xs text-gray-400 mb-5">{{ assignModal.order?.customerFirstName }} {{ assignModal.order?.customerLastName }} — {{ assignModal.order?.packageName }}</p>
             <div class="space-y-3">
               <label class="block text-xs font-medium text-gray-500">เลือก Editor</label>
               <select v-model="assignModal.selectedEditorId" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400">

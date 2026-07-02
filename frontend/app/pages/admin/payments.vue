@@ -14,7 +14,8 @@ const { apiFetch } = useApi()
 interface PaymentRow {
   paymentId: number
   orderId: number
-  customerName: string
+  customerFirstName?: string
+  customerLastName?: string
   paymentType: "deposit" | "final"
   paymentAmount: number
   paymentSlipUrl: string
@@ -22,13 +23,6 @@ interface PaymentRow {
   paymentCreatedAt: string
 }
 
-const mockPayments: PaymentRow[] = [
-  { paymentId: 1, orderId: 1024, customerName: "สมชาย ใจดี", paymentType: "deposit", paymentAmount: 1500, paymentSlipUrl: "#", paymentStatus: "pending", paymentCreatedAt: "2025-06-28T10:00:00Z" },
-  { paymentId: 2, orderId: 1023, customerName: "นิรมล วงษ์ดี", paymentType: "deposit", paymentAmount: 2500, paymentSlipUrl: "#", paymentStatus: "pending", paymentCreatedAt: "2025-06-27T14:30:00Z" },
-  { paymentId: 3, orderId: 1022, customerName: "ประทีป มั่นคง", paymentType: "final", paymentAmount: 3500, paymentSlipUrl: "#", paymentStatus: "approved", paymentCreatedAt: "2025-06-26T09:00:00Z" },
-  { paymentId: 4, orderId: 1021, customerName: "วิมล สวัสดี", paymentType: "final", paymentAmount: 1200, paymentSlipUrl: "#", paymentStatus: "rejected", paymentCreatedAt: "2025-06-25T15:00:00Z" },
-  { paymentId: 5, orderId: 1020, customerName: "รัตนา กิจเจริญ", paymentType: "deposit", paymentAmount: 4000, paymentSlipUrl: "#", paymentStatus: "pending", paymentCreatedAt: "2025-06-24T11:00:00Z" },
-]
 
 // ── State ──────────────────────────────────────────────────────
 const payments = ref<PaymentRow[]>([])
@@ -42,9 +36,10 @@ const confirmDialog = ref({ open: false, loading: false, paymentId: 0, orderId: 
 const fetchPayments = async () => {
   loading.value = true
   try {
-    // Future: const data = await apiFetch<PaymentRow[]>("/payments")
-    await new Promise(r => setTimeout(r, 400))
-    payments.value = mockPayments
+    const data = await apiFetch<PaymentRow[]>("/payments")
+    payments.value = data
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
   } finally {
     loading.value = false
   }
@@ -69,7 +64,7 @@ const filteredPayments = computed(() => {
   else if (activeTab.value === "rejected") result = result.filter(p => p.paymentStatus === "rejected")
 
   const q = searchQuery.value.toLowerCase().trim()
-  if (q) result = result.filter(p => String(p.orderId).includes(q) || p.customerName.toLowerCase().includes(q))
+  if (q) result = result.filter(p => String(p.orderId).includes(q) || (p.customerFirstName + ' ' + p.customerLastName).toLowerCase().includes(q))
   return result
 })
 
@@ -92,11 +87,16 @@ const openConfirm = (p: PaymentRow, action: "approved" | "rejected") => {
 const confirmVerify = async () => {
   confirmDialog.value.loading = true
   try {
-    // Future: await apiFetch(`/orders/${confirmDialog.value.orderId}/payments/${confirmDialog.value.paymentId}`, { method: "PATCH", ... })
-    await new Promise(r => setTimeout(r, 600))
-    const idx = payments.value.findIndex(p => p.paymentId === confirmDialog.value.paymentId)
-    if (idx !== -1) payments.value[idx].paymentStatus = confirmDialog.value.action
+    await apiFetch(`/payments/${confirmDialog.value.paymentId}/${confirmDialog.value.action}`, {
+      method: "PATCH"
+    })
+    
+    // Refresh data after success
+    await fetchPayments()
+    
     confirmDialog.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาด: " + error.message)
   } finally {
     confirmDialog.value.loading = false
   }
@@ -144,8 +144,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         <template #cell-orderId="{ value }">
           <span class="font-mono text-xs font-bold text-gray-900">#{{ value }}</span>
         </template>
-        <template #cell-customerName="{ value }">
-          <span class="text-sm text-gray-700">{{ value }}</span>
+        <template #cell-customerName="{ row }">
+          <span class="text-sm text-gray-700">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
         </template>
         <template #cell-paymentType="{ value }">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="value === 'deposit' ? 'bg-gray-100 text-gray-600 border-gray-200' : 'bg-gray-800 text-white border-gray-800'">
