@@ -202,3 +202,9 @@ INSERT IGNORE INTO `systemSettings` (`settingKey`, `settingValue`) VALUES
 ('studioLineId', '@coosstudio'),
 ('studioFacebook', 'facebook.com/coosstudio'),
 ('studioInstagram', '@coos.studio');
+-- 11. Tags Table
+CREATE TABLE IF NOT EXISTS `tags` (
+  `tagId` INT AUTO_INCREMENT PRIMARY KEY,
+  `tagName` VARCHAR(100) NOT NULL UNIQUE,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
