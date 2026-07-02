@@ -39,7 +39,7 @@ onMounted(() => fetchData())
 // ────────────────────────────────────────
 // Stats
 // ────────────────────────────────────────
-const hasRealData = computed(() => users.value.length > 0 || orders.value.length > 0)
+
 
 const stats = computed(() => {
   const o = orders.value
@@ -55,50 +55,35 @@ const stats = computed(() => {
   }
 })
 
-// Mock fallback data for when DB is empty
-const displayStats = computed(() => {
-  if (hasRealData.value) return stats.value
-  return {
-    total: 42,
-    waitingDeposit: 8,
-    waitingAssignment: 5,
-    inProgress: 12,
-    completed: 15,
-    cancelled: 2,
-    totalCustomers: 38,
-    totalEditors: 6
-  }
-})
-
 const statCards = computed(() => [
   {
     label: "คำสั่งงานทั้งหมด",
-    value: displayStats.value.total,
+    value: stats.value.total,
     icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
   },
   {
     label: "รอชำระเงินมัดจำ",
-    value: displayStats.value.waitingDeposit,
+    value: stats.value.waitingDeposit,
     icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
   },
   {
     label: "รอมอบหมายงาน",
-    value: displayStats.value.waitingAssignment,
+    value: stats.value.waitingAssignment,
     icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
   },
   {
     label: "กำลังดำเนินการ",
-    value: displayStats.value.inProgress,
+    value: stats.value.inProgress,
     icon: "M13 10V3L4 14h7v7l9-11h-7z"
   },
   {
     label: "เสร็จสมบูรณ์",
-    value: displayStats.value.completed,
+    value: stats.value.completed,
     icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
   },
   {
     label: "ยกเลิกออเดอร์",
-    value: displayStats.value.cancelled,
+    value: stats.value.cancelled,
     icon: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
   }
 ])
@@ -119,36 +104,26 @@ const orderTableColumns = [
 ]
 
 const filterOptions = computed(() => [
-  { key: "all", label: "ทั้งหมด", count: orders.value.length || displayStats.value.total },
-  { key: "waiting_deposit", label: "รอมัดจำ", count: displayStats.value.waitingDeposit },
-  { key: "waiting_assignment", label: "รอมอบหมาย", count: displayStats.value.waitingAssignment },
-  { key: "in_progress", label: "กำลังทำงาน", count: displayStats.value.inProgress },
-  { key: "completed", label: "เสร็จสมบูรณ์", count: displayStats.value.completed },
-  { key: "cancelled", label: "ยกเลิก", count: displayStats.value.cancelled }
+  { key: "all", label: "ทั้งหมด", count: stats.value.total },
+  { key: "waiting_deposit", label: "รอมัดจำ", count: stats.value.waitingDeposit },
+  { key: "waiting_assignment", label: "รอมอบหมาย", count: stats.value.waitingAssignment },
+  { key: "in_progress", label: "กำลังทำงาน", count: stats.value.inProgress },
+  { key: "completed", label: "เสร็จสมบูรณ์", count: stats.value.completed },
+  { key: "cancelled", label: "ยกเลิก", count: stats.value.cancelled }
 ])
 
-const mockOrders = [
-  { orderId: 1024, customer: "สมชาย ใจดี", packageName: "Professional", orderStatus: "in_progress", orderCreatedAt: "2025-06-28T10:00:00Z", editor: "Alex W." },
-  { orderId: 1023, customer: "นิรมล วงษ์ดี", packageName: "Enterprise", orderStatus: "waiting_assignment", orderCreatedAt: "2025-06-27T14:30:00Z", editor: "—" },
-  { orderId: 1022, customer: "ประทีป มั่นคง", packageName: "Basic", orderStatus: "waiting_deposit", orderCreatedAt: "2025-06-27T09:15:00Z", editor: "—" },
-  { orderId: 1021, customer: "วิมล สวัสดี", packageName: "Professional", orderStatus: "completed", orderCreatedAt: "2025-06-26T16:00:00Z", editor: "Sarah J." },
-  { orderId: 1020, customer: "รัตนา กิจเจริญ", packageName: "Basic", orderStatus: "cancelled", orderCreatedAt: "2025-06-25T08:45:00Z", editor: "—" }
-]
-
 const tableRows = computed(() => {
-  const source = hasRealData.value
-    ? [...orders.value]
-        .sort((a, b) => b.orderId - a.orderId)
-        .slice(0, 10)
-        .map(o => ({
-          orderId: o.orderId,
-          customer: `ลูกค้า #${o.customerId}`,
-          packageName: o.packageName,
-          orderStatus: o.orderStatus,
-          orderCreatedAt: o.orderCreatedAt,
-          editor: o.editorId ? `Editor #${o.editorId}` : "—"
-        }))
-    : mockOrders
+  const source = [...orders.value]
+    .sort((a, b) => b.orderId - a.orderId)
+    .slice(0, 10)
+    .map((o: any) => ({
+      orderId: o.orderId,
+      customer: (o.customerFirstName && o.customerLastName) ? `${o.customerFirstName} ${o.customerLastName}` : `ลูกค้า #${o.customerId}`,
+      packageName: o.packageName,
+      orderStatus: o.orderStatus,
+      orderCreatedAt: o.orderCreatedAt,
+      editor: o.editorId ? (o.editorFirstName ? `${o.editorFirstName} ${o.editorLastName?.charAt(0) || ''}.` : `Editor #${o.editorId}`) : "—"
+    }))
 
   if (statusFilter.value === "all") return source
   if (statusFilter.value === "completed") return source.filter(r => r.orderStatus === "completed" || r.orderStatus === "delivered")
@@ -167,19 +142,11 @@ const formatDate = (dateStr: string) => {
 // ────────────────────────────────────────
 const editorsWorkload = computed(() => {
   const editors = users.value.filter(u => u.userRole === "editor")
-  if (hasRealData.value && editors.length > 0) {
-    return editors.map(e => ({
-      initials: ((e.userFirstName?.[0] ?? "") + (e.userLastName?.[0] ?? "")).toUpperCase() || "ED",
-      name: `${e.userFirstName} ${e.userLastName}`,
-      activeJobs: orders.value.filter(o => o.editorId === e.userId && o.orderStatus === "in_progress").length
-    })).sort((a, b) => b.activeJobs - a.activeJobs).slice(0, 5)
-  }
-  return [
-    { initials: "AW", name: "Alex W.", activeJobs: 8 },
-    { initials: "SJ", name: "Sarah J.", activeJobs: 5 },
-    { initials: "ML", name: "Mark L.", activeJobs: 3 },
-    { initials: "CP", name: "Chris P.", activeJobs: 2 }
-  ]
+  return editors.map(e => ({
+    initials: ((e.userFirstName?.[0] ?? "") + (e.userLastName?.[0] ?? "")).toUpperCase() || "ED",
+    name: `${e.userFirstName} ${e.userLastName}`,
+    activeJobs: orders.value.filter(o => o.editorId === e.userId && o.orderStatus === "in_progress").length
+  })).sort((a, b) => b.activeJobs - a.activeJobs).slice(0, 5)
 })
 
 const breadcrumb = [

@@ -31,8 +31,8 @@ const fetchData = async () => {
   loading.value = true
   try {
     const [cats, tgs] = await Promise.all([
-      apiFetch<any[]>("/api/v1/work-types").catch(() => []),
-      apiFetch<string[]>("/api/v1/gallery-images/tags").catch(() => [])
+      apiFetch<any[]>("/work-types").catch(() => []),
+      apiFetch<string[]>("/gallery-images/tags").catch(() => [])
     ])
     
     categories.value = cats.map(c => ({
@@ -61,15 +61,25 @@ onMounted(() => fetchData())
 const saveCat = async () => {
   catModal.value.loading = true
   try {
-    // Future: POST/PATCH /categories
-    await new Promise(r => setTimeout(r, 400))
     if (catModal.value.mode === "edit") {
+      await apiFetch(`/work-types/${catModal.value.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ typeName: catModal.value.name, typeDescription: "" })
+      })
       const idx = categories.value.findIndex(c => c.categoryId === catModal.value.id)
       if (idx !== -1) categories.value[idx].categoryName = catModal.value.name
     } else {
-      categories.value.push({ categoryId: Date.now(), categoryName: catModal.value.name, imageCount: 0, createdAt: new Date().toISOString().slice(0, 10) })
+      await apiFetch("/work-types", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ typeName: catModal.value.name, typeDescription: "" })
+      })
+      await fetchData()
     }
     catModal.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาด: " + error.message)
   } finally {
     catModal.value.loading = false
   }
@@ -78,9 +88,11 @@ const saveCat = async () => {
 const confirmCatDelete = async () => {
   catDelete.value.loading = true
   try {
-    await new Promise(r => setTimeout(r, 400))
+    await apiFetch(`/work-types/${catDelete.value.id}`, { method: "DELETE" })
     categories.value = categories.value.filter(c => c.categoryId !== catDelete.value.id)
     catDelete.value.open = false
+  } catch (error: any) {
+    alert("เกิดข้อผิดพลาดในการลบ: " + error.message)
   } finally {
     catDelete.value.loading = false
   }
@@ -88,30 +100,13 @@ const confirmCatDelete = async () => {
 
 // ── Tag CRUD ───────────────────────────────────────────────────
 const saveTag = async () => {
-  tagModal.value.loading = true
-  try {
-    await new Promise(r => setTimeout(r, 400))
-    if (tagModal.value.mode === "edit") {
-      const idx = hashtags.value.findIndex(t => t.tagId === tagModal.value.id)
-      if (idx !== -1) hashtags.value[idx].tagName = tagModal.value.name
-    } else {
-      hashtags.value.push({ tagId: Date.now(), tagName: tagModal.value.name.replace(/^#/, ""), imageCount: 0, createdAt: new Date().toISOString().slice(0, 10) })
-    }
-    tagModal.value.open = false
-  } finally {
-    tagModal.value.loading = false
-  }
+  alert("ไม่สามารถเพิ่มหรือแก้ไขแฮชแท็กได้โดยตรง แฮชแท็กจะถูกสร้างอัตโนมัติเมื่อมีการเพิ่มแฮชแท็กใหม่ในรูปภาพ")
+  tagModal.value.open = false
 }
 
 const confirmTagDelete = async () => {
-  tagDelete.value.loading = true
-  try {
-    await new Promise(r => setTimeout(r, 400))
-    hashtags.value = hashtags.value.filter(t => t.tagId !== tagDelete.value.id)
-    tagDelete.value.open = false
-  } finally {
-    tagDelete.value.loading = false
-  }
+  alert("ไม่สามารถลบแฮชแท็กได้โดยตรง แฮชแท็กจะหายไปเองเมื่อไม่มีรูปภาพใดใช้แฮชแท็กนี้")
+  tagDelete.value.open = false
 }
 
 const catColumns = [
@@ -185,8 +180,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           </template>
           <template #cell-action="{ row }">
             <div class="flex items-center justify-center gap-1.5">
-              <AdminActionButton variant="secondary" size="sm" @click="tagModal = { open: true, mode: 'edit', loading: false, id: row.tagId, name: row.tagName }">แก้ไข</AdminActionButton>
-              <AdminActionButton variant="danger" size="sm" @click="tagDelete = { open: true, loading: false, id: row.tagId, name: row.tagName }">ลบ</AdminActionButton>
+              <AdminActionButton variant="secondary" size="sm" @click="saveTag">แก้ไข</AdminActionButton>
+              <AdminActionButton variant="danger" size="sm" @click="confirmTagDelete">ลบ</AdminActionButton>
             </div>
           </template>
         </AdminDataTable>
