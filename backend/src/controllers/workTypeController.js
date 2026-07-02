@@ -70,7 +70,7 @@ exports.remove = async (req, res) => {
       return res.status(404).json({ message: "ไม่พบประเภทงานนี้" });
     }
 
-    res.status(200).json({ message: "ลบประเภทงานสำเร็จ" });
+    res.status(200).json({ message: "ปิดการใช้งานประเภทงานสำเร็จ" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

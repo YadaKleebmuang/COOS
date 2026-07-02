@@ -51,7 +51,7 @@ exports.update = async (id, fields) => {
 
 exports.delete = async (id) => {
   const [result] = await pool.query(
-    "DELETE FROM workTypes WHERE workTypeId = ?",
+    "UPDATE workTypes SET workTypeIsActive = 0 WHERE workTypeId = ?",
     [id],
   );
   return [result];
