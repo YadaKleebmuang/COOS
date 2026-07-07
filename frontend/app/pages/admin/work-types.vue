@@ -33,7 +33,7 @@ const fetchWorkTypes = async () => {
   loading.value = true
   error.value = ""
   try {
-    workTypes.value = await orderService.getWorkTypes()
+    workTypes.value = await orderService.getWorkTypes(true)
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดประเภทงานได้"
   } finally {
@@ -115,7 +115,7 @@ const confirmDelete = async () => {
     deleteDialog.value.open = false
     fetchWorkTypes()
   } catch (err: any) {
-    alert(err?.message || "ลบไม่สำเร็จ")
+    alert(err?.message || "ดำเนินการไม่สำเร็จ")
   } finally {
     deleteDialog.value.loading = false
   }

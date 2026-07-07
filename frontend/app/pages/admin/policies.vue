@@ -34,7 +34,18 @@ const policies = ref<Policy[]>([])
 const loading = ref(true)
 const error = ref("")
 const saving = ref(false)
-const preview = ref(false)
+const preview = ref(true)
+
+const notification = ref<{ show: boolean, type: 'success' | 'error', message: string }>({ show: false, type: 'success', message: '' })
+
+const showNotification = (type: 'success' | 'error', message: string) => {
+  notification.value = { show: true, type, message }
+  if (type === 'success') {
+    setTimeout(() => {
+      notification.value.show = false
+    }, 3000)
+  }
+}
 
 // Per-tab edit form
 const form = reactive<Record<PolicyType, { policyId: number | null; policyTitle: string; policyContent: string; policyIsActive: 0 | 1 }>>({
@@ -89,6 +100,7 @@ const currentForm = computed(() => form[activeTab.value])
 // ── Save ───────────────────────────────────────────────────────
 const handleSave = async () => {
   saving.value = true
+  notification.value.show = false
   const f = currentForm.value
   const payload = {
     policyTitle: f.policyTitle,
@@ -111,9 +123,11 @@ const handleSave = async () => {
       })
       form[activeTab.value].policyId = res.policyId ?? null
     }
-    fetchPolicies()
+    await fetchPolicies()
+    showNotification("success", "บันทึกข้อมูลสำเร็จ")
+    preview.value = true
   } catch (err: any) {
-    alert(err?.message || "บันทึกไม่สำเร็จ")
+    showNotification("error", err?.message || "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง")
   } finally {
     saving.value = false
   }
@@ -176,7 +190,7 @@ const breadcrumb = [
           <button
             v-for="tab in tabs"
             :key="tab.key"
-            @click="activeTab = tab.key; preview = false"
+            @click="activeTab = tab.key; preview = true; notification.show = false"
             class="flex-shrink-0 px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px"
             :class="activeTab === tab.key
               ? 'border-gray-900 text-gray-900'
@@ -246,11 +260,19 @@ const breadcrumb = [
           </div>
 
           <!-- Save + Preview buttons -->
-          <div class="flex items-center justify-end gap-2 pt-2">
-            <p class="text-xs text-gray-400 mr-auto">
-              {{ currentTabPolicy ? `บันทึกล่าสุด: แก้ไขข้อมูล` : "นโยบายนี้ยังไม่เคยบันทึก" }}
-            </p>
-            <AdminActionButton variant="primary" size="md" :loading="saving" @click="handleSave">
+          <div class="flex items-center justify-between pt-2">
+            <div>
+              <p v-if="!notification.show" class="text-xs text-gray-400">
+                {{ currentTabPolicy ? `บันทึกล่าสุด: แก้ไขข้อมูล` : "นโยบายนี้ยังไม่เคยบันทึก" }}
+              </p>
+              <div v-else class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border" :class="notification.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'">
+                <svg v-if="notification.type === 'success'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span>{{ notification.message }}</span>
+              </div>
+            </div>
+            
+            <AdminActionButton variant="primary" size="md" @click="handleSave">
               บันทึกนโยบาย
             </AdminActionButton>
           </div>
