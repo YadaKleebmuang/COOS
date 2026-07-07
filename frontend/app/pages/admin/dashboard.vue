@@ -28,502 +28,318 @@ const fetchData = async () => {
     users.value = allUsers
     orders.value = allOrders
   } catch (err: any) {
-    error.value = err?.message || "ไม่สามารถโหลดข้อมูลสถิติผู้ดูแลระบบได้"
+    error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  fetchData()
-})
+onMounted(() => fetchData())
+
+// ────────────────────────────────────────
+// Stats
+// ────────────────────────────────────────
+
 
 const stats = computed(() => {
-  const totalUsers = users.value.length
-  const totalCustomers = users.value.filter(u => u.userRole === "customer").length
-  const totalEditors = users.value.filter(u => u.userRole === "editor").length
-
-  const totalOrders = orders.value.length
-  const totalRevenue = orders.value
-    .filter(o => o.orderStatus !== "cancelled")
-    .reduce((sum, o) => sum + Number(o.orderTotalPrice), 0)
-
-  const pendingDeposit = orders.value.filter(o => o.orderStatus === "waiting_deposit").length
-  const waitingToStart = orders.value.filter(o => o.orderStatus === "waiting_assignment" || o.orderStatus === "waiting_to_start").length
-  const inProgress = orders.value.filter(o => o.orderStatus === "in_progress").length
-  const waitingReview = orders.value.filter(o => o.orderStatus === "waiting_selection").length
-  const pendingPayment = orders.value.filter(o => o.orderStatus === "waiting_final_payment").length
-  const delivered = orders.value.filter(o => o.orderStatus === "delivered").length
-  const completed = orders.value.filter(o => o.orderStatus === "completed").length
-
+  const o = orders.value
   return {
-    totalUsers,
-    totalCustomers,
-    totalEditors,
-    totalOrders,
-    totalRevenue,
-    pendingDeposit,
-    waitingToStart,
-    inProgress,
-    waitingReview,
-    pendingPayment,
-    delivered,
-    completed
+    total: o.length,
+    waitingDeposit: o.filter(x => x.orderStatus === "waiting_deposit").length,
+    waitingAssignment: o.filter(x => x.orderStatus === "waiting_assignment").length,
+    inProgress: o.filter(x => x.orderStatus === "in_progress").length,
+    completed: o.filter(x => x.orderStatus === "completed" || x.orderStatus === "delivered").length,
+    cancelled: o.filter(x => x.orderStatus === "cancelled").length,
+    totalCustomers: users.value.filter(u => u.userRole === "customer").length,
+    totalEditors: users.value.filter(u => u.userRole === "editor").length
   }
 })
 
-// Check if database has loaded actual users/orders data to switch from fallback to real stats
-const hasRealData = computed(() => users.value.length > 0 || orders.value.length > 0)
-
-const displayStats = computed(() => {
-  if (hasRealData.value) {
-    return {
-      totalCustomers: stats.value.totalCustomers.toLocaleString(),
-      totalOrders: stats.value.totalOrders.toLocaleString(),
-      totalEditors: stats.value.totalEditors.toLocaleString(),
-      completedOrders: stats.value.completed.toLocaleString(),
-
-      pendingDeposit: stats.value.pendingDeposit,
-      waitingToStart: stats.value.waitingToStart,
-      inProgress: stats.value.inProgress,
-      waitingReview: stats.value.waitingReview,
-      pendingPayment: stats.value.pendingPayment,
-      delivered: stats.value.delivered,
-      completed: stats.value.completed
-    }
+const statCards = computed(() => [
+  {
+    label: "คำสั่งงานทั้งหมด",
+    value: stats.value.total,
+    icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+  },
+  {
+    label: "รอชำระเงินมัดจำ",
+    value: stats.value.waitingDeposit,
+    icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+  },
+  {
+    label: "รอมอบหมายงาน",
+    value: stats.value.waitingAssignment,
+    icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+  },
+  {
+    label: "กำลังดำเนินการ",
+    value: stats.value.inProgress,
+    icon: "M13 10V3L4 14h7v7l9-11h-7z"
+  },
+  {
+    label: "เสร็จสมบูรณ์",
+    value: stats.value.completed,
+    icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+  },
+  {
+    label: "ยกเลิกออเดอร์",
+    value: stats.value.cancelled,
+    icon: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
   }
+])
 
-  // Fallback mock data to match screenshot exactly
-  return {
-    totalCustomers: "1,240",
-    totalOrders: "3,582",
-    totalEditors: "24",
-    completedOrders: "3,150",
+// ────────────────────────────────────────
+// Recent Orders Table
+// ────────────────────────────────────────
+const statusFilter = ref("all")
 
-    pendingDeposit: 12,
-    waitingToStart: 8,
-    inProgress: 45,
-    waitingReview: 14,
-    pendingPayment: 6,
-    delivered: 92,
-    completed: 3150
-  }
+const orderTableColumns = [
+  { key: "orderId", label: "เลขที่คำสั่งงาน" },
+  { key: "customer", label: "ลูกค้า" },
+  { key: "packageName", label: "แพ็กเกจ" },
+  { key: "orderStatus", label: "สถานะ" },
+  { key: "orderCreatedAt", label: "วันที่สั่งงาน" },
+  { key: "editor", label: "ผู้รับผิดชอบ" },
+  { key: "action", label: "การจัดการ", align: "center" as const }
+]
+
+const filterOptions = computed(() => [
+  { key: "all", label: "ทั้งหมด", count: stats.value.total },
+  { key: "waiting_deposit", label: "รอมัดจำ", count: stats.value.waitingDeposit },
+  { key: "waiting_assignment", label: "รอมอบหมาย", count: stats.value.waitingAssignment },
+  { key: "in_progress", label: "กำลังทำงาน", count: stats.value.inProgress },
+  { key: "completed", label: "เสร็จสมบูรณ์", count: stats.value.completed },
+  { key: "cancelled", label: "ยกเลิก", count: stats.value.cancelled }
+])
+
+const tableRows = computed(() => {
+  const source = [...orders.value]
+    .sort((a, b) => b.orderId - a.orderId)
+    .slice(0, 10)
+    .map((o: any) => ({
+      orderId: o.orderId,
+      customer: (o.customerFirstName && o.customerLastName) ? `${o.customerFirstName} ${o.customerLastName}` : `ลูกค้า #${o.customerId}`,
+      packageName: o.packageName,
+      orderStatus: o.orderStatus,
+      orderCreatedAt: o.orderCreatedAt,
+      editor: o.editorId ? (o.editorFirstName ? `${o.editorFirstName} ${o.editorLastName?.charAt(0) || ''}.` : `Editor #${o.editorId}`) : "—"
+    }))
+
+  if (statusFilter.value === "all") return source
+  if (statusFilter.value === "completed") return source.filter(r => r.orderStatus === "completed" || r.orderStatus === "delivered")
+  return source.filter(r => r.orderStatus === statusFilter.value)
 })
 
-const getStatusProgress = (status: string) => {
-  switch (status) {
-    case "waiting_deposit": return 10
-    case "waiting_assignment": return 25
-    case "waiting_to_start": return 40
-    case "in_progress": return 60
-    case "waiting_selection": return 75
-    case "waiting_final_payment": return 90
-    case "delivered":
-    case "completed": return 100
-    default: return 0
-  }
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return "—"
+  return new Date(dateStr).toLocaleDateString("th-TH", {
+    day: "numeric", month: "short", year: "numeric"
+  })
 }
 
-const recentOrders = computed(() => {
-  if (hasRealData.value && orders.value.length > 0) {
-    const sorted = [...orders.value].sort((a, b) => b.orderId - a.orderId)
-    return sorted.slice(0, 4).map(o => {
-      const cust = users.value.find(u => u.userId === o.customerId)
-      const customerName = cust ? `${cust.userFirstName} ${cust.userLastName}` : `ลูกค้า รหัส #${o.customerId}`
-      return {
-        orderId: `#ORD-${o.orderId}`,
-        customerName,
-        packageName: o.packageName || "Professional",
-        status: o.orderStatus,
-        progress: getStatusProgress(o.orderStatus)
-      }
-    })
-  }
-
-  // Fallback to match screenshot exactly
-  return [
-    { orderId: "#ORD-2024-102", customerName: "Alpha Graphics", packageName: "Professional", status: "in_progress", progress: 60 },
-    { orderId: "#ORD-2024-099", customerName: "Beta Studio", packageName: "Enterprise", status: "waiting_selection", progress: 75 },
-    { orderId: "#ORD-2024-098", customerName: "Gamma Co", packageName: "Basic", status: "in_progress", progress: 60 },
-    { orderId: "#ORD-2024-095", customerName: "Delta Agency", packageName: "Professional", status: "waiting_to_start", progress: 40 }
-  ]
-})
-
+// ────────────────────────────────────────
+// Editor Workload
+// ────────────────────────────────────────
 const editorsWorkload = computed(() => {
   const editors = users.value.filter(u => u.userRole === "editor")
-  if (hasRealData.value && editors.length > 0) {
-    return editors.map(e => {
-      const activeJobs = orders.value.filter(o => o.editorId === e.userId && o.orderStatus === "in_progress").length
-      const initials = ((e.userFirstName ? e.userFirstName[0] : "") + (e.userLastName ? e.userLastName[0] : "")).toUpperCase() || "ED"
-      return {
-        name: `${e.userFirstName} ${e.userLastName}`,
-        initials,
-        activeJobs
-      }
-    }).sort((a, b) => b.activeJobs - a.activeJobs).slice(0, 4)
-  }
-
-  // Fallback to match screenshot exactly
-  return [
-    { initials: "SJ", name: "Sarah J.", activeJobs: 5 },
-    { initials: "ML", name: "Mark L.", activeJobs: 3 },
-    { initials: "AW", name: "Alex W.", activeJobs: 8 },
-    { initials: "CP", name: "Chris P.", activeJobs: 2 }
-  ]
+  return editors.map(e => ({
+    initials: ((e.userFirstName?.[0] ?? "") + (e.userLastName?.[0] ?? "")).toUpperCase() || "ED",
+    name: `${e.userFirstName} ${e.userLastName}`,
+    activeJobs: orders.value.filter(o => o.editorId === e.userId && o.orderStatus === "in_progress").length
+  })).sort((a, b) => b.activeJobs - a.activeJobs).slice(0, 5)
 })
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case "waiting_deposit": return "Pending Deposit"
-    case "waiting_assignment":
-    case "waiting_to_start": return "Waiting To Start"
-    case "in_progress": return "In Progress"
-    case "waiting_selection": return "Waiting Review"
-    case "waiting_final_payment": return "Pending Payment"
-    case "delivered": return "Delivered"
-    case "completed": return "Completed"
-    case "cancelled": return "Cancelled"
-    default: return status
-  }
-}
-
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case "waiting_deposit": return "bg-gray-50 text-gray-500 border-gray-200"
-    case "waiting_assignment":
-    case "waiting_to_start": return "bg-gray-100 text-gray-700 border-gray-200"
-    case "in_progress": return "bg-gray-900 text-white border-gray-800"
-    case "waiting_selection": return "bg-gray-100 text-gray-700 border-gray-200"
-    case "waiting_final_payment": return "bg-amber-50 text-amber-600 border-amber-100"
-    case "delivered":
-    case "completed": return "bg-emerald-50 text-emerald-700 border-emerald-100"
-    default: return "bg-gray-50 text-gray-500 border-gray-200"
-  }
-}
+const breadcrumb = [
+  { label: "หน้าแรก", to: "/admin/dashboard" },
+  { label: "แดชบอร์ด" }
+]
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl space-y-6 font-sans text-gray-900">
-    <!-- Loading State -->
-    <div v-if="loading" class="rounded-3xl border border-gray-200 bg-white p-16 text-center shadow-sm">
-      <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
-      <p class="text-sm font-medium text-gray-500">กำลังโหลดข้อมูลแดชบอร์ดผู้ดูแลระบบ...</p>
+  <div class="space-y-6 max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <h1 class="mt-2 text-xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
+        <p class="mt-0.5 text-sm text-gray-500">ภาพรวมสถานะออเดอร์และระบบ COOS Studio</p>
+      </div>
+      <AdminActionButton
+        variant="secondary"
+        size="sm"
+        icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        @click="fetchData"
+      >
+        รีเฟรช
+      </AdminActionButton>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="error"
-      class="rounded-2xl border border-red-100 bg-red-50 p-6 text-center text-sm font-semibold text-red-600">
-      ⚠️ {{ error }}
+    <!-- Loading -->
+    <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div v-for="i in 6" :key="i" class="bg-white border border-gray-200 rounded-xl p-5 h-24 animate-pulse" />
     </div>
 
-    <!-- Main Dashboard -->
-    <div v-else class="space-y-6">
-      <!-- Header Section -->
-      <section class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
-        <div class="bg-gray-900 px-6 py-7 text-white">
-          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-[0.25em] text-gray-400">
-                Admin Workspace
-              </p>
-              <h1 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">
-                แผงควบคุมผู้ดูแลระบบ
-              </h1>
-              <p class="mt-2 max-w-2xl text-sm text-gray-400">
-                ภาพรวมคำสั่งซื้อ ผู้ใช้งาน ทีม Editor และสถานะการดำเนินงานทั้งหมดของระบบ COOS Studio
-              </p>
-            </div>
+    <!-- Error -->
+    <div v-else-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+      <button @click="fetchData" class="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">
+        ลองโหลดใหม่
+      </button>
+    </div>
 
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-5 py-4">
-              <p class="text-xs text-gray-400">สถานะระบบ</p>
-              <div class="mt-1 flex items-center gap-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                <span class="text-sm font-bold">Normal</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <!-- Main content -->
+    <template v-else>
+      <!-- ── Stat Cards ── -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+        <AdminStatCard
+          v-for="card in statCards"
+          :key="card.label"
+          :label="card.label"
+          :value="card.value"
+          :icon="card.icon"
+        />
+      </div>
 
-      <!-- KPI Cards -->
-      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ลูกค้าทั้งหมด</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalCustomers }}</p>
-            </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
-              👥
-            </div>
-          </div>
-          <p class="mt-4 text-xs font-medium text-gray-400">Total Customers</p>
-        </div>
-
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ออเดอร์ทั้งหมด</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalOrders }}</p>
-            </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
-              📦
-            </div>
-          </div>
-          <p class="mt-4 text-xs font-medium text-gray-400">Total Orders</p>
-        </div>
-
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">ทีม Editor</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.totalEditors }}</p>
-            </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
-              🎨
-            </div>
-          </div>
-          <p class="mt-4 text-xs font-medium text-gray-400">Total Editors</p>
-        </div>
-
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-gray-400">งานเสร็จสมบูรณ์</p>
-              <p class="mt-3 font-number text-3xl font-extrabold text-gray-900">{{ displayStats.completedOrders }}</p>
-            </div>
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gray-100 text-xl">
-              ✅
-            </div>
-          </div>
-          <p class="mt-4 text-xs font-medium text-gray-400">Completed Orders</p>
-        </div>
-      </section>
-
-      <!-- Order Pipeline -->
-      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <!-- ── Recent Orders ── -->
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <!-- Section header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
-              Order Pipeline
-            </p>
-            <h2 class="mt-1 text-lg font-bold text-gray-900">
-              สถานะคำสั่งซื้อในระบบ
-            </h2>
+            <h2 class="text-sm font-bold text-gray-900">คำสั่งงานล่าสุด</h2>
+            <p class="text-xs text-gray-400 mt-0.5">รายการคำสั่งงานที่ต้องดำเนินการ</p>
           </div>
-          <p class="text-xs font-medium text-gray-400">
-            อ้างอิงจากสถานะกลางของออเดอร์
-          </p>
+          <AdminActionButton
+            variant="secondary"
+            size="sm"
+            @click="router.push('/admin/orders')"
+          >
+            ดูทั้งหมด
+          </AdminActionButton>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-gray-400">Pending Deposit</p>
-            <p class="mt-2 text-2xl font-black text-gray-900">{{ displayStats.pendingDeposit }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-gray-200 bg-gray-100 p-4">
-            <p class="text-[11px] font-bold uppercase text-gray-500">Waiting To Start</p>
-            <p class="mt-2 text-2xl font-black text-gray-800">{{ displayStats.waitingToStart }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-white">
-            <p class="text-[11px] font-bold uppercase text-gray-400">In Progress</p>
-            <p class="mt-2 text-2xl font-black">{{ displayStats.inProgress }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-gray-200 bg-gray-100 p-4">
-            <p class="text-[11px] font-bold uppercase text-gray-500">Waiting Review</p>
-            <p class="mt-2 text-2xl font-black text-gray-800">{{ displayStats.waitingReview }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-amber-500">Pending Payment</p>
-            <p class="mt-2 text-2xl font-black text-amber-700">{{ displayStats.pendingPayment }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-            <p class="text-[11px] font-bold uppercase text-emerald-500">Delivered</p>
-            <p class="mt-2 text-2xl font-black text-emerald-700">{{ displayStats.delivered }}</p>
-          </div>
-
-          <div class="rounded-2xl border border-gray-200 bg-gray-950 p-4 text-white">
-            <p class="text-[11px] font-bold uppercase text-gray-500">Completed</p>
-            <p class="mt-2 text-2xl font-black">{{ displayStats.completed }}</p>
-          </div>
+        <!-- Filter bar -->
+        <div class="px-6 py-3 border-b border-gray-100 overflow-x-auto">
+          <AdminFilterBar
+            v-model="statusFilter"
+            :filters="filterOptions"
+          />
         </div>
-      </section>
 
-      <!-- Content Grid -->
-      <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <!-- Recent Orders -->
-        <div class="xl:col-span-2 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div class="mb-5 flex items-center justify-between">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
-                Recent Orders
-              </p>
-              <h2 class="mt-1 text-lg font-black text-gray-900">
-                ออเดอร์ล่าสุด
-              </h2>
+        <!-- Table -->
+        <AdminDataTable
+          :columns="orderTableColumns"
+          :rows="tableRows"
+          row-key="orderId"
+        >
+          <!-- Order ID -->
+          <template #cell-orderId="{ value }">
+            <span class="font-mono text-xs font-semibold text-gray-900">#{{ value }}</span>
+          </template>
+
+          <!-- Customer -->
+          <template #cell-customer="{ value }">
+            <span class="text-sm text-gray-700">{{ value }}</span>
+          </template>
+
+          <!-- Package -->
+          <template #cell-packageName="{ value }">
+            <span class="text-xs text-gray-600">{{ value }}</span>
+          </template>
+
+          <!-- Status badge -->
+          <template #cell-orderStatus="{ value }">
+            <AdminStatusBadge :status="value" />
+          </template>
+
+          <!-- Date -->
+          <template #cell-orderCreatedAt="{ value }">
+            <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
+          </template>
+
+          <!-- Editor -->
+          <template #cell-editor="{ value }">
+            <span class="text-xs text-gray-500">{{ value }}</span>
+          </template>
+
+          <!-- Actions -->
+          <template #cell-action="{ row }">
+            <AdminActionButton
+              variant="ghost"
+              size="sm"
+              @click="router.push('/admin/orders')"
+            >
+              จัดการ
+            </AdminActionButton>
+          </template>
+        </AdminDataTable>
+
+        <!-- Empty state inside table -->
+        <AdminEmptyState
+          v-if="tableRows.length === 0"
+          title="ไม่พบคำสั่งงาน"
+          description="ไม่มีคำสั่งงานที่ตรงกับสถานะที่เลือก"
+        />
+      </div>
+
+      <!-- ── Bottom Grid ── -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Order Status Summary -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 class="text-sm font-bold text-gray-900 mb-4">สรุปสถานะออเดอร์</h2>
+          <div class="space-y-3">
+            <div
+              v-for="card in statCards.filter(c => c.label !== 'คำสั่งงานทั้งหมด')"
+              :key="card.label"
+              class="flex items-center justify-between"
+            >
+              <span class="text-xs text-gray-600">{{ card.label }}</span>
+              <span class="text-xs font-bold text-gray-900 font-number">{{ card.value }}</span>
             </div>
-
-            <button
-              class="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-600 transition hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
-              @click="router.push('/admin/orders')">
-              ดูทั้งหมด
-            </button>
           </div>
+        </div>
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <article v-for="order in recentOrders" :key="order.orderId"
-              class="group rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-md">
-              <div
-                class="relative h-36 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
-                <svg class="absolute inset-0 h-full w-full text-gray-200" preserveAspectRatio="none"
-                  viewBox="0 0 100 100">
-                  <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="1" />
-                  <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="1" />
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <span
-                    class="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                    Preview Image
-                  </span>
-                </div>
+        <!-- Editor Workload -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 xl:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold text-gray-900">ภาระงาน Editor</h2>
+            <AdminActionButton variant="ghost" size="sm" @click="router.push('/admin/assignments')">
+              มอบหมายงาน
+            </AdminActionButton>
+          </div>
+          <div class="space-y-2">
+            <div
+              v-for="editor in editorsWorkload"
+              :key="editor.name"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <!-- Avatar initials -->
+              <div class="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                {{ editor.initials }}
               </div>
-
-              <div class="mt-4 space-y-2">
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-black text-gray-900">{{ order.orderId }}</p>
-                    <p class="mt-1 text-xs font-medium text-gray-500">
-                      Customer: {{ order.customerName }}
-                    </p>
-                    <p class="text-xs font-medium text-gray-400">
-                      Package: {{ order.packageName }}
-                    </p>
-                  </div>
-
-                  <span :class="[
-                    'shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider',
-                    getStatusClass(order.status)
-                  ]">
-                    {{ getStatusLabel(order.status) }}
-                  </span>
-                </div>
-
-                <div class="pt-2">
-                  <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-gray-400">
-                    <span>Progress</span>
-                    <span>{{ order.progress }}%</span>
-                  </div>
-                  <div class="h-2 overflow-hidden rounded-full bg-gray-100">
-                    <div
-                      class="h-full rounded-full bg-gray-900 transition-all duration-500"
-                      :style="{ width: order.progress + '%' }"></div>
-                  </div>
-                </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">{{ editor.name }}</p>
+                <p class="text-xs text-gray-400">Editor</p>
               </div>
-            </article>
-          </div>
-        </div>
-
-        <!-- Right Panel -->
-        <div class="space-y-6">
-          <!-- Quick Actions -->
-          <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div class="mb-5">
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
-                Quick Actions
-              </p>
-              <h2 class="mt-1 text-lg font-black text-gray-900">
-                เมนูลัดผู้ดูแลระบบ
-              </h2>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
-                @click="router.push('/admin/users')">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
-                  👤
-                </div>
-                <p class="text-sm font-semibold text-gray-800">จัดการผู้ใช้</p>
-                <p class="mt-1 text-[10px] font-medium text-gray-400">Users</p>
-              </button>
-
-              <button
-                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
-                @click="router.push('/admin/orders')">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
-                  📦
-                </div>
-                <p class="text-sm font-semibold text-gray-800">จัดการออเดอร์</p>
-                <p class="mt-1 text-[10px] font-medium text-gray-400">Orders</p>
-              </button>
-
-              <button
-                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
-                @click="router.push('/admin/orders')">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
-                  📝
-                </div>
-                <p class="text-sm font-semibold text-gray-800">มอบหมายงาน</p>
-                <p class="mt-1 text-[10px] font-medium text-gray-400">Assign</p>
-              </button>
-
-              <button
-                class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-left transition hover:border-gray-400 hover:bg-gray-100"
-                @click="router.push('/admin/packages')">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
-                  💎
-                </div>
-                <p class="text-sm font-semibold text-gray-800">แพ็กเกจ</p>
-                <p class="mt-1 text-[10px] font-medium text-gray-400">Packages</p>
-              </button>
-            </div>
-          </div>
-
-          <!-- Editor Workload -->
-          <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div class="mb-5">
-              <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
-                Editor Workload
-              </p>
-              <h2 class="mt-1 text-lg font-black text-gray-900">
-                ภาระงานของทีม Editor
-              </h2>
-            </div>
-
-            <div class="space-y-3">
-              <div v-for="editor in editorsWorkload" :key="editor.name"
-                class="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-3">
-                <div class="flex min-w-0 items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <div class="h-1.5 bg-gray-100 rounded-full w-20 overflow-hidden">
                   <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gray-900 text-xs font-black text-white">
-                    {{ editor.initials }}
-                  </div>
-
-                  <div class="min-w-0">
-                    <p class="truncate text-sm font-black text-gray-800">
-                      {{ editor.name }}
-                    </p>
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                      Editor
-                    </p>
-                  </div>
+                    class="h-full bg-gray-900 rounded-full transition-all"
+                    :style="{ width: `${Math.min(100, (editor.activeJobs / 10) * 100)}%` }"
+                  />
                 </div>
-
-                <span
-                  class="shrink-0 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-[10px] font-black text-gray-700">
-                  {{ editor.activeJobs }} Jobs
+                <span class="text-xs font-bold text-gray-700 w-12 text-right">
+                  {{ editor.activeJobs }} งาน
                 </span>
               </div>
             </div>
+            <AdminEmptyState
+              v-if="editorsWorkload.length === 0"
+              title="ยังไม่มี Editor"
+              description="ยังไม่มี Editor ในระบบ"
+            />
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </template>
   </div>
 </template>

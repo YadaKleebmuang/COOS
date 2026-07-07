@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue"
+import { ref, reactive, computed, onMounted } from "vue"
 import { useApi } from "~/composables/useApi"
 import { orderService } from "~/services/order.service"
+import type { Package } from "~/types/order.types"
 
 definePageMeta({
   layout: "admin",
@@ -10,90 +11,105 @@ definePageMeta({
 
 const { apiFetch } = useApi()
 
-const packages = ref<any[]>([])
+// ── State ──────────────────────────────────────────────────────
+const packages = ref<Package[]>([])
 const loading = ref(true)
 const error = ref("")
 const saving = ref(false)
 
-const showForm = ref(false)
-const isEdit = ref(false)
-const currentId = ref<number | null>(null)
+const modal = ref({ open: false, mode: "add" as "add" | "edit" })
+const deleteDialog = ref({ open: false, loading: false, packageId: 0, name: "" })
 
-const form = reactive({
+const form = reactive<Omit<Package, "packageId" | "packageCreatedAt" | "packageUpdatedAt">>({
   packageName: "",
+  packageDescription: "",
   packagePrice: 0,
-  packageImageCount: 1,
-  packageResolution: "Full HD",
-  packageDeliveryDays: 3,
-  packageUrgentPrice: 0,
+  packageImageCount: 5,
+  packageResolution: "FullHD",
+  packageDeliveryDays: 5,
+  packageUrgentPrice: null,
   packageGalleryDiscount: 20,
-  packageDescription: ""
+  packageIsActive: 1
 })
+const editingId = ref<number | null>(null)
 
+// ── API ────────────────────────────────────────────────────────
 const fetchPackages = async () => {
   loading.value = true
   error.value = ""
   try {
-    const data = await orderService.getPackages()
-    packages.value = data
+    packages.value = await orderService.getPackages()
   } catch (err: any) {
-    error.value = err?.message || "ไม่สามารถดึงข้อมูลแพ็กเกจได้"
+    error.value = err?.message || "ไม่สามารถโหลดข้อมูลแพ็กเกจได้"
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  fetchPackages()
-})
+onMounted(() => fetchPackages())
 
-const handleAdd = () => {
-  isEdit.value = false
-  currentId.value = null
+// ── Table columns ──────────────────────────────────────────────
+const columns = [
+  { key: "packageName", label: "ชื่อแพ็กเกจ" },
+  { key: "packageImageCount", label: "จำนวนภาพ", align: "center" as const },
+  { key: "packageResolution", label: "ความละเอียด", align: "center" as const },
+  { key: "packageDeliveryDays", label: "ระยะเวลาส่ง", align: "center" as const },
+  { key: "packagePrice", label: "ราคา (฿)", align: "right" as const },
+  { key: "packageUrgentPrice", label: "ค่าเร่งด่วน (฿)", align: "right" as const },
+  { key: "packageIsActive", label: "สถานะ", align: "center" as const },
+  { key: "action", label: "การจัดการ", align: "center" as const }
+]
+
+// ── Modal ──────────────────────────────────────────────────────
+const resetForm = () => {
   form.packageName = ""
-  form.packagePrice = 0
-  form.packageImageCount = 1
-  form.packageResolution = "Full HD"
-  form.packageDeliveryDays = 3
-  form.packageUrgentPrice = 0
-  form.packageGalleryDiscount = 20
   form.packageDescription = ""
-  showForm.value = true
+  form.packagePrice = 0
+  form.packageImageCount = 5
+  form.packageResolution = "FullHD"
+  form.packageDeliveryDays = 5
+  form.packageUrgentPrice = null
+  form.packageGalleryDiscount = 20
+  form.packageIsActive = 1
 }
 
-const handleEdit = (pkg: any) => {
-  isEdit.value = true
-  currentId.value = pkg.packageId
+const openAdd = () => {
+  resetForm()
+  editingId.value = null
+  modal.value = { open: true, mode: "add" }
+}
+
+const openEdit = (pkg: Package) => {
+  editingId.value = pkg.packageId
   form.packageName = pkg.packageName
+  form.packageDescription = pkg.packageDescription ?? ""
   form.packagePrice = pkg.packagePrice
   form.packageImageCount = pkg.packageImageCount
   form.packageResolution = pkg.packageResolution
   form.packageDeliveryDays = pkg.packageDeliveryDays
   form.packageUrgentPrice = pkg.packageUrgentPrice
   form.packageGalleryDiscount = pkg.packageGalleryDiscount
-  form.packageDescription = pkg.packageDescription || ""
-  showForm.value = true
+  form.packageIsActive = pkg.packageIsActive
+  modal.value = { open: true, mode: "edit" }
 }
 
 const handleSubmit = async () => {
   saving.value = true
   try {
-    if (isEdit.value && currentId.value) {
-      await apiFetch(`/packages/${currentId.value}`, {
+    if (modal.value.mode === "edit" && editingId.value) {
+      await apiFetch(`/packages/${editingId.value}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       })
-      alert("อัปเดตแพ็กเกจสำเร็จ")
     } else {
       await apiFetch("/packages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       })
-      alert("สร้างแพ็กเกจสำเร็จ")
     }
-    showForm.value = false
+    modal.value.open = false
     fetchPackages()
   } catch (err: any) {
     alert(err?.message || "ดำเนินการไม่สำเร็จ")
@@ -102,124 +118,185 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async (id: number) => {
-  if (!confirm("คุณแน่ใจหรือไม่ที่จะลบแพ็กเกจนี้?")) return
-  
+const openDelete = (pkg: Package) => {
+  deleteDialog.value = { open: true, loading: false, packageId: pkg.packageId, name: pkg.packageName }
+}
+
+const confirmDelete = async () => {
+  deleteDialog.value.loading = true
   try {
-    await apiFetch(`/packages/${id}`, {
-      method: "DELETE"
-    })
-    alert("ลบแพ็กเกจเรียบร้อยแล้ว")
+    await apiFetch(`/packages/${deleteDialog.value.packageId}`, { method: "DELETE" })
+    deleteDialog.value.open = false
     fetchPackages()
   } catch (err: any) {
-    alert(err?.message || "ลบแพ็กเกจไม่สำเร็จ")
+    alert(err?.message || "ลบไม่สำเร็จ")
+  } finally {
+    deleteDialog.value.loading = false
   }
 }
+
+const formatPrice = (n: number | null) => n != null ? `฿${Number(n).toLocaleString("th-TH")}` : "—"
+
+const breadcrumb = [
+  { label: "หน้าแรก", to: "/admin/dashboard" },
+  { label: "แพ็กเกจ" }
+]
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="space-y-5 max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">📦 จัดการแพ็กเกจราคา</h1>
-        <p class="text-slate-500 text-sm mt-1">เพิ่ม แก้ไข หรือลบแพ็กเกจสำหรับคำสั่งซื้อของลูกค้าในระบบ</p>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <h1 class="mt-2 text-xl font-bold text-gray-900">จัดการแพ็กเกจบริการ</h1>
+        <p class="mt-0.5 text-sm text-gray-500">เพิ่ม แก้ไข หรือปิดใช้งานแพ็กเกจบริการตกแต่งภาพ</p>
       </div>
-      <div>
-        <button @click="handleAdd" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow transition">
-          ➕ เพิ่มแพ็กเกจใหม่
-        </button>
-      </div>
-    </div>
-
-    <!-- Edit/Add Modal Overlay -->
-    <div v-if="showForm" class="bg-slate-50 border border-slate-100 p-6 rounded-3xl space-y-4 max-w-2xl">
-      <h3 class="font-bold text-slate-800 text-base border-b pb-2">
-        {{ isEdit ? '✏️ แก้ไขข้อมูลแพ็กเกจ' : '➕ เพิ่มแพ็กเกจใหม่' }}
-      </h3>
-      
-      <form @submit.prevent="handleSubmit" class="space-y-4 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">ชื่อแพ็กเกจ</label>
-            <input v-model="form.packageName" required type="text" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">ราคาฐาน (฿)</label>
-            <input v-model="form.packagePrice" required type="number" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">จำนวนรูปที่ได้รับ</label>
-            <input v-model="form.packageImageCount" required type="number" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">ความละเอียดภาพ</label>
-            <input v-model="form.packageResolution" required type="text" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">ระยะเวลาส่งงาน (วัน)</label>
-            <input v-model="form.packageDeliveryDays" required type="number" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">บวกเพิ่มค่าเร่งด่วน (฿)</label>
-            <input v-model="form.packageUrgentPrice" required type="number" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 uppercase mb-1">ส่วนลด Gallery (%)</label>
-            <input v-model="form.packageGalleryDiscount" required type="number" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-400 uppercase mb-1">รายละเอียดเพิ่มเติม</label>
-          <textarea v-model="form.packageDescription" rows="2" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 resize-none" />
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button @click="showForm = false" type="button" class="bg-white border text-slate-600 font-bold px-4 py-2 rounded-lg">ยกเลิก</button>
-          <button :disabled="saving" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg">บันทึก</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Packages List Table -->
-    <div v-if="loading" class="bg-white rounded-3xl p-16 text-center border shadow-sm">
-      <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-      <p class="text-slate-400 font-medium">กำลังโหลดข้อมูลแพ็กเกจ...</p>
-    </div>
-
-    <div v-else-if="error" class="bg-red-50 text-red-600 p-6 rounded-2xl border text-center font-bold text-sm">
-      ⚠️ {{ error }}
-    </div>
-
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="pkg in packages" :key="pkg.packageId" class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-4">
-        <div>
-          <div class="flex items-center justify-between border-b pb-2">
-            <h3 class="font-bold text-slate-800 text-base">{{ pkg.packageName }}</h3>
-            <span class="text-indigo-600 font-extrabold text-base">฿{{ pkg.packagePrice.toLocaleString() }}</span>
-          </div>
-          
-          <ul class="text-xs text-slate-500 space-y-2 mt-3 font-medium">
-            <li>🖼️ รูปภาพที่ได้รับ: {{ pkg.packageImageCount }} ภาพ</li>
-            <li>🔍 ความละเอียด: {{ pkg.packageResolution }}</li>
-            <li>📅 ส่งมอบภายใน: {{ pkg.packageDeliveryDays }} วัน</li>
-            <li>⚡ ค่าส่งด่วน: +฿{{ pkg.packageUrgentPrice.toLocaleString() }}</li>
-            <li>🎁 ส่วนลด Portfolio: {{ pkg.packageGalleryDiscount }}%</li>
-          </ul>
-        </div>
-
-        <div class="flex justify-end gap-2 border-t pt-3">
-          <button @click="handleEdit(pkg)" class="text-xs font-bold text-indigo-600 hover:underline">✏️ แก้ไข</button>
-          <button @click="handleDelete(pkg.packageId)" class="text-xs font-bold text-red-600 hover:underline">🗑️ ลบ</button>
-        </div>
+      <div class="flex gap-2">
+        <AdminActionButton variant="secondary" size="sm" :loading="loading" @click="fetchPackages">รีเฟรช</AdminActionButton>
+        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="openAdd">เพิ่มแพ็กเกจ</AdminActionButton>
       </div>
     </div>
+
+    <!-- Error -->
+    <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-sm text-red-600">{{ error }}</p>
+    </div>
+
+    <!-- Table -->
+    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <AdminDataTable :columns="columns" :rows="packages" :loading="loading" row-key="packageId">
+        <!-- Name + Description -->
+        <template #cell-packageName="{ row }">
+          <div>
+            <p class="text-sm font-semibold text-gray-900">{{ row.packageName }}</p>
+            <p v-if="row.packageDescription" class="text-xs text-gray-400 mt-0.5 max-w-xs truncate">{{ row.packageDescription }}</p>
+          </div>
+        </template>
+        <!-- Image count -->
+        <template #cell-packageImageCount="{ value }">
+          <span class="text-sm font-number text-gray-700">{{ value }} ภาพ</span>
+        </template>
+        <!-- Resolution -->
+        <template #cell-packageResolution="{ value }">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+            {{ value }}
+          </span>
+        </template>
+        <!-- Delivery days -->
+        <template #cell-packageDeliveryDays="{ value }">
+          <span class="text-sm font-number text-gray-700">{{ value }} วัน</span>
+        </template>
+        <!-- Price -->
+        <template #cell-packagePrice="{ value }">
+          <span class="text-sm font-bold text-gray-900 font-number">{{ formatPrice(value) }}</span>
+        </template>
+        <!-- Urgent price -->
+        <template #cell-packageUrgentPrice="{ value }">
+          <span class="text-xs text-gray-500 font-number">{{ formatPrice(value) }}</span>
+        </template>
+        <!-- Status -->
+        <template #cell-packageIsActive="{ value }">
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+            :class="value ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200'"
+          >
+            {{ value ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+          </span>
+        </template>
+        <!-- Actions -->
+        <template #cell-action="{ row }">
+          <div class="flex items-center justify-center gap-1.5">
+            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row)">แก้ไข</AdminActionButton>
+            <AdminActionButton variant="danger" size="sm" @click="openDelete(row)">ลบ</AdminActionButton>
+          </div>
+        </template>
+      </AdminDataTable>
+      <AdminEmptyState v-if="!loading && packages.length === 0" title="ยังไม่มีแพ็กเกจ" description="กดปุ่มเพิ่มแพ็กเกจเพื่อสร้างรายการแรก" icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <Teleport to="body">
+      <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <div v-if="modal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/40" @click="modal.open = false" />
+          <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-sm font-bold text-gray-900 mb-5">{{ modal.mode === "edit" ? "แก้ไขแพ็กเกจ" : "เพิ่มแพ็กเกจใหม่" }}</h3>
+            <form @submit.prevent="handleSubmit" class="space-y-4">
+              <!-- Name -->
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">ชื่อแพ็กเกจ *</label>
+                <input v-model="form.packageName" required type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" placeholder="เช่น Basic, Standard, Professional" />
+              </div>
+              <!-- Description -->
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">คำอธิบาย</label>
+                <textarea v-model="form.packageDescription" rows="2" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 resize-none" />
+              </div>
+              <!-- Row 1 -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">จำนวนภาพ *</label>
+                  <input v-model.number="form.packageImageCount" required type="number" min="1" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">ความละเอียด *</label>
+                  <select v-model="form.packageResolution" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400">
+                    <option value="FullHD">Full HD</option>
+                    <option value="4K">4K</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Row 2 -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">ราคา (฿) *</label>
+                  <input v-model.number="form.packagePrice" required type="number" min="0" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">ระยะเวลาส่งงาน (วัน) *</label>
+                  <input v-model.number="form.packageDeliveryDays" required type="number" min="1" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+              </div>
+              <!-- Row 3 -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">ค่าบริการเร่งด่วน (฿)</label>
+                  <input v-model.number="form.packageUrgentPrice" type="number" min="0" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">ส่วนลด Gallery (%)</label>
+                  <input v-model.number="form.packageGalleryDiscount" type="number" min="0" max="100" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+              </div>
+              <!-- Active toggle -->
+              <div class="flex items-center gap-2">
+                <input v-model="form.packageIsActive" type="checkbox" :true-value="1" :false-value="0" id="pkg-active" class="rounded" />
+                <label for="pkg-active" class="text-sm text-gray-700">เปิดใช้งานแพ็กเกจนี้</label>
+              </div>
+              <!-- Actions -->
+              <div class="flex gap-2 justify-end pt-2 border-t border-gray-100 mt-2">
+                <AdminActionButton variant="secondary" size="md" @click="modal.open = false">ยกเลิก</AdminActionButton>
+                <AdminActionButton variant="primary" size="md" :loading="saving">
+                  <button type="submit" class="contents">บันทึก</button>
+                </AdminActionButton>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Delete confirm -->
+    <AdminConfirmDialog
+      :open="deleteDialog.open"
+      title="ยืนยันการลบแพ็กเกจ"
+      :message="`คุณต้องการลบแพ็กเกจ '${deleteDialog.name}' ใช่หรือไม่?`"
+      confirm-label="ลบแพ็กเกจ"
+      :danger="true"
+      :loading="deleteDialog.loading"
+      @confirm="confirmDelete"
+      @cancel="deleteDialog.open = false"
+    />
   </div>
 </template>

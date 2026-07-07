@@ -177,3 +177,34 @@ CREATE TABLE IF NOT EXISTS `workflowLogs` (
   FOREIGN KEY (`orderId`) REFERENCES `orders`(`orderId`) ON DELETE CASCADE,
   FOREIGN KEY (`changedById`) REFERENCES `users`(`userId`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. System Settings Table
+CREATE TABLE IF NOT EXISTS `systemSettings` (
+  `settingKey`          VARCHAR(100) PRIMARY KEY,
+  `settingValue`        TEXT NULL,
+  `updatedAt`           TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updatedByAdminId`    INT NULL,
+  
+  FOREIGN KEY (`updatedByAdminId`) REFERENCES `users`(`userId`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default settings
+INSERT IGNORE INTO `systemSettings` (`settingKey`, `settingValue`) VALUES 
+('maxUploadSizeMb', '20'),
+('allowedImageTypes', 'jpg,jpeg,png,webp'),
+('orderAutoExpireDays', '7'),
+('depositPercentage', '30'),
+('maintenanceMode', 'false'),
+('studioName', 'COOS Studio'),
+('studioEmail', 'hello@coos.studio'),
+('studioPhone', '02-xxx-xxxx'),
+('studioAddress', 'กรุงเทพมหานคร ประเทศไทย'),
+('studioLineId', '@coosstudio'),
+('studioFacebook', 'facebook.com/coosstudio'),
+('studioInstagram', '@coos.studio');
+-- 11. Tags Table
+CREATE TABLE IF NOT EXISTS `tags` (
+  `tagId` INT AUTO_INCREMENT PRIMARY KEY,
+  `tagName` VARCHAR(100) NOT NULL UNIQUE,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
