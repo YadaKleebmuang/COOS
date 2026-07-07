@@ -18,6 +18,24 @@ exports.getGalleryImages = async (req, res) => {
   }
 };
 
+// GET /gallery-images/tags — ดึงแท็กทั้งหมดแบบไม่ซ้ำกัน
+exports.getTags = async (req, res) => {
+  try {
+    const { pool } = require("../config/db");
+    const [rows] = await pool.query("SELECT imageTags FROM galleryImages WHERE imageTags IS NOT NULL AND imageTags != ''");
+    
+    const tagSet = new Set();
+    rows.forEach(row => {
+      const tags = row.imageTags.split(",").map(t => t.trim()).filter(t => t);
+      tags.forEach(t => tagSet.add(t));
+    });
+    
+    res.status(200).json(Array.from(tagSet));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // GET /gallery-images/:id — ดึงรูปภาพตาม id
 exports.getGalleryImageById = async (req, res) => {
   try {

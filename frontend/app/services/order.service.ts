@@ -11,11 +11,13 @@ import type {
 
 export const orderService = {
   /**
-   * ดึงประเภทงานทั้งหมดที่เปิดใช้งาน
+   * ดึงประเภทงาน
+   * @param all - ถ้าเป็น true จะดึงทั้งหมดรวมที่ปิดใช้งานด้วย (เฉพาะ admin)
    */
-  async getWorkTypes(): Promise<WorkType[]> {
+  async getWorkTypes(all: boolean = false): Promise<WorkType[]> {
     const { apiFetch } = useApi()
-    return await apiFetch<WorkType[]>("/work-types")
+    const url = all ? "/work-types?all=true" : "/work-types"
+    return await apiFetch<WorkType[]>(url)
   },
 
   /**
