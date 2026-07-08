@@ -19,7 +19,7 @@ const dropdownOpen = ref(false)
 // ── Title Logic ──────────────────────────────────────────────────────────────
 const editorPageTitles: Record<string, string> = {
   "/editor/dashboard": "แดชบอร์ด",
-  "/editor/jobs": "ประวัติการทำงาน",
+  "/editor/jobs": "งานที่ได้รับมอบหมาย",
   "/editor/profile": "แก้ไขโปรไฟล์"
 }
 const currentPageTitle = computed(() => {
@@ -27,7 +27,7 @@ const currentPageTitle = computed(() => {
     if (route.path.startsWith("/editor/jobs/") && route.path !== "/editor/jobs") {
       return "ห้องทำงาน (Workspace)"
     }
-    return editorPageTitles[route.path] ?? "Editor Workspace"
+    return editorPageTitles[route.path] ?? "บันทึก Prompt"
   }
   return "Admin Panel"
 })
@@ -47,7 +47,7 @@ const roleConfig = computed(() => {
     subLabel: "ช่างแต่งภาพ (Editor)",
     dropdownLinks: [
       { label: "แก้ไขโปรไฟล์", to: "/editor/profile", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-      { label: "ประวัติการทำงาน", to: "/editor/jobs", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+      { label: "งานที่ได้รับมอบหมาย", to: "/editor/jobs", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
       { label: "แดชบอร์ด", to: "/editor/dashboard", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" }
     ]
   }

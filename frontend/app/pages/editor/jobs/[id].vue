@@ -52,7 +52,7 @@ onMounted(() => {
 
 const breadcrumb = computed(() => [
   { label: "หน้าแรก", to: "/editor/dashboard" },
-  { label: "ประวัติการทำงาน", to: "/editor/jobs" },
+  { label: "งานที่ได้รับมอบหมาย", to: "/editor/jobs" },
   { label: `งาน #${jobId}` }
 ])
 </script>
