@@ -49,29 +49,39 @@ const fetchOrderDetails = async () => {
 onMounted(() => {
   fetchOrderDetails()
 })
+
+const breadcrumb = computed(() => [
+  { label: "หน้าแรก", to: "/editor/dashboard" },
+  { label: "ประวัติการทำงาน", to: "/editor/jobs" },
+  { label: `งาน #${jobId}` }
+])
 </script>
 
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Loading State -->
-    <div v-if="loading" class="bg-white rounded-3xl p-16 text-center border shadow-sm">
-      <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-      <p class="text-slate-400 font-medium">กำลังโหลดห้องทำงาน...</p>
+    <!-- Breadcrumb Header -->
+    <div v-if="!loading && !error && order" class="flex items-center justify-between">
+      <AdminBreadcrumb :items="breadcrumb" />
+    </div>
+
+    <!-- Loading State (Skeleton) -->
+    <div v-if="loading" class="space-y-6">
+      <div class="h-6 w-1/3 bg-gray-200 rounded animate-pulse"></div>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 h-48 animate-pulse"></div>
+      <div class="bg-white rounded-xl border border-gray-200 p-8 h-96 animate-pulse"></div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error || !order" class="bg-white rounded-3xl p-12 text-center border border-red-100">
-      <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </div>
-      <h3 class="text-lg font-bold text-red-600 mb-1">เกิดข้อผิดพลาด</h3>
-      <p class="text-gray-500 text-sm mb-6">{{ error || 'ไม่พบข้อมูลงานนี้' }}</p>
-      <NuxtLink to="/editor/dashboard" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
-        กลับหน้าหลักแดชบอร์ด
+    <AdminEmptyState
+      v-else-if="error || !order"
+      title="เกิดข้อผิดพลาด"
+      :description="error || 'ไม่พบข้อมูลงานนี้'"
+      icon="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    >
+      <NuxtLink to="/editor/dashboard">
+        <AdminActionButton variant="primary">กลับหน้าหลักแดชบอร์ด</AdminActionButton>
       </NuxtLink>
-    </div>
+    </AdminEmptyState>
 
     <!-- Workspace Main View -->
     <div v-else class="space-y-6 animate-fade-in">
@@ -82,7 +92,7 @@ onMounted(() => {
       <EditorJobTabs :tabs="tabs" v-model:active="activeTab" />
 
       <!-- 3. Dynamic Tab Component Panel -->
-      <div class="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
         <EditorJobOverviewTab v-if="activeTab === 'overview'" :order="order" />
         <EditorJobSourceImagesTab v-else-if="activeTab === 'sources'" :order="order" />
         <EditorJobGeneratedImagesTab v-else-if="activeTab === 'generated'" :order="order" @refresh="fetchOrderDetails" />
@@ -96,12 +106,12 @@ onMounted(() => {
 
 <style scoped>
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
