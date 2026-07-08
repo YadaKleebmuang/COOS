@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
 import { orderService } from "~/services/order.service"
 import type { OrderSummary, OrderStatus } from "~/types/order.types"
 
@@ -8,10 +9,19 @@ definePageMeta({
   middleware: ["auth", "editor"]
 })
 
+const route = useRoute()
+const router = useRouter()
+
 const jobs = ref<OrderSummary[]>([])
 const loading = ref(true)
 const error = ref("")
-const selectedStatusFilter = ref<string>("all")
+const selectedStatusFilter = ref<string>((route.query.status as string) || "all")
+
+watch(selectedStatusFilter, (newStatus) => {
+  router.replace({ 
+    query: { ...route.query, status: newStatus === "all" ? undefined : newStatus } 
+  })
+})
 
 const fetchJobs = async () => {
   loading.value = true

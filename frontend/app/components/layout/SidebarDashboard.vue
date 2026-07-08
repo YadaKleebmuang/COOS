@@ -60,12 +60,17 @@ const menuItems = computed<SidebarItem[]>(() => {
         icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
       },
       {
-        name: "ประวัติการทำงาน",
+        name: "งานที่ได้รับมอบหมาย",
         path: "/editor/jobs",
-        icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
       },
       {
-        name: "แก้ไขโปรไฟล์",
+        name: "บันทึก Prompt",
+        path: "/editor/prompt-notes",
+        icon: "M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+      },
+      {
+        name: "โปรไฟล์",
         path: "/editor/profile",
         icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
       }
@@ -125,11 +130,19 @@ const menuItems = computed<SidebarItem[]>(() => {
             v-for="item in menuItems"
             :key="item.path"
             :to="item.path"
-            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            active-class="bg-gray-900 text-white shadow-sm hover:bg-gray-900 hover:text-white"
+            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+            :class="[
+              $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
+                ? 'bg-gray-900 text-white shadow-sm hover:bg-gray-900 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            ]"
           >
             <!-- Icon -->
-            <svg class="w-4 h-4 flex-shrink-0" :class="$route.path.startsWith(item.path) && item.path !== '/' ? 'text-white' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="w-4 h-4 flex-shrink-0"
+              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-white' : 'text-gray-400']"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
             </svg>
             <span>{{ item.name }}</span>
