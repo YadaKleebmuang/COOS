@@ -84,7 +84,7 @@ const formatDate = (dateStr: string) => {
 
 const breadcrumb = [
   { label: "หน้าแรก", to: "/editor/dashboard" },
-  { label: "ประวัติการทำงาน" }
+  { label: "งานที่ได้รับมอบหมาย" }
 ]
 </script>
 
