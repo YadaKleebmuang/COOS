@@ -85,11 +85,11 @@
 
 ### 🔄 กำลังพัฒนา (Sprint 3)
 - [ ] Payment UI ครบ (Customer Upload Slip + Admin Verify)
-- [ ] Admin Gallery Page (`/admin/gallery` ยังไม่มี page file)
+- [x] Admin Gallery Page — มีอยู่แล้ว + เพิ่ม Upload Modal + แก้ ?all=true
 - [ ] Gallery Public Showcase (Filter/Search/Sort ครบ)
 - [ ] Admin Dashboard Advanced Charts
-- [ ] Security Fix: Register Role Hijack
-- [ ] Error Body Parsing ใน `useApi.ts`
+- [x] Security Fix: Register Role Hijack — hardcode role="customer"
+- [x] Error Body Parsing ใน `useApi.ts` — เพิ่ม ApiError class + statusCode
 
 ### ⬜ ยังไม่เริ่ม (Sprint 4–5)
 - Testing (Unit, Integration, UAT)
@@ -105,9 +105,9 @@
 
 | Issue | ระดับ | Sprint แก้ |
 |-------|-------|-----------|
-| Register สามารถกำหนด role ใดก็ได้ผ่าน body | 🔴 Security | Sprint 3 |
-| `/admin/gallery` ไม่มี page file | 🟠 Missing Feature | Sprint 3 |
-| `useApi.ts` throw statusText แทน Error body | 🟡 UX | Sprint 3 |
+| Register สามารถกำหนด role ใดก็ได้ผ่าน body | ~~🔴 Security~~ | ✅ แก้แล้ว Sprint 3 |
+| `/admin/gallery` ไม่มี page file | ~~🟠 Missing Feature~~ | ✅ มีอยู่แล้ว + เพิ่ม upload modal |
+| `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
 | Forgot Password ไม่มีระบบ Email จริง | 🟡 Feature Gap | Sprint 4+ |
 | Mobile Responsive ไม่สมบูรณ์ | 🟡 UX | Sprint 4 |
 
