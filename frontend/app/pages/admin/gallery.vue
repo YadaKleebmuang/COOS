@@ -9,7 +9,6 @@ definePageMeta({
 // ── Types ──────────────────────────────────────────────────────
 interface GalleryImage {
   imageId: number
-  orderId: number
   title: string
   category: string
   hashtags: string[]
@@ -18,7 +17,10 @@ interface GalleryImage {
   createdAt: string
 }
 
-
+interface WorkType {
+  workTypeId: number
+  workTypeName: string
+}
 
 // ── State ──────────────────────────────────────────────────────
 const images = ref<GalleryImage[]>([])
@@ -29,15 +31,23 @@ const hashtagFilter = ref("")
 const visibilityFilter = ref("all")
 const deleteDialog = ref({ open: false, loading: false, imageId: 0 })
 
+// Upload Modal State
+const uploadModal = ref(false)
+const workTypes = ref<WorkType[]>([])
+const uploadForm = ref({ workTypeId: "", imageTitle: "", imageTags: "" })
+const uploadFile = ref<File | null>(null)
+const uploadLoading = ref(false)
+const uploadError = ref("")
+
 // ── Fetch ──────────────────────────────────────────────────────
 const fetchGallery = async () => {
   loading.value = true
   try {
     const { apiFetch } = useApi()
-    const data = await apiFetch<any[]>("/gallery-images")
+    // [Fix] ?all=true ให้ admin เห็นทุกรูปรวมที่ hidden อยู่ด้วย
+    const data = await apiFetch<any[]>("/gallery-images?all=true")
     images.value = data.map(img => ({
       imageId: img.imageId,
-      orderId: 0,
       title: img.imageTitle || "ไม่มีชื่อภาพ",
       category: img.workTypeName || "ไม่มีหมวดหมู่",
       hashtags: img.imageTags ? img.imageTags.split(",").map((t: string) => t.trim()) : [],
@@ -50,7 +60,17 @@ const fetchGallery = async () => {
   }
 }
 
-onMounted(() => fetchGallery())
+const fetchWorkTypes = async () => {
+  try {
+    const { apiFetch } = useApi()
+    workTypes.value = await apiFetch<WorkType[]>("/work-types")
+  } catch {}
+}
+
+onMounted(() => {
+  fetchGallery()
+  fetchWorkTypes()
+})
 
 // ── Filters ────────────────────────────────────────────────────
 const categories = computed(() => {
@@ -69,6 +89,44 @@ const filteredImages = computed(() => {
   if (hq) result = result.filter(i => i.hashtags.some(h => h.includes(hq)))
   return result
 })
+
+// ── Upload ─────────────────────────────────────────────────────
+const openUploadModal = () => {
+  uploadForm.value = { workTypeId: "", imageTitle: "", imageTags: "" }
+  uploadFile.value = null
+  uploadError.value = ""
+  uploadModal.value = true
+}
+
+const onFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  uploadFile.value = input.files?.[0] || null
+}
+
+const submitUpload = async () => {
+  if (!uploadFile.value) { uploadError.value = "กรุณาเลือกรูปภาพ"; return }
+  if (!uploadForm.value.workTypeId) { uploadError.value = "กรุณาเลือกประเภทงาน"; return }
+
+  uploadLoading.value = true
+  uploadError.value = ""
+  try {
+    const { apiFetch } = useApi()
+    const formData = new FormData()
+    formData.append("image", uploadFile.value)
+    formData.append("workTypeId", uploadForm.value.workTypeId)
+    if (uploadForm.value.imageTitle) formData.append("imageTitle", uploadForm.value.imageTitle)
+    if (uploadForm.value.imageTags) formData.append("imageTags", uploadForm.value.imageTags)
+
+    // ไม่ set Content-Type — browser จะ set multipart/form-data + boundary อัตโนมัติ
+    await apiFetch("/gallery-images", { method: "POST", body: formData })
+    uploadModal.value = false
+    await fetchGallery()
+  } catch (err: any) {
+    uploadError.value = err.message || "เกิดข้อผิดพลาดในการอัปโหลด"
+  } finally {
+    uploadLoading.value = false
+  }
+}
 
 // ── Delete ─────────────────────────────────────────────────────
 const confirmDelete = async () => {
@@ -109,7 +167,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       </div>
       <div class="flex gap-2">
         <AdminActionButton variant="secondary" size="sm" :loading="loading" @click="fetchGallery">รีเฟรช</AdminActionButton>
-        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4">เพิ่มรูปภาพ</AdminActionButton>
+        <!-- [Fix] เพิ่ม @click handler -->
+        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="openUploadModal">เพิ่มรูปภาพ</AdminActionButton>
       </div>
     </div>
 
@@ -150,7 +209,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         :key="img.imageId"
         class="bg-white border border-gray-200 rounded-xl overflow-hidden group hover:shadow-md transition-shadow"
       >
-        <!-- Thumbnail placeholder -->
+        <!-- Thumbnail -->
         <div class="aspect-square bg-gray-50 flex items-center justify-center border-b border-gray-100 relative overflow-hidden">
           <img v-if="img.thumbnailUrl" :src="img.thumbnailUrl" class="w-full h-full object-cover" />
           <svg v-else class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,12 +226,12 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           </div>
           <!-- Hover overlay -->
           <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <button @click="toggleVisibility(img)" class="p-1.5 bg-white rounded-lg">
+            <button @click="toggleVisibility(img)" class="p-1.5 bg-white rounded-lg" title="สลับการแสดงผล">
               <svg class="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
             </button>
-            <button @click="deleteDialog = { open: true, loading: false, imageId: img.imageId }" class="p-1.5 bg-red-600 rounded-lg">
+            <button @click="deleteDialog = { open: true, loading: false, imageId: img.imageId }" class="p-1.5 bg-red-600 rounded-lg" title="ลบภาพ">
               <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
               </svg>
@@ -194,6 +253,125 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <AdminEmptyState v-else title="ไม่พบรูปภาพ" description="ไม่มีรูปภาพที่ตรงกับเงื่อนไขที่เลือก" icon="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
 
     <!-- Delete confirm -->
-    <AdminConfirmDialog :open="deleteDialog.open" title="ลบรูปภาพ" message="คุณต้องการลบภาพนี้ออกจาก Gallery ใช่หรือไม่?" confirm-label="ลบภาพ" :danger="true" :loading="deleteDialog.loading" @confirm="confirmDelete" @cancel="deleteDialog.open = false"/>
+    <AdminConfirmDialog
+      :open="deleteDialog.open"
+      title="ลบรูปภาพ"
+      message="คุณต้องการลบภาพนี้ออกจาก Gallery ใช่หรือไม่?"
+      confirm-label="ลบภาพ"
+      :danger="true"
+      :loading="deleteDialog.loading"
+      @confirm="confirmDelete"
+      @cancel="deleteDialog.open = false"
+    />
+
+    <!-- ── Upload Modal ─────────────────────────────────────────── -->
+    <Teleport to="body">
+      <div v-if="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="uploadModal = false" />
+
+        <!-- Modal Card -->
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5">
+
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-gray-900">เพิ่มรูปภาพใน Gallery</h2>
+            <button @click="uploadModal = false" class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- File Upload Zone -->
+          <div class="border-2 border-dashed rounded-xl p-5 text-center transition-colors"
+               :class="uploadFile ? 'border-green-300 bg-green-50' : 'border-gray-200 hover:border-gray-400'">
+            <input id="gallery-upload-input" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+            <label for="gallery-upload-input" class="cursor-pointer block">
+              <template v-if="uploadFile">
+                <svg class="w-8 h-8 text-green-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <p class="text-sm font-medium text-gray-800">{{ uploadFile.name }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">คลิกเพื่อเปลี่ยนไฟล์</p>
+              </template>
+              <template v-else>
+                <svg class="w-8 h-8 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                <p class="text-sm text-gray-500">คลิกเพื่อเลือกรูปภาพ</p>
+                <p class="text-xs text-gray-400 mt-0.5">PNG, JPG ขนาดไม่เกิน 10MB</p>
+              </template>
+            </label>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="space-y-3">
+            <!-- WorkType (required) -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                ประเภทงาน <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model="uploadForm.workTypeId"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              >
+                <option value="">-- เลือกประเภทงาน --</option>
+                <option v-for="wt in workTypes" :key="wt.workTypeId" :value="String(wt.workTypeId)">
+                  {{ wt.workTypeName }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Title -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">ชื่อภาพ</label>
+              <input
+                v-model="uploadForm.imageTitle"
+                type="text"
+                placeholder="เช่น Pre-wedding Lookbook 2025"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              />
+            </div>
+
+            <!-- Tags -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                แฮชแท็ก <span class="text-gray-400 font-normal">(คั่นด้วยจุลภาค)</span>
+              </label>
+              <input
+                v-model="uploadForm.imageTags"
+                type="text"
+                placeholder="เช่น prewedding, outdoor, nature"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <p v-if="uploadError" class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            {{ uploadError }}
+          </p>
+
+          <!-- Footer Buttons -->
+          <div class="flex gap-2 pt-1">
+            <button
+              @click="uploadModal = false"
+              class="flex-1 py-2 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              ยกเลิก
+            </button>
+            <button
+              @click="submitUpload"
+              :disabled="uploadLoading"
+              class="flex-1 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="uploadLoading">กำลังอัปโหลด...</span>
+              <span v-else>อัปโหลดรูปภาพ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
