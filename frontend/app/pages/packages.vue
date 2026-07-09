@@ -64,7 +64,7 @@ onMounted(() => loadData())
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              ระยะเวลาดำเนินงาน <strong class="ml-1">{{ pkg.packageDurationDays }} วัน</strong>
+              ระยะเวลาดำเนินงาน <strong class="ml-1">{{ pkg.packageDeliveryDays }} วัน</strong>
             </li>
             <li class="flex items-center text-gray-700">
               <svg class="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
