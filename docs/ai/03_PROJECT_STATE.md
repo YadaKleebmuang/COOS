@@ -84,7 +84,7 @@
 - Workflow Logs
 
 ### 🔄 กำลังพัฒนา (Sprint 3)
-- [ ] Payment UI ครบ (Customer Upload Slip + Admin Verify)
+- [x] Payment UI ครบ (Customer Upload Slip + Admin Verify)
 - [x] Admin Gallery Page — มีอยู่แล้ว + เพิ่ม Upload Modal + แก้ ?all=true
 - [ ] Gallery Public Showcase (Filter/Search/Sort ครบ)
 - [ ] Admin Dashboard Advanced Charts
