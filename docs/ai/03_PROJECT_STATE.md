@@ -11,9 +11,9 @@
 |-------|-----------|
 | **ชื่อโครงงาน (TH)** | การพัฒนาเว็บแอปพลิเคชันบริหารจัดการคำสั่งงานสร้างภาพสำหรับสตูดิโอออนไลน์ |
 | **ชื่อโครงงาน (EN)** | Development of a Web-Based Application for Managing Image Creation Orders for an Online Studio |
-| **Version ปัจจุบัน** | v0.3 (Milestone 30%) |
-| **Sprint ปัจจุบัน** | Sprint 3 (Active) |
-| **อัปเดตล่าสุด** | 29 มิถุนายน 2568 |
+| **Version ปัจจุบัน** | v0.6 (Milestone 60%+) |
+| **Sprint ปัจจุบัน** | Sprint 4 (Active) |
+| **อัปเดตล่าสุด** | 9 กรกฎาคม 2569 |
 
 ---
 
@@ -22,9 +22,9 @@
 | Milestone | เป้าหมาย | วันที่ | สถานะ |
 |-----------|---------|-------|-------|
 | M1 — 30% | Foundation (Auth, Order, Package, Gallery) | 29 มิ.ย. 2568 | ✅ เสร็จแล้ว |
-| M2 — 60% | Payment, Dashboard, Admin Gallery, Security Fix | 20 ก.ค. 2568 | 🔄 กำลังดำเนินการ |
-| M3 — 90% | Testing, Responsive, Bug Fix, Refactor | 10 ส.ค. 2568 | ⬜ ยังไม่เริ่ม |
-| M4 — 100% | Deployment, Documentation, Final Submission | 1 ก.ย. 2568 | ⬜ ยังไม่เริ่ม |
+| M2 — 60% | Payment, Dashboard, Admin Gallery, Security Fix | 9 ก.ค. 2569 | ✅ เสร็จแล้ว |
+| M3 — 90% | Testing, Responsive, Bug Fix, Refactor | 10 ส.ค. 2569 | 🔄 กำลังดำเนินการ |
+| M4 — 100% | Deployment, Documentation, Final Submission | 1 ก.ย. 2569 | ⬜ ยังไม่เริ่ม |
 
 ---
 
@@ -69,9 +69,9 @@
 
 ---
 
-## สถานะการพัฒนาระบบ (Sprint 3 — Active)
+## สถานะการพัฒนาระบบ (Sprint 4 — Active)
 
-### ✅ พัฒนาเสร็จแล้ว (Sprint 1–2)
+### ✅ พัฒนาเสร็จแล้ว (Sprint 1–3)
 - Authentication (Register/Login/Forgot/Reset)
 - User Management (CRUD + Profile Upload)
 - WorkType CRUD
@@ -80,24 +80,23 @@
 - Editor 6-Tab Workspace
 - Gallery + Policy Management
 - File Upload System (5 directories)
-- Admin Dashboard (basic)
+- Admin Dashboard & Reports Page (CSS-based charts & tables)
 - Workflow Logs
+- Payment UI ครบ (Customer Upload Slip + Admin Verify)
+- Admin Gallery Page (Upload Modal & ?all=true fix)
+- Gallery Public Showcase (Filter/Search/Sort/Hashtags complete)
+- Security Fix: Register Role Hijack — hardcode role="customer"
+- Error Body Parsing ใน `useApi.ts` — เพิ่ม ApiError class + statusCode
 
-### 🔄 กำลังพัฒนา (Sprint 3)
-- [x] Payment UI ครบ (Customer Upload Slip + Admin Verify)
-- [x] Admin Gallery Page — มีอยู่แล้ว + เพิ่ม Upload Modal + แก้ ?all=true
-- [ ] Gallery Public Showcase (Filter/Search/Sort ครบ)
-- [ ] Admin Dashboard Advanced Charts
-- [x] Security Fix: Register Role Hijack — hardcode role="customer"
-- [x] Error Body Parsing ใน `useApi.ts` — เพิ่ม ApiError class + statusCode
+### 🔄 กำลังพัฒนา (Sprint 4)
+- [ ] Testing (Unit, Integration, UAT)
+- [ ] Mobile Responsive Design
+- [ ] Email System (Real SMTP configuration for Forgot Password)
 
-### ⬜ ยังไม่เริ่ม (Sprint 4–5)
-- Testing (Unit, Integration, UAT)
-- Responsive Design (Mobile)
-- Error Handling สมบูรณ์
-- Deployment
-- Email System
-- Documentation S06–S28
+### ⬜ ยังไม่เริ่ม (Sprint 5)
+- Deployment (Staging & Production)
+- Backup & Maintenance scripts
+- Final Documentation (S15–S28)
 
 ---
 
@@ -117,6 +116,7 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 9 ก.ค. 2569 | เสร็จสิ้น Sprint 3 (100%), อัปเดตหน้าแกลเลอรี่สาธารณะ, แก้ปัญหาความปลอดภัย, ปรับปรุงฐานข้อมูลภาษาไทย |
 | 29 มิ.ย. 2568 | สร้าง S01–S14 เสร็จ, สร้างไฟล์ docs/ai/ ครบ 4 ไฟล์ |
 
 ---
