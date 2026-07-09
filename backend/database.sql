@@ -1,6 +1,8 @@
 -- COOS Database Schema
 -- Created for E-commerce Application
 
+SET NAMES utf8mb4;
+
 -- Create Database
 CREATE DATABASE IF NOT EXISTS `coosdb`;
 USE `coosdb`;
