@@ -231,6 +231,31 @@ onMounted(async () => {
     ])
     workTypes.value = wt
     packages.value = pkg
+
+    // Prefill from query parameters
+    const route = useRoute()
+    if (route.query.workTypeId) {
+      selectedWorkTypeId.value = Number(route.query.workTypeId)
+    }
+    if (route.query.packageId) {
+      selectedPackageId.value = Number(route.query.packageId)
+    }
+    if (route.query.style) {
+      form.orderStyle = String(route.query.style)
+    }
+    if (route.query.colorTone) {
+      form.orderColorTone = String(route.query.colorTone)
+    }
+    if (route.query.composition) {
+      form.orderComposition = String(route.query.composition)
+    }
+
+    // Auto-advance step if selections are prefilled
+    if (selectedWorkTypeId.value && selectedPackageId.value) {
+      currentStep.value = 3
+    } else if (selectedWorkTypeId.value) {
+      currentStep.value = 2
+    }
   } catch (err: any) {
     dataError.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
