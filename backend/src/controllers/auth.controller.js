@@ -6,7 +6,7 @@ const crypto = require("crypto");
 // POST /auth/register
 exports.register = async (req, res) => {
   try {
-    // รับค่าจาก body
+    // รับค่าจาก body (ไม่รับ userRole — ป้องกัน Role Hijack)
     const {
       userFirstName,
       userLastName,
@@ -14,7 +14,6 @@ exports.register = async (req, res) => {
       userPassword,
       userPhone,
       userAddress,
-      userRole,
     } = req.body;
 
     // ตรวจสอบข้อมูลที่จำเป็น (Validation)
@@ -22,10 +21,9 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // กำหนดค่า role เริ่มต้น
-    const allowedRoles = ["editor", "admin"];
-    // ถ้า role ที่ส่งมาไม่ถูกต้อง ให้ตั้งเป็น "customer"
-    const role = allowedRoles.includes(userRole) ? userRole : "customer";
+    // [Security] role ถูก hardcode เป็น "customer" เสมอ
+    // การสร้าง editor/admin ทำได้ผ่าน Admin Panel เท่านั้น
+    const role = "customer";
 
     // Hash Password
     const hashedPassword = await bcrypt.hash(userPassword, 10);
