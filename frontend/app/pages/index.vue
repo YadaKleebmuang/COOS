@@ -1,326 +1,297 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, onMounted } from "vue"
 import { useApi } from "~/composables/useApi"
-import type { WorkType } from "~/types/order.types"
+import type { Package } from "~/types/order.types"
 
 definePageMeta({
   layout: "default"
 })
 
-const token = useCookie<string | null>("token")
-const router = useRouter()
 const { apiFetch } = useApi()
 
-// --- Auth & User State ---
-const currentUser = ref<any>(null)
-const checkAuth = async () => {
-  if (token.value) {
-    try {
-      const data = await apiFetch<any>("/users/me")
-      currentUser.value = data
-    } catch (err) {
-      console.error("Auth check failed:", err)
-      token.value = null // Clear invalid token
-      currentUser.value = null
-    }
-  }
+const featuredImages = ref<any[]>([])
+const packages = ref<Package[]>([])
+const loading = ref(true)
+
+const selectedImage = ref<any>(null)
+const isDetailsModalOpen = ref(false)
+
+const openDetails = (img: any) => {
+  selectedImage.value = img
+  isDetailsModalOpen.value = true
 }
-
-const logout = async () => {
-  token.value = null
-  currentUser.value = null
-  router.push("/")
-}
-
-// --- Gallery & Category State ---
-const images = ref<any[]>([])
-const workTypes = ref<WorkType[]>([])
-const loading = ref(false)
-const error = ref("")
-
-// Search & Filter state
-const search = ref("")
-const selectedWorkTypeId = ref<number | null>(null) // null means "All"
-const sortBy = ref("newest") // newest, oldest
-const otherLimit = ref(6) // Number of other images to display initially
 
 const loadData = async () => {
-  loading.value = true
-  error.value = ""
   try {
-    const [imgData, wtData] = await Promise.all([
-      apiFetch<any[]>("/gallery-images"),
-      apiFetch<WorkType[]>("/work-types").catch(() => []), // fallback if guest or error
+    const [imgData, pkgData] = await Promise.all([
+      apiFetch<any[]>("/gallery-images").catch(() => []),
+      apiFetch<Package[]>("/packages").catch(() => [])
     ])
-    images.value = imgData
 
-    if (wtData && wtData.length > 0) {
-      workTypes.value = wtData.filter(wt => wt.workTypeIsActive === 1)
-    } else {
-      // Fallback categories for guest visitors
-      workTypes.value = [
-        { workTypeId: 1, workTypeName: "Pre-wedding", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-        { workTypeId: 2, workTypeName: "Portrait", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-        { workTypeId: 3, workTypeName: "ครอบครัว (Family)", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-      ]
-    }
-  } catch (err: any) {
-    error.value = err?.message || "ไม่สามารถโหลดข้อมูลแกลเลอรีได้"
+    // เอาแค่ 3 รูปล่าสุด
+    featuredImages.value = imgData.slice(0, 3)
+    // แพ็กเกจเอาเฉพาะที่เปิดใช้งาน
+    packages.value = pkgData.filter(p => p.packageIsActive === 1)
+  } catch (error) {
+    console.error("Failed to load landing data", error)
   } finally {
     loading.value = false
   }
 }
 
-onMounted(async () => {
-  await checkAuth()
-  await loadData()
+onMounted(() => {
+  loadData()
 })
-
-// --- Computed Filters & Sorting ---
-const filteredImages = computed(() => {
-  let result = images.value
-
-  // Filter by category
-  if (selectedWorkTypeId.value !== null) {
-    result = result.filter(img => img.workTypeId === selectedWorkTypeId.value)
-  }
-
-  // Filter by search text
-  if (search.value.trim()) {
-    const query = search.value.toLowerCase().trim()
-    result = result.filter(img => 
-      img.imageTitle?.toLowerCase().includes(query) ||
-      img.imageDescription?.toLowerCase().includes(query) ||
-      img.imageTags?.toLowerCase().includes(query)
-    )
-  }
-
-  // Apply sorting
-  const sorted = [...result]
-  if (sortBy.value === "oldest") {
-    // Newest is default in DB, reverse to get oldest
-    return sorted.reverse()
-  }
-
-  return sorted
-})
-
-// --- Category Tabs ---
-const categoryTabs = computed(() => {
-  return [
-    { id: null, name: "ทั้งหมด" },
-    ...workTypes.value.map(wt => ({ id: wt.workTypeId, name: wt.workTypeName }))
-  ]
-})
-
-// --- Featured Work (First 2 images) ---
-const featuredImages = computed(() => {
-  return filteredImages.value.slice(0, 2)
-})
-
-// --- Other Work (Remaining images) ---
-const otherImages = computed(() => {
-  return filteredImages.value.slice(2, 2 + otherLimit.value)
-})
-
-const hasMore = computed(() => {
-  return filteredImages.value.length > otherImages.value.length + 2
-})
-
-const loadMore = () => {
-  otherLimit.value += 6
-}
 </script>
 
 <template>
-  <div>
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-      
-      <!-- Search & Filters Container -->
-      <div class="space-y-6">
-        <!-- Search input -->
-        <div class="relative max-w-3xl mx-auto">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  <div class="bg-white">
+    <!-- Hero Section -->
+    <section class="relative bg-gray-50/50 overflow-hidden py-24 md:py-32">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <!-- Text column -->
+          <div class="text-left space-y-6">
+            <span
+              class="inline-block bg-gray-100 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-gray-200">
+              COOS — Creative Order & Online Studio
+            </span>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
+              สั่งทำภาพสไตล์ที่คุณต้องการ<br class="hidden sm:block" />
+              ง่าย รวดเร็ว โปร่งใส
+            </h1>
+            <p class="text-base md:text-lg text-gray-500 leading-relaxed max-w-xl">
+              เลือกสไตล์จากแกลเลอรี เลือกแพ็กเกจ อัปโหลดภาพต้นฉบับ แล้วให้ทีมของเรานำเสนอผลงานให้คุณคัดเลือก
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+              <NuxtLink to="/customer/orders/create"
+                class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-xl shadow hover:shadow-lg transition-all text-center text-sm">
+                เริ่มสั่งงาน
+              </NuxtLink>
+              <NuxtLink to="/gallery"
+                class="bg-white border border-gray-200 hover:border-gray-900 text-gray-900 font-bold py-4 px-8 rounded-xl shadow-sm hover:shadow transition-all text-center text-sm">
+                ดูแกลเลอรี
+              </NuxtLink>
+            </div>
+          </div>
+          <!-- Grid of Images column -->
+          <div class="grid grid-cols-2 gap-4">
+            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=500&auto=format&fit=crop&q=80"
+              alt="COOS B&W 1"
+              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
+            <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=500&auto=format&fit=crop&q=80"
+              alt="COOS B&W 2"
+              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
+            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&auto=format&fit=crop&q=80"
+              alt="COOS B&W 3"
+              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&auto=format&fit=crop&q=80"
+              alt="COOS B&W 4"
+              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Latest Works Section -->
+    <section class="py-24 bg-gray-50/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-12">
+          <div class="text-left">
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">ผลงานล่าสุด</h3>
+            <p class="text-sm text-gray-500">ตัวอย่างสไตล์ที่ลูกค้าเลือกใช้บริการ</p>
+          </div>
+          <NuxtLink to="/gallery"
+            class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+            ดูทั้งหมด
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
             </svg>
-          </div>
-          <input
-            v-model="search"
-            type="text"
-            placeholder="ค้นหาภาพถ่ายหรือคำจำกัดความ (Prompt)..."
-            class="block w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-2xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-700 placeholder-slate-400 transition-all duration-300 hover:border-slate-300 text-sm"
-          />
+          </NuxtLink>
         </div>
 
-        <!-- Filter Controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">FILTER:</span>
-            <button
-              v-for="tab in categoryTabs"
-              :key="tab.id ?? 'all'"
-              @click="selectedWorkTypeId = tab.id"
-              class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider"
-              :class="selectedWorkTypeId === tab.id
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/60'"
-            >
-              {{ tab.name }}
-            </button>
-          </div>
+        <div v-if="loading" class="flex justify-center py-12">
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        </div>
 
-          <!-- Sort / Layout Selectors -->
-          <div class="flex items-center gap-3">
-            <select
-              v-model="sortBy"
-              class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="newest">อัปเดตล่าสุด</option>
-              <option value="oldest">อัปเดตเก่าสุด</option>
-            </select>
+        <div v-else-if="featuredImages.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div v-for="img in featuredImages" :key="img.imageId">
+            <GalleryImageCard :img="img" @view-details="openDetails" />
           </div>
         </div>
-      </div>
 
-      <!-- ===== Loading State ===== -->
-      <div v-if="loading" class="py-20 text-center">
-        <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-        <p class="text-slate-400 font-medium">กำลังโหลดผลงานแกลเลอรี...</p>
-      </div>
-
-      <!-- ===== Error State ===== -->
-      <div v-else-if="error" class="py-12 text-center max-w-md mx-auto">
-        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div v-else class="text-center py-12">
+          <p class="text-gray-500 text-sm">ยังไม่มีผลงานแสดงในขณะนี้</p>
         </div>
-        <h3 class="text-lg font-bold text-red-600 mb-1">ไม่สามารถโหลดแกลเลอรีได้</h3>
-        <p class="text-slate-500 text-sm mb-4">{{ error }}</p>
-        <button @click="loadData" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">
-          ลองใหม่อีกครั้ง
-        </button>
       </div>
+    </section>
 
-      <!-- ===== Empty State ===== -->
-      <div v-else-if="filteredImages.length === 0" class="py-20 text-center">
-        <div class="text-5xl mb-4">🖼️</div>
-        <h3 class="text-lg font-bold text-slate-700 mb-1">ไม่พบรูปภาพผลงาน</h3>
-        <p class="text-slate-400 text-sm">ไม่พบรูปภาพที่ตรงกับการค้นหาหรือตัวกรองนี้</p>
-      </div>
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-left mb-16 border-b border-gray-100 pb-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-1">ขั้นตอนการใช้งาน</h3>
+          <p class="text-sm text-gray-500">4 ขั้นตอนง่ายๆ จากไอเดียถึงผลงาน</p>
+        </div>
 
-      <!-- ===== Gallery Content ===== -->
-      <div v-else class="space-y-12">
-        
-        <!-- SECTION 1: FEATURED WORK -->
-        <section v-if="featuredImages.length > 0" class="space-y-4 text-left">
-          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">FEATURED_WORK</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Step 1 -->
+          <div
+            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
             <div
-              v-for="img in featuredImages"
-              :key="img.imageId"
-              class="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
-            >
-              <!-- Card Image with Hover overlay -->
-              <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <a :href="img.imageUrl" target="_blank" class="bg-white/95 hover:bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    เปิดดูรูปภาพ
-                  </a>
-                </div>
-                <!-- Work Type Badge -->
-                <span class="absolute top-4 left-4 bg-indigo-600/90 text-white backdrop-blur-sm text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full shadow">
-                  {{ img.workTypeName }}
-                </span>
-              </div>
-              
-              <!-- Card Details -->
-              <div class="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-extrabold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{{ img.imageTitle || 'Untitled' }}</h3>
-                  <p class="text-sm text-slate-500 mt-2 leading-relaxed line-clamp-2">{{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}</p>
-                </div>
-                <!-- Tags -->
-                <div v-if="img.imageTags" class="flex flex-wrap gap-1.5 mt-4">
-                  <span
-                    v-for="tag in img.imageTags.split(',')"
-                    :key="tag"
-                    class="text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-400 font-bold px-2.5 py-1 rounded-md transition"
-                  >
-                    #{{ tag.trim() }}
-                  </span>
-                </div>
-              </div>
-            </div>
+              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
+              1</div>
+            <h4 class="text-base font-bold text-gray-900 mb-2">เลือกสไตล์</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">ดูตัวอย่างในแกลเลอรีและเลือกแนวที่คุณชอบ</p>
           </div>
-        </section>
-
-        <!-- SECTION 2: OTHER WORK -->
-        <section v-if="otherImages.length > 0" class="space-y-4 text-left">
-          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">OTHER_WORK</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Step 2 -->
+          <div
+            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
             <div
-              v-for="img in otherImages"
-              :key="img.imageId"
-              class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group"
-            >
-              <!-- Card Image with Hover Overlay -->
-              <div class="relative aspect-square overflow-hidden bg-slate-100">
-                <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <a :href="img.imageUrl" target="_blank" class="bg-white/95 hover:bg-white text-slate-900 font-bold px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1.5 shadow transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    เปิดดูรูปภาพ
-                  </a>
-                </div>
-                <!-- Category Badge -->
-                <span class="absolute top-3 left-3 bg-slate-900/80 text-white backdrop-blur-sm text-[9px] font-bold tracking-wider px-2 py-0.5 rounded">
-                  {{ img.workTypeName }}
+              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
+              2</div>
+            <h4 class="text-base font-bold text-gray-900 mb-2">เลือกแพ็กเกจ</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">Basic, Standard หรือ Pro ตามความต้องการ</p>
+          </div>
+          <!-- Step 3 -->
+          <div
+            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            <div
+              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
+              3</div>
+            <h4 class="text-base font-bold text-gray-900 mb-2">อัปโหลดภาพต้นฉบับ</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">ส่งภาพอ้างอิงและรายละเอียดให้กับทีมงาน</p>
+          </div>
+          <!-- Step 4 -->
+          <div
+            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            <div
+              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
+              4</div>
+            <h4 class="text-base font-bold text-gray-900 mb-2">รับผลงาน</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">คัดเลือกภาพและดาวน์โหลดเมื่อพร้อม</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Packages Section -->
+    <section id="packages" class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-left mb-16 border-b border-gray-100 pb-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-1">แพ็กเกจบริการ</h3>
+          <p class="text-sm text-gray-500">เลือกแพ็กเกจที่เหมาะสมกับงานของคุณ</p>
+        </div>
+
+        <div v-if="loading" class="flex justify-center py-12">
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        </div>
+
+        <div v-else-if="packages.length > 0" class="space-y-12">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div v-for="pkg in packages" :key="pkg.packageId"
+              class="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col hover:border-gray-900 hover:shadow-xl transition-all duration-300 relative">
+              <!-- Badge container to keep heights identical -->
+              <div class="h-8 mb-2 flex items-center">
+                <span v-if="pkg.packageName === 'Standard'"
+                  class="bg-gray-50 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border border-gray-200">
+                  ยอดนิยม
                 </span>
               </div>
 
-              <!-- Card Details -->
-              <div class="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-bold text-slate-800 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">{{ img.imageTitle || 'Untitled' }}</h3>
-                  <p class="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-2">{{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}</p>
-                </div>
-                <!-- Tags -->
-                <div v-if="img.imageTags" class="flex flex-wrap gap-1 mt-3">
-                  <span
-                    v-for="tag in img.imageTags.split(',')"
-                    :key="tag"
-                    class="text-[9px] bg-slate-50 hover:bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded font-bold transition"
-                  >
-                    #{{ tag.trim() }}
-                  </span>
+              <!-- Header Row -->
+              <div class="flex justify-between items-baseline mb-2">
+                <h4 class="text-2xl font-bold text-gray-900">{{ pkg.packageName }}</h4>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl font-extrabold text-gray-900">{{ Math.round(pkg.packagePrice).toLocaleString()
+                    }}</span>
+                  <span class="text-xs text-gray-500 font-semibold uppercase">THB</span>
                 </div>
               </div>
+
+              <p class="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">{{ pkg.packageDescription ||
+                'ไม่มีคำอธิบาย' }}</p>
+
+              <!-- Specs List -->
+              <div class="border-t border-gray-100 my-6 pt-6">
+                <div class="space-y-4">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">ภาพส่งมอบ</span>
+                    <span class="font-medium text-gray-900">{{ pkg.packageImageCount }} ภาพ</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">ความละเอียด</span>
+                    <span class="font-medium text-gray-900">
+                      {{ pkg.packageName === 'Standard' ? 'Full HD หรือ 4K' : pkg.packageResolution === 'FullHD' ? 'Full HD' : '4K' }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">ระยะเวลา</span>
+                    <span class="font-medium text-gray-900">
+                      {{ pkg.packageName === 'Basic' ? '3-5' : pkg.packageName === 'Standard' ? '5-7' : '7-10' }} วัน
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <NuxtLink :to="`/customer/orders/create?packageId=${pkg.packageId}`"
+                class="w-full mt-auto border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-900 text-gray-900 font-semibold py-3.5 px-6 rounded-2xl text-center transition-all text-sm shadow-sm hover:shadow">
+                เลือกแพ็กเกจนี้
+              </NuxtLink>
             </div>
           </div>
-        </section>
 
-        <!-- LOAD MORE BUTTON -->
-        <div v-if="hasMore" class="flex justify-center pt-4">
-          <button
-            @click="loadMore"
-            class="px-6 py-2.5 border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 text-slate-600 bg-white hover:bg-indigo-50/10 rounded-xl font-bold text-xs transition-all duration-300 focus:outline-none uppercase tracking-wider"
-          >
-            LOAD_MORE
-          </button>
+          <!-- Table Compare Section -->
+          <div class="pt-12">
+            <h4 class="text-lg font-bold text-gray-900 mb-6 text-left">เปรียบเทียบแพ็กเกจ</h4>
+            <div class="overflow-x-auto border border-gray-200 rounded-3xl bg-white shadow-sm">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-50/50">
+                    <th class="py-5 px-8 text-sm font-semibold text-gray-500">คุณสมบัติ</th>
+                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Basic</th>
+                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Standard</th>
+                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Pro</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr>
+                    <td class="py-5 px-8 text-sm text-gray-500">ราคา</td>
+                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">199 THB</td>
+                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">399 THB</td>
+                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">599 THB</td>
+                  </tr>
+                  <tr>
+                    <td class="py-5 px-8 text-sm text-gray-500">จำนวนภาพ</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">10 ภาพ</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">20 ภาพ</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">30 ภาพ</td>
+                  </tr>
+                  <tr>
+                    <td class="py-5 px-8 text-sm text-gray-500">ความละเอียด</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">Full HD</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">Full HD หรือ 4K</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">4K</td>
+                  </tr>
+                  <tr>
+                    <td class="py-5 px-8 text-sm text-gray-500">ระยะเวลาส่งมอบ</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">3-5 วัน</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">5-7 วัน</td>
+                    <td class="py-5 px-8 text-sm text-gray-900">7-10 วัน</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
+        <div v-else class="text-center py-12">
+          <p class="text-gray-500 text-sm">ไม่มีข้อมูลแพ็กเกจในขณะนี้</p>
+        </div>
       </div>
+    </section>
 
-    </main>
+    <!-- Details Modal -->
+    <GalleryDetailsModal :img="selectedImage" :is-open="isDetailsModalOpen" @close="isDetailsModalOpen = false" />
   </div>
 </template>
-

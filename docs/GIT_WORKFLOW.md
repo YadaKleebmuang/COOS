@@ -190,6 +190,25 @@ git pull origin main
    ```
    > 💡 **หมายเหตุ:** สามารถรันได้จากทุก Branch ไม่ว่าจะเป็น `main`, `feature/frontend`, หรือ `feature/backend` โดย Docker จะใช้ไฟล์จาก Branch ปัจจุบันที่คุณสลับไว้ (Checkout)
 
+3. **คำสั่ง Restart และ Rebuild เฉพาะ Service (Frontend / Backend):**
+   ในกรณีที่มีการแก้ไขการตั้งค่า พึ่งติดตั้ง Package ใหม่ หรือต้องการเริ่มทำงานของ Service บางตัวใหม่โดยไม่ต้องเริ่มระบบใหม่ทั้งหมด:
+   * **Restart แบบปกติ (ไม่ต้องลงทะเบียนอิมเมจใหม่):**
+     ```bash
+     # Restart ฝั่ง Frontend
+     docker compose restart frontend
+
+     # Restart ฝั่ง Backend
+     docker compose restart backend
+     ```
+   * **Rebuild และ Restart เฉพาะ Service (ใช้เมื่อมีการแก้ไข Dockerfile หรือ package.json):**
+     ```bash
+     # Rebuild และเริ่มรัน Frontend ใหม่
+     docker compose up -d --build frontend
+
+     # Rebuild และเริ่มรัน Backend ใหม่
+     docker compose up -d --build backend
+     ```
+
 ---
 
 ## 📋 Checklist & Rules

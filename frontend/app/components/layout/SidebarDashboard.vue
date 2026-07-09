@@ -55,17 +55,22 @@ const menuItems = computed<SidebarItem[]>(() => {
   if (props.role === "editor") {
     return [
       {
-        name: "แดชบอร์ดงาน",
+        name: "แดชบอร์ด",
         path: "/editor/dashboard",
         icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
       },
       {
-        name: "ประวัติการทำงาน",
+        name: "งานที่ได้รับมอบหมาย",
         path: "/editor/jobs",
-        icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
       },
       {
-        name: "แก้ไขโปรไฟล์",
+        name: "บันทึก Prompt",
+        path: "/editor/prompt-notes",
+        icon: "M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+      },
+      {
+        name: "โปรไฟล์",
         path: "/editor/profile",
         icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
       }
@@ -99,40 +104,56 @@ const menuItems = computed<SidebarItem[]>(() => {
 </script>
 
 <template>
-  <aside class="w-64 bg-gray-950 text-gray-400 min-h-screen flex flex-col border-r border-gray-800 flex-shrink-0">
+  <aside class="w-60 bg-white text-gray-600 min-h-screen flex flex-col border-r border-gray-200 flex-shrink-0">
 
     <!-- Brand Logo -->
-    <div class="h-16 flex items-center px-6 border-b border-gray-800 gap-2.5">
-      <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-gray-900 flex-shrink-0">
+    <div class="h-14 flex items-center px-5 border-b border-gray-100 gap-2.5 flex-shrink-0">
+      <div class="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white flex-shrink-0">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
-      <span class="font-bold text-white text-base tracking-wide">COOS STUDIO</span>
+      <div>
+        <p class="text-sm font-bold text-gray-900 leading-none">COOS Studio</p>
+        <p class="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">{{ role === 'editor' ? 'Editor Workspace' : 'Dashboard' }}</p>
+      </div>
     </div>
 
     <!-- Navigation List -->
-    <nav class="flex-1 px-3 py-5 space-y-0.5">
-      <NuxtLink
-        v-for="item in menuItems"
-        :key="item.path"
-        :to="item.path"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-800 hover:text-white"
-        active-class="bg-white text-gray-900 shadow-sm hover:bg-white hover:text-gray-900"
-      >
-        <!-- Icon -->
-        <svg class="w-4.5 h-4.5 flex-shrink-0 w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
-        </svg>
-        <span>{{ item.name }}</span>
-      </NuxtLink>
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+      <div>
+        <p class="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 select-none">
+          เมนูหลัก
+        </p>
+        <div class="space-y-0.5">
+          <NuxtLink
+            v-for="item in menuItems"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+            :class="[
+              $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
+                ? 'bg-gray-900 text-white shadow-sm hover:bg-gray-900 hover:text-white'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            ]"
+          >
+            <!-- Icon -->
+            <svg
+              class="w-4 h-4 flex-shrink-0"
+              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-white' : 'text-gray-400']"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
+            </svg>
+            <span>{{ item.name }}</span>
+          </NuxtLink>
+        </div>
+      </div>
     </nav>
 
     <!-- Footer -->
-    <div class="p-4 border-t border-gray-800">
-      <p class="text-[10px] text-gray-600 font-semibold uppercase tracking-widest text-center">
-        COOS &copy; 2025
-      </p>
+    <div class="px-4 py-3 border-t border-gray-100 flex-shrink-0">
+      <p class="text-[10px] text-gray-400 text-center">COOS © 2025</p>
     </div>
   </aside>
 </template>

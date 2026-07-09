@@ -6,8 +6,8 @@
         <span>© 2026. All rights reserved.</span>
       </div>
       <div class="flex items-center gap-4">
-        <NuxtLink to="/policies/terms" class="hover:text-indigo-600 transition">เงื่อนไขการใช้บริการ</NuxtLink>
-        <NuxtLink to="/policies/privacy" class="hover:text-indigo-600 transition">นโยบายความเป็นส่วนตัว</NuxtLink>
+        <NuxtLink to="/policy?tab=terms" class="hover:text-indigo-600 transition">เงื่อนไขการใช้บริการ</NuxtLink>
+        <NuxtLink to="/policy?tab=privacy" class="hover:text-indigo-600 transition">นโยบายความเป็นส่วนตัว</NuxtLink>
       </div>
     </div>
   </footer>
