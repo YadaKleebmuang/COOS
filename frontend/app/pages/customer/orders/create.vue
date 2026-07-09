@@ -248,26 +248,26 @@ const formatPrice = (n: number) =>
 
       <!-- Header -->
       <div class="mb-8 text-center">
-        <NuxtLink to="/" class="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 transition mb-4">
+        <NuxtLink to="/" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 transition mb-4">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           กลับหน้าหลัก
         </NuxtLink>
-        <h1 class="text-3xl font-bold text-gray-800">🎨 สั่งทำภาพ</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">🎨 สั่งทำภาพ</h1>
         <p class="text-gray-500 mt-1">กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล</p>
       </div>
 
       <!-- ===== Success State ===== -->
-      <div v-if="submitSuccess && createdOrder" class="bg-white rounded-2xl shadow-lg p-8 text-center animate-fade-in">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div v-if="submitSuccess && createdOrder" class="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 text-center animate-fade-in">
+        <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         </div>
         <h2 class="text-2xl font-bold text-gray-800 mb-2">สร้างคำสั่งงานสำเร็จ! 🎉</h2>
-        <p class="text-gray-500 mb-6">หมายเลขออเดอร์: <span class="font-semibold text-indigo-600">#{{ createdOrder.orderId }}</span></p>
+        <p class="text-gray-500 mb-6">หมายเลขออเดอร์: <span class="font-bold text-gray-900">#{{ createdOrder.orderId }}</span></p>
 
-        <div class="bg-gray-50 rounded-xl p-5 max-w-sm mx-auto mb-6 text-left space-y-2">
+        <div class="bg-gray-50 border border-gray-100 rounded-2xl p-5 max-w-sm mx-auto mb-6 text-left space-y-2">
           <div class="flex justify-between text-sm">
             <span class="text-gray-500">ราคาแพ็กเกจ</span>
-            <span class="font-medium">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
+            <span class="font-medium text-gray-900">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
           </div>
           <div v-if="createdOrder.orderUrgentPrice > 0" class="flex justify-between text-sm">
             <span class="text-gray-500">ค่าเร่งด่วน</span>
@@ -279,26 +279,26 @@ const formatPrice = (n: number) =>
           </div>
           <hr class="border-gray-200"/>
           <div class="flex justify-between text-base font-bold">
-            <span>รวมทั้งหมด</span>
-            <span class="text-indigo-600">฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
+            <span class="text-gray-900">รวมทั้งหมด</span>
+            <span class="text-gray-900">฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
           </div>
         </div>
 
-        <p class="text-sm text-amber-600 bg-amber-50 rounded-lg p-3 mb-6">
+        <p class="text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-xl p-3 mb-6">
           ⏳ สถานะ: <strong>รอชำระมัดจำ</strong> — กรุณาชำระมัดจำ 30% เพื่อเริ่มดำเนินการ
         </p>
 
         <NuxtLink to="/"
-          class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition"
+          class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-bold px-8 py-3 rounded-xl transition shadow-sm hover:shadow-md"
         >
           กลับหน้าหลัก
         </NuxtLink>
       </div>
 
       <!-- ===== Loading State ===== -->
-      <div v-else-if="loadingData" class="bg-white rounded-2xl shadow-lg p-12 text-center">
-        <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-        <p class="text-gray-500">กำลังโหลดข้อมูล...</p>
+      <div v-else-if="loadingData" class="bg-white rounded-3xl border border-gray-100 shadow-xl p-12 text-center">
+        <div class="animate-spin w-10 h-10 border-4 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
+        <p class="text-gray-500 font-semibold">กำลังโหลดข้อมูล...</p>
       </div>
 
       <!-- ===== Error State ===== -->
@@ -324,9 +324,9 @@ const formatPrice = (n: number) =>
                 class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
                 :class="
                   idx + 1 < currentStep
-                    ? 'bg-green-500 text-white shadow-md shadow-green-200'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : idx + 1 === currentStep
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                      ? 'bg-gray-900 text-white shadow-sm'
                       : 'bg-gray-200 text-gray-400'
                 "
               >
@@ -334,9 +334,9 @@ const formatPrice = (n: number) =>
                 <span v-else>{{ idx + 1 }}</span>
               </div>
               <span
-                class="text-sm font-medium hidden sm:inline transition-colors duration-200"
+                class="text-sm font-semibold hidden sm:inline transition-colors duration-200"
                 :class="
-                  idx + 1 <= currentStep ? 'text-gray-700' : 'text-gray-400'
+                  idx + 1 <= currentStep ? 'text-gray-800' : 'text-gray-400'
                 "
               >{{ label }}</span>
             </button>
@@ -345,17 +345,17 @@ const formatPrice = (n: number) =>
             <div
               v-if="idx < stepLabels.length - 1"
               class="w-8 sm:w-16 h-0.5 mx-2 transition-all duration-300"
-              :class="idx + 1 < currentStep ? 'bg-green-400' : 'bg-gray-200'"
+              :class="idx + 1 < currentStep ? 'bg-emerald-500' : 'bg-gray-200'"
             />
           </template>
         </div>
 
         <!-- Card container -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
 
           <!-- ==================== Step 1: Work Type ==================== -->
           <div v-show="currentStep === 1" class="p-6 sm:p-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-1">เลือกประเภทงาน</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-1">เลือกประเภทงาน</h2>
             <p class="text-gray-500 text-sm mb-6">เลือกประเภทภาพที่ต้องการสั่งทำ</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -363,31 +363,31 @@ const formatPrice = (n: number) =>
                 v-for="wt in workTypes"
                 :key="wt.workTypeId"
                 @click="selectedWorkTypeId = wt.workTypeId"
-                class="relative p-5 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md group"
+                class="relative p-6 rounded-2xl border-2 text-left transition-all duration-200 hover:shadow-md group"
                 :class="
                   selectedWorkTypeId === wt.workTypeId
-                    ? 'border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100'
-                    : 'border-gray-200 hover:border-indigo-300 bg-white'
+                    ? 'border-gray-900 bg-gray-50/50 shadow-sm'
+                    : 'border-gray-100 hover:border-gray-300 bg-white'
                 "
               >
                 <!-- Check icon -->
                 <div
                   v-if="selectedWorkTypeId === wt.workTypeId"
-                  class="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center"
+                  class="absolute top-4 right-4 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center"
                 >
                   <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 </div>
 
                 <div class="text-2xl mb-2">🎨</div>
-                <h3 class="font-semibold text-gray-800 text-lg">{{ wt.workTypeName }}</h3>
-                <p v-if="wt.workTypeDescription" class="text-gray-500 text-sm mt-1">{{ wt.workTypeDescription }}</p>
+                <h3 class="font-extrabold text-gray-800 text-lg">{{ wt.workTypeName }}</h3>
+                <p v-if="wt.workTypeDescription" class="text-gray-500 text-sm mt-1.5 leading-relaxed">{{ wt.workTypeDescription }}</p>
               </button>
             </div>
           </div>
 
           <!-- ==================== Step 2: Package ==================== -->
           <div v-show="currentStep === 2" class="p-6 sm:p-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-1">เลือกแพ็กเกจ</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-1">เลือกแพ็กเกจ</h2>
             <p class="text-gray-500 text-sm mb-6">เลือกแพ็กเกจที่เหมาะกับความต้องการของคุณ</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -395,41 +395,41 @@ const formatPrice = (n: number) =>
                 v-for="pkg in packages"
                 :key="pkg.packageId"
                 @click="selectedPackageId = pkg.packageId"
-                class="relative p-6 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg group flex flex-col"
+                class="relative p-6 rounded-2xl border-2 text-left transition-all duration-200 hover:shadow-lg group flex flex-col"
                 :class="
                   selectedPackageId === pkg.packageId
-                    ? 'border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-100'
-                    : 'border-gray-200 hover:border-indigo-300 bg-white'
+                    ? 'border-gray-900 bg-gray-50/50 shadow-md'
+                    : 'border-gray-100 hover:border-gray-300 bg-white'
                 "
               >
                 <!-- Check -->
                 <div
                   v-if="selectedPackageId === pkg.packageId"
-                  class="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center"
+                  class="absolute top-4 right-4 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center"
                 >
                   <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 </div>
 
                 <!-- Package name -->
-                <h3 class="font-bold text-lg text-gray-800 mb-3">{{ pkg.packageName }}</h3>
+                <h3 class="font-extrabold text-lg text-gray-800 mb-3">{{ pkg.packageName }}</h3>
 
                 <!-- Price -->
                 <div class="mb-4">
-                  <span class="text-3xl font-extrabold text-indigo-600">฿{{ formatPrice(pkg.packagePrice) }}</span>
+                  <span class="text-3xl font-black text-gray-900">฿{{ formatPrice(pkg.packagePrice) }}</span>
                 </div>
 
                 <!-- Details -->
-                <ul class="space-y-2 text-sm text-gray-600 flex-1">
+                <ul class="space-y-2.5 text-sm text-gray-600 flex-1">
                   <li class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     {{ pkg.packageImageCount }} ภาพ
                   </li>
                   <li class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     ความละเอียด {{ pkg.packageResolution }}
                   </li>
                   <li class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     ส่งงานภายใน {{ pkg.packageDeliveryDays }} วัน
                   </li>
                   <li v-if="pkg.packageUrgentPrice" class="flex items-center gap-2">
@@ -442,7 +442,7 @@ const formatPrice = (n: number) =>
                   </li>
                 </ul>
 
-                <p v-if="pkg.packageDescription" class="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">{{ pkg.packageDescription }}</p>
+                <p v-if="pkg.packageDescription" class="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100 leading-relaxed">{{ pkg.packageDescription }}</p>
               </button>
             </div>
           </div>
@@ -461,7 +461,7 @@ const formatPrice = (n: number) =>
                   v-model="form.orderStyle"
                   type="text"
                   placeholder="เช่น Minimal, Retro, Anime, Realistic"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 transition"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-700 transition text-sm"
                 />
               </div>
 
@@ -473,7 +473,7 @@ const formatPrice = (n: number) =>
                   v-model="form.orderColorTone"
                   type="text"
                   placeholder="เช่น Warm, Cool, Pastel, Earth Tone"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 transition"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-700 transition text-sm"
                 />
               </div>
 
@@ -485,7 +485,7 @@ const formatPrice = (n: number) =>
                   v-model="form.orderComposition"
                   rows="3"
                   placeholder="อธิบายฉากหรือองค์ประกอบที่ต้องการ เช่น สวนดอกไม้ ฉากพระอาทิตย์ตก ริมทะเล"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 transition resize-none"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-700 transition resize-none text-sm"
                 />
               </div>
 
@@ -497,7 +497,7 @@ const formatPrice = (n: number) =>
                   v-model="form.orderNote"
                   rows="2"
                   placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้ง Editor"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 transition resize-none"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-700 transition resize-none text-sm"
                 />
               </div>
 
@@ -511,7 +511,7 @@ const formatPrice = (n: number) =>
                   v-model="form.orderRequiredDate"
                   type="date"
                   :min="minDate"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 transition"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-700 transition text-sm"
                 />
               </div>
 
@@ -529,8 +529,8 @@ const formatPrice = (n: number) =>
                   @dragleave.prevent="dragOver = false"
                   @drop.prevent="handleDrop"
                   @click="triggerFileInput"
-                  class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200"
-                  :class="dragOver ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-300 hover:border-indigo-400 bg-gray-50/50'"
+                  class="border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200"
+                  :class="dragOver ? 'border-gray-900 bg-gray-50/50' : 'border-gray-200 hover:border-gray-400 bg-gray-50/50'"
                 >
                   <input
                     type="file"
@@ -541,15 +541,15 @@ const formatPrice = (n: number) =>
                     @change="handleFileSelect"
                   />
                   <div class="flex flex-col items-center justify-center space-y-2">
-                    <div class="text-3xl text-indigo-500">📤</div>
-                    <p class="text-sm font-medium text-gray-700">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                    <div class="text-3xl text-gray-900">📤</div>
+                    <p class="text-sm font-semibold text-gray-700">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
                     <p class="text-xs text-gray-400">รองรับไฟล์ JPEG, PNG, WebP (สูงสุด 20MB ต่อไฟล์)</p>
                   </div>
                 </div>
 
                 <!-- Upload progress / error -->
-                <div v-if="uploadingSource" class="mt-3 flex items-center justify-center gap-2 text-sm text-indigo-600 font-medium">
-                  <div class="animate-spin w-4 h-4 border-2 border-indigo-200 border-t-indigo-600 rounded-full"></div>
+                <div v-if="uploadingSource" class="mt-3 flex items-center justify-center gap-2 text-sm text-gray-900 font-medium">
+                  <div class="animate-spin w-4 h-4 border-2 border-slate-200 border-t-gray-900 rounded-full"></div>
                   กำลังอัปโหลดรูปภาพ...
                 </div>
                 <p v-if="uploadError" class="mt-2 text-xs text-red-600 font-medium">⚠️ {{ uploadError }}</p>
@@ -559,7 +559,7 @@ const formatPrice = (n: number) =>
                   <div
                     v-for="(url, idx) in sourceImageUrls"
                     :key="url"
-                    class="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-white"
+                    class="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-white"
                   >
                     <img :src="url" class="w-full h-full object-cover" />
                     <button
@@ -576,9 +576,9 @@ const formatPrice = (n: number) =>
               </div>
 
               <!-- Toggle: เร่งด่วน -->
-              <div class="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-200">
+              <div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
                 <div>
-                  <p class="font-medium text-gray-800 text-sm">⚡ บริการเร่งด่วน</p>
+                  <p class="font-bold text-gray-800 text-sm">⚡ บริการเร่งด่วน</p>
                   <p v-if="selectedPackage?.packageUrgentPrice" class="text-xs text-orange-600 mt-0.5">
                     +฿{{ formatPrice(selectedPackage.packageUrgentPrice) }}
                   </p>
@@ -598,9 +598,9 @@ const formatPrice = (n: number) =>
               </div>
 
               <!-- Toggle: Gallery -->
-              <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <div class="flex items-center justify-between p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
                 <div>
-                  <p class="font-medium text-gray-800 text-sm">🖼 อนุญาตโชว์ใน Gallery</p>
+                  <p class="font-bold text-gray-800 text-sm">🖼 อนุญาตโชว์ใน Gallery</p>
                   <p v-if="selectedPackage" class="text-xs text-blue-600 mt-0.5">
                     ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด ฿{{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
                   </p>
@@ -619,23 +619,23 @@ const formatPrice = (n: number) =>
             </div>
 
             <!-- Price Preview -->
-            <div v-if="selectedPackage" class="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100">
-              <h3 class="font-semibold text-gray-800 text-sm mb-3">💰 สรุปราคาเบื้องต้น</h3>
+            <div v-if="selectedPackage" class="mt-6 bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <h3 class="font-bold text-gray-900 text-sm mb-3">💰 สรุปราคาเบื้องต้น</h3>
               <div class="space-y-1.5 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-600">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
-                  <span class="font-medium">฿{{ formatPrice(pricePreview.base) }}</span>
+                  <span class="text-gray-500">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
+                  <span class="font-semibold text-gray-900">฿{{ formatPrice(pricePreview.base) }}</span>
                 </div>
                 <div v-if="pricePreview.urgent > 0" class="flex justify-between text-orange-600">
                   <span>ค่าเร่งด่วน</span>
-                  <span class="font-medium">+฿{{ formatPrice(pricePreview.urgent) }}</span>
+                  <span class="font-semibold">+฿{{ formatPrice(pricePreview.urgent) }}</span>
                 </div>
                 <div v-if="pricePreview.discount > 0" class="flex justify-between text-green-600">
                   <span>ส่วนลด Gallery</span>
-                  <span class="font-medium">-฿{{ formatPrice(pricePreview.discount) }}</span>
+                  <span class="font-semibold">-฿{{ formatPrice(pricePreview.discount) }}</span>
                 </div>
-                <hr class="border-indigo-200" />
-                <div class="flex justify-between text-base font-bold text-indigo-700">
+                <hr class="border-gray-200" />
+                <div class="flex justify-between text-base font-black text-gray-900">
                   <span>รวมโดยประมาณ</span>
                   <span>฿{{ formatPrice(pricePreview.total) }}</span>
                 </div>
@@ -650,51 +650,51 @@ const formatPrice = (n: number) =>
 
             <div class="space-y-5">
               <!-- Work Type -->
-              <div class="bg-gray-50 rounded-xl p-4">
+              <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">ประเภทงาน</p>
-                <p class="font-semibold text-gray-800 text-lg">🎨 {{ selectedWorkType?.workTypeName }}</p>
+                <p class="font-bold text-gray-800 text-lg">🎨 {{ selectedWorkType?.workTypeName }}</p>
               </div>
 
               <!-- Package -->
-              <div class="bg-gray-50 rounded-xl p-4">
+              <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">แพ็กเกจ</p>
-                <p class="font-semibold text-gray-800 text-lg">📦 {{ selectedPackage?.packageName }}</p>
+                <p class="font-bold text-gray-800 text-lg">📦 {{ selectedPackage?.packageName }}</p>
                 <div class="flex flex-wrap gap-3 mt-2 text-sm text-gray-600">
-                  <span class="bg-white px-3 py-1 rounded-lg border">{{ selectedPackage?.packageImageCount }} ภาพ</span>
-                  <span class="bg-white px-3 py-1 rounded-lg border">{{ selectedPackage?.packageResolution }}</span>
-                  <span class="bg-white px-3 py-1 rounded-lg border">{{ selectedPackage?.packageDeliveryDays }} วัน</span>
+                  <span class="bg-white px-3 py-1 rounded-lg border border-gray-200/60 font-semibold">{{ selectedPackage?.packageImageCount }} ภาพ</span>
+                  <span class="bg-white px-3 py-1 rounded-lg border border-gray-200/60 font-semibold">{{ selectedPackage?.packageResolution }}</span>
+                  <span class="bg-white px-3 py-1 rounded-lg border border-gray-200/60 font-semibold">{{ selectedPackage?.packageDeliveryDays }} วัน</span>
                 </div>
               </div>
 
               <!-- Details -->
-              <div class="bg-gray-50 rounded-xl p-4">
+              <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">รายละเอียดงาน</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div v-if="form.orderStyle">
-                    <span class="text-gray-500">สไตล์:</span>
-                    <span class="ml-1 font-medium text-gray-800">{{ form.orderStyle }}</span>
+                    <span class="text-gray-500 font-medium">สไตล์:</span>
+                    <span class="ml-1 font-bold text-gray-800">{{ form.orderStyle }}</span>
                   </div>
                   <div v-if="form.orderColorTone">
-                    <span class="text-gray-500">โทนสี:</span>
-                    <span class="ml-1 font-medium text-gray-800">{{ form.orderColorTone }}</span>
+                    <span class="text-gray-500 font-medium">โทนสี:</span>
+                    <span class="ml-1 font-bold text-gray-800">{{ form.orderColorTone }}</span>
                   </div>
                   <div class="sm:col-span-2" v-if="form.orderComposition">
-                    <span class="text-gray-500">องค์ประกอบฉาก:</span>
-                    <span class="ml-1 font-medium text-gray-800">{{ form.orderComposition }}</span>
+                    <span class="text-gray-500 font-medium">องค์ประกอบฉาก:</span>
+                    <span class="ml-1 font-bold text-gray-800">{{ form.orderComposition }}</span>
                   </div>
                   <div class="sm:col-span-2" v-if="form.orderNote">
-                    <span class="text-gray-500">หมายเหตุ:</span>
-                    <span class="ml-1 font-medium text-gray-800">{{ form.orderNote }}</span>
+                    <span class="text-gray-500 font-medium">หมายเหตุ:</span>
+                    <span class="ml-1 font-bold text-gray-800">{{ form.orderNote }}</span>
                   </div>
                   <div>
-                    <span class="text-gray-500">วันรับงาน:</span>
-                    <span class="ml-1 font-medium text-gray-800">{{ form.orderRequiredDate }}</span>
+                    <span class="text-gray-500 font-medium">วันรับงาน:</span>
+                    <span class="ml-1 font-bold text-gray-800">{{ form.orderRequiredDate }}</span>
                   </div>
                   <div v-if="form.orderIsUrgent">
-                    <span class="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md text-xs font-medium">⚡ เร่งด่วน</span>
+                    <span class="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-100 px-2.5 py-0.5 rounded-md text-xs font-bold">⚡ เร่งด่วน</span>
                   </div>
                   <div v-if="form.orderIsGalleryAllowed">
-                    <span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md text-xs font-medium">🖼 โชว์ Gallery</span>
+                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-0.5 rounded-md text-xs font-bold">🖼 โชว์ Gallery</span>
                   </div>
                   <div
                     v-if="!form.orderStyle && !form.orderColorTone && !form.orderComposition && !form.orderNote && !form.orderIsUrgent && !form.orderIsGalleryAllowed"
@@ -706,23 +706,23 @@ const formatPrice = (n: number) =>
               </div>
 
               <!-- Pricing -->
-              <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100">
+              <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">สรุปราคา</p>
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
-                    <span class="text-gray-600">ราคาแพ็กเกจ ({{ selectedPackage?.packageName }})</span>
-                    <span class="font-medium">฿{{ formatPrice(pricePreview.base) }}</span>
+                    <span class="text-gray-500">ราคาแพ็กเกจ ({{ selectedPackage?.packageName }})</span>
+                    <span class="font-semibold text-gray-900">฿{{ formatPrice(pricePreview.base) }}</span>
                   </div>
                   <div v-if="pricePreview.urgent > 0" class="flex justify-between text-orange-600">
                     <span>ค่าเร่งด่วน</span>
-                    <span class="font-medium">+฿{{ formatPrice(pricePreview.urgent) }}</span>
+                    <span class="font-semibold">+฿{{ formatPrice(pricePreview.urgent) }}</span>
                   </div>
                   <div v-if="pricePreview.discount > 0" class="flex justify-between text-green-600">
                     <span>ส่วนลด Gallery ({{ selectedPackage?.packageGalleryDiscount }}%)</span>
-                    <span class="font-medium">-฿{{ formatPrice(pricePreview.discount) }}</span>
+                    <span class="font-semibold">-฿{{ formatPrice(pricePreview.discount) }}</span>
                   </div>
-                  <hr class="border-indigo-200" />
-                  <div class="flex justify-between text-lg font-bold text-indigo-700">
+                  <hr class="border-gray-200" />
+                  <div class="flex justify-between text-lg font-black text-gray-900">
                     <span>รวมทั้งหมด</span>
                     <span>฿{{ formatPrice(pricePreview.total) }}</span>
                   </div>
@@ -735,13 +735,13 @@ const formatPrice = (n: number) =>
                 <h3 class="font-bold text-gray-800 text-sm">📄 ข้อตกลงและเงื่อนไขการใช้บริการ</h3>
                 
                 <!-- Privacy Card -->
-                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-800 leading-relaxed text-left">
+                <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 leading-relaxed text-left">
                   <p class="font-bold mb-1">นโยบายความเป็นส่วนตัว (Privacy Policy)</p>
                   <p>รูปภาพต้นฉบับที่ท่านอัปโหลดเข้าระบบ จะถูกนำไปใช้เพื่อการประมวลผลและการตกแต่งภาพตามสั่งเท่านั้น ทางเราจะเก็บรักษาไฟล์ของท่านไว้เป็นความลับ และลบออกจากฐานข้อมูลภายใน 30 วันหลังจากออเดอร์เสร็จสิ้น</p>
                 </div>
 
                 <!-- AI Disclaimer Card -->
-                <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-xs text-amber-800 leading-relaxed text-left">
+                <div class="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 text-xs text-amber-800 leading-relaxed text-left">
                   <p class="font-bold mb-1">ข้อจำกัดความรับผิดชอบและลิขสิทธิ์ AI (AI Disclaimer)</p>
                   <p>ผลงานภาพชิ้นนี้มีการใช้เทคโนโลยีปัญญาประดิษฐ์ (AI) ในกระบวนการสร้างสรรค์ร่วมกับงานฝีมือของศิลปิน ลิขสิทธิ์ของภาพผลงานขั้นสุดท้ายจะถูกโอนย้ายให้เป็นของท่าน แต่ทางระบบขอสงวนสิทธิ์การนำผลงานไปโชว์ใน Portfolio/Gallery หากท่านได้เลือกรับส่วนลด</p>
                 </div>
@@ -751,16 +751,16 @@ const formatPrice = (n: number) =>
                   <input
                     type="checkbox"
                     v-model="acceptedDisclaimer"
-                    class="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500 mt-0.5 cursor-pointer"
+                    class="w-4 h-4 rounded text-gray-900 border-gray-300 focus:ring-gray-900 mt-0.5 cursor-pointer"
                   />
-                  <span class="text-xs font-medium text-gray-600 select-none">
+                  <span class="text-xs font-semibold text-gray-600 select-none">
                     ข้าพเจ้าได้อ่าน เข้าใจ และยอมรับนโยบายความเป็นส่วนตัวและข้อตกลงเกี่ยวกับผลงาน AI เรียบร้อยแล้ว
                   </span>
                 </label>
               </div>
 
               <!-- Submit Error -->
-              <div v-if="submitError" class="bg-red-50 border border-red-200 rounded-xl p-4">
+              <div v-if="submitError" class="bg-red-50 border border-red-100 rounded-2xl p-4">
                 <p class="text-red-600 text-sm font-medium">❌ {{ submitError }}</p>
               </div>
             </div>
@@ -771,7 +771,7 @@ const formatPrice = (n: number) =>
             <button
               v-if="currentStep > 1"
               @click="prevStep"
-              class="flex items-center gap-1.5 text-gray-600 hover:text-gray-800 font-medium transition text-sm"
+              class="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 font-semibold transition text-sm"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               ย้อนกลับ
@@ -783,7 +783,7 @@ const formatPrice = (n: number) =>
               v-if="currentStep < totalSteps"
               @click="nextStep"
               :disabled="!canGoNext"
-              class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition text-sm"
+              class="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-6 py-2.5 rounded-xl transition text-sm shadow-sm hover:shadow-md"
             >
               ถัดไป
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -793,7 +793,7 @@ const formatPrice = (n: number) =>
               v-else
               @click="submitOrder"
               :disabled="submitting || !acceptedDisclaimer"
-              class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-semibold px-8 py-2.5 rounded-xl transition text-sm"
+              class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white font-bold px-8 py-2.5 rounded-xl transition text-sm shadow-sm hover:shadow-md"
             >
               <svg v-if="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
