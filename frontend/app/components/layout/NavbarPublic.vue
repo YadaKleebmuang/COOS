@@ -74,21 +74,35 @@ onBeforeUnmount(() => {
           class="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors duration-200"
           active-class="text-gray-900"
         >
+          หน้าแรก
+        </NuxtLink>
+        <NuxtLink
+          to="/gallery"
+          class="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors duration-200"
+          active-class="text-gray-900"
+        >
           แกลเลอรี
         </NuxtLink>
         <NuxtLink
-          to="/customer/orders/create"
+          to="/packages"
           class="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors duration-200"
           active-class="text-gray-900"
         >
-          สั่งแต่งภาพ
+          แพ็กเกจ
         </NuxtLink>
         <NuxtLink
-          to="/customer/orders"
+          to="/how-it-works"
           class="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors duration-200"
           active-class="text-gray-900"
         >
-          ออเดอร์ของฉัน
+          ขั้นตอนการใช้งาน
+        </NuxtLink>
+        <NuxtLink
+          to="/policy"
+          class="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors duration-200"
+          active-class="text-gray-900"
+        >
+          นโยบาย
         </NuxtLink>
       </nav>
 
@@ -96,6 +110,13 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-3">
         <template v-if="currentUser">
           <div class="flex items-center gap-3">
+
+            <NuxtLink
+              to="/customer/orders/create"
+              class="hidden sm:flex bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm transition-all duration-200"
+            >
+              เริ่มสั่งงาน
+            </NuxtLink>
 
             <!-- Greeting -->
             <span class="text-sm font-medium text-gray-500 hidden sm:inline">

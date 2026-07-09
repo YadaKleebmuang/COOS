@@ -1,326 +1,206 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, onMounted } from "vue"
 import { useApi } from "~/composables/useApi"
-import type { WorkType } from "~/types/order.types"
+import type { Package } from "~/types/order.types"
 
 definePageMeta({
   layout: "default"
 })
 
-const token = useCookie<string | null>("token")
-const router = useRouter()
 const { apiFetch } = useApi()
 
-// --- Auth & User State ---
-const currentUser = ref<any>(null)
-const checkAuth = async () => {
-  if (token.value) {
-    try {
-      const data = await apiFetch<any>("/users/me")
-      currentUser.value = data
-    } catch (err) {
-      console.error("Auth check failed:", err)
-      token.value = null // Clear invalid token
-      currentUser.value = null
-    }
-  }
-}
-
-const logout = async () => {
-  token.value = null
-  currentUser.value = null
-  router.push("/")
-}
-
-// --- Gallery & Category State ---
-const images = ref<any[]>([])
-const workTypes = ref<WorkType[]>([])
-const loading = ref(false)
-const error = ref("")
-
-// Search & Filter state
-const search = ref("")
-const selectedWorkTypeId = ref<number | null>(null) // null means "All"
-const sortBy = ref("newest") // newest, oldest
-const otherLimit = ref(6) // Number of other images to display initially
+const featuredImages = ref<any[]>([])
+const packages = ref<Package[]>([])
+const loading = ref(true)
 
 const loadData = async () => {
-  loading.value = true
-  error.value = ""
   try {
-    const [imgData, wtData] = await Promise.all([
-      apiFetch<any[]>("/gallery-images"),
-      apiFetch<WorkType[]>("/work-types").catch(() => []), // fallback if guest or error
+    const [imgData, pkgData] = await Promise.all([
+      apiFetch<any[]>("/gallery-images").catch(() => []),
+      apiFetch<Package[]>("/packages").catch(() => [])
     ])
-    images.value = imgData
-
-    if (wtData && wtData.length > 0) {
-      workTypes.value = wtData.filter(wt => wt.workTypeIsActive === 1)
-    } else {
-      // Fallback categories for guest visitors
-      workTypes.value = [
-        { workTypeId: 1, workTypeName: "Pre-wedding", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-        { workTypeId: 2, workTypeName: "Portrait", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-        { workTypeId: 3, workTypeName: "ครอบครัว (Family)", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
-      ]
-    }
-  } catch (err: any) {
-    error.value = err?.message || "ไม่สามารถโหลดข้อมูลแกลเลอรีได้"
+    
+    // เอาแค่ 3 รูปล่าสุด
+    featuredImages.value = imgData.slice(0, 3)
+    // แพ็กเกจเอาเฉพาะที่เปิดใช้งาน
+    packages.value = pkgData.filter(p => p.packageIsActive === 1)
+  } catch (error) {
+    console.error("Failed to load landing data", error)
   } finally {
     loading.value = false
   }
 }
 
-onMounted(async () => {
-  await checkAuth()
-  await loadData()
+onMounted(() => {
+  loadData()
 })
-
-// --- Computed Filters & Sorting ---
-const filteredImages = computed(() => {
-  let result = images.value
-
-  // Filter by category
-  if (selectedWorkTypeId.value !== null) {
-    result = result.filter(img => img.workTypeId === selectedWorkTypeId.value)
-  }
-
-  // Filter by search text
-  if (search.value.trim()) {
-    const query = search.value.toLowerCase().trim()
-    result = result.filter(img => 
-      img.imageTitle?.toLowerCase().includes(query) ||
-      img.imageDescription?.toLowerCase().includes(query) ||
-      img.imageTags?.toLowerCase().includes(query)
-    )
-  }
-
-  // Apply sorting
-  const sorted = [...result]
-  if (sortBy.value === "oldest") {
-    // Newest is default in DB, reverse to get oldest
-    return sorted.reverse()
-  }
-
-  return sorted
-})
-
-// --- Category Tabs ---
-const categoryTabs = computed(() => {
-  return [
-    { id: null, name: "ทั้งหมด" },
-    ...workTypes.value.map(wt => ({ id: wt.workTypeId, name: wt.workTypeName }))
-  ]
-})
-
-// --- Featured Work (First 2 images) ---
-const featuredImages = computed(() => {
-  return filteredImages.value.slice(0, 2)
-})
-
-// --- Other Work (Remaining images) ---
-const otherImages = computed(() => {
-  return filteredImages.value.slice(2, 2 + otherLimit.value)
-})
-
-const hasMore = computed(() => {
-  return filteredImages.value.length > otherImages.value.length + 2
-})
-
-const loadMore = () => {
-  otherLimit.value += 6
-}
 </script>
 
 <template>
-  <div>
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-      
-      <!-- Search & Filters Container -->
-      <div class="space-y-6">
-        <!-- Search input -->
-        <div class="relative max-w-3xl mx-auto">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            v-model="search"
-            type="text"
-            placeholder="ค้นหาภาพถ่ายหรือคำจำกัดความ (Prompt)..."
-            class="block w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-2xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-700 placeholder-slate-400 transition-all duration-300 hover:border-slate-300 text-sm"
-          />
-        </div>
-
-        <!-- Filter Controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">FILTER:</span>
-            <button
-              v-for="tab in categoryTabs"
-              :key="tab.id ?? 'all'"
-              @click="selectedWorkTypeId = tab.id"
-              class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider"
-              :class="selectedWorkTypeId === tab.id
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/60'"
-            >
-              {{ tab.name }}
-            </button>
-          </div>
-
-          <!-- Sort / Layout Selectors -->
-          <div class="flex items-center gap-3">
-            <select
-              v-model="sortBy"
-              class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="newest">อัปเดตล่าสุด</option>
-              <option value="oldest">อัปเดตเก่าสุด</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Loading State ===== -->
-      <div v-if="loading" class="py-20 text-center">
-        <div class="animate-spin w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-        <p class="text-slate-400 font-medium">กำลังโหลดผลงานแกลเลอรี...</p>
-      </div>
-
-      <!-- ===== Error State ===== -->
-      <div v-else-if="error" class="py-12 text-center max-w-md mx-auto">
-        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-bold text-red-600 mb-1">ไม่สามารถโหลดแกลเลอรีได้</h3>
-        <p class="text-slate-500 text-sm mb-4">{{ error }}</p>
-        <button @click="loadData" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">
-          ลองใหม่อีกครั้ง
-        </button>
-      </div>
-
-      <!-- ===== Empty State ===== -->
-      <div v-else-if="filteredImages.length === 0" class="py-20 text-center">
-        <div class="text-5xl mb-4">🖼️</div>
-        <h3 class="text-lg font-bold text-slate-700 mb-1">ไม่พบรูปภาพผลงาน</h3>
-        <p class="text-slate-400 text-sm">ไม่พบรูปภาพที่ตรงกับการค้นหาหรือตัวกรองนี้</p>
-      </div>
-
-      <!-- ===== Gallery Content ===== -->
-      <div v-else class="space-y-12">
-        
-        <!-- SECTION 1: FEATURED WORK -->
-        <section v-if="featuredImages.length > 0" class="space-y-4 text-left">
-          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">FEATURED_WORK</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div
-              v-for="img in featuredImages"
-              :key="img.imageId"
-              class="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
-            >
-              <!-- Card Image with Hover overlay -->
-              <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <a :href="img.imageUrl" target="_blank" class="bg-white/95 hover:bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    เปิดดูรูปภาพ
-                  </a>
-                </div>
-                <!-- Work Type Badge -->
-                <span class="absolute top-4 left-4 bg-indigo-600/90 text-white backdrop-blur-sm text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full shadow">
-                  {{ img.workTypeName }}
-                </span>
-              </div>
-              
-              <!-- Card Details -->
-              <div class="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-extrabold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{{ img.imageTitle || 'Untitled' }}</h3>
-                  <p class="text-sm text-slate-500 mt-2 leading-relaxed line-clamp-2">{{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}</p>
-                </div>
-                <!-- Tags -->
-                <div v-if="img.imageTags" class="flex flex-wrap gap-1.5 mt-4">
-                  <span
-                    v-for="tag in img.imageTags.split(',')"
-                    :key="tag"
-                    class="text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-400 font-bold px-2.5 py-1 rounded-md transition"
-                  >
-                    #{{ tag.trim() }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 2: OTHER WORK -->
-        <section v-if="otherImages.length > 0" class="space-y-4 text-left">
-          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">OTHER_WORK</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="img in otherImages"
-              :key="img.imageId"
-              class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group"
-            >
-              <!-- Card Image with Hover Overlay -->
-              <div class="relative aspect-square overflow-hidden bg-slate-100">
-                <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <a :href="img.imageUrl" target="_blank" class="bg-white/95 hover:bg-white text-slate-900 font-bold px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-1.5 shadow transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    เปิดดูรูปภาพ
-                  </a>
-                </div>
-                <!-- Category Badge -->
-                <span class="absolute top-3 left-3 bg-slate-900/80 text-white backdrop-blur-sm text-[9px] font-bold tracking-wider px-2 py-0.5 rounded">
-                  {{ img.workTypeName }}
-                </span>
-              </div>
-
-              <!-- Card Details -->
-              <div class="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 class="font-bold text-slate-800 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">{{ img.imageTitle || 'Untitled' }}</h3>
-                  <p class="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-2">{{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}</p>
-                </div>
-                <!-- Tags -->
-                <div v-if="img.imageTags" class="flex flex-wrap gap-1 mt-3">
-                  <span
-                    v-for="tag in img.imageTags.split(',')"
-                    :key="tag"
-                    class="text-[9px] bg-slate-50 hover:bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded font-bold transition"
-                  >
-                    #{{ tag.trim() }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- LOAD MORE BUTTON -->
-        <div v-if="hasMore" class="flex justify-center pt-4">
-          <button
-            @click="loadMore"
-            class="px-6 py-2.5 border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 text-slate-600 bg-white hover:bg-indigo-50/10 rounded-xl font-bold text-xs transition-all duration-300 focus:outline-none uppercase tracking-wider"
+  <div class="bg-white">
+    <!-- Hero Section -->
+    <section class="relative bg-gray-50 overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 md:pt-32 md:pb-32 flex flex-col items-center text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+          COOS Studio <br class="hidden md:block"/>
+          <span class="text-gray-500">สร้างสรรค์ภาพถ่ายในสไตล์คุณ</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-500 max-w-2xl mb-10 leading-relaxed">
+          บริการสั่งทำภาพจากทีมสตูดิโอออนไลน์ เลือกสไตล์จากแกลเลอรี เลือกแพ็กเกจ อัปโหลดภาพต้นฉบับ แล้วให้ทีมของเรานำเสนอผลงานให้คุณคัดเลือก
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <NuxtLink 
+            to="/customer/orders/create" 
+            class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center text-lg"
           >
-            LOAD_MORE
-          </button>
+            เริ่มสั่งงาน
+          </NuxtLink>
+          <NuxtLink 
+            to="/gallery" 
+            class="bg-white border-2 border-gray-200 hover:border-gray-900 text-gray-900 font-bold py-4 px-8 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-center text-lg"
+          >
+            ดูแกลเลอรี
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">How It Works</h2>
+          <h3 class="text-3xl md:text-4xl font-extrabold text-gray-900">ขั้นตอนการใช้งาน</h3>
+          <p class="mt-4 text-lg text-gray-500">4 ขั้นตอนง่ายๆ จากไอเดียถึงผลงาน</p>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Step 1 -->
+          <div class="bg-gray-50 p-8 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-300">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 mx-auto mb-6 shadow-sm">1</div>
+            <h4 class="text-xl font-bold text-gray-900 mb-3">เลือกสไตล์</h4>
+            <p class="text-gray-500">ดูผลงานในแกลเลอรีและเลือกสไตล์หรือโทนภาพที่คุณชื่นชอบ</p>
+          </div>
+          <!-- Step 2 -->
+          <div class="bg-gray-50 p-8 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-300">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 mx-auto mb-6 shadow-sm">2</div>
+            <h4 class="text-xl font-bold text-gray-900 mb-3">เลือกแพ็กเกจ</h4>
+            <p class="text-gray-500">ระบุจำนวนภาพและระยะเวลาที่คุณต้องการจากแพ็กเกจของเรา</p>
+          </div>
+          <!-- Step 3 -->
+          <div class="bg-gray-50 p-8 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-300">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 mx-auto mb-6 shadow-sm">3</div>
+            <h4 class="text-xl font-bold text-gray-900 mb-3">ส่งภาพต้นฉบับ</h4>
+            <p class="text-gray-500">อัปโหลดภาพของคุณเพื่อให้ทีมงานนำไปปรับแต่งตามสไตล์</p>
+          </div>
+          <!-- Step 4 -->
+          <div class="bg-gray-50 p-8 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-300">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 mx-auto mb-6 shadow-sm">4</div>
+            <h4 class="text-xl font-bold text-gray-900 mb-3">รับผลงาน</h4>
+            <p class="text-gray-500">ตรวจสอบและดาวน์โหลดภาพที่แต่งเสร็จสมบูรณ์</p>
+          </div>
+        </div>
       </div>
+    </section>
 
-    </main>
+    <!-- Latest Works Section -->
+    <section class="py-24 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-12">
+          <div>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Latest Works</h2>
+            <h3 class="text-3xl md:text-4xl font-extrabold text-gray-900">ผลงานล่าสุด</h3>
+            <p class="mt-4 text-lg text-gray-500">ตัวอย่างสไตล์ที่ลูกค้าเลือกใช้บริการ</p>
+          </div>
+          <NuxtLink to="/gallery" class="hidden sm:flex items-center text-gray-900 font-bold hover:text-gray-600 transition-colors">
+            ดูทั้งหมด
+            <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </NuxtLink>
+        </div>
+
+        <div v-if="loading" class="flex justify-center py-12">
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        </div>
+
+        <div v-else-if="featuredImages.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div v-for="img in featuredImages" :key="img.imageId">
+            <GalleryImageCard :img="img" />
+          </div>
+        </div>
+        
+        <div v-else class="text-center py-12">
+          <p class="text-gray-500">ยังไม่มีผลงานแสดงในขณะนี้</p>
+        </div>
+        
+        <div class="mt-8 text-center sm:hidden">
+          <NuxtLink to="/gallery" class="inline-flex items-center text-gray-900 font-bold">
+            ดูผลงานทั้งหมด
+            <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Packages Section -->
+    <section class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Pricing</h2>
+          <h3 class="text-3xl md:text-4xl font-extrabold text-gray-900">แพ็กเกจของเรา</h3>
+          <p class="mt-4 text-lg text-gray-500">เลือกแพ็กเกจที่เหมาะกับความต้องการของคุณ</p>
+        </div>
+
+        <div v-if="loading" class="flex justify-center py-12">
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        </div>
+
+        <div v-else-if="packages.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div 
+            v-for="pkg in packages" 
+            :key="pkg.packageId"
+            class="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col hover:border-gray-900 hover:shadow-xl transition-all duration-300"
+          >
+            <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ pkg.packageName }}</h4>
+            <p class="text-gray-500 mb-6 flex-grow">{{ pkg.packageDescription || 'ไม่มีคำอธิบาย' }}</p>
+            
+            <div class="mb-6 border-t border-gray-100 pt-6">
+              <div class="flex items-baseline gap-1">
+                <span class="text-4xl font-extrabold text-gray-900">฿{{ pkg.packagePrice.toLocaleString() }}</span>
+              </div>
+            </div>
+            
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center text-gray-700">
+                <svg class="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                ภาพส่งมอบสูงสุด {{ pkg.packageImageCount }} ภาพ
+              </li>
+              <li class="flex items-center text-gray-700">
+                <svg class="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                ระยะเวลา {{ pkg.packageDurationDays }} วัน
+              </li>
+            </ul>
+            
+            <NuxtLink 
+              to="/customer/orders/create" 
+              class="w-full mt-auto bg-gray-50 hover:bg-gray-900 text-gray-900 hover:text-white font-bold py-3 px-6 rounded-xl text-center transition-colors"
+            >
+              เลือกแพ็กเกจนี้
+            </NuxtLink>
+          </div>
+        </div>
+        
+        <div v-else class="text-center py-12">
+          <p class="text-gray-500">ไม่มีข้อมูลแพ็กเกจในขณะนี้</p>
+        </div>
+        
+        <div class="mt-12 text-center">
+          <NuxtLink to="/packages" class="text-gray-500 hover:text-gray-900 font-semibold underline decoration-2 underline-offset-4">
+            ดูรายละเอียดแพ็กเกจทั้งหมด
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
-

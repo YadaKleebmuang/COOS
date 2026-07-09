@@ -240,7 +240,7 @@ const formatDate = (dateStr?: string) => {
       
       <!-- Nav Header -->
       <div class="mb-8 flex items-center justify-between">
-        <NuxtLink to="/customer/orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-indigo-600 transition">
+        <NuxtLink to="/customer/orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition">
           <svg class="w-4.5 h-4.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -257,7 +257,7 @@ const formatDate = (dateStr?: string) => {
 
       <!-- Loading State -->
       <div v-if="loading" class="bg-white rounded-3xl shadow-xl p-16 text-center border border-gray-100">
-        <div class="animate-spin w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
+        <div class="animate-spin w-12 h-12 border-4 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
         <p class="text-gray-500 font-bold">กำลังดึงข้อมูลออเดอร์...</p>
       </div>
 
@@ -270,7 +270,7 @@ const formatDate = (dateStr?: string) => {
         </div>
         <h3 class="text-lg font-bold text-red-600 mb-1">ไม่สามารถเปิดหน้านี้ได้</h3>
         <p class="text-gray-500 text-sm mb-6">{{ error || 'ไม่พบข้อมูลออเดอร์นี้' }}</p>
-        <NuxtLink to="/customer/orders" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
+        <NuxtLink to="/customer/orders" class="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
           กลับไปหน้าประวัติออเดอร์
         </NuxtLink>
       </div>
@@ -307,7 +307,7 @@ const formatDate = (dateStr?: string) => {
             </div>
             <div>
               <span class="text-xs text-gray-400 font-bold block mb-1">💰 ยอดเงินรวมทั้งสิ้น</span>
-              <span class="font-black text-indigo-600 text-xl">฿{{ formatPrice(order.orderTotalPrice) }}</span>
+              <span class="font-black text-gray-900 text-xl">฿{{ formatPrice(order.orderTotalPrice) }}</span>
             </div>
           </div>
 
@@ -367,9 +367,9 @@ const formatDate = (dateStr?: string) => {
                 class="absolute -left-10 top-0.5 w-8 h-8 rounded-full flex items-center justify-center border-4 text-xs font-extrabold shadow-sm transition-all duration-300"
                 :class="
                   idx < currentStepIndex
-                    ? 'bg-green-500 border-green-100 text-white'
+                    ? 'bg-emerald-600 border-emerald-100 text-white'
                     : idx === currentStepIndex
-                      ? 'bg-indigo-600 border-indigo-100 text-white animate-pulse'
+                      ? 'bg-gray-900 border-gray-200 text-white animate-pulse'
                       : 'bg-white border-gray-200 text-gray-400'
                 "
               >
@@ -413,7 +413,7 @@ const formatDate = (dateStr?: string) => {
                     <span class="text-gray-400">จาก</span>
                     <span class="font-medium text-gray-500">{{ getStatusLabel(log.fromStatus as OrderStatus).split(" (")[0] }}</span>
                     <span class="text-gray-400">➔</span>
-                    <span class="font-bold text-indigo-600">{{ getStatusLabel(log.toStatus as OrderStatus).split(" (")[0] }}</span>
+                    <span class="font-bold text-gray-900">{{ getStatusLabel(log.toStatus as OrderStatus).split(" (")[0] }}</span>
                   </div>
                   <p v-if="log.logNote" class="text-gray-600 font-medium bg-white px-2 py-1 rounded border border-gray-100 mt-1">{{ log.logNote }}</p>
                   <p class="text-[10px] text-gray-400">
@@ -427,7 +427,6 @@ const formatDate = (dateStr?: string) => {
           </div>
         </div>
 
-        <!-- ==================== ส่วนที่ 3: Payment Section ==================== -->
         <div
           v-if="order.orderStatus === 'waiting_deposit' || order.orderStatus === 'waiting_final_payment'"
           class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8"
@@ -441,12 +440,12 @@ const formatDate = (dateStr?: string) => {
             </div>
             <div class="text-right">
               <span class="text-xs text-gray-400 block">ยอดที่ต้องชำระ ({{ paymentInfo.percentage }}%)</span>
-              <span class="text-2xl font-black text-indigo-600">฿{{ formatPrice(paymentInfo.amount) }}</span>
+              <span class="text-2xl font-black text-gray-900">฿{{ formatPrice(paymentInfo.amount) }}</span>
             </div>
           </div>
 
           <!-- Bank Account Info -->
-          <div class="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100/60 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/60 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <div class="text-3xl">🏦</div>
               <div>
@@ -455,7 +454,7 @@ const formatDate = (dateStr?: string) => {
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-base font-black text-indigo-700 bg-white border border-indigo-200 px-3 py-1.5 rounded-xl tracking-wider select-all">123-4-56789-0</span>
+              <span class="text-base font-black text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-xl tracking-wider select-all">123-4-56789-0</span>
             </div>
           </div>
 
@@ -467,7 +466,7 @@ const formatDate = (dateStr?: string) => {
               @drop.prevent="handleDrop"
               @click="triggerFileInput"
               class="border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200"
-              :class="dragOver ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-300 hover:border-indigo-400 bg-gray-50/50'"
+              :class="dragOver ? 'border-gray-900 bg-gray-50/50' : 'border-gray-200 hover:border-gray-400 bg-gray-50/50'"
             >
               <input
                 type="file"
@@ -483,15 +482,15 @@ const formatDate = (dateStr?: string) => {
                 <p class="text-[10px] text-gray-400 underline">คลิกหรือลากสลิปใหม่มาวางที่นี่เพื่อเปลี่ยนไฟล์</p>
               </div>
               <div v-else class="flex flex-col items-center justify-center space-y-2">
-                <div class="text-3xl text-indigo-500">🧾</div>
+                <div class="text-3xl text-gray-900">🧾</div>
                 <p class="text-sm font-semibold text-gray-700">ลากรูปภาพสลิปมาวาง หรือคลิกเพื่ออัปโหลด</p>
                 <p class="text-xs text-gray-400">รองรับไฟล์สลิปรูปภาพ JPG, PNG (สูงสุด 10MB)</p>
               </div>
             </div>
 
             <!-- Upload progress/error indicators -->
-            <div v-if="uploadingSlip" class="flex items-center justify-center gap-2 text-sm text-indigo-600 font-medium">
-              <div class="animate-spin w-4 h-4 border-2 border-indigo-200 border-t-indigo-600 rounded-full"></div>
+            <div v-if="uploadingSlip" class="flex items-center justify-center gap-2 text-sm text-gray-900 font-medium">
+              <div class="animate-spin w-4 h-4 border-2 border-slate-200 border-t-gray-900 rounded-full"></div>
               กำลังประมวลผลรูปภาพสลิป...
             </div>
             <p v-if="uploadError" class="text-xs text-red-600 font-bold text-center">⚠️ {{ uploadError }}</p>
@@ -501,7 +500,7 @@ const formatDate = (dateStr?: string) => {
               <button
                 @click="submitSlip"
                 :disabled="!uploadedSlipUrl || submittingPayment"
-                class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm flex items-center gap-2"
+                class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm flex items-center gap-2"
               >
                 <span v-if="submittingPayment" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
                 {{ submittingPayment ? "กำลังส่ง..." : "ส่งหลักฐานชำระเงิน" }}
@@ -530,11 +529,11 @@ const formatDate = (dateStr?: string) => {
                   <td class="py-4 pr-4 font-bold">
                     {{ pay.paymentType === 'deposit' ? 'เงินมัดจำ (30%)' : 'เงินส่วนที่เหลือ (70%)' }}
                   </td>
-                  <td class="py-4 pr-4 font-bold text-indigo-600">
+                  <td class="py-4 pr-4 font-bold text-gray-900">
                     ฿{{ formatPrice(pay.paymentAmount) }}
                   </td>
                   <td class="py-4 pr-4">
-                    <a :href="pay.paymentSlipUrl" target="_blank" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline font-bold">
+                    <a :href="pay.paymentSlipUrl" target="_blank" class="inline-flex items-center gap-1 text-xs text-gray-900 hover:underline font-bold">
                       📎 เปิดดูสลิป
                     </a>
                   </td>
@@ -584,7 +583,7 @@ const formatDate = (dateStr?: string) => {
               <!-- Thumbnail preview -->
               <div class="relative aspect-[4/3] bg-gray-200 overflow-hidden">
                 <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <span class="absolute top-2 left-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
+                <span class="absolute top-2 left-2 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
                   {{ img.imageType === 'selected_final' ? 'FINAL IMAGE' : 'AI GENERATED' }}
                 </span>
               </div>
@@ -604,7 +603,7 @@ const formatDate = (dateStr?: string) => {
                   :href="img.imageUrl"
                   target="_blank"
                   download
-                  class="w-full inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-sm transition gap-1.5"
+                  class="w-full inline-flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-sm transition gap-1.5"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
