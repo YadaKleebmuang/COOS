@@ -76,7 +76,7 @@ exports.rejectPayment = async (req, res) => {
   try {
     const { id } = req.params;
     const adminId = req.session.userId;
-    const { reason } = req.body;
+    const { reason } = req.body || {};
 
     const payment = await PaymentModel.findById(id);
     if (!payment) {
@@ -98,6 +98,7 @@ exports.rejectPayment = async (req, res) => {
 
     res.status(200).json({ message: "Payment rejected successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Reject Payment Error:", err);
+    res.status(500).json({ message: err.message, stack: err.stack });
   }
 };
