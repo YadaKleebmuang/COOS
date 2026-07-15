@@ -37,7 +37,6 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend/src:/app/src
       - uploads_data:/app/uploads
     depends_on:
       db:
@@ -57,9 +56,6 @@ services:
       NUXT_PUBLIC_API_BASE: http://localhost:3000/api/v1
     ports:
       - "8888:8888"
-    volumes:
-      - ./frontend/app:/app/app
-      - ./frontend/public:/app/public
     depends_on:
       - backend
 
