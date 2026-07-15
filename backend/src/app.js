@@ -6,7 +6,12 @@ const handleUploadError = require('./middlewares/upload.middleware');
 const loadRoutes = require('./routes/index.route');
 const { testConnection } = require('../src/config/db');
 
+const { globalLimiter } = require('./middlewares/rateLimit.middleware');
+
 const app = express();
+
+// Apply the rate limiting middleware to all requests
+app.use(globalLimiter);
 
 app.use(corsMiddleware);
 app.use(express.json());
