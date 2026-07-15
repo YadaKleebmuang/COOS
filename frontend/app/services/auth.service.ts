@@ -40,11 +40,14 @@ export const authService = {
     if (data?.token) {
       const token = useCookie<string | null>("token", {
         sameSite: "lax",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
       });
       token.value = data.token;
 
       const userRole = useCookie<string | null>("userRole", {
         sameSite: "lax",
+        secure: process.env.NODE_ENV === 'production',
       });
       userRole.value = data.user?.userRole || "customer";
     }

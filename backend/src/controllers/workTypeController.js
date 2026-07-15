@@ -1,7 +1,7 @@
 const WorkTypeModel = require("../models/workTypeModel");
 
 // GET /api/v1/work-types
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
   try {
     const includeInactive =
       req.query.all === "true" && req.session?.userRole === "admin";
@@ -13,12 +13,12 @@ exports.getAll = async (req, res) => {
 
     res.status(200).json(rows);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /api/v1/work-types
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
     const { workTypeName, workTypeDescription } = req.body;
 
@@ -39,12 +39,12 @@ exports.create = async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ message: "ชื่อประเภทงานนี้มีอยู่แล้ว" });
     }
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /api/v1/work-types/:id
-exports.update = async (req, res) => {
+exports.update = async (req, res, next) => {
   try {
     const [result] = await WorkTypeModel.update(req.params.id, req.body);
 
@@ -57,12 +57,12 @@ exports.update = async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ message: "ชื่อประเภทงานนี้มีอยู่แล้ว" });
     }
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /api/v1/work-types/:id
-exports.remove = async (req, res) => {
+exports.remove = async (req, res, next) => {
   try {
     const [result] = await WorkTypeModel.delete(req.params.id);
 
@@ -72,6 +72,6 @@ exports.remove = async (req, res) => {
 
     res.status(200).json({ message: "ปิดการใช้งานประเภทงานสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

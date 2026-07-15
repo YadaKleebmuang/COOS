@@ -1,7 +1,7 @@
 const PolicyModel = require("../models/policy.model");
 
 // GET /policies — ดึง policies ทั้งหมด (รองรับ filter)
-exports.getPolicies = async (req, res) => {
+exports.getPolicies = async (req, res, next) => {
   try {
     const { policyType, all } = req.query;
 
@@ -13,12 +13,12 @@ exports.getPolicies = async (req, res) => {
     const policies = await PolicyModel.findAll(filters);
     res.status(200).json(policies);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /policies/type/:type — ดึง policy ตาม type (public)
-exports.getPolicyByType = async (req, res) => {
+exports.getPolicyByType = async (req, res, next) => {
   try {
     const validTypes = ["refund", "terms", "privacy"];
     const { type } = req.params;
@@ -37,12 +37,12 @@ exports.getPolicyByType = async (req, res) => {
 
     res.status(200).json(policy);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /policies/:id — ดึง policy ตาม id
-exports.getPolicyById = async (req, res) => {
+exports.getPolicyById = async (req, res, next) => {
   try {
     const policy = await PolicyModel.findById(req.params.id);
 
@@ -52,12 +52,12 @@ exports.getPolicyById = async (req, res) => {
 
     res.status(200).json(policy);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /policies — สร้าง policy ใหม่ (Admin only)
-exports.createPolicy = async (req, res) => {
+exports.createPolicy = async (req, res, next) => {
   try {
     const { policyTitle, policyContent, policyType } = req.body;
 
@@ -83,12 +83,12 @@ exports.createPolicy = async (req, res) => {
       policyId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /policies/:id — อัปเดต policy (Admin only)
-exports.updatePolicy = async (req, res) => {
+exports.updatePolicy = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await PolicyModel.update(id, req.body);
@@ -99,12 +99,12 @@ exports.updatePolicy = async (req, res) => {
 
     res.status(200).json({ message: "Policy updated" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /policies/:id — ลบ policy (Admin only)
-exports.deletePolicy = async (req, res) => {
+exports.deletePolicy = async (req, res, next) => {
   try {
     const affected = await PolicyModel.remove(req.params.id);
 
@@ -114,6 +114,6 @@ exports.deletePolicy = async (req, res) => {
 
     res.json({ message: "Policy deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

@@ -22,13 +22,13 @@ router.use("/auth", auth);
 // Public routes — ไม่ต้อง login สำหรับ GET (admin routes ป้องกันด้วย middleware ที่ route level)
 router.use("/gallery-images", galleryImageRoutes);
 router.use("/policies", policyRoutes);
+router.use("/packages", packageRoutes);
+router.use("/work-types", workTypeRoutes);
 
 // ทุก route หลังจากนี้ต้อง login
 router.use(authMiddleware);
 
 router.use("/users", userRoutes);
-router.use("/packages", packageRoutes);
-router.use("/work-types", workTypeRoutes);
 router.use("/orders", orderRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/payments", paymentRoutes);

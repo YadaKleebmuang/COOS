@@ -171,6 +171,19 @@ git pull origin main
 1. กดปุ่ม Esc พิมพ์ :wq แล้วกด Enter
 ```
 
+### 💡 การดึงโค้ดระหว่าง Branch งานโดยตรง (เช่น git merge feature/frontend)
+หากคุณกำลังทำงานอยู่บน Branch หนึ่ง (เช่น `feature/backend`) แต่ต้องการดึงงานหรือไฟล์ดีไซน์ล่าสุดจากอีก Branch หนึ่ง (เช่น `feature/frontend`) มาร่วมใช้งานด้วยกันเพื่อป้องกันไม่ให้ระบบเออเร่อ (เช่น หน้าเว็บหาไฟล์ของอีกฝั่งไม่เจอ) สามารถทำได้ดังนี้:
+
+1. **สลับไปยัง Branch ปัจจุบันที่คุณทำงานอยู่ (เป็นฝั่งปลายทางที่จะรับโค้ด):**
+   ```bash
+   git checkout feature/backend
+   ```
+2. **สั่งรวมโค้ดจาก Branch ต้นทางเข้ามา:**
+   ```bash
+   git merge feature/frontend
+   ```
+   *คำสั่งนี้จะดึงไฟล์และประวัติการแก้ไขทั้งหมดจาก `feature/frontend` มารวมเข้ากับ `feature/backend` บนเครื่องของคุณทันทีโดยประวัติไม่สูญหาย*
+
 ---
 
 ## 🐳 Docker Workflow
@@ -189,6 +202,25 @@ git pull origin main
    docker compose up --build
    ```
    > 💡 **หมายเหตุ:** สามารถรันได้จากทุก Branch ไม่ว่าจะเป็น `main`, `feature/frontend`, หรือ `feature/backend` โดย Docker จะใช้ไฟล์จาก Branch ปัจจุบันที่คุณสลับไว้ (Checkout)
+
+3. **คำสั่ง Restart และ Rebuild เฉพาะ Service (Frontend / Backend):**
+   ในกรณีที่มีการแก้ไขการตั้งค่า พึ่งติดตั้ง Package ใหม่ หรือต้องการเริ่มทำงานของ Service บางตัวใหม่โดยไม่ต้องเริ่มระบบใหม่ทั้งหมด:
+   * **Restart แบบปกติ (ไม่ต้องลงทะเบียนอิมเมจใหม่):**
+     ```bash
+     # Restart ฝั่ง Frontend
+     docker compose restart frontend
+
+     # Restart ฝั่ง Backend
+     docker compose restart backend
+     ```
+   * **Rebuild และ Restart เฉพาะ Service (ใช้เมื่อมีการแก้ไข Dockerfile หรือ package.json):**
+     ```bash
+     # Rebuild และเริ่มรัน Frontend ใหม่
+     docker compose up -d --build frontend
+
+     # Rebuild และเริ่มรัน Backend ใหม่
+     docker compose up -d --build backend
+     ```
 
 ---
 
