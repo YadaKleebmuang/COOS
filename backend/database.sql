@@ -204,6 +204,7 @@ INSERT IGNORE INTO `systemSettings` (`settingKey`, `settingValue`) VALUES
 ('studioLineId', '@coosstudio'),
 ('studioFacebook', 'facebook.com/coosstudio'),
 ('studioInstagram', '@coos.studio');
+
 -- 11. Tags Table
 CREATE TABLE IF NOT EXISTS `tags` (
   `tagId` INT AUTO_INCREMENT PRIMARY KEY,
