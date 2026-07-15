@@ -51,6 +51,9 @@ services:
     container_name: coos-frontend
     restart: unless-stopped
     environment:
+      # Internal URL สำหรับ SSR ใน container เพื่อเชื่อมต่อกับ backend โดยตรง
+      NUXT_INTERNAL_API_BASE: http://backend:3000/api/v1
+      # Public URL สำหรับ Browser (เปลี่ยน localhost เป็น IP หรือ Domain หากรันบนเครื่องอื่น)
       NUXT_PUBLIC_API_BASE: http://localhost:3000/api/v1
     ports:
       - "8888:8888"
