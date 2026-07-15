@@ -21,6 +21,10 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    if (userPassword.length < 8) {
+      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
+    }
+
     // [Security] role ถูก hardcode เป็น "customer" เสมอ
     // การสร้าง editor/admin ทำได้ผ่าน Admin Panel เท่านั้น
     const role = "customer";
@@ -170,8 +174,8 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "กรุณากรอก token และรหัสผ่านใหม่" });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" });
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
     }
 
     // ค้นหา user จาก token ที่ยังไม่หมดอายุ
