@@ -263,6 +263,11 @@ exports.uploadImage = async (req, res, next) => {
       return res.status(400).json({ message: "กรุณาระบุ imageType และ imageUrl" });
     }
 
+    const validImageTypes = ["source", "ai_generated", "selected_final"];
+    if (!validImageTypes.includes(imageType)) {
+      return res.status(400).json({ message: "imageType ไม่ถูกต้อง" });
+    }
+
     const order = await OrderModel.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
