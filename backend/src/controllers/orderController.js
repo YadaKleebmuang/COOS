@@ -148,10 +148,10 @@ exports.getById = async (req, res) => {
     }
 
     // Role-based authorization check
-    if (userRole === "customer" && order.customerId !== userId) {
+    if (userRole === "customer" && Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลออเดอร์นี้" });
     }
-    if (userRole === "editor" && order.editorId !== userId) {
+    if (userRole === "editor" && Number(order.editorId) !== Number(userId)) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลออเดอร์นี้" });
     }
 
@@ -188,10 +188,10 @@ exports.updateStatus = async (req, res) => {
     }
 
     // Validate ownership
-    if (userRole === "customer" && order.customerId !== userId) {
+    if (userRole === "customer" && Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ในการแก้ไขออเดอร์นี้" });
     }
-    if (userRole === "editor" && order.editorId !== userId) {
+    if (userRole === "editor" && Number(order.editorId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ในการแก้ไขออเดอร์นี้" });
     }
 
@@ -264,7 +264,7 @@ exports.uploadImage = async (req, res) => {
 
     // Role restrictions for uploading types
     if (userRole === "customer") {
-      if (order.customerId !== userId) {
+      if (Number(order.customerId) !== Number(userId)) {
         return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
       }
       if (imageType !== "source") {
@@ -273,7 +273,7 @@ exports.uploadImage = async (req, res) => {
     }
 
     if (userRole === "editor") {
-      if (order.editorId !== userId) {
+      if (Number(order.editorId) !== Number(userId)) {
         return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
       }
       if (imageType === "source") {
@@ -322,7 +322,7 @@ exports.submitPayment = async (req, res) => {
       return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
     }
 
-    if (order.customerId !== userId) {
+    if (Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ทำรายการในออเดอร์นี้" });
     }
 
