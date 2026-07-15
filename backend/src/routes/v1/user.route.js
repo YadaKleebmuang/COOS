@@ -11,8 +11,8 @@ const router = express.Router();
 router.get("/me", controller.getMyProfile);
 router.patch("/me", uploadProfile.single("profileImage"), controller.updateMyProfile);
 
-router.get("/", controller.getUsers);
-router.get("/:id", controller.getUserById);
+router.get("/", adminOnly, controller.getUsers);
+router.get("/:id", adminOnly, controller.getUserById);
 
 // Admin only
 router.post("/", adminOnly, controller.createUser);
