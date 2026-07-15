@@ -52,20 +52,20 @@ const getStatusLabel = (status: string) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+  <div class="bg-white rounded-xl border border-gray-100 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
     <div class="space-y-2">
       <div class="flex items-center gap-3">
-        <NuxtLink to="/editor/dashboard" class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+        <NuxtLink to="/editor/dashboard" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition">
           ◀
         </NuxtLink>
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">ห้องทำงานช่างแต่งภาพ (Workspace)</span>
+        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">ห้องทำงานช่างแต่งภาพ (Workspace)</span>
       </div>
-      <h1 class="text-2xl font-black text-slate-800">งานหมายเลขออเดอร์ #{{ order.orderId }}</h1>
+      <h1 class="text-2xl font-black text-gray-800">งานหมายเลขออเดอร์ #{{ order.orderId }}</h1>
       <div class="flex flex-wrap gap-2 text-xs">
-        <span class="bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-lg border border-indigo-100">
+        <span class="bg-gray-100 text-gray-700 font-bold px-3 py-1 rounded-lg border border-gray-200">
           ประเภท: {{ order.workTypeName }}
         </span>
-        <span class="bg-slate-100 text-slate-600 font-bold px-3 py-1 rounded-lg">
+        <span class="bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-lg">
           แพ็กเกจ: {{ order.packageName }}
         </span>
         <span class="bg-amber-50 text-amber-700 font-bold px-3 py-1 rounded-lg border border-amber-100">
@@ -80,7 +80,7 @@ const getStatusLabel = (status: string) => {
         v-if="canStart"
         @click="handleStartJob"
         :disabled="updating"
-        class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-sm px-6 py-3 rounded-xl shadow transition flex items-center gap-2"
+        class="bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white font-bold text-sm px-6 py-3 rounded-xl shadow transition flex items-center gap-2"
       >
         <span v-if="updating" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
         ✍️ กดเริ่มทำงาน (Start Job)
@@ -96,9 +96,11 @@ const getStatusLabel = (status: string) => {
         📤 ส่งผลงานให้ลูกค้าตรวจ (Submit Generated)
       </button>
       
-      <div v-if="!canStart && !canSubmit" class="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 border border-slate-100 px-4 py-3 rounded-xl">
+      <div v-if="!canStart && !canSubmit" class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border border-gray-100 px-4 py-3 rounded-xl">
         ไม่มีขั้นตอนรอดำเนินการในส่วนนี้
       </div>
     </div>
   </div>
 </template>
+
+

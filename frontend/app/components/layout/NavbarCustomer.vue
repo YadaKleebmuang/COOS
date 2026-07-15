@@ -69,7 +69,13 @@ onBeforeUnmount(() => {
       <!-- Center: Nav Links -->
       <nav class="hidden md:flex items-center gap-1">
         <NuxtLink to="/"
-          class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200">
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200"
+          exact-active-class="text-gray-900 bg-gray-100">
+          หน้าแรก
+        </NuxtLink>
+        <NuxtLink to="/gallery"
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200"
+          active-class="text-gray-900 bg-gray-100">
           แกลเลอรี
         </NuxtLink>
         <NuxtLink to="/customer/dashboard"
