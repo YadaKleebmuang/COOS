@@ -24,7 +24,7 @@
 | กฎ | รายละเอียด |
 |----|-----------|
 | **อ่าน Context ก่อนเสมอ** | อ่าน `03_PROJECT_STATE.md` เพื่อทราบสถานะล่าสุดก่อนทำงาน |
-| **วิเคราะห์จาก Source Code** | ใช้ข้อมูลจากไฟล์จริงในโปรเจกต์เป็นหลัก |
+| **วิเคราะห์จาก Source Code** | ใช้ข้อมูลจากไฟล์จริงในโปรเจกต์เป็นหลัก เอกสารเป็นเพียงบริบท |
 | **อัปเดต State หลังทำงาน** | เมื่อสร้างเอกสารเสร็จ อัปเดตสถานะใน `03_PROJECT_STATE.md` |
 | **ตรวจสอบความสอดคล้อง** | เนื้อหา S01–S28 ต้องสอดคล้องกัน ไม่ขัดแย้ง |
 | **ใช้ภาษาทางการ** | ภาษาไทยทางการ เหมาะสำหรับรายงานโครงงานมหาวิทยาลัย |
@@ -38,6 +38,7 @@
 | **ห้ามสร้างข้อมูลที่ไม่มีอยู่จริง** | เช่น Feature ที่ยังไม่ได้พัฒนา |
 | **ห้ามข้ามขั้นตอน** | ถ้าข้อมูลไม่พอ ให้ถามผู้ใช้ก่อน |
 | **ห้ามเปลี่ยน Scope** | ยึดตาม In/Out of Scope ที่กำหนดใน S01 |
+| **ห้ามสรุปสถานะจาก UI เพียงอย่างเดียว** | ต้องตรวจสอบ Logic, API, DB และ Permission ที่ Backend ด้วย |
 
 ---
 
@@ -69,6 +70,16 @@
 3. ตอบตรงประเด็น ไม่คาดเดา
 ```
 
+### เมื่อผู้ใช้ขอแก้ Bug หรือพัฒนา Feature
+```
+1. ตรวจสอบ Known Issues ใน 03_PROJECT_STATE.md
+2. อ่าน Source Code ที่เกี่ยวข้อง
+3. วิเคราะห์ผลกระทบ
+4. เสนอวิธีแก้ไขพร้อมหลักฐาน
+5. รอการอนุมัติก่อนแก้โค้ด
+6. หลังแก้เสร็จ อัปเดต Known Issues ใน 03_PROJECT_STATE.md
+```
+
 ---
 
 ## 📁 ไฟล์ Context ที่ต้องอ่าน
@@ -86,11 +97,33 @@
 
 ```
 COOS/
-├── backend/src/          ← Express 5 API (MVC)
-├── frontend/app/         ← Nuxt 3 (Feature-Based)
-├── docs/                 ← Technical Documentation
-│   └── ai/               ← AI Context Files (ไฟล์นี้)
-└── docker-compose.yml    ← 3 Services (db, backend, frontend)
+├── backend/
+│   ├── src/                  ← Express 5 API (MVC)
+│   │   ├── controllers/      ← 13 controllers
+│   │   ├── models/           ← 9 models
+│   │   ├── routes/v1/        ← 14 route files
+│   │   ├── middlewares/      ← 6 middlewares
+│   │   └── config/           ← db, env, upload
+│   ├── migrations/           ← SQL migration scripts
+│   ├── uploads/              ← uploaded files (gitignored)
+│   └── database.sql          ← Schema + seed (11 tables)
+├── frontend/
+│   └── app/                  ← Nuxt 3 (Feature-Based)
+│       ├── pages/            ← 22 pages (admin 13, customer 3+2, editor 2+2, public 5)
+│       ├── components/       ← 23 components (admin 10, editor/job 8, layout 5)
+│       ├── services/         ← auth.service.ts, order.service.ts
+│       ├── composables/      ← useApi.ts
+│       ├── types/            ← auth, user, order TypeScript interfaces
+│       ├── middleware/        ← 5 route guards
+│       └── layouts/          ← 5 layouts
+├── docs/
+│   ├── ai/                   ← AI Context Files (ไฟล์นี้)
+│   ├── DATABASE_SEED.md
+│   ├── ER_DIAGRAM_USECASE.md
+│   ├── FRONTEND_ARCHITECTURE.md
+│   ├── GIT_WORKFLOW.md
+│   └── SETUP.md
+└── docker-compose.yml        ← 3 Services (db, backend, frontend)
 ```
 
 **Dev URLs:**
@@ -98,6 +131,25 @@ COOS/
 - Backend API: `http://localhost:3000/api/v1`
 - MySQL: `localhost:3306` (coosdb)
 
+**Upload Directories (ใน backend container):**
+- `/uploads/profiles/` — รูปโปรไฟล์
+- `/uploads/slips/` — สลิปชำระเงิน
+- `/uploads/sources/` — รูปต้นฉบับจากลูกค้า
+- `/uploads/ai-generated/` — รูปที่ AI สร้าง
+- `/uploads/gallery/` — รูปแกลเลอรี
+
 ---
 
-*อัปเดตล่าสุด: 29 มิถุนายน 2568*
+## ⚠️ Security Issues ที่ต้องระวัง (อัปเดต 15 ก.ค. 68)
+
+AI ต้องไม่เขียนโค้ดที่ทำให้ปัญหาเหล่านี้แย่ลง:
+
+1. **JWT_SECRET** — ห้ามเพิ่ม hardcode ใน code ใดๆ ใช้ `process.env.JWT_SECRET` เสมอ
+2. **Password** — ห้าม return `userPassword` ใน API response เด็ดขาด
+3. **Reset Token** — ต้องส่งผ่าน email เท่านั้น ห้าม return ใน response
+4. **File URL** — ใช้ `process.env.BACKEND_PUBLIC_URL` แทน `req.get("host")`
+5. **Role Guard** — Validation ต้องอยู่ที่ Backend เสมอ ไม่พึ่ง Frontend cookie
+
+---
+
+*อัปเดตล่าสุด: 15 กรกฎาคม 2568*
