@@ -1,15 +1,15 @@
 const TagModel = require("../models/tag.model");
 
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
   try {
     const tags = await TagModel.findAll();
     res.status(200).json(tags);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
     const { tagName } = req.body;
     if (!tagName || !tagName.trim()) {
@@ -28,11 +28,11 @@ exports.create = async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ message: "ชื่อแฮชแท็กนี้มีอยู่แล้ว" });
     }
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-exports.update = async (req, res) => {
+exports.update = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { tagName } = req.body;
@@ -55,11 +55,11 @@ exports.update = async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ message: "ชื่อแฮชแท็กนี้มีอยู่แล้ว" });
     }
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
-exports.remove = async (req, res) => {
+exports.remove = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await TagModel.delete(id);
@@ -68,6 +68,6 @@ exports.remove = async (req, res) => {
     }
     res.status(200).json({ message: "ลบแฮชแท็กสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

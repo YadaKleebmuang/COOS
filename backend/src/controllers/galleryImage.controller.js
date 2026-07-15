@@ -1,7 +1,7 @@
 const GalleryImageModel = require("../models/galleryImage.model");
 
 // GET /gallery-images — ดึงรูปภาพทั้งหมด (รองรับ filter)
-exports.getGalleryImages = async (req, res) => {
+exports.getGalleryImages = async (req, res, next) => {
   try {
     const { workTypeId, tag, all } = req.query;
 
@@ -14,12 +14,12 @@ exports.getGalleryImages = async (req, res) => {
     const images = await GalleryImageModel.findAll(filters);
     res.status(200).json(images);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /gallery-images/tags — ดึงแท็กทั้งหมดแบบไม่ซ้ำกัน
-exports.getTags = async (req, res) => {
+exports.getTags = async (req, res, next) => {
   try {
     const { pool } = require("../config/db");
     // Only return tags that are actually used in galleryImages
@@ -33,12 +33,12 @@ exports.getTags = async (req, res) => {
     const tagList = rows.map(r => r.tagName);
     res.status(200).json(tagList);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /gallery-images/:id — ดึงรูปภาพตาม id
-exports.getGalleryImageById = async (req, res) => {
+exports.getGalleryImageById = async (req, res, next) => {
   try {
     const image = await GalleryImageModel.findById(req.params.id);
 
@@ -48,12 +48,12 @@ exports.getGalleryImageById = async (req, res) => {
 
     res.status(200).json(image);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /gallery-images — สร้างรูปภาพใหม่ (รองรับ file upload)
-exports.createGalleryImage = async (req, res) => {
+exports.createGalleryImage = async (req, res, next) => {
   try {
     const { workTypeId, imageTitle, imageDescription, imageTags } = req.body;
 
@@ -85,12 +85,12 @@ exports.createGalleryImage = async (req, res) => {
       imageUrl,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /gallery-images/:id — อัปเดตรูปภาพ
-exports.updateGalleryImage = async (req, res) => {
+exports.updateGalleryImage = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -107,12 +107,12 @@ exports.updateGalleryImage = async (req, res) => {
 
     res.status(200).json({ message: "Gallery image updated" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /gallery-images/:id — ลบรูปภาพ
-exports.deleteGalleryImage = async (req, res) => {
+exports.deleteGalleryImage = async (req, res, next) => {
   try {
     const affected = await GalleryImageModel.remove(req.params.id);
 
@@ -122,12 +122,12 @@ exports.deleteGalleryImage = async (req, res) => {
 
     res.json({ message: "Gallery image deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /gallery-images/:id/toggle — เปิด/ปิดการแสดงผล
-exports.toggleGalleryImage = async (req, res) => {
+exports.toggleGalleryImage = async (req, res, next) => {
   try {
     const result = await GalleryImageModel.toggleActive(req.params.id);
 
@@ -140,6 +140,6 @@ exports.toggleGalleryImage = async (req, res) => {
       imageIsActive: result.imageIsActive,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

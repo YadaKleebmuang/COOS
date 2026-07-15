@@ -31,4 +31,8 @@ loadRoutes(app);
 // Multer error handler (ต้องอยู่หลัง routes)
 app.use(handleUploadError);
 
+// Global Error Handler
+const errorHandler = require('./middlewares/error.middleware');
+app.use(errorHandler);
+
 module.exports = app;

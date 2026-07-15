@@ -1,6 +1,6 @@
 const { pool } = require("../config/db");
 
-exports.getDashboardStats = async (req, res) => {
+exports.getDashboardStats = async (req, res, next) => {
   try {
     const { from, to } = req.query;
     let dateFilter = "";
@@ -80,6 +80,6 @@ exports.getDashboardStats = async (req, res) => {
       revenueByMonth: revenueByMonth.reverse(),
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

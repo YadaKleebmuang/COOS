@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 // POST /auth/register
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     // รับค่าจาก body (ไม่รับ userRole — ป้องกัน Role Hijack)
     const {
@@ -49,12 +49,12 @@ exports.register = async (req, res) => {
       id: userId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/login
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     // รับค่าจาก body
     const { userEmail, userPassword } = req.body;
@@ -118,12 +118,12 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/forgot-password
-exports.forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     const { userEmail } = req.body;
 
@@ -161,12 +161,12 @@ exports.forgotPassword = async (req, res) => {
       message: "ถ้า email นี้มีในระบบ เราจะส่งลิงก์ให้",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/reset-password
-exports.resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
 
@@ -192,6 +192,6 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

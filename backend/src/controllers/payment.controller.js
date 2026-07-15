@@ -3,18 +3,18 @@ const OrderModel = require("../models/orderModel"); // For logging workflow or u
 const { pool } = require("../config/db");
 
 // GET /payments
-exports.getPayments = async (req, res) => {
+exports.getPayments = async (req, res, next) => {
   try {
     const { status } = req.query; // ?status=pending
     const payments = await PaymentModel.findAll({ status });
     res.status(200).json(payments);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /payments/:id/approve
-exports.approvePayment = async (req, res) => {
+exports.approvePayment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const adminId = req.session.userId;
@@ -41,12 +41,12 @@ exports.approvePayment = async (req, res) => {
       nextOrderStatus: result.nextStatus 
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /payments/:id/reject
-exports.rejectPayment = async (req, res) => {
+exports.rejectPayment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const adminId = req.session.userId;
@@ -75,6 +75,6 @@ exports.rejectPayment = async (req, res) => {
     });
   } catch (err) {
     console.error("Reject Payment Error:", err);
-    res.status(500).json({ message: err.message }); // Removed stack: err.stack as part of BUG-09
+    next(err); // Removed stack: err.stack as part of BUG-09
   }
 };

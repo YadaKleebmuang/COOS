@@ -3,7 +3,7 @@ const PackageModel = require("../models/packageModel");
 const VALID_RESOLUTIONS = ["FullHD", "4K"];
 
 // GET /api/v1/packages
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
   try {
     const includeInactive =
       req.query.all === "true" && req.session?.userRole === "admin";
@@ -15,12 +15,12 @@ exports.getAll = async (req, res) => {
 
     res.status(200).json(rows);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /api/v1/packages/:id
-exports.getById = async (req, res) => {
+exports.getById = async (req, res, next) => {
   try {
     const [rows] = await PackageModel.findById(req.params.id);
 
@@ -30,12 +30,12 @@ exports.getById = async (req, res) => {
 
     res.status(200).json(rows[0]);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /api/v1/packages
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
     const {
       packageName,
@@ -76,12 +76,12 @@ exports.create = async (req, res) => {
       packageId: result.insertId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /api/v1/packages/:id
-exports.update = async (req, res) => {
+exports.update = async (req, res, next) => {
   try {
     const { packageResolution, packageGalleryDiscount } = req.body;
 
@@ -103,12 +103,12 @@ exports.update = async (req, res) => {
 
     res.status(200).json({ message: "อัปเดตแพ็กเกจสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /api/v1/packages/:id
-exports.delete = async (req, res) => {
+exports.delete = async (req, res, next) => {
   try {
     const [result] = await PackageModel.delete(req.params.id);
 
@@ -118,6 +118,6 @@ exports.delete = async (req, res) => {
 
     res.status(200).json({ message: "ลบแพ็กเกจสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

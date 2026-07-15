@@ -35,7 +35,7 @@ const isValidTransition = (from, to, role) => {
 };
 
 // 1. POST /api/v1/orders (Create Order - Customer only)
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
 
@@ -111,12 +111,12 @@ exports.create = async (req, res) => {
       orderStatus: "waiting_deposit",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 2. GET /api/v1/orders (List all orders - Role Filtered)
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const { status } = req.query;
@@ -138,12 +138,12 @@ exports.getAll = async (req, res) => {
     const orders = await OrderModel.findAll({ customerId, editorId, status });
     res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 3. GET /api/v1/orders/:id (Retrieve specific order details)
-exports.getById = async (req, res) => {
+exports.getById = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -173,12 +173,12 @@ exports.getById = async (req, res) => {
       workflowLogs,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 4. PATCH /api/v1/orders/:id/status (Transition order status)
-exports.updateStatus = async (req, res) => {
+exports.updateStatus = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -211,12 +211,12 @@ exports.updateStatus = async (req, res) => {
     await OrderModel.updateStatus(orderId, order.orderStatus, orderStatus, userId, logNote);
     res.status(200).json({ message: "อัปเดตสถานะออเดอร์สำเร็จ", orderStatus });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 5. PATCH /api/v1/orders/:id/assign (Assign Editor - Admin only)
-exports.assignEditor = async (req, res) => {
+exports.assignEditor = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -238,12 +238,12 @@ exports.assignEditor = async (req, res) => {
       orderStatus: nextStatus,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 6. POST /api/v1/orders/:id/images (Upload Image for order - Editor/Customer)
-exports.uploadImage = async (req, res) => {
+exports.uploadImage = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -304,12 +304,12 @@ exports.uploadImage = async (req, res) => {
       imageId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 7. POST /api/v1/orders/:id/payments (Upload Payment Slip - Customer only)
-exports.submitPayment = async (req, res) => {
+exports.submitPayment = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -354,12 +354,12 @@ exports.submitPayment = async (req, res) => {
       paymentId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 8. PATCH /api/v1/orders/:id/payments/:paymentId (Verify Payment Slip - Admin only)
-exports.verifyPayment = async (req, res) => {
+exports.verifyPayment = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const paymentId = req.params.paymentId;
@@ -385,6 +385,6 @@ exports.verifyPayment = async (req, res) => {
       nextOrderStatus: result.nextStatus,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

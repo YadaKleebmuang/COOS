@@ -26,7 +26,7 @@ exports.uploadSingle = (req, res) => {
       mimetype: req.file.mimetype,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return next(err);
   }
 };
 
@@ -56,6 +56,6 @@ exports.uploadMultiple = (req, res) => {
       files,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return next(err);
   }
 };
