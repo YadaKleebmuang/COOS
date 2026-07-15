@@ -43,7 +43,12 @@ exports.create = async (req, res) => {
       packageResolution,
       packageDeliveryDays,
       packagePrice,
+      packageGalleryDiscount,
     } = req.body;
+
+    if (packageGalleryDiscount !== undefined && (Number(packageGalleryDiscount) < 0 || Number(packageGalleryDiscount) > 100)) {
+      return res.status(400).json({ message: "packageGalleryDiscount ต้องอยู่ระหว่าง 0 ถึง 100" });
+    }
 
     if (
       !packageName?.trim() ||
@@ -78,7 +83,11 @@ exports.create = async (req, res) => {
 // PATCH /api/v1/packages/:id
 exports.update = async (req, res) => {
   try {
-    const { packageResolution } = req.body;
+    const { packageResolution, packageGalleryDiscount } = req.body;
+
+    if (packageGalleryDiscount !== undefined && (Number(packageGalleryDiscount) < 0 || Number(packageGalleryDiscount) > 100)) {
+      return res.status(400).json({ message: "packageGalleryDiscount ต้องอยู่ระหว่าง 0 ถึง 100" });
+    }
 
     if (packageResolution && !VALID_RESOLUTIONS.includes(packageResolution)) {
       return res

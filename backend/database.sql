@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `packages` (
   `packageDeliveryDays`     INT             NOT NULL,
   `packagePrice`            DECIMAL(10,2)  NOT NULL,
   `packageUrgentPrice`      DECIMAL(10,2)  NULL,
-  `packageGalleryDiscount`  DECIMAL(5,2)   NOT NULL DEFAULT 20.00,
+  `packageGalleryDiscount`  DECIMAL(5,2)   NOT NULL DEFAULT 20.00 CHECK (`packageGalleryDiscount` BETWEEN 0 AND 100),
   `packageIsActive`         TINYINT(1)     NOT NULL DEFAULT 1,
   `packageCreatedAt`        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
   `packageUpdatedAt`        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
