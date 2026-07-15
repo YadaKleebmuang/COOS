@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const corsMiddleware = require('./middlewares/cors.middleware');
-const handleUploadError = require('./middlewares/upload.middleware');
+const { handleUploadError } = require('./middlewares/upload.middleware');
 const loadRoutes = require('./routes/index.route');
 const { testConnection } = require('../src/config/db');
 
