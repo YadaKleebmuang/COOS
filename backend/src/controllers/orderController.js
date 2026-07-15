@@ -4,7 +4,13 @@ const WorkTypeModel = require("../models/workTypeModel");
 
 // Helper function to check if order status transition is valid
 const isValidTransition = (from, to, role) => {
-  if (role === "admin") return true; // Admin can change to any state
+  if (role === "admin") {
+    // Admin cannot change status if it's already in a terminal state
+    if (from === "cancelled" || from === "completed") {
+      return false;
+    }
+    return true; // Admin can do other forward/skip transitions
+  }
 
   const customerTransitions = {
     waiting_deposit: ["cancelled"],
