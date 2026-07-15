@@ -15,7 +15,8 @@ exports.uploadSingle = (req, res) => {
     // app.js serve /uploads ด้วย express.static แล้ว
     const protocol = req.protocol;
     const host = req.get("host");
-    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+    const baseUrl = process.env.UPLOAD_BASE_URL || `${protocol}://${host}`;
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     return res.status(201).json({
       message: "อัปโหลดไฟล์สำเร็จ",
@@ -42,9 +43,10 @@ exports.uploadMultiple = (req, res) => {
 
     const protocol = req.protocol;
     const host = req.get("host");
+    const baseUrl = process.env.UPLOAD_BASE_URL || `${protocol}://${host}`;
 
     const files = req.files.map((file) => ({
-      url: `${protocol}://${host}/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
       filename: file.filename,
       originalname: file.originalname,
       size: file.size,
