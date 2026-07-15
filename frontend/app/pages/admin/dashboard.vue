@@ -23,7 +23,7 @@ const fetchData = async () => {
   try {
     const [allUsers, allOrders] = await Promise.all([
       apiFetch("/users"),
-      orderService.getMyOrders()
+      apiFetch("/orders")
     ])
     users.value = allUsers
     orders.value = allOrders

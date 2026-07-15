@@ -87,7 +87,8 @@ const openConfirm = (p: PaymentRow, action: "approved" | "rejected") => {
 const confirmVerify = async () => {
   confirmDialog.value.loading = true
   try {
-    await apiFetch(`/payments/${confirmDialog.value.paymentId}/${confirmDialog.value.action}`, {
+    const routeAction = confirmDialog.value.action === 'approved' ? 'approve' : 'reject';
+    await apiFetch(`/payments/${confirmDialog.value.paymentId}/${routeAction}`, {
       method: "PATCH"
     })
     

@@ -2,7 +2,7 @@ const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 
 // GET /users
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   // console.log('GET USERS controller start');
   try {
     const user = await UserModel.findAll();
@@ -14,12 +14,12 @@ exports.getUsers = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /users/:id
-exports.getUserById = async (req, res) => {
+exports.getUserById = async (req, res, next) => {
   try {
     // หา user ตาม id
     const user = await UserModel.findById(req.params.id);
@@ -30,12 +30,12 @@ exports.getUserById = async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /users
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
   try {
     // รับค่าจาก body
     const {
@@ -80,12 +80,12 @@ exports.createUser = async (req, res) => {
       id: userId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /users/:id
-exports.updateUser = async (req, res) => {
+exports.updateUser = async (req, res, next) => {
   try {
     // รับ id จาก params
     const { id } = req.params;
@@ -113,12 +113,12 @@ exports.updateUser = async (req, res) => {
       message: "User updated successfully",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /users/:id
-exports.deleteUser = async (req, res) => {
+exports.deleteUser = async (req, res, next) => {
   try {
     // เรียก Model เพื่อลบข้อมูลผู้ใช้
     const affected = await UserModel.remove(req.params.id);
@@ -130,12 +130,12 @@ exports.deleteUser = async (req, res) => {
 
     res.json({ message: "User deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /users/me  — อัปเดตโปรไฟล์ตัวเอง (ไม่รวม role และ email)
-exports.updateMyProfile = async (req, res) => {
+exports.updateMyProfile = async (req, res, next) => {
   try {
     const userId = req.session.userId; // จาก JWT middleware
     const {
@@ -200,12 +200,12 @@ exports.updateMyProfile = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /users/me  — ดึงข้อมูลโปรไฟล์ตัวเอง
-exports.getMyProfile = async (req, res) => {
+exports.getMyProfile = async (req, res, next) => {
   try {
     const userId = req.session.userId; // จาก JWT middleware
     const user = await UserModel.findById(userId);
@@ -228,6 +228,6 @@ exports.getMyProfile = async (req, res) => {
       userCreatedAt: user.userCreatedAt,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

@@ -4,7 +4,13 @@ const WorkTypeModel = require("../models/workTypeModel");
 
 // Helper function to check if order status transition is valid
 const isValidTransition = (from, to, role) => {
-  if (role === "admin") return true; // Admin can change to any state
+  if (role === "admin") {
+    // Admin cannot change status if it's already in a terminal state
+    if (from === "cancelled" || from === "completed") {
+      return false;
+    }
+    return true; // Admin can do other forward/skip transitions
+  }
 
   const customerTransitions = {
     waiting_deposit: ["cancelled"],
@@ -29,7 +35,7 @@ const isValidTransition = (from, to, role) => {
 };
 
 // 1. POST /api/v1/orders (Create Order - Customer only)
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
 
@@ -105,12 +111,12 @@ exports.create = async (req, res) => {
       orderStatus: "waiting_deposit",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 2. GET /api/v1/orders (List all orders - Role Filtered)
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const { status } = req.query;
@@ -132,12 +138,12 @@ exports.getAll = async (req, res) => {
     const orders = await OrderModel.findAll({ customerId, editorId, status });
     res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 3. GET /api/v1/orders/:id (Retrieve specific order details)
-exports.getById = async (req, res) => {
+exports.getById = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -148,10 +154,10 @@ exports.getById = async (req, res) => {
     }
 
     // Role-based authorization check
-    if (userRole === "customer" && order.customerId !== userId) {
+    if (userRole === "customer" && Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลออเดอร์นี้" });
     }
-    if (userRole === "editor" && order.editorId !== userId) {
+    if (userRole === "editor" && Number(order.editorId) !== Number(userId)) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลออเดอร์นี้" });
     }
 
@@ -167,12 +173,12 @@ exports.getById = async (req, res) => {
       workflowLogs,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 4. PATCH /api/v1/orders/:id/status (Transition order status)
-exports.updateStatus = async (req, res) => {
+exports.updateStatus = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -188,10 +194,10 @@ exports.updateStatus = async (req, res) => {
     }
 
     // Validate ownership
-    if (userRole === "customer" && order.customerId !== userId) {
+    if (userRole === "customer" && Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ในการแก้ไขออเดอร์นี้" });
     }
-    if (userRole === "editor" && order.editorId !== userId) {
+    if (userRole === "editor" && Number(order.editorId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ในการแก้ไขออเดอร์นี้" });
     }
 
@@ -205,12 +211,12 @@ exports.updateStatus = async (req, res) => {
     await OrderModel.updateStatus(orderId, order.orderStatus, orderStatus, userId, logNote);
     res.status(200).json({ message: "อัปเดตสถานะออเดอร์สำเร็จ", orderStatus });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 5. PATCH /api/v1/orders/:id/assign (Assign Editor - Admin only)
-exports.assignEditor = async (req, res) => {
+exports.assignEditor = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -232,12 +238,12 @@ exports.assignEditor = async (req, res) => {
       orderStatus: nextStatus,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 6. POST /api/v1/orders/:id/images (Upload Image for order - Editor/Customer)
-exports.uploadImage = async (req, res) => {
+exports.uploadImage = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -257,6 +263,11 @@ exports.uploadImage = async (req, res) => {
       return res.status(400).json({ message: "กรุณาระบุ imageType และ imageUrl" });
     }
 
+    const validImageTypes = ["source", "ai_generated", "selected_final"];
+    if (!validImageTypes.includes(imageType)) {
+      return res.status(400).json({ message: "imageType ไม่ถูกต้อง" });
+    }
+
     const order = await OrderModel.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
@@ -264,7 +275,7 @@ exports.uploadImage = async (req, res) => {
 
     // Role restrictions for uploading types
     if (userRole === "customer") {
-      if (order.customerId !== userId) {
+      if (Number(order.customerId) !== Number(userId)) {
         return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
       }
       if (imageType !== "source") {
@@ -273,7 +284,7 @@ exports.uploadImage = async (req, res) => {
     }
 
     if (userRole === "editor") {
-      if (order.editorId !== userId) {
+      if (Number(order.editorId) !== Number(userId)) {
         return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
       }
       if (imageType === "source") {
@@ -298,12 +309,12 @@ exports.uploadImage = async (req, res) => {
       imageId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 7. POST /api/v1/orders/:id/payments (Upload Payment Slip - Customer only)
-exports.submitPayment = async (req, res) => {
+exports.submitPayment = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const orderId = req.params.id;
@@ -322,8 +333,18 @@ exports.submitPayment = async (req, res) => {
       return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
     }
 
-    if (order.customerId !== userId) {
+    if (Number(order.customerId) !== Number(userId)) {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ทำรายการในออเดอร์นี้" });
+    }
+
+    // Validate payment amount (BUG-03 Fix)
+    const expectedDeposit = Math.round(order.orderTotalPrice * 0.30 * 100) / 100;
+    const expectedFinal   = Math.round(order.orderTotalPrice * 0.70 * 100) / 100;
+    const expected = paymentType === "deposit" ? expectedDeposit : expectedFinal;
+    const submitted = Number(paymentAmount);
+    
+    if (Math.abs(submitted - expected) > 1) { // tolerance 1 บาท
+      return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
     }
 
     const paymentId = await OrderModel.addPayment({
@@ -338,12 +359,12 @@ exports.submitPayment = async (req, res) => {
       paymentId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // 8. PATCH /api/v1/orders/:id/payments/:paymentId (Verify Payment Slip - Admin only)
-exports.verifyPayment = async (req, res) => {
+exports.verifyPayment = async (req, res, next) => {
   try {
     const { userId, userRole } = req.session;
     const paymentId = req.params.paymentId;
@@ -369,6 +390,6 @@ exports.verifyPayment = async (req, res) => {
       nextOrderStatus: result.nextStatus,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

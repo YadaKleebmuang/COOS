@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 // POST /auth/register
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     // รับค่าจาก body (ไม่รับ userRole — ป้องกัน Role Hijack)
     const {
@@ -19,6 +19,10 @@ exports.register = async (req, res) => {
     // ตรวจสอบข้อมูลที่จำเป็น (Validation)
     if (!userFirstName || !userLastName || !userEmail || !userPassword) {
       return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    if (userPassword.length < 8) {
+      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
     }
 
     // [Security] role ถูก hardcode เป็น "customer" เสมอ
@@ -45,12 +49,12 @@ exports.register = async (req, res) => {
       id: userId,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/login
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     // รับค่าจาก body
     const { userEmail, userPassword } = req.body;
@@ -114,12 +118,12 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/forgot-password
-exports.forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     const { userEmail } = req.body;
 
@@ -130,7 +134,8 @@ exports.forgotPassword = async (req, res) => {
     // ตรวจสอบว่ามี user นี้ในระบบหรือไม่
     const user = await UserModel.findByEmail(userEmail);
     if (!user) {
-      return res.status(404).json({ message: "ไม่พบ email นี้ในระบบ" });
+      // Return the exact same message to prevent enumeration
+      return res.status(200).json({ message: "ถ้า email นี้มีในระบบ เราจะส่งลิงก์ให้" });
     }
 
     // สร้าง random token (32 bytes → 64 hex chars)
@@ -142,19 +147,26 @@ exports.forgotPassword = async (req, res) => {
     // บันทึกลง DB
     await UserModel.saveResetToken(userEmail, resetToken, expiry);
 
-    // (dev mode) ส่ง token กลับใน response — ระบบจริงจะส่ง email
+    // ส่ง email
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8888";
+    try {
+      const { sendResetEmail } = require("../utils/email");
+      await sendResetEmail(userEmail, resetToken, frontendUrl);
+    } catch (emailErr) {
+      console.error("Email Error:", emailErr);
+      // We still return success to the user so they don't know the email exists or failed
+    }
+
     res.status(200).json({
-      message: "สร้าง reset token สำเร็จ",
-      resetToken: resetToken,
-      expiresAt: expiry,
+      message: "ถ้า email นี้มีในระบบ เราจะส่งลิงก์ให้",
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /auth/reset-password
-exports.resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
 
@@ -162,8 +174,8 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "กรุณากรอก token และรหัสผ่านใหม่" });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" });
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
     }
 
     // ค้นหา user จาก token ที่ยังไม่หมดอายุ
@@ -180,6 +192,6 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

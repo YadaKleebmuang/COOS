@@ -25,15 +25,8 @@ services:
       dockerfile: Dockerfile
     container_name: coos-backend
     restart: unless-stopped
-    environment:
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root1234
-      DB_NAME: coosdb
-      DB_PORT: 3306
-      PORT: 3000
-      JWT_SECRET: supersecretkey123
-      JWT_EXPIRES_IN: 1d
+    env_file:
+      - ./backend/.env
     ports:
       - "3000:3000"
     volumes:

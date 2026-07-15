@@ -1,14 +1,14 @@
 const { pool } = require("../config/db");
 
-exports.getDashboardStats = async (req, res) => {
+exports.getDashboardStats = async (req, res, next) => {
   try {
     const { from, to } = req.query;
     let dateFilter = "";
-    const params = [];
+    const dateParams = [];
 
     if (from && to) {
       dateFilter = "AND orderCreatedAt >= ? AND orderCreatedAt <= ?";
-      params.push(from, to + " 23:59:59");
+      dateParams.push(from, to + " 23:59:59");
     }
 
     // 1. KPI Stats
@@ -19,21 +19,21 @@ exports.getDashboardStats = async (req, res) => {
         SUM(CASE WHEN orderStatus = 'cancelled' THEN 1 ELSE 0 END) as cancelledOrders,
         SUM(orderTotalPrice) as totalRevenue
        FROM orders WHERE 1=1 ${dateFilter}`,
-      params
+      dateParams
     );
 
     // 2. New Customers
     const [[{ newCustomers }]] = await pool.query(
       `SELECT COUNT(userId) as newCustomers FROM users WHERE userRole = 'customer' 
        ${from && to ? "AND userCreatedAt >= ? AND userCreatedAt <= ?" : ""}`,
-      params
+      dateParams
     );
 
     // 3. Orders by Status
     const [ordersByStatus] = await pool.query(
       `SELECT orderStatus as status, COUNT(orderId) as count 
        FROM orders WHERE 1=1 ${dateFilter} GROUP BY orderStatus`,
-      params
+      dateParams
     );
 
     // 4. Popular Packages
@@ -44,7 +44,7 @@ exports.getDashboardStats = async (req, res) => {
        WHERE 1=1 ${dateFilter}
        GROUP BY p.packageId
        ORDER BY count DESC LIMIT 5`,
-      params
+      dateParams
     );
 
     // 5. Editor Workload
@@ -56,7 +56,7 @@ exports.getDashboardStats = async (req, res) => {
        LEFT JOIN orders o ON u.userId = o.editorId AND o.orderStatus = 'completed' ${dateFilter.replace(/orderCreatedAt/g, 'o.orderCreatedAt')}
        WHERE u.userRole = 'editor'
        GROUP BY u.userId`,
-      params
+      dateParams
     );
 
     // 6. Revenue by Month
@@ -80,6 +80,6 @@ exports.getDashboardStats = async (req, res) => {
       revenueByMonth: revenueByMonth.reverse(),
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

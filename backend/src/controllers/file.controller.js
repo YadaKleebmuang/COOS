@@ -1,6 +1,6 @@
 const { pool } = require("../config/db");
 
-exports.getAllFiles = async (req, res) => {
+exports.getAllFiles = async (req, res, next) => {
   try {
     const { type, status, search } = req.query;
 
@@ -69,6 +69,6 @@ exports.getAllFiles = async (req, res) => {
 
     res.status(200).json(files);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
