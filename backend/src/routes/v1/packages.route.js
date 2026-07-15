@@ -4,7 +4,7 @@ const controller = require("../../controllers/packageController");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const adminOnly = require("../../middlewares/admin.middleware");
 
-// routes สำหรับ packages
+// Public routes (ไม่ต้อง Login) - ถูกเรียกใช้ก่อน global authMiddleware ใน index.js
 router.get("/", controller.getAll);
 router.get("/:id", controller.getById);
 
