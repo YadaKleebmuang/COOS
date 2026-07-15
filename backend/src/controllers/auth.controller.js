@@ -130,7 +130,8 @@ exports.forgotPassword = async (req, res) => {
     // ตรวจสอบว่ามี user นี้ในระบบหรือไม่
     const user = await UserModel.findByEmail(userEmail);
     if (!user) {
-      return res.status(404).json({ message: "ไม่พบ email นี้ในระบบ" });
+      // Return the exact same message to prevent enumeration
+      return res.status(200).json({ message: "ถ้า email นี้มีในระบบ เราจะส่งลิงก์ให้" });
     }
 
     // สร้าง random token (32 bytes → 64 hex chars)
@@ -142,11 +143,18 @@ exports.forgotPassword = async (req, res) => {
     // บันทึกลง DB
     await UserModel.saveResetToken(userEmail, resetToken, expiry);
 
-    // (dev mode) ส่ง token กลับใน response — ระบบจริงจะส่ง email
+    // ส่ง email
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8888";
+    try {
+      const { sendResetEmail } = require("../utils/email");
+      await sendResetEmail(userEmail, resetToken, frontendUrl);
+    } catch (emailErr) {
+      console.error("Email Error:", emailErr);
+      // We still return success to the user so they don't know the email exists or failed
+    }
+
     res.status(200).json({
-      message: "สร้าง reset token สำเร็จ",
-      resetToken: resetToken,
-      expiresAt: expiry,
+      message: "ถ้า email นี้มีในระบบ เราจะส่งลิงก์ให้",
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
