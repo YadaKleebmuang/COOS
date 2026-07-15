@@ -22,15 +22,16 @@ exports.getGalleryImages = async (req, res) => {
 exports.getTags = async (req, res) => {
   try {
     const { pool } = require("../config/db");
-    const [rows] = await pool.query("SELECT imageTags FROM galleryImages WHERE imageTags IS NOT NULL AND imageTags != ''");
+    // Only return tags that are actually used in galleryImages
+    const [rows] = await pool.query(`
+      SELECT DISTINCT t.tagName 
+      FROM tags t
+      JOIN galleryImageTags git ON t.tagId = git.tagId
+      ORDER BY t.tagName ASC
+    `);
     
-    const tagSet = new Set();
-    rows.forEach(row => {
-      const tags = row.imageTags.split(",").map(t => t.trim()).filter(t => t);
-      tags.forEach(t => tagSet.add(t));
-    });
-    
-    res.status(200).json(Array.from(tagSet));
+    const tagList = rows.map(r => r.tagName);
+    res.status(200).json(tagList);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

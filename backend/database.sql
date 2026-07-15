@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `galleryImages` (
   `workTypeId`        INT NOT NULL,
   `imageTitle`        VARCHAR(150) NULL,
   `imageDescription`  TEXT NULL,
-  `imageTags`         VARCHAR(255) NULL,  -- เก็บแท็กที่เกี่ยวข้องคั่นด้วยจุลภาค เช่น 'minimal, retro, anime'
+  -- `imageTags`         VARCHAR(255) NULL,  -- เก็บแท็กที่เกี่ยวข้องคั่นด้วยจุลภาค เช่น 'minimal, retro, anime'
   `imageIsActive`     TINYINT(1) NOT NULL DEFAULT 1,
   `imageCreatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `imageUpdatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -210,3 +210,13 @@ CREATE TABLE IF NOT EXISTS `tags` (
   `tagName` VARCHAR(100) NOT NULL UNIQUE,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Gallery Image Tags Table (Many-to-Many)
+CREATE TABLE IF NOT EXISTS `galleryImageTags` (
+  `imageId` INT NOT NULL,
+  `tagId` INT NOT NULL,
+  PRIMARY KEY (`imageId`, `tagId`),
+  FOREIGN KEY (`imageId`) REFERENCES `galleryImages`(`imageId`) ON DELETE CASCADE,
+  FOREIGN KEY (`tagId`) REFERENCES `tags`(`tagId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
