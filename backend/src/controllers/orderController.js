@@ -326,6 +326,16 @@ exports.submitPayment = async (req, res) => {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ทำรายการในออเดอร์นี้" });
     }
 
+    // Validate payment amount (BUG-03 Fix)
+    const expectedDeposit = Math.round(order.orderTotalPrice * 0.30 * 100) / 100;
+    const expectedFinal   = Math.round(order.orderTotalPrice * 0.70 * 100) / 100;
+    const expected = paymentType === "deposit" ? expectedDeposit : expectedFinal;
+    const submitted = Number(paymentAmount);
+    
+    if (Math.abs(submitted - expected) > 1) { // tolerance 1 บาท
+      return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
+    }
+
     const paymentId = await OrderModel.addPayment({
       orderId,
       paymentType,
