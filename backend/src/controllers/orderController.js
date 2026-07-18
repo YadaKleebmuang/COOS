@@ -347,6 +347,15 @@ exports.submitPayment = async (req, res, next) => {
       return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
     }
 
+    // Validate duplicate payment (BUG-01 Fix)
+    const existingPayments = await OrderModel.findPayments(orderId);
+    const hasDuplicate = existingPayments.some(
+      (p) => p.paymentType === paymentType && (p.paymentStatus === "pending" || p.paymentStatus === "approved")
+    );
+    if (hasDuplicate) {
+      return res.status(400).json({ message: `มีหลักฐานชำระเงินงวดนี้ (${paymentType}) ที่กำลังรอตรวจสอบ หรือตรวจสอบผ่านแล้ว` });
+    }
+
     const paymentId = await OrderModel.addPayment({
       orderId,
       paymentType,
