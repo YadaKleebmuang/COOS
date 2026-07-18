@@ -131,16 +131,37 @@ erDiagram
         TEXT logNote
     }
 
+    systemSettings {
+        VARCHAR settingKey PK
+        TEXT settingValue
+        TIMESTAMP updatedAt
+        INT updatedByAdminId FK
+    }
+
+    tags {
+        INT tagId PK
+        VARCHAR tagName UK
+        TIMESTAMP createdAt
+    }
+
+    galleryImageTags {
+        INT imageId PK,FK
+        INT tagId PK,FK
+    }
+
     users ||--o{ orders : "สั่งงาน (customer)"
     users ||--o{ orders : "รับงาน (editor)"
     users ||--o{ payments : "ตรวจสอบ (admin)"
     users ||--o{ workflowLogs : "เปลี่ยนสถานะ"
+    users ||--o{ systemSettings : "ตั้งค่า (admin)"
     packages ||--o{ orders : "ใช้แพ็กเกจ"
     workTypes ||--o{ orders : "ประเภทงาน"
     workTypes ||--o{ galleryImages : "หมวดหมู่"
     orders ||--o{ orderImages : "รูปภาพในออเดอร์"
     orders ||--o{ payments : "การชำระเงิน"
     orders ||--o{ workflowLogs : "ประวัติสถานะ"
+    galleryImages ||--o{ galleryImageTags : "มีแท็ก"
+    tags ||--o{ galleryImageTags : "ถูกใช้ใน"
 ```
 
 ---

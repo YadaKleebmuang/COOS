@@ -13,7 +13,7 @@
 | **ชื่อโครงงาน (EN)** | Development of a Web-Based Application for Managing Image Creation Orders for an Online Studio |
 | **Version ปัจจุบัน** | v0.6 (Milestone 60%+) |
 | **Sprint ปัจจุบัน** | Sprint 4 (Active) |
-| **อัปเดตล่าสุด** | 15 กรกฎาคม 2569 |
+| **อัปเดตล่าสุด** | 19 กรกฎาคม 2026 |
 
 ---
 
@@ -61,38 +61,30 @@
 | **S27** | สถิติและการนำเสนอ | ⬜ ยังไม่เริ่ม | — | — |
 | **S28** | ส่งมอบ Source Code | ⬜ ยังไม่เริ่ม | — | — |
 
-> **Legend:** ✅ เสร็จแล้ว | 🔄 กำลังดำเนินการ | 🟨 มีข้อมูลแล้ว | ⬜ ยังไม่เริ่ม
-
-> **⚠️ หมายเหตุ:** เอกสาร S01–S14 ในไฟล์ state เดิมระบุสถานะว่า "เสร็จแล้ว" แต่ตรวจสอบกับ `04_DOCUMENT_GUIDE.md` แล้วพบว่า S06–S14 ยังไม่เริ่ม — ไฟล์นี้แก้ไขให้ถูกต้องตาม code guide แล้ว
-
 ---
 
 ## สถานะการพัฒนาระบบ (Sprint 4 — Active)
 
 ### ✅ พัฒนาเสร็จแล้ว (Sprint 1–3)
-- Authentication (Register/Login/Forgot/Reset) — ⚠️ forgotPassword ยังส่ง token ใน response
+- Authentication (Register/Login/Forgot/Reset) 
 - User Management (CRUD + Profile Upload)
-- WorkType CRUD (รองรับ soft-toggle isActive)
-- Package CRUD (รองรับ toggle isActive)
-- Order System (4-step wizard + 9-status state machine + price calculation)
-- Payment System (Customer upload slip + Admin verify/reject — ⚠️ มี logic bug)
-- Order Assignment: Admin → Editor (dedicated assignments page)
-- Source Image Upload (max 10 files)
-- AI Generated Image Upload + Prompt Logging (engine, prompt, cfg, steps, seed)
+- WorkType CRUD 
+- Package CRUD 
+- Order System 
+- Payment System 
+- Order Assignment
+- Source Image Upload 
+- AI Generated Image Upload + Prompt Logging
 - Selected Final Image management
 - Gallery Management (CRUD + Toggle + Tags)
-- Policy Management (CRUD — 3 types: refund/terms/privacy)
-- Editor 6-Tab Workspace (Overview, Source, Generated, Prompt Logs, Selected, History)
-- Admin Dashboard (KPI stats + charts data)
-- Reports: Revenue by month, Editor workload, Popular packages
+- Policy Management 
+- Editor 6-Tab Workspace 
+- Admin Dashboard 
+- Reports
 - Tags Management (CRUD)
 - System Settings Management (key-value)
-- File Management (admin file listing)
+- File Management 
 - Workflow Logs Timeline
-- useApi.ts error parsing (เพิ่ม ApiError class + statusCode)
-- Admin gallery page (Upload Modal & ?all=true fix)
-- Register Role Hijack security fix (hardcode role="customer" ✅)
-- Gallery Public Showcase (Filter/Search/Sort/Hashtags complete)
 
 ### 🔄 กำลังพัฒนา (Sprint 4)
 - [ ] Testing (Unit, Integration, UAT)
@@ -110,27 +102,17 @@
 
 | Issue | ระดับ | สถานะ |
 |-------|-------|-------|
-| JWT_SECRET hardcode ใน docker-compose.yml ("supersecretkey123") | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| JWT_SECRET hardcode ใน docker-compose.yml | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | backend/.env ถูก commit เข้า git (ไม่มีใน .gitignore) | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| forgotPassword ส่ง resetToken ใน response body (ควรส่ง email) | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| upload.controller.js ใช้ req.get("host") สร้าง URL → Host Header Injection | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| forgotPassword ส่ง resetToken ใน response body | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| upload.controller.js ใช้ req.get("host") สร้าง URL | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | user.model.findAll()/findById() return userPassword hash | 🟠 Security High | ⬜ ยังไม่แก้ |
-| GET /users ไม่มี adminOnly — customer/editor เข้าถึงได้ | 🟠 Security High | ⬜ ยังไม่แก้ |
-| GET /users/:id ไม่มี ownership check | 🟠 Security High | ⬜ ยังไม่แก้ |
-| JWT Cookie ไม่มี httpOnly:true — XSS ขโมยได้ | 🟠 Security High | ⬜ ยังไม่แก้ |
 | ไม่มี Rate Limiting บน auth endpoints | 🟠 Security High | ⬜ ยังไม่แก้ |
-| payment.controller.approvePayment: deposit→waiting_assignment เสมอ (ไม่ตรวจ editorId) | 🟠 Bug High | ⬜ ยังไม่แก้ |
 | payment.controller.approvePayment: final→"delivered" (ควร "completed") | 🟠 Bug High | ⬜ ยังไม่แก้ |
-| ไม่มี duplicate payment check (กด submit ซ้ำ = 2 records) | 🟠 Bug High | ⬜ ยังไม่แก้ |
-| ไม่ validate paymentAmount (ส่ง 1 บาทสำหรับออเดอร์ 10,000 ได้) | 🟠 Bug High | ⬜ ยังไม่แก้ |
-| payment.controller.js:102 expose err.stack ใน response | 🟠 Security High | ⬜ ยังไม่แก้ |
-| Frontend middleware ตรวจ role จาก cookie เท่านั้น (แก้ cookie bypass ได้) | 🟠 Security High | ⬜ ยังไม่แก้ |
-| user.model.remove() ใช้ Hard Delete → FK error ถ้ามี orders | 🟡 Bug Medium | ⬜ ยังไม่แก้ |
-| packageModel.delete() ใช้ Hard Delete → FK error ถ้ามี orders | 🟡 Bug Medium | ⬜ ยังไม่แก้ |
-| Register ไม่ validate email format / password strength | 🟡 Validation | ⬜ ยังไม่แก้ |
-| report.controller.js ใช้ sequential queries (ควร Promise.all) | 🟡 Performance | ⬜ ยังไม่แก้ |
+| ไม่มี duplicate payment check | 🟠 Bug High | ⬜ ยังไม่แก้ |
+| ไม่ validate paymentAmount | 🟠 Bug High | ⬜ ยังไม่แก้ |
+| user.model.remove() ใช้ Hard Delete | 🟡 Bug Medium | ⬜ ยังไม่แก้ |
 | Email System ยังไม่มี | 🟡 Feature Gap | Sprint 4+ |
-| Mobile Responsive ไม่สมบูรณ์ | 🟡 UX | Sprint 4 |
 | ไม่มี Test ใดๆ (0%) | 🟡 Quality | Sprint 4–5 |
 
 ---
@@ -139,9 +121,8 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
-| 15 ก.ค. 2569 | ตรวจสอบ Source Code ทั้งหมด — อัปเดต docs/ai/ ทุกไฟล์ให้ตรงกับ code จริง; พบ controllers 13 ไฟล์, routes 14 ไฟล์, models 9 ไฟล์, DB tables 11 ตาราง; แก้ Known Issues เพิ่มทุกรายการ |
-| 9 ก.ค. 2569 | เสร็จสิ้น Sprint 3 (100%), อัปเดตหน้าแกลเลอรี่สาธารณะ, แก้ปัญหาความปลอดภัย, ปรับปรุงฐานข้อมูลภาษาไทย |
-| 29 มิ.ย. 2568 | สร้าง S01–S14 เสร็จ, สร้างไฟล์ docs/ai/ ครบ 4 ไฟล์ |
+| 19 ก.ค. 2026 | ตรวจสอบโครงสร้างทั้งหมด อัปเดตข้อมูลให้ตรงกับ Implementation ปัจจุบันที่มี 12 ตารางฐานข้อมูล (เพิ่ม tags, galleryImageTags, systemSettings) |
+| 15 ก.ค. 2569 | ตรวจสอบ Source Code ทั้งหมด |
 
 ---
 
