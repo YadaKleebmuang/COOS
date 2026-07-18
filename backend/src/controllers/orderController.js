@@ -292,17 +292,19 @@ exports.uploadImage = async (req, res, next) => {
       }
     }
 
-    const imageId = await OrderModel.addOrderImage(orderId, {
+    const imagePayload = {
       imageType,
       imageUrl,
       imageThumbnailUrl,
-      aiEngine,
-      positivePrompt,
-      negativePrompt,
-      cfgScale,
-      steps,
-      seed,
-    });
+      aiEngine: imageType === "ai_generated" ? aiEngine : null,
+      positivePrompt: imageType === "ai_generated" ? positivePrompt : null,
+      negativePrompt: imageType === "ai_generated" ? negativePrompt : null,
+      cfgScale: imageType === "ai_generated" ? cfgScale : null,
+      steps: imageType === "ai_generated" ? steps : null,
+      seed: imageType === "ai_generated" ? seed : null,
+    };
+
+    const imageId = await OrderModel.addOrderImage(orderId, imagePayload);
 
     res.status(201).json({
       message: "อัปโหลดรูปภาพเข้าออเดอร์สำเร็จ",
