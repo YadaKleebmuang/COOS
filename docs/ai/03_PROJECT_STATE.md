@@ -104,11 +104,9 @@
 |-------|-------|-------|
 | JWT_SECRET hardcode ใน docker-compose.yml | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | backend/.env ถูก commit เข้า git (ไม่มีใน .gitignore) | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| forgotPassword ส่ง resetToken ใน response body | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | upload.controller.js ใช้ req.get("host") สร้าง URL | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | user.model.findAll()/findById() return userPassword hash | 🟠 Security High | ⬜ ยังไม่แก้ |
 | ไม่มี Rate Limiting บน auth endpoints | 🟠 Security High | ⬜ ยังไม่แก้ |
-| payment.controller.approvePayment: final→"delivered" (ควร "completed") | 🟠 Bug High | ⬜ ยังไม่แก้ |
 | ไม่มี duplicate payment check | 🟠 Bug High | ⬜ ยังไม่แก้ |
 | ไม่ validate paymentAmount | 🟠 Bug High | ⬜ ยังไม่แก้ |
 | user.model.remove() ใช้ Hard Delete | 🟡 Bug Medium | ⬜ ยังไม่แก้ |
@@ -121,6 +119,7 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 19 ก.ค. 2026 | ลบ Known Issues ที่ถูกแก้ไขแล้วในโค้ดออก (Payment State Transition, Admin Route Protection, Forgot Password) |
 | 19 ก.ค. 2026 | ตรวจสอบโครงสร้างทั้งหมด อัปเดตข้อมูลให้ตรงกับ Implementation ปัจจุบันที่มี 12 ตารางฐานข้อมูล (เพิ่ม tags, galleryImageTags, systemSettings) |
 | 15 ก.ค. 2569 | ตรวจสอบ Source Code ทั้งหมด |
 

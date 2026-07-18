@@ -217,7 +217,7 @@ waiting_deposit → waiting_assignment → waiting_to_start → in_progress
 |--------|------|-----------|
 | GET | /users/me | auth |
 | PATCH | /users/me | auth + multer (profile upload) |
-| GET | /users | auth (⚠️ ควร adminOnly) |
+| GET | /users | auth + adminOnly |
 | GET | /users/:id | auth (⚠️ ควร ownership check) |
 | POST | /users | auth + adminOnly |
 | PATCH | /users/:id | auth + adminOnly |
@@ -376,6 +376,7 @@ Editor:   waiting_to_start → in_progress
 ### Auto-Transition เมื่อ Admin Approve Payment (orderController.verifyPayment — ถูกต้อง)
 - Deposit Approved + มี editorId → `waiting_to_start`
 - Deposit Approved + ไม่มี editorId → `waiting_assignment`
+- Deposit Approved + มี editorId → `waiting_to_start`
 - Final Approved → `completed`
 
 ### Auto-Transition เมื่อ Admin Assign Editor (orderModel.assignEditor)
@@ -407,16 +408,15 @@ Editor:   waiting_to_start → in_progress
 - Admin Assignments Page: มอบหมายงาน Editor แบบ dedicated page
 
 ### ⚠️ Known Issues (ปัญหาที่รู้แล้ว — ยืนยันจาก Code)
-- **[Security-Critical]** `forgotPassword` ส่ง `resetToken` ใน response body แทนที่จะส่ง email
+- **[Security]** `forgotPassword` ป้องกันการเดาอีเมลโดยคืนค่าเป็นข้อความทั่วไปเสมอ
 - **[Security-Critical]** JWT_SECRET hardcode ใน `docker-compose.yml` เป็น "supersecretkey123"
 - **[Security-Critical]** `backend/.env` ถูก commit เข้า git (ไม่มีใน .gitignore)
-- **[Security-High]** `GET /users` และ `GET /users/:id` ไม่มี role restriction
-- **[Security-High]** `user.model.findAll()` และ `findById()` return `userPassword` hash
-- **[Security-High]** JWT Cookie ไม่มี `httpOnly: true`
+- **[Security-High]** `GET /users/:id` ไม่มี ownership check
+- **[Security-High]** JWT Cookie ไม่มี `httpOnly: true` และ `findById()` return `userPassword` hash
 - **[Security-High]** ไม่มี Rate Limiting บน auth endpoints
 - **[Bug-High]** `payment.controller.approvePayment` มี logic ผิด 2 จุด:
-  - deposit approval → `waiting_assignment` เสมอ (ไม่ตรวจ editorId)
-  - final approval → `delivered` (ควรเป็น `completed`)
+  - deposit approval → สลับไป `waiting_assignment` หรือ `waiting_to_start` ตามการมอบหมาย
+  - final approval → `completed`
 - **[Bug-High]** ไม่มีการป้องกัน duplicate payment submission
 - **[Bug-High]** ไม่ validate `paymentAmount` ที่ backend
 - **[Missing]** Email System ยังไม่ implement (SMTP config มีแต่ไม่มีโค้ดส่งจริง)
