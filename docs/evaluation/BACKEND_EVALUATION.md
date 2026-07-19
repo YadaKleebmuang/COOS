@@ -285,12 +285,52 @@ const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT 
 
 ---
 
-### ISSUE-BE-011 ถึง ISSUE-BE-014
+### ISSUE-BE-011: ขาด Validation Library
 
-- **BE-011:** ขาด Validation library — Manual if/check เสี่ยง miss case — ใช้ zod หรือ joi
-- **BE-012:** console.error ใน rejectPayment (payment.controller.js บรรทัด 77) — ไม่สม่ำเสมอ
-- **BE-013:** ขาด index บน payments.orderId และ orderImages.orderId ใน database.sql
-- **BE-014:** Test ครอบคลุมแค่ orderController.create (4 cases) และ isValidTransition — ไม่มี auth, payment, upload test
+- **Severity:** Medium
+- **Category:** Code Quality / Validation
+- **File/Module:** ทั่วทั้ง Backend Controllers
+- **Problem:** ปัจจุบันระบบใช้การตรวจสอบเงื่อนไข (if-check) แบบ Manual สำหรับ req.body ซึ่งเสี่ยงต่อการหลุดตรวจสอบหรือมีช่องโหว่เมื่อ API ซับซ้อนขึ้น
+- **Impact:** ข้อมูลขยะหรือข้อมูลที่ผิดรูปแบบสามารถหลุดเข้าสู่ Database ได้ง่าย
+- **Recommended Fix:** ติดตั้งและใช้งาน Validation Library ที่เป็นมาตรฐาน เช่น `zod` หรือ `joi` เป็น Middleware เพื่อตรวจสอบ schema ของ Request อย่างเป็นระบบ
+- **Priority:** P3
+
+---
+
+### ISSUE-BE-012: การจัดการ Error ไม่สม่ำเสมอ (console.error)
+
+- **Severity:** Low
+- **Category:** Code Quality / Logging
+- **File/Module:** backend/src/controllers/payment.controller.js
+- **Line/Function/Route:** บรรทัด 77 (rejectPayment)
+- **Problem:** มีการใช้ `console.error` ในบล็อก catch แทนที่จะส่ง error ไปให้ `next(error)` จัดการผ่าน Error Middleware ส่วนกลาง
+- **Impact:** ทำให้ Log กระจัดกระจายและไม่ถูกจัดการโดยระบบ Error Handling กลาง
+- **Recommended Fix:** เปลี่ยน `console.error` เป็น `return next(err)` หรือสร้างระบบ Logger มาตรฐานแทน
+- **Priority:** P4
+
+---
+
+### ISSUE-BE-013: ขาด Database Index บน Foreign Keys
+
+- **Severity:** Low
+- **Category:** Performance / Database
+- **File/Module:** backend/database.sql
+- **Problem:** ตารางสำคัญที่มีการ Join ข้อมูลอยู่บ่อยครั้ง เช่น `payments` และ `orderImages` ขาดการสร้าง Index บนคอลัมน์ที่เป็น Foreign Key (`orderId`)
+- **Impact:** เมื่อจำนวนข้อมูลมีมากขึ้น การสืบค้น หรือสั่ง `JOIN` จาก `orders` ไปหา `payments` และ `orderImages` จะช้าลงเพราะต้องทำ Table Scan
+- **Recommended Fix:** เพิ่มคำสั่ง `CREATE INDEX idx_payments_orderId ON payments(orderId);` และ `CREATE INDEX idx_orderImages_orderId ON orderImages(orderId);` ในสคริปต์สร้างฐานข้อมูล
+- **Priority:** P4
+
+---
+
+### ISSUE-BE-014: Test Coverage ต่ำมาก
+
+- **Severity:** Low
+- **Category:** Quality / Testing
+- **File/Module:** backend/tests/*
+- **Problem:** ปัจจุบันมี Unit Test เพียง 1 ไฟล์ (`orderController.spec.js`) จำนวน 7 Test Cases ครอบคลุมแค่เพียงฟังก์ชัน `create` และ `isValidTransition` เท่านั้น
+- **Impact:** ขาดความมั่นใจในการ Refactor โค้ดในส่วนอื่นๆ และมีความเสี่ยงเกิด Regression Bug ในฟังก์ชัน Auth, Payment, Upload
+- **Recommended Fix:** เพิ่ม Unit Test ให้ครอบคลุมทุก Core Business Logic Controllers (Auth, Payment, Package)
+- **Priority:** P4
 
 ---
 

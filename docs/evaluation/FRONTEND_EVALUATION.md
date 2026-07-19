@@ -1,4 +1,4 @@
-﻿# FRONTEND EVALUATION REPORT — COOS Project
+# FRONTEND EVALUATION REPORT — COOS Project
 
 > **ประเภทการตรวจสอบ:** Static Code Review (ไม่ได้รันระบบจริง)
 > **วันที่ประเมิน:** 20 กรกฎาคม 2026
@@ -186,17 +186,115 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-004 ถึง ISSUE-FE-012 (Medium/Low)
+### ISSUE-FE-004: alert() ใช้ใน admin/payments.vue แทน Toast
 
-- **FE-004:** alert() ใน payments.vue บรรทัด 42 — แก้เป็น reactive errorMessage ref
-- **FE-005:** create.vue 851 บรรทัด — แยกเป็น Step components
-- **FE-006:** AuthResponse.user เป็น any — กำหนด type ชัดเจน
-- **FE-007:** Upload error ไม่ reset — เพิ่ม uploadError.value = "" ใน handleFileSelect
-- **FE-008:** ขาด aria attributes — เพิ่ม aria-label บน icon buttons, for ใน labels
-- **FE-009:** ไม่ใช้ NuxtImg — เปลี่ยน img tags
-- **FE-010:** axios, better-sqlite3 unused — ลบออกจาก package.json
-- **FE-011:** ขาด Confirmation dialog — เพิ่มก่อนลบ
-- **FE-012:** Admin Dashboard ไม่ใช้ /reports — เปลี่ยน apiFetch("/orders") เป็น apiFetch("/reports")
+- **Severity:** Medium
+- **Category:** UX/UI
+- **File/Module:** frontend/app/pages/admin/payments.vue
+- **Line/Function/Route:** บรรทัด 42
+- **Problem:** มีการใช้ `alert()` ของเบราว์เซอร์ในการแสดงข้อความแจ้งเตือน ซึ่งทำให้ UX ไม่ดี และขัดขวางการทำงานของเบราว์เซอร์
+- **Evidence:** `alert("เกิดข้อผิดพลาดในการตรวจสอบ");`
+- **Impact:** ประสบการณ์ผู้ใช้ที่แย่ลง
+- **Recommended Fix:** เปลี่ยนไปใช้ reactive `errorMessage` ref หรือ Toast component ของโปรเจกต์
+- **Priority:** P3
+
+---
+
+### ISSUE-FE-005: create.vue มี 851 บรรทัด — ควรแยก Step Components
+
+- **Severity:** Medium
+- **Category:** Code Quality / Maintainability
+- **File/Module:** frontend/app/pages/customer/orders/create.vue
+- **Line/Function/Route:** ทั้งไฟล์
+- **Problem:** ไฟล์มีขนาดใหญ่มาก (851 บรรทัด) รวบรวม UI และ Logic ของทุกขั้นตอนในการสร้างออเดอร์ ทำให้ดูแลรักษายาก
+- **Impact:** ยากต่อการอ่านโค้ด การหาบั๊ก และการทำงานร่วมกัน
+- **Recommended Fix:** แยกส่วนประกอบเป็น Component ย่อยตาม Step เช่น `StepPackage.vue`, `StepDetails.vue`, `StepSummary.vue`
+- **Priority:** P3
+
+---
+
+### ISSUE-FE-006: AuthResponse.user typed เป็น any
+
+- **Severity:** Medium
+- **Category:** Type Safety
+- **File/Module:** frontend/app/types/auth.types.ts หรือ composables/useApi.ts
+- **Problem:** มีการระบุประเภทของ `user` ใน response เป็น `any` ซึ่งทำให้เสียประโยชน์ของการใช้ TypeScript
+- **Impact:** โอกาสเกิด Runtime error หากเรียกใช้ property ที่ไม่มีอยู่จริง
+- **Recommended Fix:** กำหนด Interface `User` ที่ชัดเจนและนำมาผูกกับ `AuthResponse`
+- **Priority:** P3
+
+---
+
+### ISSUE-FE-007: Upload error ไม่ reset เมื่อเปลี่ยนไฟล์ใหม่
+
+- **Severity:** Medium
+- **Category:** UX
+- **File/Module:** Component ที่มีการอัปโหลดไฟล์ เช่น Source Image Upload
+- **Problem:** เมื่อเกิด error จากการอัปโหลดไฟล์ (เช่น ไฟล์ใหญ่เกิน) และผู้ใช้เลือกไฟล์ใหม่ ข้อความ error เดิมไม่ถูกเคลียร์ออก
+- **Impact:** ผู้ใช้อาจสับสนว่าระบบยังมีปัญหาอยู่
+- **Recommended Fix:** เพิ่ม `uploadError.value = ""` ภายในฟังก์ชัน `handleFileSelect` หรือเมื่อเริ่มต้นอัปโหลดใหม่
+- **Priority:** P3
+
+---
+
+### ISSUE-FE-008: ขาด aria attributes ในหลายส่วน
+
+- **Severity:** Medium
+- **Category:** Accessibility (A11y)
+- **File/Module:** หลายหน้าจอ เช่น Icon buttons, Form labels
+- **Problem:** ขาด `aria-label` บนปุ่มที่มีแต่ไอคอน และป้ายกำกับ (`<label>`) บางอันไม่มี attribute `for`
+- **Impact:** ผู้ใช้ที่ใช้งาน Screen Reader ไม่สามารถเข้าใจจุดประสงค์ของปุ่มหรือฟอร์มได้
+- **Recommended Fix:** เติม `aria-label` ให้ Icon button และตรวจสอบ tag `for` ใน labels ให้ตรงกับ `id` ของ input
+- **Priority:** P3
+
+---
+
+### ISSUE-FE-009: ไม่ใช้ NuxtImg ในหลายที่
+
+- **Severity:** Low
+- **Category:** Performance
+- **File/Module:** ทั่วทั้งโปรเจกต์
+- **Problem:** โปรเจกต์นี้ใช้ Nuxt แต่หลายจุดยังคงใช้แท็ก `<img>` ธรรมดาแทนที่จะเป็น `<NuxtImg>`
+- **Impact:** พลาดโอกาสในการ Optimize ขนาดภาพและ Lazy loading อัตโนมัติจาก Nuxt ทำให้เสียแบนด์วิดท์
+- **Recommended Fix:** เปลี่ยนแท็ก `<img>` เป็น `<NuxtImg>` และกำหนด width/height ตามความเหมาะสม
+- **Priority:** P4
+
+---
+
+### ISSUE-FE-010: axios และ better-sqlite3 ใน dependencies แต่ไม่ได้ใช้
+
+- **Severity:** Low
+- **Category:** Code Quality / Bundle Size
+- **File/Module:** frontend/package.json
+- **Problem:** มี Library ที่ถูกติดตั้งไว้แต่ไม่มีการเรียกใช้งานในโค้ดฝั่ง Frontend จริง
+- **Impact:** เพิ่มขนาดของ `node_modules` สิ้นเปลืองพื้นที่และอาจกระทบความเร็วการติดตั้ง
+- **Recommended Fix:** ลบ packages เหล่านี้ออกด้วยคำสั่ง `npm uninstall axios better-sqlite3`
+- **Priority:** P4
+
+---
+
+### ISSUE-FE-011: ไม่มี Confirmation dialog เมื่อลบข้อมูลในบางหน้า
+
+- **Severity:** Low
+- **Category:** UX
+- **File/Module:** หน้าจอการจัดการข้อมูล (เช่น การลบไฟล์, การลบ Tags)
+- **Problem:** บางปุ่ม Delete ทริกเกอร์ฟังก์ชันลบและเรียก API ทันทีโดยไม่ถามซ้ำ
+- **Impact:** ผู้ใช้อาจเผลอกดและทำให้ข้อมูลสูญหายโดยไม่ได้ตั้งใจ
+- **Recommended Fix:** เพิ่ม Modal หรือหน้าต่างยืนยัน (Confirmation dialog) ก่อนทำงานลบข้อมูล
+- **Priority:** P4
+
+---
+
+### ISSUE-FE-012: Admin Dashboard ไม่ใช้ /reports endpoint
+
+- **Severity:** Low
+- **Category:** Architecture / Performance
+- **File/Module:** frontend/app/pages/admin/index.vue (Dashboard)
+- **Problem:** หน้า Dashboard ดึงข้อมูลทั้งหมดผ่าน `apiFetch("/orders")` แล้วนำมาคำนวณสถิติที่ฝั่ง Client แทนที่จะเรียกใช้สถิติจาก backend ตรงๆ
+- **Impact:** กิน Resource เครือข่ายและเบราว์เซอร์โดยไม่จำเป็น หากมีข้อมูลเยอะมากๆ
+- **Recommended Fix:** เปลี่ยนไปเรียก `apiFetch("/reports/dashboard")` (ถ้ามี) หรืออัปเดตให้ดึงเฉพาะข้อมูลสถิติที่ผ่านการคำนวณจาก Server มาแล้ว
+- **Priority:** P4
+
 
 ---
 
