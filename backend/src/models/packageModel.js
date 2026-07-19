@@ -83,5 +83,5 @@ exports.update = (id, fields) => {
 };
 
 exports.delete = (id) => {
-  return pool.query("DELETE FROM packages WHERE packageId = ?", [id]);
+  return pool.query("UPDATE packages SET packageIsActive = 0 WHERE packageId = ?", [id]);
 };

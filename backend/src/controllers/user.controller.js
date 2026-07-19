@@ -1,4 +1,5 @@
 const UserModel = require("../models/user.model");
+const OrderModel = require("../models/orderModel");
 const bcrypt = require("bcrypt");
 
 // GET /users
@@ -120,8 +121,18 @@ exports.updateUser = async (req, res, next) => {
 // DELETE /users/:id
 exports.deleteUser = async (req, res, next) => {
   try {
+    const userId = req.params.id;
+
+    // ตรวจสอบว่าผู้ใช้นี้มีออเดอร์ (ในฐานะลูกค้าหรือช่างภาพ) หรือไม่ (BUG-03 Fix)
+    const customerOrders = await OrderModel.findAll({ customerId: userId });
+    const editorOrders = await OrderModel.findAll({ editorId: userId });
+
+    if (customerOrders.length > 0 || editorOrders.length > 0) {
+      return res.status(400).json({ message: "ไม่สามารถลบผู้ใช้นี้ได้ เนื่องจากมีประวัติคำสั่งซื้อผูกอยู่" });
+    }
+
     // เรียก Model เพื่อลบข้อมูลผู้ใช้
-    const affected = await UserModel.remove(req.params.id);
+    const affected = await UserModel.remove(userId);
 
     // ตรวจสอบว่าพบผู้ใช้หรือไม่
     if (!affected) {

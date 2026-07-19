@@ -12,10 +12,8 @@ exports.uploadSingle = (req, res) => {
     }
 
     // สร้าง public URL สำหรับเข้าถึงไฟล์
-    // app.js serve /uploads ด้วย express.static แล้ว
-    const protocol = req.protocol;
-    const host = req.get("host");
-    const baseUrl = process.env.UPLOAD_BASE_URL || `${protocol}://${host}`;
+    // ไม่ใช้ req.get("host") เพื่อป้องกัน Host Header Injection
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3000}`;
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     return res.status(201).json({
@@ -41,9 +39,7 @@ exports.uploadMultiple = (req, res) => {
       return res.status(400).json({ message: "กรุณาเลือกไฟล์อย่างน้อย 1 ไฟล์" });
     }
 
-    const protocol = req.protocol;
-    const host = req.get("host");
-    const baseUrl = process.env.UPLOAD_BASE_URL || `${protocol}://${host}`;
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3000}`;
 
     const files = req.files.map((file) => ({
       url: `${baseUrl}/uploads/${file.filename}`,
