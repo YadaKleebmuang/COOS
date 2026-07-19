@@ -1,6 +1,7 @@
 const OrderModel = require("../models/orderModel");
 const PackageModel = require("../models/packageModel");
 const WorkTypeModel = require("../models/workTypeModel");
+const UserModel = require("../models/user.model");
 
 // Helper function to check if order status transition is valid
 const isValidTransition = (from, to, role) => {
@@ -224,6 +225,13 @@ exports.assignEditor = async (req, res, next) => {
 
     if (userRole !== "admin") {
       return res.status(403).json({ message: "เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถมอบหมายงานได้" });
+    }
+
+    if (editorId) {
+      const editorUser = await UserModel.findById(editorId);
+      if (!editorUser || editorUser.userRole !== "editor") {
+        return res.status(400).json({ message: "ผู้ใช้ที่ระบุไม่ถูกต้องหรือไม่ได้เป็น Editor" });
+      }
     }
 
     const order = await OrderModel.findById(orderId);
