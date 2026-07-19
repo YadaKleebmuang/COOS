@@ -112,7 +112,7 @@
 | `/admin/gallery` ไม่มี page file | ~~🟠 Missing Feature~~ | ✅ มีอยู่แล้ว + เพิ่ม upload modal |
 | `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
 | Forgot Password ไม่มีระบบ Email จริง | 🟡 Feature Gap | Sprint 4+ |
-| Mobile Responsive ไม่สมบูรณ์ | 🟡 UX | Sprint 4 |
+| ISSUE-003: Mobile Responsive ไม่สมบูรณ์ | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-01: ไม่ตรวจสอบการชำระเงินซ้ำ (Duplicate Payment) | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-02: ไม่ Validate จำนวนเงิน | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-03: ใช้ Hard Delete ทับซ้อนกับ Foreign Keys (ใน User) | ~~🟡 Bug Medium~~ | ✅ แก้แล้ว Sprint 4 |

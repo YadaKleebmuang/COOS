@@ -9,6 +9,7 @@ const { apiFetch } = useApi()
 
 const currentUser = ref<any>(null)
 const dropdownOpen = ref(false)
+const mobileMenuOpen = ref(false)
 
 const checkAuth = async () => {
   if (token.value) {
@@ -29,6 +30,10 @@ const toggleDropdown = (e: Event) => {
   dropdownOpen.value = !dropdownOpen.value
 }
 
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
 const closeDropdown = () => {
   dropdownOpen.value = false
 }
@@ -43,6 +48,10 @@ const logout = async () => {
 onMounted(() => {
   checkAuth()
   window.addEventListener("click", closeDropdown)
+  
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) mobileMenuOpen.value = false
+  })
 })
 
 onBeforeUnmount(() => {
@@ -163,6 +172,46 @@ onBeforeUnmount(() => {
           </Transition>
         </div>
       </div>
+      
+      <!-- Hamburger Button -->
+      <button @click="toggleMobileMenu" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ml-2">
+        <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
+
+    <!-- Mobile Menu -->
+    <Transition
+      enter-active-class="transition-all duration-300 ease-in-out"
+      enter-from-class="max-h-0 opacity-0"
+      enter-to-class="max-h-[400px] opacity-100"
+      leave-active-class="transition-all duration-200 ease-in-out"
+      leave-from-class="max-h-[400px] opacity-100"
+      leave-to-class="max-h-0 opacity-0"
+    >
+      <div v-show="mobileMenuOpen" class="md:hidden overflow-hidden bg-white border-b border-gray-100 shadow-inner">
+        <nav class="flex flex-col px-4 pt-2 pb-4 space-y-1">
+          <NuxtLink to="/" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900" exact-active-class="text-gray-900 bg-gray-100 font-bold">
+            หน้าแรก
+          </NuxtLink>
+          <NuxtLink to="/gallery" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900" active-class="text-gray-900 bg-gray-100 font-bold">
+            แกลเลอรี
+          </NuxtLink>
+          <NuxtLink to="/customer/dashboard" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900" active-class="text-gray-900 bg-gray-100 font-bold">
+            แดชบอร์ด
+          </NuxtLink>
+          <NuxtLink to="/customer/orders/create" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900" active-class="text-gray-900 bg-gray-100 font-bold">
+            สั่งแต่งภาพ
+          </NuxtLink>
+          <NuxtLink to="/customer/orders" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900" active-class="text-gray-900 bg-gray-100 font-bold">
+            ประวัติออเดอร์
+          </NuxtLink>
+        </nav>
+      </div>
+    </Transition>
   </header>
 </template>

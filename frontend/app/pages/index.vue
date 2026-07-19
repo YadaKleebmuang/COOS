@@ -241,14 +241,13 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Table Compare Section -->
           <div class="pt-12">
             <h4 class="text-lg font-bold text-gray-900 mb-6 text-left">เปรียบเทียบแพ็กเกจ</h4>
-            <div class="overflow-x-auto border border-gray-200 rounded-3xl bg-white shadow-sm">
-              <table class="w-full text-left border-collapse">
+            <div class="overflow-x-auto border border-gray-200 rounded-3xl bg-white shadow-sm w-full">
+              <table class="w-full min-w-[600px] text-left border-collapse">
                 <thead>
                   <tr class="border-b border-gray-200 bg-gray-50/50">
-                    <th class="py-5 px-8 text-sm font-semibold text-gray-500">คุณสมบัติ</th>
+                    <th class="py-5 px-8 text-sm font-semibold text-gray-500 w-1/4">คุณสมบัติ</th>
                     <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Basic</th>
                     <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Standard</th>
                     <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Pro</th>
