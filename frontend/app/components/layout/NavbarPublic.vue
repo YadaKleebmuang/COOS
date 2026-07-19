@@ -11,6 +11,7 @@ const { apiFetch } = useApi()
 
 const currentUser = ref<any>(null)
 const dropdownOpen = ref(false)
+const mobileMenuOpen = ref(false)
 const activeSection = ref("home")
 
 let observer: IntersectionObserver | null = null
@@ -37,6 +38,10 @@ const closeDropdown = () => {
   dropdownOpen.value = false
 }
 
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
 const logout = async () => {
   await authService.logout()
   currentUser.value = null
@@ -58,6 +63,11 @@ onMounted(() => {
   checkAuth()
   window.addEventListener("click", closeDropdown)
   window.addEventListener("scroll", handleScroll)
+  
+  // Close mobile menu on window resize if crossing md breakpoint
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) mobileMenuOpen.value = false
+  })
 
   // Set up intersection observer for scroll spy
   const options = {
@@ -243,6 +253,66 @@ onBeforeUnmount(() => {
           </div>
         </template>
       </div>
+
+      <!-- Hamburger Button -->
+      <button @click="toggleMobileMenu" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ml-2">
+        <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
+
+    <!-- Mobile Menu -->
+    <Transition
+      enter-active-class="transition-all duration-300 ease-in-out"
+      enter-from-class="max-h-0 opacity-0"
+      enter-to-class="max-h-[400px] opacity-100"
+      leave-active-class="transition-all duration-200 ease-in-out"
+      leave-from-class="max-h-[400px] opacity-100"
+      leave-to-class="max-h-0 opacity-0"
+    >
+      <div v-show="mobileMenuOpen" class="md:hidden overflow-hidden bg-white border-b border-gray-100 shadow-inner">
+        <nav class="flex flex-col px-4 pt-2 pb-4 space-y-1">
+          <NuxtLink to="/" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="[activeSection === 'home' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']">
+            หน้าแรก
+          </NuxtLink>
+          <NuxtLink to="/gallery" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="[activeSection === 'gallery' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']">
+            แกลเลอรี
+          </NuxtLink>
+          <NuxtLink to="/#how-it-works" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="[activeSection === 'how-it-works' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']">
+            ขั้นตอนการใช้งาน
+          </NuxtLink>
+          <NuxtLink to="/#packages" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="[activeSection === 'packages' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']">
+            แพ็กเกจ
+          </NuxtLink>
+          <NuxtLink to="/policy" @click="mobileMenuOpen = false" class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+            :class="[activeSection === 'policy' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']">
+            นโยบาย
+          </NuxtLink>
+          <div class="pt-4 mt-2 border-t border-gray-100 flex flex-col gap-2">
+            <template v-if="currentUser">
+              <NuxtLink to="/customer/orders/create" @click="mobileMenuOpen = false" class="w-full text-center bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200">
+                เริ่มสั่งงาน
+              </NuxtLink>
+            </template>
+            <template v-else>
+              <NuxtLink to="/register" @click="mobileMenuOpen = false" class="w-full text-center bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200">
+                สมัครสมาชิก
+              </NuxtLink>
+              <NuxtLink to="/login" @click="mobileMenuOpen = false" class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200">
+                เข้าสู่ระบบ
+              </NuxtLink>
+            </template>
+          </div>
+        </nav>
+      </div>
+    </Transition>
   </header>
 </template>

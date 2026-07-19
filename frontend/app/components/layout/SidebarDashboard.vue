@@ -104,7 +104,7 @@ const menuItems = computed<SidebarItem[]>(() => {
 </script>
 
 <template>
-  <aside class="w-60 bg-white text-gray-600 min-h-screen flex flex-col border-r border-gray-200 flex-shrink-0">
+  <aside class="hidden lg:flex w-60 bg-white text-gray-600 min-h-screen flex-col border-r border-gray-200 flex-shrink-0">
 
     <!-- Brand Logo -->
     <div class="h-14 flex items-center px-5 border-b border-gray-100 gap-2.5 flex-shrink-0">
