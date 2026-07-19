@@ -56,6 +56,8 @@
 
 ### S04 — Repository และ Version Control ✅ เสร็จแล้ว
 
+> **หมายเหตุ (อัปเดต 15 ก.ค. 68):** ตรวจพบว่า `backend/.env` ยังไม่อยู่ใน `.gitignore` — ข้อมูลนี้ต้องบันทึกใน S04 เมื่อสร้าง
+
 **คืออะไร:** อธิบายการใช้งาน Git, GitHub, Branch Strategy และ Folder Structure
 
 **ควรมี:**
@@ -129,7 +131,7 @@
 - State Diagram (Order Status Machine)
 - Request/Response Schema
 
-**ไฟล์ที่เกี่ยวข้อง:** `routes/v1/`, `controllers/`, `models/`, `types/`
+**ไฟล์ที่เกี่ยวข้อง:** `routes/v1/` (14 files), `controllers/` (13 files), `models/` (9 files), `types/` (auth, user, order)
 
 ---
 
@@ -212,7 +214,7 @@
 - Pagination (ถ้ามี)
 - Admin Reports/Dashboard
 
-**ไฟล์ที่เกี่ยวข้อง:** `admin/*.vue`, Controllers ของแต่ละ Entity
+**ไฟล์ที่เกี่ยวข้อง:** `admin/*.vue` (13 pages), `report.controller.js`, `setting.controller.js`, `tag.controller.js`, `file.controller.js`
 
 ---
 
@@ -416,4 +418,4 @@
 
 ---
 
-*อัปเดตล่าสุด: 29 มิถุนายน 2568*
+*อัปเดตล่าสุด: 19 กรกฎาคม 2026*

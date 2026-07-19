@@ -31,21 +31,21 @@
 ## สถานะเอกสาร S01–S28
 
 | รหัส | หัวข้อ | สถานะ | อัปเดตล่าสุด | หมายเหตุ |
-|------|--------|-------|------------|---------|
+|------|--------|-------|------------|---------| 
 | **S01** | วิเคราะห์ปัญหาและความต้องการ | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | FR 30 ข้อ, NFR 15 ข้อ |
 | **S02** | Persona และ Use Case | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | 3 Persona, 34 Use Cases |
 | **S03** | แผนงาน ระยะเวลา และความเสี่ยง | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | 5 Sprints, Gantt, Risk 12 รายการ |
 | **S04** | Repository และ Version Control | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Folder Structure, Branches, Commit Convention |
 | **S05** | Wireframe / Prototype | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | 20 หน้าจอ, Wireframe 5 ภาพ |
-| **S06** | สถาปัตยกรรมระบบ | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Architecture, Docker, DFD |
-| **S07** | ฐานข้อมูล | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | ER Diagram 9 ตาราง, Data Dictionary |
-| **S08** | UML / API / Interface Design | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Sequence, State Machine, API Routes |
-| **S09** | UI Design System | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Typography, Color Palette, Components |
-| **S10** | Login / Role / Permission | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Auth Flow, JWT, RBAC 3 ระดับ |
-| **S11** | ฟังก์ชันหลักที่ 1 | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | ระบบจัดการออเดอร์และการคำนวณราคา |
-| **S12** | ฟังก์ชันหลักที่ 2 | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | ระบบชำระเงินและตรวจสอบ (Auto-transition) |
-| **S13** | ฟังก์ชันหลักที่ 3 | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | Editor Workspace และ AI Upload |
-| **S14** | CRUD / Search / Report | ✅ เสร็จแล้ว | 29 มิ.ย. 68 | ระบบจัดการข้อมูล, Soft Delete, สถิติ |
+| **S06** | สถาปัตยกรรมระบบ | ⬜ ยังไม่เริ่ม | — | — |
+| **S07** | ฐานข้อมูล | ⬜ ยังไม่เริ่ม | — | — |
+| **S08** | UML / API / Interface Design | ⬜ ยังไม่เริ่ม | — | — |
+| **S09** | UI Design System | ⬜ ยังไม่เริ่ม | — | — |
+| **S10** | Login / Role / Permission | ⬜ ยังไม่เริ่ม | — | — |
+| **S11** | ฟังก์ชันหลักที่ 1 (Order System) | ⬜ ยังไม่เริ่ม | — | — |
+| **S12** | ฟังก์ชันหลักที่ 2 (Payment System) | ⬜ ยังไม่เริ่ม | — | — |
+| **S13** | ฟังก์ชันหลักที่ 3 (Editor Workspace) | ⬜ ยังไม่เริ่ม | — | — |
+| **S14** | CRUD / Search / Report | ⬜ ยังไม่เริ่ม | — | — |
 | **S15** | API / AI / ระบบภายนอก | ⬜ ยังไม่เริ่ม | — | — |
 | **S16** | Responsive | ⬜ ยังไม่เริ่ม | — | รองรับ Desktop เท่านั้น |
 | **S17** | Error Handling | ⬜ ยังไม่เริ่ม | — | — |
@@ -61,32 +61,30 @@
 | **S27** | สถิติและการนำเสนอ | ⬜ ยังไม่เริ่ม | — | — |
 | **S28** | ส่งมอบ Source Code | ⬜ ยังไม่เริ่ม | — | — |
 
-**Legend:**
-- ✅ เสร็จแล้ว — เอกสารสร้างเสร็จสมบูรณ์
-- 🔄 กำลังดำเนินการ — อยู่ระหว่างสร้าง
-- 🟨 มีข้อมูลแล้ว — มีข้อมูลพื้นฐาน รอจัดทำเอกสาร
-- ⬜ ยังไม่เริ่ม — ยังไม่ได้เริ่มต้น
-
 ---
 
 ## สถานะการพัฒนาระบบ (Sprint 4 — Active)
 
 ### ✅ พัฒนาเสร็จแล้ว (Sprint 1–3)
-- Authentication (Register/Login/Forgot/Reset)
+- Authentication (Register/Login/Forgot/Reset) 
 - User Management (CRUD + Profile Upload)
-- WorkType CRUD
-- Package CRUD
-- Order System (4-step wizard + 9-status state machine)
-- Editor 6-Tab Workspace
-- Gallery + Policy Management
-- File Upload System (5 directories)
-- Admin Dashboard & Reports Page (CSS-based charts & tables)
-- Workflow Logs
-- Payment UI ครบ (Customer Upload Slip + Admin Verify)
-- Admin Gallery Page (Upload Modal & ?all=true fix)
-- Gallery Public Showcase (Filter/Search/Sort/Hashtags complete)
-- Security Fix: Register Role Hijack — hardcode role="customer"
-- Error Body Parsing ใน `useApi.ts` — เพิ่ม ApiError class + statusCode
+- WorkType CRUD 
+- Package CRUD 
+- Order System 
+- Payment System 
+- Order Assignment
+- Source Image Upload 
+- AI Generated Image Upload + Prompt Logging
+- Selected Final Image management
+- Gallery Management (CRUD + Toggle + Tags)
+- Policy Management 
+- Editor 6-Tab Workspace 
+- Admin Dashboard 
+- Reports
+- Tags Management (CRUD)
+- System Settings Management (key-value)
+- File Management 
+- Workflow Logs Timeline
 
 ### 🔄 กำลังพัฒนา (Sprint 4)
 - [ ] Testing (Unit, Integration, UAT)
@@ -102,8 +100,14 @@
 
 ## Known Issues (ปัญหาที่ทราบแล้ว)
 
-| Issue | ระดับ | Sprint แก้ |
+| Issue | ระดับ | สถานะ/Sprint แก้ |
 |-------|-------|-----------|
+| JWT_SECRET hardcode ใน docker-compose.yml | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| backend/.env ถูก commit เข้า git (ไม่มีใน .gitignore) | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| upload.controller.js ใช้ req.get("host") สร้าง URL | 🔴 Security Critical | ⬜ ยังไม่แก้ |
+| user.model.findAll()/findById() return userPassword hash | 🟠 Security High | ⬜ ยังไม่แก้ |
+| ไม่มี Rate Limiting บน auth endpoints | 🟠 Security High | ⬜ ยังไม่แก้ |
+| ไม่มี Test ใดๆ (0%) | 🟡 Quality | Sprint 4–5 |
 | Register สามารถกำหนด role ใดก็ได้ผ่าน body | ~~🔴 Security~~ | ✅ แก้แล้ว Sprint 3 |
 | `/admin/gallery` ไม่มี page file | ~~🟠 Missing Feature~~ | ✅ มีอยู่แล้ว + เพิ่ม upload modal |
 | `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
@@ -123,9 +127,11 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 19 ก.ค. 2026 | ลบ Known Issues ที่ถูกแก้ไขแล้วในโค้ดออก, ตรวจสอบโครงสร้างทั้งหมดให้อัปเดตตรงกับ 12 ตาราง |
 | 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 2 (ISSUE-002) ตรวจสอบ Role เมื่อมีการสั่งงาน Editor |
 | 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 1 (BUG-04, SEC-01, BUG-05) ตามรายงานการประเมินระบบ |
 | 19 ก.ค. 2026 | ปรับปรุงเอกสาร AI Context ทั้งหมดให้ตรงกับโค้ดปัจจุบัน และอัปเดตสถานะบัก BUG-01, BUG-02, BUG-03 เป็นแก้แล้ว |
+| 15 ก.ค. 2569 | ตรวจสอบ Source Code ทั้งหมด |
 | 9 ก.ค. 2569 | เสร็จสิ้น Sprint 3 (100%), อัปเดตหน้าแกลเลอรี่สาธารณะ, แก้ปัญหาความปลอดภัย, ปรับปรุงฐานข้อมูลภาษาไทย |
 | 29 มิ.ย. 2568 | สร้าง S01–S14 เสร็จ, สร้างไฟล์ docs/ai/ ครบ 4 ไฟล์ |
 
