@@ -13,7 +13,7 @@
 | **ชื่อโครงงาน (EN)** | Development of a Web-Based Application for Managing Image Creation Orders for an Online Studio |
 | **Version ปัจจุบัน** | v0.6 (Milestone 60%+) |
 | **Sprint ปัจจุบัน** | Sprint 4 (Active) |
-| **อัปเดตล่าสุด** | 9 กรกฎาคม 2569 |
+| **อัปเดตล่าสุด** | 19 กรกฎาคม 2026 |
 
 ---
 
@@ -109,6 +109,13 @@
 | `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
 | Forgot Password ไม่มีระบบ Email จริง | 🟡 Feature Gap | Sprint 4+ |
 | Mobile Responsive ไม่สมบูรณ์ | 🟡 UX | Sprint 4 |
+| BUG-01: ไม่ตรวจสอบการชำระเงินซ้ำ (Duplicate Payment) | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
+| BUG-02: ไม่ Validate จำนวนเงิน | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
+| BUG-03: ใช้ Hard Delete ทับซ้อนกับ Foreign Keys (ใน User) | ~~🟡 Bug Medium~~ | ✅ แก้แล้ว Sprint 4 |
+| BUG-04: ใช้ Hard Delete กับ Package ทำระบบพังจาก FK | ~~🔴 Bug Critical~~ | ✅ แก้แล้ว Phase 1 |
+| SEC-01: Admin Upload Gallery ขาดเช็คไฟล์ปลอมแปลง | ~~🟠 Security High~~ | ✅ แก้แล้ว Phase 1 |
+| BUG-05: AI Prompt หลุดบันทึกลงภาพ Source ได้ | ~~🟡 Data Integrity Low~~ | ✅ แก้แล้ว Phase 1 |
+| ISSUE-002: การมอบหมายงาน Editor ขาดเช็ค Role | ~~🔴 Security High~~ | ✅ แก้แล้ว Phase 2 |
 
 ---
 
@@ -116,6 +123,9 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 2 (ISSUE-002) ตรวจสอบ Role เมื่อมีการสั่งงาน Editor |
+| 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 1 (BUG-04, SEC-01, BUG-05) ตามรายงานการประเมินระบบ |
+| 19 ก.ค. 2026 | ปรับปรุงเอกสาร AI Context ทั้งหมดให้ตรงกับโค้ดปัจจุบัน และอัปเดตสถานะบัก BUG-01, BUG-02, BUG-03 เป็นแก้แล้ว |
 | 9 ก.ค. 2569 | เสร็จสิ้น Sprint 3 (100%), อัปเดตหน้าแกลเลอรี่สาธารณะ, แก้ปัญหาความปลอดภัย, ปรับปรุงฐานข้อมูลภาษาไทย |
 | 29 มิ.ย. 2568 | สร้าง S01–S14 เสร็จ, สร้างไฟล์ docs/ai/ ครบ 4 ไฟล์ |
 

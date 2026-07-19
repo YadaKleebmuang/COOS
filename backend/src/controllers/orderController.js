@@ -1,6 +1,7 @@
 const OrderModel = require("../models/orderModel");
 const PackageModel = require("../models/packageModel");
 const WorkTypeModel = require("../models/workTypeModel");
+const UserModel = require("../models/user.model");
 
 // Helper function to check if order status transition is valid
 const isValidTransition = (from, to, role) => {
@@ -226,6 +227,13 @@ exports.assignEditor = async (req, res, next) => {
       return res.status(403).json({ message: "เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถมอบหมายงานได้" });
     }
 
+    if (editorId) {
+      const editorUser = await UserModel.findById(editorId);
+      if (!editorUser || editorUser.userRole !== "editor") {
+        return res.status(400).json({ message: "ผู้ใช้ที่ระบุไม่ถูกต้องหรือไม่ได้เป็น Editor" });
+      }
+    }
+
     const order = await OrderModel.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
@@ -292,17 +300,19 @@ exports.uploadImage = async (req, res, next) => {
       }
     }
 
-    const imageId = await OrderModel.addOrderImage(orderId, {
+    const imagePayload = {
       imageType,
       imageUrl,
       imageThumbnailUrl,
-      aiEngine,
-      positivePrompt,
-      negativePrompt,
-      cfgScale,
-      steps,
-      seed,
-    });
+      aiEngine: imageType === "ai_generated" ? aiEngine : null,
+      positivePrompt: imageType === "ai_generated" ? positivePrompt : null,
+      negativePrompt: imageType === "ai_generated" ? negativePrompt : null,
+      cfgScale: imageType === "ai_generated" ? cfgScale : null,
+      steps: imageType === "ai_generated" ? steps : null,
+      seed: imageType === "ai_generated" ? seed : null,
+    };
+
+    const imageId = await OrderModel.addOrderImage(orderId, imagePayload);
 
     res.status(201).json({
       message: "อัปโหลดรูปภาพเข้าออเดอร์สำเร็จ",
@@ -345,6 +355,15 @@ exports.submitPayment = async (req, res, next) => {
     
     if (Math.abs(submitted - expected) > 1) { // tolerance 1 บาท
       return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
+    }
+
+    // Validate duplicate payment (BUG-01 Fix)
+    const existingPayments = await OrderModel.findPayments(orderId);
+    const hasDuplicate = existingPayments.some(
+      (p) => p.paymentType === paymentType && (p.paymentStatus === "pending" || p.paymentStatus === "approved")
+    );
+    if (hasDuplicate) {
+      return res.status(400).json({ message: `มีหลักฐานชำระเงินงวดนี้ (${paymentType}) ที่กำลังรอตรวจสอบ หรือตรวจสอบผ่านแล้ว` });
     }
 
     const paymentId = await OrderModel.addPayment({
