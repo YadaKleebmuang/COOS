@@ -107,7 +107,7 @@
 | upload.controller.js ใช้ req.get("host") สร้าง URL | 🔴 Security Critical | ⬜ ยังไม่แก้ |
 | user.model.findAll()/findById() return userPassword hash | 🟠 Security High | ⬜ ยังไม่แก้ |
 | ไม่มี Rate Limiting บน auth endpoints | 🟠 Security High | ⬜ ยังไม่แก้ |
-| ไม่มี Test ใดๆ (0%) | 🟡 Quality | Sprint 4–5 |
+| ISSUE-004: ขาด Automated Tests (orderController) | ~~🟡 Quality~~ | ✅ แก้แล้ว Sprint 4 |
 | Register สามารถกำหนด role ใดก็ได้ผ่าน body | ~~🔴 Security~~ | ✅ แก้แล้ว Sprint 3 |
 | `/admin/gallery` ไม่มี page file | ~~🟠 Missing Feature~~ | ✅ มีอยู่แล้ว + เพิ่ม upload modal |
 | `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
@@ -127,6 +127,7 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 19 ก.ค. 2026 | ตั้งค่าระบบ Automated Tests (Jest, Supertest) และเพิ่ม Unit Tests สำหรับ orderController (ISSUE-004) |
 | 19 ก.ค. 2026 | ลบ Known Issues ที่ถูกแก้ไขแล้วในโค้ดออก, ตรวจสอบโครงสร้างทั้งหมดให้อัปเดตตรงกับ 12 ตาราง |
 | 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 2 (ISSUE-002) ตรวจสอบ Role เมื่อมีการสั่งงาน Editor |
 | 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 1 (BUG-04, SEC-01, BUG-05) ตามรายงานการประเมินระบบ |
