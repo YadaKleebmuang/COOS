@@ -25,15 +25,17 @@ const isValidTransition = (from, to, role) => {
   };
 
   if (role === "customer") {
-    return customerTransitions[from] && customerTransitions[from].includes(to);
+    return !!(customerTransitions[from] && customerTransitions[from].includes(to));
   }
 
   if (role === "editor") {
-    return editorTransitions[from] && editorTransitions[from].includes(to);
+    return !!(editorTransitions[from] && editorTransitions[from].includes(to));
   }
 
   return false;
 };
+
+exports.isValidTransition = isValidTransition;
 
 // 1. POST /api/v1/orders (Create Order - Customer only)
 exports.create = async (req, res, next) => {
