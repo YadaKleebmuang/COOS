@@ -13,7 +13,7 @@
 | **ชื่อโครงงาน (EN)** | Development of a Web-Based Application for Managing Image Creation Orders for an Online Studio |
 | **Version ปัจจุบัน** | v0.6 (Milestone 60%+) |
 | **Sprint ปัจจุบัน** | Sprint 4 (Active) |
-| **อัปเดตล่าสุด** | 19 กรกฎาคม 2026 |
+| **อัปเดตล่าสุด** | 20 กรกฎาคม 2026 |
 
 ---
 
@@ -102,17 +102,25 @@
 
 | Issue | ระดับ | สถานะ/Sprint แก้ |
 |-------|-------|-----------|
-| JWT_SECRET hardcode ใน docker-compose.yml | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| backend/.env ถูก commit เข้า git (ไม่มีใน .gitignore) | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| upload.controller.js ใช้ req.get("host") สร้าง URL | 🔴 Security Critical | ⬜ ยังไม่แก้ |
-| user.model.findAll()/findById() return userPassword hash | 🟠 Security High | ⬜ ยังไม่แก้ |
-| ไม่มี Rate Limiting บน auth endpoints | 🟠 Security High | ⬜ ยังไม่แก้ |
-| ISSUE-004: ขาด Automated Tests (orderController) | ~~🟡 Quality~~ | ✅ แก้แล้ว Sprint 4 |
+| **ISSUE-BE-001:** backend/.env ถูก commit เข้า git — JWT Secret / DB Password รั่ว | 🔴 Security Critical | ⬜ ยังไม่แก้ — **P0** |
+| **ISSUE-BE-002:** upload.controller.js มี `next` undeclared — Runtime Crash | 🔴 Critical Bug | ⬜ ยังไม่แก้ — **P0** |
+| **ISSUE-BE-003:** ขาด Security Headers (Helmet) | 🔴 Security High | ⬜ Sprint 4 |
+| **ISSUE-BE-005:** ขาด Request Body Size Limit (express.json) | 🔴 Security High | ⬜ Sprint 4 |
+| **ISSUE-BE-006:** ขาด Pagination ใน GET /orders, GET /users | 🟠 Performance High | ⬜ Sprint 4 |
+| **ISSUE-BE-007:** Mass Assignment ใน galleryImage.controller update | 🔴 Security High | ⬜ Sprint 4 |
+| **ISSUE-BE-008:** SQL interpolation ใน Report controller | 🟠 Security Medium | ⬜ Sprint 5 |
+| **ISSUE-BE-009:** ไม่มี JWT Token Revocation (logout client-side only) | 🟠 Auth Medium | ⬜ Sprint 5 |
+| **ISSUE-BE-010:** BACKEND_URL ไม่ได้ set ใน docker-compose — File URL invalid | 🟠 Config Medium | ⬜ Sprint 4 |
+| **ISSUE-FE-001:** customer/editor middleware ตรวจแค่ cookie ไม่ verify backend | 🔴 Security High | ⬜ Sprint 4 |
+| **ISSUE-FE-002:** httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client | 🔴 Security High | ⬜ Sprint 4 |
+| **ISSUE-FE-003:** ขาด Pagination ใน List pages ทุกหน้า | 🟠 Performance High | ⬜ Sprint 4 |
+| **INT-001:** depositPercentage hardcode ใน Frontend แทนที่จะดึงจาก systemSettings | 🟠 Business Rule High | ⬜ Sprint 4 |
+| **INT-002:** Static File URL format ไม่สม่ำเสมอ (relative vs absolute) | 🟠 Integration High | ⬜ Sprint 4 |
+| **INT-004:** Editor ไม่มี UI สำหรับ transition waiting_selection → waiting_final_payment | 🟡 Feature Gap | ⬜ Sprint 4 |
+| ISSUE-004: ขาด Automated Tests (orderController) | ~~🟡 Quality~~ | ✅ แก้แล้ว Sprint 4 (Unit Tests เพิ่มแล้ว) |
 | Register สามารถกำหนด role ใดก็ได้ผ่าน body | ~~🔴 Security~~ | ✅ แก้แล้ว Sprint 3 |
-| `/admin/gallery` ไม่มี page file | ~~🟠 Missing Feature~~ | ✅ มีอยู่แล้ว + เพิ่ม upload modal |
-| `useApi.ts` throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 — เพิ่ม ApiError class |
+| useApi.ts throw statusText แทน Error body | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 3 |
 | Forgot Password ไม่มีระบบ Email จริง | 🟡 Feature Gap | Sprint 4+ |
-| ISSUE-003: Mobile Responsive ไม่สมบูรณ์ | ~~🟡 UX~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-01: ไม่ตรวจสอบการชำระเงินซ้ำ (Duplicate Payment) | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-02: ไม่ Validate จำนวนเงิน | ~~🟠 Bug High~~ | ✅ แก้แล้ว Sprint 4 |
 | BUG-03: ใช้ Hard Delete ทับซ้อนกับ Foreign Keys (ใน User) | ~~🟡 Bug Medium~~ | ✅ แก้แล้ว Sprint 4 |
@@ -127,6 +135,7 @@
 
 | วันที่ | รายละเอียด |
 |-------|-----------|
+| 20 ก.ค. 2026 | ประเมินระบบ COOS อย่างเข้มข้น (Static Code Review) — สร้างรายงาน FRONTEND_EVALUATION.md, BACKEND_EVALUATION.md, INTEGRATED_EVALUATION.md ใน docs/evaluation/ พบ Issues 26 รายการ (2 Critical, 11 High, 7 Medium, 6 Low) คะแนน Frontend 59/100, Backend 66/100, ระบบรวม 62/100 |
 | 19 ก.ค. 2026 | ตั้งค่าระบบ Automated Tests (Jest, Supertest) และเพิ่ม Unit Tests สำหรับ orderController (ISSUE-004) |
 | 19 ก.ค. 2026 | ลบ Known Issues ที่ถูกแก้ไขแล้วในโค้ดออก, ตรวจสอบโครงสร้างทั้งหมดให้อัปเดตตรงกับ 12 ตาราง |
 | 19 ก.ค. 2026 | แก้ไขบั๊ก Phase 2 (ISSUE-002) ตรวจสอบ Role เมื่อมีการสั่งงาน Editor |
