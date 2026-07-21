@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { authService } from "~/services/auth.service";
+
 
 definePageMeta({
   layout: "auth",
@@ -24,7 +24,7 @@ const submit = async () => {
 
   loading.value = true;
   try {
-    const data = await authService.forgotPassword(email.value);
+    const data = await useAuth().forgotPassword(email.value);
     resetToken.value = data.resetToken;
     success.value = true;
   } catch (err: any) {

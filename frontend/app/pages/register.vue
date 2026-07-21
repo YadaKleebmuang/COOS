@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
-import { authService } from "~/services/auth.service";
+import { useAuth } from "../composables/useAuth";
+
 
 const router = useRouter();
 
@@ -21,6 +22,8 @@ const form = reactive({
 const error = ref<string>("");
 const loading = ref<boolean>(false);
 
+const auth = useAuth();
+
 const register = async () => {
   if (loading.value) return;
   error.value = "";
@@ -29,8 +32,8 @@ const register = async () => {
     error.value = "กรุณากรอกข้อมูลให้ครบทุกช่อง";
     return;
   }
-  if (form.password.length < 6) {
-    error.value = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+  if (form.password.length < 8) {
+    error.value = "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร";
     return;
   }
   if (form.password !== form.confirmPassword) {
@@ -40,7 +43,7 @@ const register = async () => {
 
   loading.value = true;
   try {
-    await authService.register(form);
+    await auth.register(form);
     await router.push("/login");
   } catch (err: any) {
     error.value = err?.message || "สมัครสมาชิกไม่สำเร็จ";
@@ -104,7 +107,7 @@ const register = async () => {
             id="register-password"
             v-model="form.password"
             type="password"
-            placeholder="อย่างน้อย 6 ตัวอักษร"
+            placeholder="อย่างน้อย 8 ตัวอักษร"
             autocomplete="new-password"
             class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
           />

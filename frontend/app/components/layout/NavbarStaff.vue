@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useApi } from "~/composables/useApi"
-import { authService } from "~/services/auth.service"
+
 
 const props = defineProps<{
   role: "admin" | "editor"
@@ -115,7 +115,7 @@ const closeDropdown = () => {
 }
 
 const logout = async () => {
-  await authService.logout()
+  await useAuth().logout()
   currentUser.value = null
   dropdownOpen.value = false
   router.push("/")

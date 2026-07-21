@@ -16,16 +16,16 @@ export class ApiError extends Error {
 }
 
 export function useApi() {
+  const config = useRuntimeConfig();
+  const tokenCookie = useCookie<string | null>("token");
+
   const apiFetch = async <T = any>(
     url: string,
     option: RequestInit = {},
   ): Promise<T> => {
-    const config = useRuntimeConfig();
     const options = { ...option };
     const headers = new Headers(option.headers || {});
 
-    // ใช้ useCookie แทน document.cookie เพื่อรองรับ SSR (Nuxt 3)
-    const tokenCookie = useCookie<string | null>("token");
     const token = tokenCookie.value;
 
     if (token) {

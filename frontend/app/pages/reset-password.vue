@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { authService } from "~/services/auth.service";
+
 
 const router = useRouter();
 const route = useRoute();
@@ -40,7 +40,7 @@ const submit = async () => {
 
   loading.value = true;
   try {
-    await authService.resetPassword(token.value, newPassword.value);
+    await useAuth().resetPassword(token.value, newPassword.value);
     success.value = true;
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถรีเซ็ตรหัสผ่านได้";
