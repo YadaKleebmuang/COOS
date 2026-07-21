@@ -30,16 +30,19 @@ const loading = ref(true)
 const searchQuery = ref("")
 const activeTab = ref<"all" | "deposit" | "final" | "approved" | "rejected">("all")
 
-const confirmDialog = ref({ open: false, loading: false, paymentId: 0, orderId: 0, action: "approved" as "approved" | "rejected" })
+const confirmDialog = ref({ open: false, loading: false, paymentId: 0, orderId: 0, action: "approved" as "approved" | "rejected", error: "" })
+
+const error = ref("")
 
 // ── Fetch ──────────────────────────────────────────────────────
 const fetchPayments = async () => {
   loading.value = true
+  error.value = ""
   try {
     const data = await apiFetch<PaymentRow[]>("/payments")
     payments.value = data
-  } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
+  } catch (err: any) {
+    error.value = "เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message
   } finally {
     loading.value = false
   }
@@ -81,11 +84,12 @@ const columns = [
 
 // ── Actions ────────────────────────────────────────────────────
 const openConfirm = (p: PaymentRow, action: "approved" | "rejected") => {
-  confirmDialog.value = { open: true, loading: false, paymentId: p.paymentId, orderId: p.orderId, action }
+  confirmDialog.value = { open: true, loading: false, paymentId: p.paymentId, orderId: p.orderId, action, error: "" }
 }
 
 const confirmVerify = async () => {
   confirmDialog.value.loading = true
+  confirmDialog.value.error = ""
   try {
     const routeAction = confirmDialog.value.action === 'approved' ? 'approve' : 'reject';
     await apiFetch(`/payments/${confirmDialog.value.paymentId}/${routeAction}`, {
@@ -96,8 +100,8 @@ const confirmVerify = async () => {
     await fetchPayments()
     
     confirmDialog.value.open = false
-  } catch (error: any) {
-    alert("เกิดข้อผิดพลาด: " + error.message)
+  } catch (err: any) {
+    confirmDialog.value.error = "เกิดข้อผิดพลาด: " + err.message
   } finally {
     confirmDialog.value.loading = false
   }
@@ -139,8 +143,14 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       </div>
     </div>
 
+    <!-- Error -->
+    <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+      <button @click="fetchPayments" class="mt-2 text-xs text-gray-500 underline">ลองใหม่</button>
+    </div>
+
     <!-- Table -->
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <AdminDataTable :columns="columns" :rows="filteredPayments" :loading="loading" row-key="paymentId">
         <template #cell-orderId="{ value }">
           <span class="font-mono text-xs font-bold text-gray-900">#{{ value }}</span>
@@ -186,6 +196,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       :confirm-label="confirmDialog.action === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'"
       :danger="confirmDialog.action === 'rejected'"
       :loading="confirmDialog.loading"
+      :error="confirmDialog.error"
       @confirm="confirmVerify"
       @cancel="confirmDialog.open = false"
     />

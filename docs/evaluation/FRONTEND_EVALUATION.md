@@ -99,8 +99,8 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 |----|----------|----------|---------|
 | ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend (✅ FIXED) |
 | ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client (✅ FIXED) |
-| ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages |
-| ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast |
+| ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages (✅ FIXED)|
+| ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast (✅ FIXED) |
 | ISSUE-FE-005 | Medium | Code Quality | create.vue มี 851 บรรทัด — ควรแยก Step Components |
 | ISSUE-FE-006 | Medium | Type Safety | AuthResponse.user typed เป็น any |
 | ISSUE-FE-007 | Medium | UX | Upload error ไม่ reset เมื่อเปลี่ยนไฟล์ใหม่ |
@@ -188,7 +188,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-004: alert() ใช้ใน admin/payments.vue แทน Toast
+### ISSUE-FE-004: alert() ใช้ใน admin/payments.vue แทน Toast (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** UX/UI
