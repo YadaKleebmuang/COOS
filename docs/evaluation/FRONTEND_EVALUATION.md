@@ -97,7 +97,7 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 
 | ID | Severity | Category | ชื่อปัญหา |
 |----|----------|----------|---------|
-| ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend |
+| ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend (✅ FIXED) |
 | ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client |
 | ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages |
 | ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast |
@@ -114,8 +114,9 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 
 ## 7. Detailed Issues
 
-### ISSUE-FE-001: Customer/Editor Middleware ไม่ Verify กับ Backend
+### ISSUE-FE-001: Customer/Editor Middleware ไม่ Verify กับ Backend (✅ FIXED)
 
+- **Status:** ✅ ดำเนินการสำเร็จแล้ว
 - **Severity:** High
 - **Category:** Security / Authorization
 - **File/Module:** frontend/app/middleware/customer.ts, editor.ts
