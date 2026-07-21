@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { orderService } from "~/services/order.service"
 import type { OrderSummary, OrderStatus } from "~/types/order.types"
+import Pagination from "~/components/ui/Pagination.vue"
 
 // ── Auth & Cookies ──
 const token = useCookie<string | null>("token")
@@ -18,13 +19,22 @@ const loading = ref(true)
 const error = ref("")
 const selectedStatusFilter = ref<string>("all")
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalRecords = ref(0)
+const limit = 10
+
 // ── Fetch orders ──
-const fetchOrders = async () => {
+const fetchOrders = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    const res = await orderService.getMyOrders()
-    orders.value = res
+    const statusQuery = selectedStatusFilter.value !== "all" ? selectedStatusFilter.value : undefined
+    const res = await orderService.getMyOrders(page, limit, statusQuery)
+    orders.value = res.data || []
+    currentPage.value = res.page || 1
+    totalPages.value = res.totalPages || 1
+    totalRecords.value = res.total || 0
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถดึงข้อมูลรายการออเดอร์ได้"
   } finally {
@@ -40,12 +50,18 @@ onMounted(() => {
   fetchOrders()
 })
 
+const handlePageChange = (page: number) => {
+  fetchOrders(page)
+}
+
+watch(selectedStatusFilter, () => {
+  currentPage.value = 1
+  fetchOrders(1)
+})
+
 // ── Filtered Orders ──
 const filteredOrders = computed(() => {
-  if (selectedStatusFilter.value === "all") {
-    return orders.value
-  }
-  return orders.value.filter((o) => o.orderStatus === selectedStatusFilter.value)
+  return orders.value
 })
 
 // ── Status Config (Labels & Color Badges) ──
@@ -266,5 +282,14 @@ const filterTabs = [
           </div>
         </NuxtLink>
       </div>
+
+      <Pagination 
+        v-if="!loading && filteredOrders.length > 0"
+        :current-page="currentPage" 
+        :total-pages="totalPages" 
+        :total="totalRecords" 
+        :limit="limit" 
+        @page-change="handlePageChange" 
+      />
     </div>
 </template>

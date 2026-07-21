@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { useApi } from "~/composables/useApi"
 import { orderService } from "~/services/order.service"
+import Pagination from "~/components/ui/Pagination.vue"
 
 definePageMeta({
   layout: "admin",
@@ -25,16 +26,28 @@ const confirmDialog = ref({
   loading: false
 })
 
-const fetchAdminData = async () => {
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalRecords = ref(0)
+const limit = 10
+
+const fetchAdminData = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    const [allUsers, allOrders] = await Promise.all([
-      apiFetch("/users"),
-      orderService.getMyOrders()
+    // Request up to 1000 users for the editor dropdown, but paginate orders
+    const statusQuery = selectedFilter.value !== "all" ? selectedFilter.value : undefined
+    const [usersRes, ordersRes] = await Promise.all([
+      apiFetch<any>("/users?limit=1000"),
+      orderService.getMyOrders(page, limit, statusQuery)
     ])
-    orders.value = [...allOrders].sort((a, b) => b.orderId - a.orderId)
-    editors.value = allUsers.filter((u: any) => u.userRole === "editor")
+    
+    orders.value = ordersRes.data || []
+    currentPage.value = ordersRes.page || 1
+    totalPages.value = ordersRes.totalPages || 1
+    totalRecords.value = ordersRes.total || 0
+
+    editors.value = (usersRes.data || []).filter((u: any) => u.userRole === "editor")
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
@@ -44,30 +57,28 @@ const fetchAdminData = async () => {
 
 onMounted(() => fetchAdminData())
 
-// ── Filters ────────────────────────────────────────────────────
-const countByStatus = (status: string) => orders.value.filter(o => o.orderStatus === status).length
+const handlePageChange = (page: number) => {
+  fetchAdminData(page)
+}
 
+// ── Filters ────────────────────────────────────────────────────
 const filterOptions = computed(() => [
-  { key: "all", label: "ทั้งหมด", count: orders.value.length },
-  { key: "waiting_deposit", label: "รอมัดจำ", count: countByStatus("waiting_deposit") },
-  { key: "waiting_assignment", label: "รอมอบหมาย", count: countByStatus("waiting_assignment") },
-  { key: "in_progress", label: "กำลังดำเนินการ", count: countByStatus("in_progress") },
-  { key: "waiting_final_payment", label: "รอชำระส่วนที่เหลือ", count: countByStatus("waiting_final_payment") },
-  { key: "completed", label: "ส่งงานแล้ว", count: orders.value.filter(o => o.orderStatus === "completed" || o.orderStatus === "delivered").length },
-  { key: "cancelled", label: "ยกเลิก", count: countByStatus("cancelled") }
+  { key: "all", label: "ทั้งหมด" },
+  { key: "waiting_deposit", label: "รอมัดจำ" },
+  { key: "waiting_assignment", label: "รอมอบหมาย" },
+  { key: "in_progress", label: "กำลังดำเนินการ" },
+  { key: "waiting_final_payment", label: "รอชำระส่วนที่เหลือ" },
+  { key: "completed", label: "ส่งงานแล้ว" },
+  { key: "cancelled", label: "ยกเลิก" }
 ])
+
+watch(selectedFilter, () => {
+  currentPage.value = 1
+  fetchAdminData(1)
+})
 
 const filteredOrders = computed(() => {
   let result = orders.value
-
-  if (selectedFilter.value !== "all") {
-    if (selectedFilter.value === "completed") {
-      result = result.filter(o => o.orderStatus === "completed" || o.orderStatus === "delivered")
-    } else {
-      result = result.filter(o => o.orderStatus === selectedFilter.value)
-    }
-  }
-
   const q = searchQuery.value.trim()
   if (q) {
     result = result.filter(o =>
@@ -76,7 +87,6 @@ const filteredOrders = computed(() => {
       (o.workTypeName ?? "").toLowerCase().includes(q.toLowerCase())
     )
   }
-
   return result
 })
 
@@ -288,9 +298,16 @@ const breadcrumb = [
 
         <!-- Created at -->
         <template #cell-orderCreatedAt="{ value }">
-          <span class="text-xs text-gray-400">{{ formatDate(value) }}</span>
+          <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
         </template>
       </AdminDataTable>
+      <Pagination 
+        :current-page="currentPage" 
+        :total-pages="totalPages" 
+        :total="totalRecords" 
+        :limit="limit" 
+        @page-change="handlePageChange" 
+      />
 
       <!-- Empty state -->
       <AdminEmptyState

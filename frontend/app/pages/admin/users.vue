@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue"
 import { useApi } from "~/composables/useApi"
 import type { User } from "~/types/user.types"
+import Pagination from "~/components/ui/Pagination.vue"
 
 definePageMeta({
   layout: "admin",
@@ -17,6 +18,11 @@ const error = ref("")
 const searchQuery = ref("")
 const roleFilter = ref("all")
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalRecords = ref(0)
+const limit = 10
+
 // Modal
 const modal = ref({ open: false, mode: "add" as "add" | "edit", loading: false })
 const form = ref({ userId: 0, userFirstName: "", userLastName: "", userEmail: "", userPhone: "", userRole: "customer" as "admin" | "editor" | "customer", userPassword: "" })
@@ -26,12 +32,15 @@ const phoneError = ref("")
 const deleteDialog = ref({ open: false, loading: false, userId: 0, name: "" })
 
 // ── API ────────────────────────────────────────────────────────
-const fetchUsers = async () => {
+const fetchUsers = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    const data = await apiFetch<User[]>("/users")
-    users.value = data
+    const data = await apiFetch<any>(`/users?page=${page}&limit=${limit}`)
+    users.value = data.data || []
+    currentPage.value = data.page || 1
+    totalPages.value = data.totalPages || 1
+    totalRecords.value = data.total || 0
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลผู้ใช้ได้"
   } finally {
@@ -40,6 +49,10 @@ const fetchUsers = async () => {
 }
 
 onMounted(() => fetchUsers())
+
+const handlePageChange = (page: number) => {
+  fetchUsers(page)
+}
 
 // ── Filters ────────────────────────────────────────────────────
 const roleOptions = [
@@ -231,6 +244,13 @@ const breadcrumb = [
           </div>
         </template>
       </AdminDataTable>
+      <Pagination 
+        :current-page="currentPage" 
+        :total-pages="totalPages" 
+        :total="totalRecords" 
+        :limit="limit" 
+        @page-change="handlePageChange" 
+      />
 
       <AdminEmptyState v-if="!loading && filteredUsers.length === 0" title="ไม่พบผู้ใช้งาน" description="ไม่มีบัญชีผู้ใช้ที่ตรงกับเงื่อนไขที่เลือก" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
     </div>

@@ -1,7 +1,13 @@
 const { pool } = require("../config/db");
 
-// get all users
-exports.findAll = async () => {
+// get all users with pagination
+exports.findAll = async ({ page = 1, limit = 10 } = {}) => {
+  const countSql = `SELECT COUNT(*) as total FROM users`;
+  const [[countResult]] = await pool.query(countSql);
+  const total = countResult.total;
+
+  const offset = (page - 1) * limit;
+
   const [rows] = await pool.query(
     `SELECT
       userId,
@@ -14,9 +20,19 @@ exports.findAll = async () => {
       userContactChannels,
       userRole,
       userCreatedAt
-    FROM users`
+    FROM users
+    ORDER BY userCreatedAt DESC
+    LIMIT ? OFFSET ?`,
+    [limit, offset]
   );
-  return rows;
+
+  return {
+    data: rows,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit)
+  };
 };
 
 // get user by id

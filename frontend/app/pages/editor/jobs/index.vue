@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { orderService } from "~/services/order.service"
 import type { OrderSummary, OrderStatus } from "~/types/order.types"
+import Pagination from "~/components/ui/Pagination.vue"
 
 definePageMeta({
   layout: "editor",
@@ -17,18 +18,29 @@ const loading = ref(true)
 const error = ref("")
 const selectedStatusFilter = ref<string>((route.query.status as string) || "all")
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalRecords = ref(0)
+const limit = 10
+
 watch(selectedStatusFilter, (newStatus) => {
   router.replace({ 
     query: { ...route.query, status: newStatus === "all" ? undefined : newStatus } 
   })
+  currentPage.value = 1
+  fetchJobs(1)
 })
 
-const fetchJobs = async () => {
+const fetchJobs = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    const res = await orderService.getMyOrders()
-    jobs.value = res
+    const statusQuery = selectedStatusFilter.value !== "all" ? selectedStatusFilter.value : undefined
+    const res = await orderService.getMyOrders(page, limit, statusQuery)
+    jobs.value = res.data || []
+    currentPage.value = res.page || 1
+    totalPages.value = res.totalPages || 1
+    totalRecords.value = res.total || 0
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถดึงข้อมูลประวัติงานได้"
   } finally {
@@ -38,17 +50,20 @@ const fetchJobs = async () => {
 
 onMounted(() => { fetchJobs() })
 
+const handlePageChange = (page: number) => {
+  fetchJobs(page)
+}
+
 const filteredJobs = computed(() => {
-  if (selectedStatusFilter.value === "all") return jobs.value
-  return jobs.value.filter(j => j.orderStatus === selectedStatusFilter.value)
+  return jobs.value
 })
 
 const filterOptions = computed(() => [
-  { key: "all",               label: "ทั้งหมด",          count: jobs.value.length },
-  { key: "waiting_to_start",  label: "รอเริ่มงาน",        count: jobs.value.filter(j => j.orderStatus === "waiting_to_start").length },
-  { key: "in_progress",       label: "กำลังดำเนินงาน",    count: jobs.value.filter(j => j.orderStatus === "in_progress").length },
-  { key: "waiting_selection", label: "รอเลือกรูปภาพ",     count: jobs.value.filter(j => j.orderStatus === "waiting_selection").length },
-  { key: "completed",         label: "เสร็จสมบูรณ์",      count: jobs.value.filter(j => j.orderStatus === "completed").length }
+  { key: "all",               label: "ทั้งหมด" },
+  { key: "waiting_to_start",  label: "รอเริ่มงาน" },
+  { key: "in_progress",       label: "กำลังดำเนินงาน" },
+  { key: "waiting_selection", label: "รอเลือกรูปภาพ" },
+  { key: "completed",         label: "เสร็จสมบูรณ์" }
 ])
 
 const tableColumns = [
@@ -180,6 +195,15 @@ const breadcrumb = [
           title="ไม่พบข้อมูลงาน"
           description="คุณไม่มีประวัติงานแต่งภาพในหมวดหมู่นี้"
           icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
+
+        <Pagination 
+          v-if="!loading && tableRows.length > 0"
+          :current-page="currentPage" 
+          :total-pages="totalPages" 
+          :total="totalRecords" 
+          :limit="limit" 
+          @page-change="handlePageChange" 
         />
       </div>
     </template>
