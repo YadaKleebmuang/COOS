@@ -178,8 +178,8 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           <div class="flex items-center justify-center gap-1.5">
             <a :href="row.paymentSlipUrl" target="_blank" class="text-xs text-gray-500 hover:text-gray-700 underline whitespace-nowrap">ดูสลิป</a>
             <template v-if="row.paymentStatus === 'pending'">
-              <AdminActionButton variant="primary" size="sm" @click="openConfirm(row, 'approved')">อนุมัติ</AdminActionButton>
-              <AdminActionButton variant="danger" size="sm" @click="openConfirm(row, 'rejected')">ปฏิเสธ</AdminActionButton>
+              <AdminActionButton variant="primary" size="sm" @click="openConfirm(row as any, 'approved')">อนุมัติ</AdminActionButton>
+              <AdminActionButton variant="danger" size="sm" @click="openConfirm(row as any, 'rejected')">ปฏิเสธ</AdminActionButton>
             </template>
             <span v-else class="text-xs text-gray-300">—</span>
           </div>
