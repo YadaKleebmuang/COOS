@@ -152,24 +152,18 @@ const filterTabs = [
     <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <NuxtLink to="/" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition mb-3">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            กลับหน้าหลัก
-          </NuxtLink>
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">📁 ประวัติออเดอร์ของฉัน</h1>
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight ">ประวัติออเดอร์ของฉัน</h1>
           <p class="text-gray-500 mt-1 text-sm">ติดตามสถานะ สลิปโอนเงิน และดาวน์โหลดไฟล์ผลงานทั้งหมดของคุณ</p>
         </div>
         <div>
-          <NuxtLink to="/customer/orders/create" class="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition text-sm">
-            ➕ สั่งงานภาพใหม่
+          <NuxtLink to="/customer/orders/create" class="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white font-medium px-5 py-2.5 rounded-lg shadow-sm transition text-sm">
+            สั่งงานภาพใหม่
           </NuxtLink>
         </div>
       </div>
 
       <!-- Filters Tab -->
-      <div class="bg-white rounded-xl shadow-sm p-1.5 mb-6 flex flex-wrap gap-1 border border-gray-100 overflow-x-auto">
+      <div class="bg-white rounded-lg shadow-sm p-1.5 mb-6 flex flex-wrap gap-1 border border-gray-100 overflow-x-auto">
         <button
           v-for="tab in filterTabs"
           :key="tab.value"
@@ -186,13 +180,13 @@ const filterTabs = [
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white rounded-3xl shadow-sm p-12 text-center border border-gray-100">
+      <div v-if="loading" class="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100">
         <div class="animate-spin w-10 h-10 border-4 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
         <p class="text-gray-500 font-bold">กำลังดึงข้อมูลออเดอร์ของคุณ...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-white rounded-3xl shadow-sm p-8 text-center border border-red-100">
+      <div v-else-if="error" class="bg-white rounded-2xl shadow-sm p-8 text-center border border-red-100">
         <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -200,17 +194,16 @@ const filterTabs = [
         </div>
         <h3 class="text-lg font-bold text-red-600 mb-1">เกิดข้อผิดพลาด</h3>
         <p class="text-gray-500 text-sm mb-4">{{ error }}</p>
-        <button @click="fetchOrders" class="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">
+        <button @click="fetchOrders" class="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg transition text-sm">
           โหลดอีกครั้ง
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-3xl shadow-sm p-12 text-center border border-gray-100">
-        <div class="text-5xl mb-4">🎨</div>
+      <div v-else-if="filteredOrders.length === 0" class="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100">
         <h3 class="text-lg font-bold text-gray-700 mb-1">ไม่พบคำสั่งงาน</h3>
         <p class="text-gray-500 text-sm mb-6">คุณยังไม่มีการสั่งงานในหมวดหมู่นี้</p>
-        <NuxtLink to="/customer/orders/create" class="bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-2.5 rounded-xl transition text-sm shadow-sm hover:shadow-md">
+        <NuxtLink to="/customer/orders/create" class="bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-2.5 rounded-lg transition text-sm shadow-sm hover:shadow-md">
           สั่งงานแรกของคุณเลย
         </NuxtLink>
       </div>
@@ -221,7 +214,7 @@ const filterTabs = [
           v-for="order in filteredOrders"
           :key="order.orderId"
           :to="`/customer/orders/${order.orderId}`"
-          class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer"
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer"
         >
           <!-- Order Card Top Header -->
           <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
@@ -243,16 +236,16 @@ const filterTabs = [
             <div class="space-y-3">
               <div>
                 <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block">ประเภทภาพ</span>
-                <span class="text-gray-800 font-bold text-base">🎨 {{ order.workTypeName }}</span>
+                <span class="text-gray-800 font-bold text-base">{{ order.workTypeName }}</span>
               </div>
               <div class="flex justify-between gap-4">
                 <div>
                   <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block">แพ็กเกจ</span>
-                  <span class="text-gray-700 font-bold text-sm">📦 {{ order.packageName }}</span>
+                  <span class="text-gray-700 font-bold text-sm">{{ order.packageName }}</span>
                 </div>
                 <div>
                   <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block">วันที่ต้องการงาน</span>
-                  <span class="text-gray-700 font-semibold text-sm">📅 {{ formatDate(order.orderRequiredDate) }}</span>
+                  <span class="text-gray-700 font-semibold text-sm">{{ formatDate(order.orderRequiredDate) }}</span>
                 </div>
               </div>
             </div>
