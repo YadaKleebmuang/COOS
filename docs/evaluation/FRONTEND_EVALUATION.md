@@ -98,7 +98,7 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 | ID | Severity | Category | ชื่อปัญหา |
 |----|----------|----------|---------|
 | ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend (✅ FIXED) |
-| ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client |
+| ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client (✅ FIXED) |
 | ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages |
 | ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast |
 | ISSUE-FE-005 | Medium | Code Quality | create.vue มี 851 บรรทัด — ควรแยก Step Components |
@@ -146,8 +146,9 @@ export default defineNuxtRouteMiddleware(() => {
 
 ---
 
-### ISSUE-FE-002: httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client
+### ISSUE-FE-002: httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client (✅ FIXED)
 
+- **Status:** ✅ ดำเนินการสำเร็จแล้ว
 - **Severity:** High
 - **Category:** Security
 - **File/Module:** frontend/app/services/auth.service.ts
