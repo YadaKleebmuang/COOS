@@ -30,6 +30,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      - ./backend:/app
+      - /app/node_modules
       - uploads_data:/app/uploads
     depends_on:
       db:
@@ -47,8 +49,14 @@ services:
       NUXT_INTERNAL_API_BASE: http://backend:3000/api/v1
       # Public URL สำหรับ Browser (เปลี่ยน localhost เป็น IP หรือ Domain หากรันบนเครื่องอื่น)
       NUXT_PUBLIC_API_BASE: http://localhost:3000/api/v1
+      # บังคับใช้ Polling สำหรับ Hot Reload ใน Docker บน Windows
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "8888:8888"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.nuxt
     depends_on:
       - backend
 
