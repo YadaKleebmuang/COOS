@@ -67,18 +67,11 @@ const formatDate = (dateStr: string) => {
 <template>
   <div class="space-y-8 max-w-5xl mx-auto">
     <!-- Welcome Header Card -->
-    <div class="bg-gray-900 rounded-2xl p-6 sm:p-8 text-white shadow-sm relative overflow-hidden">
-      <!-- Background Abstract Shape -->
-      <div class="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-20 -translate-y-20">
-        <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" />
-        </svg>
-      </div>
-
+    <div class="rounded-2xl p-6 sm:p-8 text-black shadow-sm relative overflow-hidden">
       <div class="relative z-10 space-y-3">
         <span class="bg-gray-800 text-gray-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">พื้นที่บริการลูกค้า</span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ COOS Studio</h1>
-        <p class="text-gray-300 text-sm sm:text-base max-w-xl">
+        <p class="text-gray-500 text-sm sm:text-base max-w-xl">
           จัดการใบสั่งงานแต่งภาพ ตรวจสอบสถานะการตกแต่งภาพด้วยเทคโนโลยี AI และดาวน์โหลดผลงานสุดท้ายของคุณได้ที่นี่
         </p>
         <div class="pt-2 flex flex-wrap gap-3">
