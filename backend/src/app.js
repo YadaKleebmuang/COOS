@@ -10,10 +10,11 @@ const { globalLimiter } = require('./middlewares/rateLimit.middleware');
 
 const app = express();
 
+// Apply CORS before rate limiting so 429 responses have CORS headers
+app.use(corsMiddleware);
+
 // Apply the rate limiting middleware to all requests
 app.use(globalLimiter);
-
-app.use(corsMiddleware);
 app.use(express.json());
 
 // Serve ไฟล์รูปภาพที่อัปโหลด (เข้าถึงผ่าน /uploads/...)
