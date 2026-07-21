@@ -117,7 +117,7 @@ const breadcrumb = [
         size="sm"
         icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
         :loading="loading"
-        @click="fetchJobs"
+        @click="() => fetchJobs()"
       >
         รีเฟรช
       </AdminActionButton>
@@ -134,7 +134,7 @@ const breadcrumb = [
     <!-- Error -->
     <div v-else-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
       <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="fetchJobs" class="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">
+      <button @click="() => fetchJobs()" class="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">
         ลองโหลดใหม่
       </button>
     </div>

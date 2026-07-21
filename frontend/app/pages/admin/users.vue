@@ -213,7 +213,7 @@ const breadcrumb = [
         <template #cell-avatar="{ row }">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
-              {{ initials(row) }}
+              {{ initials(row as any) }}
             </div>
             <span class="text-sm font-medium text-gray-900">{{ row.userFirstName }} {{ row.userLastName }}</span>
           </div>
@@ -239,8 +239,8 @@ const breadcrumb = [
         <!-- Actions -->
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-1.5">
-            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row)">แก้ไข</AdminActionButton>
-            <AdminActionButton variant="danger" size="sm" @click="openDelete(row)">ลบ</AdminActionButton>
+            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row as any)">แก้ไข</AdminActionButton>
+            <AdminActionButton variant="danger" size="sm" @click="openDelete(row as any)">ลบ</AdminActionButton>
           </div>
         </template>
       </AdminDataTable>

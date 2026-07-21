@@ -212,7 +212,7 @@ const breadcrumb = [
     <!-- Error -->
     <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
       <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="fetchAdminData" class="mt-2 text-xs text-gray-500 underline">ลองใหม่</button>
+      <button @click="() => fetchAdminData()" class="mt-2 text-xs text-gray-500 underline">ลองใหม่</button>
     </div>
 
     <!-- Table -->
