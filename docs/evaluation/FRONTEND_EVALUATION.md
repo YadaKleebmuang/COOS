@@ -104,7 +104,7 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 | ISSUE-FE-005 | Medium | Code Quality | create.vue มี 851 บรรทัด — ควรแยก Step Components (✅ FIXED) |
 | ISSUE-FE-006 | Medium | Type Safety | AuthResponse.user typed เป็น any (✅ FIXED) |
 | ISSUE-FE-007 | Medium | UX | Upload error ไม่ reset เมื่อเปลี่ยนไฟล์ใหม่ |
-| ISSUE-FE-008 | Medium | Accessibility | ขาด aria-label, role, for attribute ในหลายส่วน |
+| ISSUE-FE-008 | Medium | Accessibility | ขาด aria-label, role, for attribute ในหลายส่วน (✅ FIXED) |
 | ISSUE-FE-009 | Low | Performance | ไม่ใช้ NuxtImg ในหลายที่ |
 | ISSUE-FE-010 | Low | Quality | axios และ better-sqlite3 ใน dependencies แต่ไม่ได้ใช้ |
 | ISSUE-FE-011 | Low | UX | ไม่มี Confirmation dialog เมื่อลบข้อมูลในบางหน้า |
@@ -239,7 +239,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-008: ขาด aria attributes ในหลายส่วน
+### ISSUE-FE-008: ขาด aria attributes ในหลายส่วน (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** Accessibility (A11y)

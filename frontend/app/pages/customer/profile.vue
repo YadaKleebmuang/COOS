@@ -180,46 +180,46 @@ const saveProfile = async () => {
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">ชื่อจริง</label>
-            <input v-model="profileForm.userFirstName" required type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="userFirstName" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">ชื่อจริง</label>
+            <input id="userFirstName" v-model="profileForm.userFirstName" required type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">นามสกุล</label>
-            <input v-model="profileForm.userLastName" required type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="userLastName" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">นามสกุล</label>
+            <input id="userLastName" v-model="profileForm.userLastName" required type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">อีเมล (ไม่สามารถเปลี่ยนได้)</label>
-          <input :value="profileForm.userEmail" disabled type="email" class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-400 cursor-not-allowed" />
+          <label for="userEmail" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">อีเมล (ไม่สามารถเปลี่ยนได้)</label>
+          <input id="userEmail" :value="profileForm.userEmail" disabled type="email" class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-400 cursor-not-allowed" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">เบอร์โทรศัพท์</label>
-            <input v-model="profileForm.userPhone" type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="userPhone" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">เบอร์โทรศัพท์</label>
+            <input id="userPhone" v-model="profileForm.userPhone" type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">เบอร์ติดต่อช่องทางด่วน (Tel)</label>
-            <input v-model="profileForm.tel" type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="tel" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">เบอร์ติดต่อช่องทางด่วน (Tel)</label>
+            <input id="tel" v-model="profileForm.tel" type="text" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
-          <textarea v-model="profileForm.userAddress" rows="2" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition resize-none" />
+          <label for="userAddress" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
+          <textarea id="userAddress" v-model="profileForm.userAddress" rows="2" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition resize-none" />
         </div>
 
         <h3 class="text-base font-bold text-slate-800 border-b border-slate-50 pb-3 pt-4">ช่องทางโซเชียลสำหรับการส่งงาน</h3>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Facebook Profile</label>
-            <input v-model="profileForm.facebook" type="text" placeholder="ชื่อ Facebook" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="facebook" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Facebook Profile</label>
+            <input id="facebook" v-model="profileForm.facebook" type="text" placeholder="ชื่อ Facebook" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Line ID</label>
-            <input v-model="profileForm.line" type="text" placeholder="ไลน์ไอดี" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
+            <label for="line" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Line ID</label>
+            <input id="line" v-model="profileForm.line" type="text" placeholder="ไลน์ไอดี" class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-slate-700 transition" />
           </div>
         </div>
 
