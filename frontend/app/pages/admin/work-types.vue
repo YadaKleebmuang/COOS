@@ -184,8 +184,8 @@ const breadcrumb = [
         <!-- Actions -->
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-1.5">
-            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row)">แก้ไข</AdminActionButton>
-            <AdminActionButton variant="danger" size="sm" @click="openDelete(row)">ลบ</AdminActionButton>
+            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row as any)">แก้ไข</AdminActionButton>
+            <AdminActionButton variant="danger" size="sm" @click="openDelete(row as any)">ลบ</AdminActionButton>
           </div>
         </template>
       </AdminDataTable>
