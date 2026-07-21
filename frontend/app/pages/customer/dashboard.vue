@@ -65,28 +65,21 @@ const formatDate = (dateStr: string) => {
 </script>
 
 <template>
-  <div class="space-y-8 max-w-7xl mx-auto">
+  <div class="space-y-8 max-w-5xl mx-auto">
     <!-- Welcome Header Card -->
-    <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-      <!-- Background Abstract Shape -->
-      <div class="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-20 -translate-y-20">
-        <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" />
-        </svg>
-      </div>
-
+    <div class="rounded-2xl p-6 sm:p-8 text-black shadow-sm relative overflow-hidden">
       <div class="relative z-10 space-y-3">
-        <span class="bg-indigo-500/30 text-indigo-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">พื้นที่บริการลูกค้า</span>
+        <span class="bg-gray-800 text-gray-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">พื้นที่บริการลูกค้า</span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ COOS Studio</h1>
-        <p class="text-indigo-100 text-sm sm:text-base max-w-xl">
+        <p class="text-gray-500 text-sm sm:text-base max-w-xl">
           จัดการใบสั่งงานแต่งภาพ ตรวจสอบสถานะการตกแต่งภาพด้วยเทคโนโลยี AI และดาวน์โหลดผลงานสุดท้ายของคุณได้ที่นี่
         </p>
         <div class="pt-2 flex flex-wrap gap-3">
-          <NuxtLink to="/customer/orders/create" class="bg-white hover:bg-slate-50 text-indigo-700 text-sm font-bold px-5 py-2.5 rounded-xl shadow transition duration-200">
-            🎨 สั่งแต่งภาพใหม่
+          <NuxtLink to="/customer/orders/create" class="bg-white hover:bg-gray-100 text-gray-900 text-sm font-bold px-5 py-2.5 rounded-lg shadow-sm transition duration-200">
+            สั่งแต่งภาพใหม่
           </NuxtLink>
-          <NuxtLink to="/customer/orders" class="bg-indigo-500/40 hover:bg-indigo-500/60 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition duration-200 border border-indigo-400/30">
-            📁 ดูออเดอร์ทั้งหมด
+          <NuxtLink to="/customer/orders" class="bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition duration-200 border border-gray-700">
+            ดูออเดอร์ทั้งหมด
           </NuxtLink>
         </div>
       </div>
@@ -95,47 +88,32 @@ const formatDate = (dateStr: string) => {
     <!-- Statistics Overview Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       <!-- Stat 1 -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
-          📁
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">ออเดอร์ทั้งหมด</p>
-          <p class="text-2xl font-black text-slate-800 mt-1">{{ stats.total }} รายการ</p>
-        </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">ออเดอร์ทั้งหมด</p>
+        <p class="text-2xl font-black text-gray-900 mt-1">{{ stats.total }} รายการ</p>
       </div>
       <!-- Stat 2 -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl">
-          ⚙️
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">กำลังรอดำเนินการ</p>
-          <p class="text-2xl font-black text-slate-800 mt-1">{{ stats.inProgress }} รายการ</p>
-        </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">กำลังรอดำเนินการ</p>
+        <p class="text-2xl font-black text-gray-900 mt-1">{{ stats.inProgress }} รายการ</p>
       </div>
       <!-- Stat 3 -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">
-          ✅
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">เสร็จสมบูรณ์แล้ว</p>
-          <p class="text-2xl font-black text-slate-800 mt-1">{{ stats.completed }} รายการ</p>
-        </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">เสร็จสมบูรณ์แล้ว</p>
+        <p class="text-2xl font-black text-gray-900 mt-1">{{ stats.completed }} รายการ</p>
       </div>
     </div>
 
     <!-- Recent Orders & Guide -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Recent Orders List (Col Span 2) -->
-      <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-50 pb-4">
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between border-b border-gray-50 pb-4">
           <div>
-            <h3 class="text-lg font-bold text-slate-800">📋 รายการออเดอร์ล่าสุด</h3>
-            <p class="text-xs text-slate-400">สรุปคำสั่งซื้อ 3 รายการล่าสุดของคุณ</p>
+            <h3 class="text-lg font-bold text-gray-900">รายการออเดอร์ล่าสุด</h3>
+            <p class="text-xs text-gray-400">สรุปคำสั่งซื้อ 3 รายการล่าสุดของคุณ</p>
           </div>
-          <NuxtLink to="/customer/orders" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+          <NuxtLink to="/customer/orders" class="text-xs font-bold text-gray-600 hover:text-gray-900 transition">
             ดูทั้งหมด →
           </NuxtLink>
         </div>
@@ -149,10 +127,9 @@ const formatDate = (dateStr: string) => {
           ⚠️ {{ error }}
         </div>
 
-        <div v-else-if="recentOrders.length === 0" class="text-center py-12 text-slate-400 space-y-3">
-          <div class="text-4xl">🎨</div>
+        <div v-else-if="recentOrders.length === 0" class="text-center py-12 text-gray-400 space-y-3">
           <p class="text-sm">คุณยังไม่มีใบสั่งงานใดๆ ในขณะนี้</p>
-          <NuxtLink to="/customer/orders/create" class="inline-block bg-indigo-600 text-white font-bold text-xs px-4 py-2 rounded-xl">
+          <NuxtLink to="/customer/orders/create" class="inline-block bg-gray-900 text-white font-bold text-xs px-4 py-2 rounded-lg">
             เริ่มต้นสั่งแต่งภาพใหม่
           </NuxtLink>
         </div>
@@ -169,15 +146,15 @@ const formatDate = (dateStr: string) => {
                 #{{ order.orderId }}
               </div>
               <div>
-                <p class="text-sm font-bold text-slate-800">🎨 {{ order.workTypeName }}</p>
-                <p class="text-xs text-slate-400">แพ็กเกจ: {{ order.packageName }} • {{ formatDate(order.orderRequiredDate) }}</p>
+                <p class="text-sm font-bold text-gray-900">{{ order.workTypeName }}</p>
+                <p class="text-xs text-gray-400">แพ็กเกจ: {{ order.packageName }} • {{ formatDate(order.orderRequiredDate) }}</p>
               </div>
             </div>
             
             <div class="text-right flex items-center gap-3">
               <div>
-                <p class="text-sm font-bold text-indigo-600">฿{{ formatPrice(order.orderTotalPrice) }}</p>
-                <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">{{ order.orderStatus }}</span>
+                <p class="text-sm font-bold text-gray-900">฿{{ formatPrice(order.orderTotalPrice) }}</p>
+                <span class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">{{ order.orderStatus }}</span>
               </div>
               <span class="text-slate-400 group-hover:translate-x-1 transition-transform">
                 ➔
@@ -188,35 +165,35 @@ const formatDate = (dateStr: string) => {
       </div>
 
       <!-- Quick Tips Guide (Col Span 1) -->
-      <div class="bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-100 space-y-6">
-        <h3 class="text-lg font-bold text-slate-800">💡 ขั้นตอนการรับบริการ</h3>
+      <div class="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100 space-y-6">
+        <h3 class="text-lg font-bold text-gray-900">ขั้นตอนการรับบริการ</h3>
         
         <div class="space-y-4">
           <div class="flex gap-3">
-            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center flex-shrink-0">1</span>
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-black flex items-center justify-center flex-shrink-0">1</span>
             <div class="text-xs">
-              <p class="font-bold text-slate-800">เลือกบริการและสั่งงาน</p>
-              <p class="text-slate-500 mt-0.5">เลือกประเภทงานและแพ็กเกจ อัปโหลดไฟล์รูปภาพต้นฉบับ</p>
+              <p class="font-bold text-gray-900">เลือกบริการและสั่งงาน</p>
+              <p class="text-gray-500 mt-0.5">เลือกประเภทงานและแพ็กเกจ อัปโหลดไฟล์รูปภาพต้นฉบับ</p>
             </div>
           </div>
           <div class="flex gap-3">
-            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center flex-shrink-0">2</span>
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-black flex items-center justify-center flex-shrink-0">2</span>
             <div class="text-xs">
-              <p class="font-bold text-slate-800">ชำระเงินมัดจำ 30%</p>
-              <p class="text-slate-500 mt-0.5">แนบหลักฐานสลิปมัดจำเข้าระบบเพื่อให้ศิลปินเริ่มดำเนินงาน</p>
+              <p class="font-bold text-gray-900">ชำระเงินมัดจำ 30%</p>
+              <p class="text-gray-500 mt-0.5">แนบหลักฐานสลิปมัดจำเข้าระบบเพื่อให้ศิลปินเริ่มดำเนินงาน</p>
             </div>
           </div>
           <div class="flex gap-3">
-            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center flex-shrink-0">3</span>
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-black flex items-center justify-center flex-shrink-0">3</span>
             <div class="text-xs">
-              <p class="font-bold text-slate-800">เลือกรูปถ่ายที่ถูกใจ</p>
-              <p class="text-slate-500 mt-0.5">พิจารณาเลือกรูปภาพที่แต่งสำเร็จเพื่อดำเนินงานขั้นตอนสุดท้าย</p>
+              <p class="font-bold text-gray-900">เลือกรูปถ่ายที่ถูกใจ</p>
+              <p class="text-gray-500 mt-0.5">พิจารณาเลือกรูปภาพที่แต่งสำเร็จเพื่อดำเนินงานขั้นตอนสุดท้าย</p>
             </div>
           </div>
           <div class="flex gap-3">
-            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center flex-shrink-0">4</span>
+            <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-black flex items-center justify-center flex-shrink-0">4</span>
             <div class="text-xs">
-              <p class="font-bold text-slate-800">ชำระงวดสุดท้าย & ดาวน์โหลด</p>
+              <p class="font-bold text-gray-900">ชำระงวดสุดท้าย & ดาวน์โหลด</p>
               <p class="text-slate-500 mt-0.5">ชำระ 70% ที่เหลือเพื่อรับลิขสิทธิ์และรูปความละเอียดสูง</p>
             </div>
           </div>
