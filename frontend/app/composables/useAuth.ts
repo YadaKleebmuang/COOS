@@ -1,10 +1,20 @@
 import type { RegisterForm, AuthResponse } from "../types/auth.types";
 
-export const authService = {
-  // register
-  async register(form: RegisterForm) {
-    const { apiFetch } = useApi();
 
+export const useAuth = () => {
+  const { apiFetch } = useApi();
+  
+  const tokenCookie = useCookie<string | null>("token", {
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+  });
+  const userRoleCookie = useCookie<string | null>("userRole", {
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  // register
+  const register = async (form: RegisterForm) => {
     return await apiFetch<AuthResponse>("/auth/register", {
       method: "POST",
       body: JSON.stringify({
@@ -17,23 +27,10 @@ export const authService = {
         "Content-Type": "application/json",
       },
     });
-  },
+  };
 
   // login
-  async login(email: string, password: string) {
-    const { apiFetch } = useApi();
-    
-    // ประกาศ useCookie ก่อนเรียก await เพื่อไม่ให้หลุด Context ของ Nuxt
-    const tokenCookie = useCookie<string | null>("token", {
-      sameSite: "lax",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-    });
-    const userRoleCookie = useCookie<string | null>("userRole", {
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === 'production',
-    });
-
+  const login = async (email: string, password: string) => {
     const data = await apiFetch<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({
@@ -51,36 +48,37 @@ export const authService = {
     }
 
     return data;
-  },
+  };
 
   // logout
-  async logout() {
-    // ไม่เรียก backend
-    const token = useCookie<string | null>("token");
-    token.value = null;
-    const userRole = useCookie<string | null>("userRole");
-    userRole.value = null;
-  },
+  const logout = async () => {
+    tokenCookie.value = null;
+    userRoleCookie.value = null;
+  };
 
   // forgot password
-  async forgotPassword(email: string) {
-    const { apiFetch } = useApi();
-
+  const forgotPassword = async (email: string) => {
     return await apiFetch<{ message: string; resetToken: string; expiresAt: string }>("/auth/forgot-password", {
       method: "POST",
       body: JSON.stringify({ userEmail: email }),
       headers: { "Content-Type": "application/json" },
     });
-  },
+  };
 
   // reset password
-  async resetPassword(token: string, newPassword: string) {
-    const { apiFetch } = useApi();
-
+  const resetPassword = async (token: string, newPassword: string) => {
     return await apiFetch<{ message: string }>("/auth/reset-password", {
       method: "POST",
       body: JSON.stringify({ token, newPassword }),
       headers: { "Content-Type": "application/json" },
     });
-  },
+  };
+
+  return {
+    register,
+    login,
+    logout,
+    forgotPassword,
+    resetPassword
+  };
 };

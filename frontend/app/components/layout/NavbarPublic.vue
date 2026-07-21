@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from "vue"
 import { useRoute } from "vue-router"
 import { useApi } from "~/composables/useApi"
-import { authService } from "~/services/auth.service"
+
 
 const token = useCookie<string | null>("token")
 const router = useRouter()
@@ -43,7 +43,7 @@ const toggleMobileMenu = () => {
 }
 
 const logout = async () => {
-  await authService.logout()
+  await useAuth().logout()
   currentUser.value = null
   dropdownOpen.value = false
   router.push("/")

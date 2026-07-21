@@ -1,4 +1,3 @@
-import { useApi } from "~/composables/useApi"
 import type {
   WorkType,
   Package,
@@ -7,7 +6,7 @@ import type {
   OrderSummary,
   OrderDetail,
   OrderStatus,
-} from "~/types/order.types"
+} from "../types/order.types"
 
 export const orderService = {
   /**

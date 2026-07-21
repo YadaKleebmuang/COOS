@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue"
 import { useApi } from "~/composables/useApi"
-import { authService } from "~/services/auth.service"
+
 
 defineProps<{
   pageTitle?: string
@@ -44,7 +44,7 @@ const closeDropdown = () => {
 }
 
 const logout = async () => {
-  await authService.logout()
+  await useAuth().logout()
   currentUser.value = null
   dropdownOpen.value = false
   router.push("/")

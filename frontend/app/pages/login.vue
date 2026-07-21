@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
-import { authService } from "~/services/auth.service";
+
 
 const router = useRouter();
+const route = useRoute();
 
 definePageMeta({
   layout: "auth",
@@ -17,6 +18,8 @@ const form = reactive({
 const error = ref<string>("");
 const loading = ref<boolean>(false);
 
+const auth = useAuth();
+
 const login = async () => {
   if (loading.value) return;
   error.value = "";
@@ -28,9 +31,8 @@ const login = async () => {
 
   loading.value = true;
   try {
-    const data = await authService.login(form.email, form.password);
+    const data = await auth.login(form.email, form.password);
     const userRole = data?.user?.userRole || "customer";
-    const route = useRoute();
     const redirect = route.query.redirect as string;
 
     if (redirect) {
