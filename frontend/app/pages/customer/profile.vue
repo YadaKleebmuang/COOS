@@ -138,7 +138,7 @@ const saveProfile = async () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto space-y-8">
+  <div class="max-w-4xl mx-auto py-8 space-y-8">
     <div class="border-b border-slate-100 pb-4">
       <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">⚙️ แก้ไขข้อมูลโปรไฟล์</h1>
       <p class="text-slate-500 text-sm mt-1">อัปเดตข้อมูลส่วนตัว ช่องทางการติดต่อ และรูปโปรไฟล์ของคุณ</p>

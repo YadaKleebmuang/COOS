@@ -164,9 +164,9 @@ const filterTabs = [
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-4xl mx-auto py-8">
     <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 mt-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 tracking-tight">ประวัติออเดอร์ของฉัน</h1>
           <p class="text-gray-500 mt-1 text-sm">ติดตามสถานะ สลิปโอนเงิน และดาวน์โหลดไฟล์ผลงานทั้งหมดของคุณ</p>

@@ -65,7 +65,7 @@ const formatDate = (dateStr: string) => {
 </script>
 
 <template>
-  <div class="space-y-8 max-w-5xl mx-auto">
+  <div class="space-y-8 max-w-4xl mx-auto py-8">
     <!-- Welcome Header Card -->
     <div class="rounded-2xl p-6 sm:p-8 text-black shadow-sm relative overflow-hidden">
       <div class="relative z-10 space-y-3">
