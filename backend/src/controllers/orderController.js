@@ -417,3 +417,50 @@ exports.verifyPayment = async (req, res, next) => {
     next(err);
   }
 };
+
+// 9. PATCH /api/v1/orders/:id/images/select (Select Final Images - Customer only)
+exports.selectImages = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    const orderId = req.params.id;
+    const { selectedImageIds } = req.body; // Array of orderImageIds
+
+    if (userRole !== "customer") {
+      return res.status(403).json({ message: "เฉพาะลูกค้าเท่านั้นที่สามารถเลือกรูปภาพได้" });
+    }
+
+    if (!Array.isArray(selectedImageIds) || selectedImageIds.length === 0) {
+      return res.status(400).json({ message: "กรุณาระบุรูปภาพที่ต้องการเลือก" });
+    }
+
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
+    }
+
+    if (Number(order.customerId) !== Number(userId)) {
+      return res.status(403).json({ message: "คุณไม่มีสิทธิ์ทำรายการในออเดอร์นี้" });
+    }
+
+    if (order.orderStatus !== "waiting_selection") {
+      return res.status(400).json({ message: "ออเดอร์ไม่ได้อยู่ในสถานะรอลูกค้าเลือกรูปภาพ" });
+    }
+
+    if (selectedImageIds.length > order.packageImageCount) {
+      return res.status(400).json({ 
+        message: `คุณเลือกรูปเกินโควตา แพ็กเกจของคุณเลือกได้สูงสุด ${order.packageImageCount} ภาพ`
+      });
+    }
+
+    // Process the selection
+    const nextStatus = await OrderModel.selectFinalImages(orderId, selectedImageIds, userId);
+
+    res.status(200).json({
+      message: "ยืนยันการเลือกรูปภาพสำเร็จ",
+      nextOrderStatus: nextStatus,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

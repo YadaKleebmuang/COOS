@@ -200,6 +200,10 @@ exports.updateStatus = async (orderId, fromStatus, toStatus, changedById, logNot
       [orderId, fromStatus, toStatus, changedById, logNote || null]
     );
 
+    if (toStatus === 'completed' && fromStatus !== 'completed') {
+      await _autoPublishToGallery(connection, orderId);
+    }
+
     await connection.commit();
     return true;
   } catch (err) {
@@ -370,6 +374,10 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
       [orderId, currentStatus, nextStatus, verifiedByAdminId, fullLogNote]
     );
 
+    if (nextStatus === 'completed' && currentStatus !== 'completed') {
+      await _autoPublishToGallery(connection, orderId);
+    }
+
     await connection.commit();
     return { orderId, nextStatus };
   } catch (err) {
@@ -379,3 +387,82 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
     connection.release();
   }
 };
+
+// 13. Select Final Images (Customer selects images)
+exports.selectFinalImages = async (orderId, selectedImageIds, customerId) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Update orderImages
+    if (selectedImageIds && selectedImageIds.length > 0) {
+      // Create placeholders e.g., "?, ?, ?"
+      const placeholders = selectedImageIds.map(() => '?').join(',');
+      await connection.query(
+        `UPDATE orderImages 
+         SET imageType = 'selected_final' 
+         WHERE orderId = ? AND orderImageId IN (${placeholders})`,
+        [orderId, ...selectedImageIds]
+      );
+    }
+
+    // 2. Update order status to waiting_final_payment
+    const nextStatus = "waiting_final_payment";
+    await connection.query(
+      "UPDATE orders SET orderStatus = ? WHERE orderId = ?",
+      [nextStatus, orderId]
+    );
+
+    // 3. Log the state change
+    const logNote = `ลูกค้าทำการเลือกรูปภาพผลงานจำนวน ${selectedImageIds.length} ภาพ เรียบร้อยแล้ว`;
+    await connection.query(
+      `INSERT INTO workflowLogs (orderId, fromStatus, toStatus, changedById, logNote)
+       VALUES (?, 'waiting_selection', ?, ?, ?)`,
+      [orderId, nextStatus, customerId, logNote]
+    );
+
+    await connection.commit();
+    return nextStatus;
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
+
+// Helper: Auto publish to gallery when completed
+const _autoPublishToGallery = async (connection, orderId) => {
+  // 1. Fetch order details to check if it's allowed
+  const [orders] = await connection.query(
+    "SELECT workTypeId, orderIsGalleryAllowed FROM orders WHERE orderId = ?",
+    [orderId]
+  );
+  if (!orders.length || orders[0].orderIsGalleryAllowed !== 1) return;
+  
+  const workTypeId = orders[0].workTypeId;
+  
+  // 2. Fetch all selected_final images
+  const [images] = await connection.query(
+    "SELECT imageUrl FROM orderImages WHERE orderId = ? AND imageType = 'selected_final'",
+    [orderId]
+  );
+  
+  if (!images.length) return;
+  
+  // 3. Insert into galleryImages with imageIsActive = 0 (Pending Approval)
+  for (const img of images) {
+    const [existing] = await connection.query(
+      "SELECT imageId FROM galleryImages WHERE imageUrl = ?", 
+      [img.imageUrl]
+    );
+    if (!existing.length) {
+      await connection.query(
+        `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageIsActive)
+         VALUES (?, ?, ?, 0)`,
+        [img.imageUrl, workTypeId, `Order #${orderId} (รออนุมัติ)`]
+      );
+    }
+  }
+};
+
