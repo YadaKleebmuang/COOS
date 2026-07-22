@@ -88,12 +88,7 @@ const login = async () => {
           />
         </div>
 
-        <!-- Forgot Password -->
-        <div class="text-right">
-          <NuxtLink to="/forgot-password" class="text-sm text-gray-400 hover:text-gray-900 transition-colors">
-            ลืมรหัสผ่าน?
-          </NuxtLink>
-        </div>
+
 
         <!-- Error -->
         <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3">

@@ -135,6 +135,55 @@ const saveProfile = async () => {
     saving.value = false
   }
 }
+
+// ── Change Password State ──
+const passwordForm = reactive({
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+})
+const passwordSaving = ref(false)
+const passwordSuccess = ref("")
+const passwordError = ref("")
+
+const changePassword = async () => {
+  passwordError.value = ""
+  passwordSuccess.value = ""
+
+  if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+    passwordError.value = "กรุณากรอกข้อมูลให้ครบถ้วน"
+    return
+  }
+  
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    passwordError.value = "รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน"
+    return
+  }
+
+  if (passwordForm.newPassword.length < 8) {
+    passwordError.value = "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร"
+    return
+  }
+
+  passwordSaving.value = true
+  try {
+    await useApi("/users/me/password", {
+      method: "PATCH",
+      body: {
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword,
+      }
+    })
+    passwordSuccess.value = "เปลี่ยนรหัสผ่านสำเร็จ"
+    passwordForm.oldPassword = ""
+    passwordForm.newPassword = ""
+    passwordForm.confirmPassword = ""
+  } catch (err: any) {
+    passwordError.value = err?.message || "เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน"
+  } finally {
+    passwordSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -235,6 +284,44 @@ const saveProfile = async () => {
           <button :disabled="saving" type="submit" class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition duration-200 shadow flex items-center gap-2">
             <span v-if="saving" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
             {{ saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง" }}
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Change Password Section -->
+    <form @submit.prevent="changePassword" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+      <div class="md:col-start-2 md:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-6">
+        <h3 class="text-base font-bold text-gray-900 border-b border-gray-50 pb-3">เปลี่ยนรหัสผ่าน</h3>
+        
+        <div>
+          <label for="oldPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">รหัสผ่านเดิม</label>
+          <input id="oldPassword" v-model="passwordForm.oldPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="newPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">รหัสผ่านใหม่</label>
+            <input id="newPassword" v-model="passwordForm.newPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+          </div>
+          <div>
+            <label for="confirmPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ยืนยันรหัสผ่านใหม่</label>
+            <input id="confirmPassword" v-model="passwordForm.confirmPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+          </div>
+        </div>
+
+        <!-- Success/Error alert box -->
+        <div v-if="passwordSuccess" class="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+          <p class="text-green-600 text-xs font-bold text-center">✓ {{ passwordSuccess }}</p>
+        </div>
+        <div v-if="passwordError" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          <p class="text-red-600 text-xs font-bold text-center">⚠️ {{ passwordError }}</p>
+        </div>
+
+        <div class="flex justify-end pt-4">
+          <button :disabled="passwordSaving" type="submit" class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition duration-200 shadow flex items-center gap-2">
+            <span v-if="passwordSaving" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+            {{ passwordSaving ? "กำลังบันทึก..." : "อัปเดตรหัสผ่าน" }}
           </button>
         </div>
       </div>
