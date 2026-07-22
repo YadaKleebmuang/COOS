@@ -13,6 +13,7 @@ frontend/.nuxt
 frontend/.nitro
 frontend/dist
 frontend/.cache
+frontend/.pnpm-store
 
 # Docker
 db_data/
