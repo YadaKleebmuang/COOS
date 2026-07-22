@@ -31,7 +31,7 @@ const reportData = ref({
 const fetchReport = async () => {
   loading.value = true
   try {
-    const data = await apiFetch<any>(`/api/v1/reports?from=${dateFrom.value}&to=${dateTo.value}`)
+    const data = await apiFetch<any>(`/reports?from=${dateFrom.value}&to=${dateTo.value}`)
     reportData.value = {
       ...reportData.value,
       ...data,

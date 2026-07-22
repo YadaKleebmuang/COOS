@@ -21,12 +21,12 @@ const fetchData = async () => {
   loading.value = true
   error.value = ""
   try {
-    const [allUsers, allOrders] = await Promise.all([
+    const [usersRes, ordersRes] = await Promise.all([
       apiFetch("/users"),
       apiFetch("/orders")
     ])
-    users.value = allUsers
-    orders.value = allOrders
+    users.value = usersRes.data || []
+    orders.value = ordersRes.data || []
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
