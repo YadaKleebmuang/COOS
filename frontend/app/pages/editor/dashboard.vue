@@ -17,8 +17,8 @@ const fetchJobs = async () => {
   loading.value = true
   error.value = ""
   try {
-    const res = await orderService.getMyOrders()
-    jobs.value = res
+    const res = await orderService.getMyOrders(1, 1000)
+    jobs.value = res.data || []
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถดึงข้อมูลรายการงานได้"
   } finally {

@@ -36,7 +36,7 @@ const formatDate = (dateStr?: string) => {
 <template>
   <div class="space-y-6">
     <div class="border-b border-gray-50 pb-2.5">
-      <h3 class="text-base font-bold text-gray-800">📜 ประวัติประมวลผลงานและบันทึกการทำรายการ (Workflow Logs)</h3>
+      <h3 class="text-base font-bold text-gray-800">ประวัติประมวลผลงานและบันทึกการทำรายการ (Workflow Logs)</h3>
       <p class="text-xs text-gray-400 mt-0.5">กิจกรรมและลำดับประวัติสถานะของออเดอร์นี้ทั้งหมด</p>
     </div>
 
@@ -50,7 +50,6 @@ const formatDate = (dateStr?: string) => {
         :key="log.logId"
         class="flex items-start gap-4 text-xs bg-gray-50 rounded-xl p-4 border border-gray-100"
       >
-        <div class="text-xl">🕒</div>
         <div class="space-y-1.5 flex-grow">
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span class="font-bold text-gray-700">อัปเดตสถานะงาน</span>

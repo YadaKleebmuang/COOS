@@ -11,6 +11,8 @@ router.patch("/:id/status", controller.updateStatus);
 router.patch("/:id/assign", controller.assignEditor);
 
 router.post("/:id/images", controller.uploadImage);
+router.patch("/:id/images/select", controller.selectImages);
+
 router.post("/:id/payments", controller.submitPayment);
 router.patch("/:id/payments/:paymentId", controller.verifyPayment);
 

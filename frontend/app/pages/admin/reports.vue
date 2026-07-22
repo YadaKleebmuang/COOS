@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── State ──────────────────────────────────────────────────────
 const loading = ref(true)
@@ -31,7 +32,7 @@ const reportData = ref({
 const fetchReport = async () => {
   loading.value = true
   try {
-    const data = await apiFetch<any>(`/api/v1/reports?from=${dateFrom.value}&to=${dateTo.value}`)
+    const data = await apiFetch<any>(`/reports?from=${dateFrom.value}&to=${dateTo.value}`)
     reportData.value = {
       ...reportData.value,
       ...data,
@@ -42,7 +43,7 @@ const fetchReport = async () => {
       })) || []
     }
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาด: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาด: " + error.message, "error")
   } finally {
     loading.value = false
   }
@@ -52,7 +53,7 @@ onMounted(() => fetchReport())
 
 const exportCsv = () => {
   // Future: trigger CSV download from API
-  alert("ฟีเจอร์นี้จะพร้อมใช้งานเร็วๆ นี้")
+  alert("เร็วๆ นี้", "ฟีเจอร์นี้จะพร้อมใช้งานเร็วๆ นี้", "info")
 }
 
 const formatCurrency = (n: number) => `฿${Number(n).toLocaleString("th-TH")}`

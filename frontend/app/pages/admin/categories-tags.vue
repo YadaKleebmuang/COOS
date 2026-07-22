@@ -8,6 +8,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 interface Hashtag { tagId: number; tagName: string; imageCount: number; createdAt: string }
@@ -33,7 +34,7 @@ const fetchData = async () => {
       createdAt: t.createdAt || new Date().toISOString()
     }))
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message, "error")
   } finally {
     loading.value = false
   }
@@ -66,7 +67,7 @@ const saveTag = async () => {
     }
     tagModal.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาด: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาด: " + error.message, "error")
   } finally {
     tagModal.value.loading = false
   }
@@ -79,7 +80,7 @@ const confirmTagDelete = async () => {
     hashtags.value = hashtags.value.filter(t => t.tagId !== tagDelete.value.id)
     tagDelete.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการลบ: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการลบ: " + error.message, "error")
   } finally {
     tagDelete.value.loading = false
   }
@@ -97,21 +98,20 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 <template>
   <div class="space-y-5 max-w-7xl mx-auto">
     <!-- Header -->
-    <div>
-      <AdminBreadcrumb :items="breadcrumb" />
-      <h1 class="mt-2 text-xl font-bold text-gray-900">จัดการแฮชแท็ก</h1>
-      <p class="mt-0.5 text-sm text-gray-500">แฮชแท็กสำหรับจัดหมวดหมู่และค้นหารูปภาพใน Gallery</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <h1 class="mt-2 text-xl font-bold text-gray-900">จัดการแฮชแท็ก</h1>
+        <p class="mt-0.5 text-sm text-gray-500">แฮชแท็กสำหรับจัดหมวดหมู่และค้นหารูปภาพใน Gallery</p>
+      </div>
+      <div class="flex gap-2">
+        <AdminActionButton variant="secondary" size="sm" :loading="loading" @click="fetchData">รีเฟรช</AdminActionButton>
+        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="tagModal = { open: true, mode: 'add', loading: false, id: 0, name: '' }">เพิ่มแท็ก</AdminActionButton>
+      </div>
     </div>
 
     <!-- One-column layout for Tags -->
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden max-w-4xl">
-      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <p class="text-sm font-bold text-gray-900">แฮชแท็ก</p>
-          <p class="text-xs text-gray-400 mt-0.5">{{ hashtags.length }} แท็ก</p>
-        </div>
-        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="tagModal = { open: true, mode: 'add', loading: false, id: 0, name: '' }">เพิ่มแท็ก</AdminActionButton>
-      </div>
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
       <AdminDataTable :columns="tagColumns" :rows="hashtags" :loading="loading" row-key="tagId">
         <template #cell-tagName="{ value }">
           <span class="text-sm font-medium text-gray-900">#{{ value }}</span>

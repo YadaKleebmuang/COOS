@@ -61,7 +61,7 @@ exports.getDashboardStats = async (req, res, next) => {
 
     // 6. Revenue by Month
     const [revenueByMonth] = await pool.query(
-      `SELECT DATE_FORMAT(orderCreatedAt, '%b') as month, SUM(orderTotalPrice) as revenue
+      `SELECT MAX(DATE_FORMAT(orderCreatedAt, '%b')) as month, SUM(orderTotalPrice) as revenue
        FROM orders
        WHERE orderStatus != 'cancelled'
        GROUP BY DATE_FORMAT(orderCreatedAt, '%Y-%m')

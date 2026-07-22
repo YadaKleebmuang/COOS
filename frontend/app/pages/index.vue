@@ -241,47 +241,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="pt-12">
-            <h4 class="text-lg font-bold text-gray-900 mb-6 text-left">เปรียบเทียบแพ็กเกจ</h4>
-            <div class="overflow-x-auto border border-gray-200 rounded-3xl bg-white shadow-sm w-full">
-              <table class="w-full min-w-[600px] text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-gray-200 bg-gray-50/50">
-                    <th class="py-5 px-8 text-sm font-semibold text-gray-500 w-1/4">คุณสมบัติ</th>
-                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Basic</th>
-                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Standard</th>
-                    <th class="py-5 px-8 text-sm font-semibold text-gray-900 w-1/4">Pro</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                  <tr>
-                    <td class="py-5 px-8 text-sm text-gray-500">ราคา</td>
-                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">199 THB</td>
-                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">399 THB</td>
-                    <td class="py-5 px-8 text-sm font-semibold text-gray-900">599 THB</td>
-                  </tr>
-                  <tr>
-                    <td class="py-5 px-8 text-sm text-gray-500">จำนวนภาพ</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">10 ภาพ</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">20 ภาพ</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">30 ภาพ</td>
-                  </tr>
-                  <tr>
-                    <td class="py-5 px-8 text-sm text-gray-500">ความละเอียด</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">Full HD</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">Full HD หรือ 4K</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">4K</td>
-                  </tr>
-                  <tr>
-                    <td class="py-5 px-8 text-sm text-gray-500">ระยะเวลาส่งมอบ</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">3-5 วัน</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">5-7 วัน</td>
-                    <td class="py-5 px-8 text-sm text-gray-900">7-10 วัน</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+
         </div>
 
         <div v-else class="text-center py-12">

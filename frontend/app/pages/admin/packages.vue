@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── State ──────────────────────────────────────────────────────
 const packages = ref<Package[]>([])
@@ -112,7 +113,7 @@ const handleSubmit = async () => {
     modal.value.open = false
     fetchPackages()
   } catch (err: any) {
-    alert(err?.message || "ดำเนินการไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ดำเนินการไม่สำเร็จ", "error")
   } finally {
     saving.value = false
   }
@@ -129,7 +130,7 @@ const confirmDelete = async () => {
     deleteDialog.value.open = false
     fetchPackages()
   } catch (err: any) {
-    alert(err?.message || "ลบไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ลบไม่สำเร็จ", "error")
   } finally {
     deleteDialog.value.loading = false
   }

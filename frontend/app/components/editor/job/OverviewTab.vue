@@ -22,7 +22,7 @@ const formatDate = (dateStr: string) => {
 <template>
   <div class="space-y-6">
     <div>
-      <h3 class="text-base font-bold text-gray-800 border-b border-gray-50 pb-2.5 mb-4">📋 ข้อมูลการสั่งงานของลูกค้า</h3>
+      <h3 class="text-base font-bold text-gray-800 border-b border-gray-50 pb-2.5 mb-4">ข้อมูลการสั่งงานของลูกค้า</h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
         <div>
           <span class="text-gray-400 font-bold block mb-1">สไตล์ภาพ</span>
@@ -44,7 +44,7 @@ const formatDate = (dateStr: string) => {
     </div>
 
     <div>
-      <h3 class="text-base font-bold text-gray-800 border-b border-gray-50 pb-2.5 mb-4">💰 รายละเอียดด้านราคา</h3>
+      <h3 class="text-base font-bold text-gray-800 border-b border-gray-50 pb-2.5 mb-4">รายละเอียดด้านราคา</h3>
       <div class="bg-gray-100/30 rounded-xl p-5 border border-gray-200/50 max-w-md space-y-2.5 text-sm">
         <div class="flex justify-between">
           <span class="text-gray-500 font-semibold">ราคาตามแพ็กเกจ</span>

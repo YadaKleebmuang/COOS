@@ -133,6 +133,8 @@ export interface OrderDetail extends OrderSummary {
   orderDiscount: number
   orderIsGalleryAllowed: number
   orderUpdatedAt: string
+  packageResolution: "FullHD" | "4K"
+  packageImageCount: number
   images: OrderImage[]
   payments: Payment[]
   workflowLogs: WorkflowLog[]

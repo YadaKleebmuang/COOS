@@ -47,16 +47,7 @@ const selectedTag = ref<string | null>(null)
 const sortBy = ref("newest") // newest, oldest
 const displayLimit = ref(9) // Number of images to display initially (multiple of 3)
 
-const availableTags = [
-  "minimal",
-  "portrait",
-  "graduation",
-  "prewedding",
-  "family",
-  "softtone",
-  "blackwhite",
-  "cleanstyle"
-]
+const availableTags = ref<string[]>([])
 
 const toggleTag = (tag: string) => {
   if (selectedTag.value === tag) {
@@ -70,9 +61,10 @@ const loadData = async () => {
   loading.value = true
   error.value = ""
   try {
-    const [imgData, wtData] = await Promise.all([
+    const [imgData, wtData, tagsData] = await Promise.all([
       apiFetch<any[]>("/gallery-images"),
       apiFetch<WorkType[]>("/work-types").catch(() => []),
+      apiFetch<any[]>("/tags").catch(() => [])
     ])
     images.value = imgData
 
@@ -87,6 +79,10 @@ const loadData = async () => {
         { workTypeId: 4, workTypeName: "ครอบครัว", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
         { workTypeId: 5, workTypeName: "อื่น ๆ", workTypeDescription: null, workTypeIsActive: 1, workTypeCreatedAt: new Date(), workTypeUpdatedAt: new Date() },
       ]
+    }
+    
+    if (tagsData && tagsData.length > 0) {
+      availableTags.value = tagsData.map(t => t.tagName)
     }
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลแกลเลอรีได้"

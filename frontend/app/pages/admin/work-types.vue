@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── State ──────────────────────────────────────────────────────
 const workTypes = ref<WorkType[]>([])
@@ -98,7 +99,7 @@ const handleSubmit = async () => {
     modal.value.open = false
     fetchWorkTypes()
   } catch (err: any) {
-    alert(err?.message || "ดำเนินการไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ดำเนินการไม่สำเร็จ", "error")
   } finally {
     saving.value = false
   }
@@ -115,7 +116,7 @@ const confirmDelete = async () => {
     deleteDialog.value.open = false
     fetchWorkTypes()
   } catch (err: any) {
-    alert(err?.message || "ดำเนินการไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ดำเนินการไม่สำเร็จ", "error")
   } finally {
     deleteDialog.value.loading = false
   }

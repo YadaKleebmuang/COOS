@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 interface SystemFile {
@@ -37,7 +38,7 @@ const fetchFiles = async () => {
     const data = await apiFetch<SystemFile[]>("/api/v1/files")
     files.value = data
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการโหลดไฟล์: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการโหลดไฟล์: " + error.message, "error")
   } finally {
     loading.value = false
   }
@@ -89,7 +90,7 @@ const confirmDelete = async () => {
     files.value = files.value.filter(f => f.fileId !== deleteDialog.value.fileId)
     deleteDialog.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการลบไฟล์: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการลบไฟล์: " + error.message, "error")
   } finally {
     deleteDialog.value.loading = false
   }

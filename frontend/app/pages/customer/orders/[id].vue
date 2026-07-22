@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
+import { useAlert } from "~/composables/useAlert"
 import { orderService } from "~/services/order.service"
 import type { OrderDetail, OrderStatus, Payment } from "~/types/order.types"
 
@@ -8,6 +9,7 @@ const token = useCookie<string | null>("token")
 const route = useRoute()
 const router = useRouter()
 const orderId = route.params.id as string
+const { alert, confirm } = useAlert()
 
 definePageMeta({
   layout: "customer",
@@ -85,11 +87,64 @@ const sourceImages = computed(() => {
   return order.value.images.filter((img) => img.imageType === "source")
 })
 
+const aiGeneratedImages = computed(() => {
+  if (!order.value?.images) return []
+  return order.value.images.filter((img) => img.imageType === "ai_generated")
+})
+
 const finalImages = computed(() => {
   if (!order.value?.images) return []
-  // ดึงภาพที่เป็น ai_generated และ selected_final
-  return order.value.images.filter((img) => img.imageType === "ai_generated" || img.imageType === "selected_final")
+  // ดึงภาพที่เป็น selected_final (ดึงแค่ที่เลือกแล้ว)
+  return order.value.images.filter((img) => img.imageType === "selected_final")
 })
+
+// ── Photo Selection State ──
+const selectedFinalImageIds = ref<number[]>([])
+const submittingSelection = ref(false)
+const submitSelectionError = ref("")
+
+const toggleImageSelection = (imageId: number) => {
+  if (!order.value) return
+  const limit = order.value.packageImageCount
+  
+  const index = selectedFinalImageIds.value.indexOf(imageId)
+  if (index > -1) {
+    selectedFinalImageIds.value.splice(index, 1)
+  } else {
+    if (selectedFinalImageIds.value.length < limit) {
+      selectedFinalImageIds.value.push(imageId)
+    } else {
+      alert("ข้อจำกัดจำนวนภาพ", `คุณสามารถเลือกรูปภาพได้สูงสุด ${limit} ภาพตามแพ็กเกจ`, "warning")
+    }
+  }
+}
+
+const submitPhotoSelection = async () => {
+  if (!order.value || submittingSelection.value) return
+  
+  if (selectedFinalImageIds.value.length === 0) {
+    submitSelectionError.value = "กรุณาเลือกรูปภาพอย่างน้อย 1 ภาพ"
+    return
+  }
+  
+  const confirmed = await confirm("ยืนยันการเลือกรูปภาพ", `ยืนยันการเลือกรูปภาพจำนวน ${selectedFinalImageIds.value.length} ภาพ ใช่หรือไม่? (เมื่อยืนยันแล้วจะไม่สามารถแก้ไขได้)`)
+  if (!confirmed) {
+    return
+  }
+
+  submittingSelection.value = true
+  submitSelectionError.value = ""
+
+  try {
+    await orderService.selectFinalImages(order.value.orderId, selectedFinalImageIds.value)
+    selectedFinalImageIds.value = []
+    await fetchOrderDetails()
+  } catch (err: any) {
+    submitSelectionError.value = err?.message || "บันทึกการเลือกรูปภาพไม่สำเร็จ"
+  } finally {
+    submittingSelection.value = false
+  }
+}
 
 // ── Status Badges Color Map ──
 const getStatusBadgeClass = (status: OrderStatus) => {
@@ -208,13 +263,14 @@ const submitSlip = async () => {
 // ── Cancel Order (Customer can cancel when waiting_deposit) ──
 const cancelOrder = async () => {
   if (!order.value) return
-  if (!confirm("คุณแน่ใจหรือไม่ที่จะยกเลิกออเดอร์นี้?")) return
+  const confirmed = await confirm("ยืนยันการยกเลิก", "คุณแน่ใจหรือไม่ที่จะยกเลิกออเดอร์นี้?")
+  if (!confirmed) return
 
   try {
     await orderService.updateOrderStatus(order.value.orderId, "cancelled", "ลูกค้ายกเลิกคำสั่งงานด้วยตนเอง")
     await fetchOrderDetails()
   } catch (err: any) {
-    alert(err?.message || "ยกเลิกคำสั่งงานไม่สำเร็จ")
+    alert("เกิดข้อผิดพลาด", err?.message || "ยกเลิกคำสั่งงานไม่สำเร็จ", "error")
   }
 }
 
@@ -240,8 +296,8 @@ const formatDate = (dateStr?: string) => {
       
       <!-- Nav Header -->
       <div class="mb-8 flex items-center justify-between">
-        <NuxtLink to="/customer/orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition">
-          <svg class="w-4.5 h-4.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <NuxtLink to="/customer/orders" class="inline-flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium px-4 py-2 rounded-xl shadow-sm transition text-sm">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
           </svg>
           ย้อนกลับไปรายการออเดอร์
@@ -251,18 +307,18 @@ const formatDate = (dateStr?: string) => {
           @click="cancelOrder"
           class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/70 border border-red-200 px-3.5 py-1.5 rounded-lg transition"
         >
-          ❌ ยกเลิกออเดอร์นี้
+          ยกเลิกออเดอร์นี้
         </button>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white rounded-3xl shadow-xl p-16 text-center border border-gray-100">
+      <div v-if="loading" class="bg-white rounded-2xl shadow-xl p-16 text-center border border-gray-100">
         <div class="animate-spin w-12 h-12 border-4 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
         <p class="text-gray-500 font-bold">กำลังดึงข้อมูลออเดอร์...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error || !order" class="bg-white rounded-3xl shadow-xl p-12 text-center border border-red-100">
+      <div v-else-if="error || !order" class="bg-white rounded-2xl shadow-xl p-12 text-center border border-red-100">
         <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -278,7 +334,7 @@ const formatDate = (dateStr?: string) => {
       <div v-else class="space-y-8">
         
         <!-- ==================== ส่วนที่ 1: Order Summary Card ==================== -->
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div class="px-6 sm:px-8 py-5 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block">หมายเลขออเดอร์</span>
@@ -294,26 +350,26 @@ const formatDate = (dateStr?: string) => {
 
           <div class="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">🎨 ประเภทงาน</span>
-              <span class="font-bold text-gray-800 text-base">🎨 {{ order.workTypeName }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">ประเภทงาน</span>
+              <span class="font-bold text-gray-800 text-base">{{ order.workTypeName }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">📦 แพ็กเกจ</span>
-              <span class="font-bold text-gray-800 text-base">📦 {{ order.packageName }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">แพ็กเกจ</span>
+              <span class="font-bold text-gray-800 text-base">{{ order.packageName }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">📅 วันส่งมอบเป้าหมาย</span>
-              <span class="font-bold text-gray-800 text-base">📅 {{ formatDate(order.orderRequiredDate).split("เวลา")[0] }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">วันส่งมอบเป้าหมาย</span>
+              <span class="font-bold text-gray-800 text-base">{{ formatDate(order.orderRequiredDate).split("เวลา")[0] }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">💰 ยอดเงินรวมทั้งสิ้น</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">ยอดเงินรวมทั้งสิ้น</span>
               <span class="font-black text-gray-900 text-xl">฿{{ formatPrice(order.orderTotalPrice) }}</span>
             </div>
           </div>
 
           <!-- Additional details expander -->
           <div v-if="order.orderStyle || order.orderColorTone || order.orderComposition || order.orderNote" class="px-6 sm:px-8 pb-6 pt-2 border-t border-gray-50">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📝 รายละเอียดความต้องการเพิ่มเติม</h4>
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">รายละเอียดความต้องการเพิ่มเติม</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-gray-50/50 rounded-2xl p-4">
               <div v-if="order.orderStyle">
                 <span class="text-gray-500 font-semibold">สไตล์ภาพ:</span>
@@ -336,7 +392,7 @@ const formatDate = (dateStr?: string) => {
 
           <!-- Source image previews -->
           <div v-if="sourceImages.length > 0" class="px-6 sm:px-8 pb-8 pt-2">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">🖼️ รูปต้นฉบับ/รูปอ้างอิงของท่าน ({{ sourceImages.length }})</h4>
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">รูปต้นฉบับ/รูปอ้างอิงของท่าน ({{ sourceImages.length }})</h4>
             <div class="flex flex-wrap gap-3">
               <a
                 v-for="img in sourceImages"
@@ -352,8 +408,8 @@ const formatDate = (dateStr?: string) => {
         </div>
 
         <!-- ==================== ส่วนที่ 2: Status Timeline ==================== -->
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          <h3 class="text-lg font-bold text-gray-800 mb-6">📌 ลำดับขั้นตอนดำเนินงาน</h3>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+          <h3 class="text-lg font-bold text-gray-800 mb-6">ลำดับขั้นตอนดำเนินงาน</h3>
           
           <!-- Stepper List -->
           <div class="relative pl-6 border-l-2 border-gray-100 space-y-8">
@@ -366,14 +422,14 @@ const formatDate = (dateStr?: string) => {
               <div
                 class="absolute -left-10 top-0.5 w-8 h-8 rounded-full flex items-center justify-center border-4 text-xs font-extrabold shadow-sm transition-all duration-300"
                 :class="
-                  idx < currentStepIndex
+                  (idx < currentStepIndex || (order.orderStatus === 'completed' && idx === currentStepIndex))
                     ? 'bg-emerald-600 border-emerald-100 text-white'
                     : idx === currentStepIndex
                       ? 'bg-gray-900 border-gray-200 text-white animate-pulse'
                       : 'bg-white border-gray-200 text-gray-400'
                 "
               >
-                <svg v-if="idx < currentStepIndex" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="idx < currentStepIndex || (order.orderStatus === 'completed' && idx === currentStepIndex)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                 </svg>
                 <span v-else>{{ idx + 1 }}</span>
@@ -406,7 +462,6 @@ const formatDate = (dateStr?: string) => {
                 :key="log.logId"
                 class="flex items-start gap-3 text-xs bg-gray-50 rounded-xl p-3"
               >
-                <div class="text-lg">🕒</div>
                 <div class="space-y-1">
                   <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span class="font-bold text-gray-700">อัปเดตสถานะ</span>
@@ -427,13 +482,86 @@ const formatDate = (dateStr?: string) => {
           </div>
         </div>
 
+        <!-- ==================== ส่วนที่ 2.5: Photo Selection (รอคัดเลือกภาพ) ==================== -->
+        <div
+          v-if="order.orderStatus === 'waiting_selection' && aiGeneratedImages.length > 0"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
+        >
+          <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">คัดเลือกรูปภาพที่ชื่นชอบ</h3>
+              <p class="text-sm text-gray-500 mt-1">
+                คลิกเลือกรูปภาพที่คุณต้องการรับเป็นไฟล์จริง แพ็กเกจของคุณสามารถเลือกได้สูงสุด <strong class="text-gray-900">{{ order.packageImageCount }} ภาพ</strong>
+              </p>
+            </div>
+            <div class="text-right flex flex-col items-end">
+              <span class="text-sm text-gray-500 font-semibold mb-1">เลือกแล้ว</span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-black" :class="selectedFinalImageIds.length === order.packageImageCount ? 'text-green-600' : 'text-gray-900'">
+                  {{ selectedFinalImageIds.length }}
+                </span>
+                <span class="text-lg text-gray-400 font-bold">/ {{ order.packageImageCount }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            <div
+              v-for="img in aiGeneratedImages"
+              :key="img.orderImageId"
+              @click="toggleImageSelection(img.orderImageId)"
+              class="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border-4 transition-all duration-200 group"
+              :class="selectedFinalImageIds.includes(img.orderImageId) ? 'border-gray-900 shadow-md transform scale-[1.02]' : 'border-transparent hover:border-gray-300'"
+            >
+              <img :src="img.imageUrl" class="w-full h-full object-cover" />
+              
+              <!-- Selected Overlay -->
+              <div
+                v-if="selectedFinalImageIds.includes(img.orderImageId)"
+                class="absolute inset-0 bg-black/20 flex items-center justify-center"
+              >
+                <div class="bg-gray-900 text-white rounded-full p-2 shadow-lg transform scale-110">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Hover Zoom -->
+              <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-end">
+                <span class="text-[10px] text-white/90 truncate">{{ img.aiEngine || 'AI Gen' }}</span>
+                <a :href="img.imageUrl" target="_blank" @click.stop class="text-white bg-black/40 hover:bg-black/70 rounded p-1 backdrop-blur-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+            <p v-if="submitSelectionError" class="text-sm text-red-600 font-bold">⚠️ {{ submitSelectionError }}</p>
+            <p v-else class="text-xs text-gray-400">
+              *เมื่อกดยืนยันแล้ว จะไม่สามารถเปลี่ยนรูปได้ และระบบจะพาท่านไปยังขั้นตอนชำระเงินส่วนที่เหลือ
+            </p>
+            
+            <button
+              @click="submitPhotoSelection"
+              :disabled="selectedFinalImageIds.length === 0 || submittingSelection"
+              class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+            >
+              <span v-if="submittingSelection" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              {{ submittingSelection ? "กำลังบันทึก..." : "ยืนยันการเลือกรูปภาพ" }}
+            </button>
+          </div>
+        </div>
+
         <div
           v-if="order.orderStatus === 'waiting_deposit' || order.orderStatus === 'waiting_final_payment'"
-          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
         >
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-gray-50 pb-4">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">💳 แนบหลักฐานการชำระเงิน</h3>
+              <h3 class="text-lg font-bold text-gray-800">แนบหลักฐานการชำระเงิน</h3>
               <p class="text-xs text-gray-500 mt-1">
                 กรุณาโอนเงินเข้าบัญชีธนาคารของร้านเพื่อแจ้งชำระเงิน
               </p>
@@ -447,7 +575,6 @@ const formatDate = (dateStr?: string) => {
           <!-- Bank Account Info -->
           <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/60 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="text-3xl">🏦</div>
               <div>
                 <p class="text-sm font-bold text-gray-800">ธนาคารไทยพาณิชย์ (SCB)</p>
                 <p class="text-xs text-gray-500">บจก. คูส สตูดิโอ (COOS Studio Co., Ltd.)</p>
@@ -482,8 +609,7 @@ const formatDate = (dateStr?: string) => {
                 <p class="text-[10px] text-gray-400 underline">คลิกหรือลากสลิปใหม่มาวางที่นี่เพื่อเปลี่ยนไฟล์</p>
               </div>
               <div v-else class="flex flex-col items-center justify-center space-y-2">
-                <div class="text-3xl text-gray-900">🧾</div>
-                <p class="text-sm font-semibold text-gray-700">ลากรูปภาพสลิปมาวาง หรือคลิกเพื่ออัปโหลด</p>
+                <p class="text-sm font-semibold text-gray-700 mt-2">ลากรูปภาพสลิปมาวาง หรือคลิกเพื่ออัปโหลด</p>
                 <p class="text-xs text-gray-400">รองรับไฟล์สลิปรูปภาพ JPG, PNG (สูงสุด 10MB)</p>
               </div>
             </div>
@@ -511,8 +637,8 @@ const formatDate = (dateStr?: string) => {
         </div>
 
         <!-- Previous Payments History -->
-        <div v-if="order.payments && order.payments.length > 0" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          <h3 class="text-lg font-bold text-gray-800 mb-4">💳 ประวัติการแจ้งชำระเงิน</h3>
+        <div v-if="order.payments && order.payments.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">ประวัติการแจ้งชำระเงิน</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
@@ -534,7 +660,7 @@ const formatDate = (dateStr?: string) => {
                   </td>
                   <td class="py-4 pr-4">
                     <a :href="pay.paymentSlipUrl" target="_blank" class="inline-flex items-center gap-1 text-xs text-gray-900 hover:underline font-bold">
-                      📎 เปิดดูสลิป
+                      เปิดดูสลิป
                     </a>
                   </td>
                   <td class="py-4 pr-4 text-gray-500 font-medium">
@@ -557,11 +683,11 @@ const formatDate = (dateStr?: string) => {
         <!-- ==================== ส่วนที่ 4: ดาวน์โหลดภาพปลายทาง ==================== -->
         <div
           v-if="order.orderStatus === 'completed' || order.orderStatus === 'delivered'"
-          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
         >
           <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-50 pb-4">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">📥 ดาวน์โหลดผลงานสุดท้าย</h3>
+              <h3 class="text-lg font-bold text-gray-800">ดาวน์โหลดผลงานสุดท้าย</h3>
               <p class="text-xs text-gray-500 mt-1">
                 คลิกที่รูปภาพเพื่อดาวน์โหลดผลงานไฟล์ขนาดใหญ่หรือภาพที่เสร็จสิ้นสมบูรณ์แล้ว
               </p>
@@ -572,7 +698,7 @@ const formatDate = (dateStr?: string) => {
           </div>
 
           <div v-if="finalImages.length === 0" class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed text-gray-500 text-sm">
-            🎨 กำลังจัดเตรียมภาพสำหรับส่งมอบ กรุณารอแอดมินหรือช่างแต่งภาพอัปโหลดรูปภาพ
+            กำลังจัดเตรียมภาพสำหรับส่งมอบ กรุณารอแอดมินหรือช่างแต่งภาพอัปโหลดรูปภาพ
           </div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div

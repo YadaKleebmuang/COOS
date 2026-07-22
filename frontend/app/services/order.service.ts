@@ -159,6 +159,18 @@ export const orderService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
+  },
+
+  /**
+   * ยืนยันการเลือกรูปภาพที่แต่งเสร็จแล้ว (Customer)
+   */
+  async selectFinalImages(orderId: number, selectedImageIds: number[]): Promise<any> {
+    const { apiFetch } = useApi()
+    return await apiFetch(`/orders/${orderId}/images/select`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selectedImageIds }),
+    })
   }
 }
 
