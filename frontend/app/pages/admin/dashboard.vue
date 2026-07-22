@@ -142,11 +142,17 @@ const formatDate = (dateStr: string) => {
 // ────────────────────────────────────────
 const editorsWorkload = computed(() => {
   const editors = users.value.filter(u => u.userRole === "editor")
-  return editors.map(e => ({
-    initials: ((e.userFirstName?.[0] ?? "") + (e.userLastName?.[0] ?? "")).toUpperCase() || "ED",
-    name: `${e.userFirstName} ${e.userLastName}`,
-    activeJobs: orders.value.filter(o => o.editorId === e.userId && o.orderStatus === "in_progress").length
-  })).sort((a, b) => b.activeJobs - a.activeJobs).slice(0, 5)
+  return editors.map(e => {
+    const editorOrders = orders.value.filter(o => o.editorId === e.userId)
+    const activeJobs = editorOrders.filter(o => ['waiting_to_start', 'in_progress', 'waiting_selection', 'waiting_final_payment'].includes(o.orderStatus)).length
+    const completedJobs = editorOrders.filter(o => o.orderStatus === 'completed').length
+    return {
+      initials: ((e.userFirstName?.[0] ?? "") + (e.userLastName?.[0] ?? "")).toUpperCase() || "ED",
+      name: `${e.userFirstName} ${e.userLastName}`,
+      activeJobs,
+      completedJobs
+    }
+  }).sort((a, b) => (b.activeJobs + b.completedJobs) - (a.activeJobs + a.completedJobs)).slice(0, 5)
 })
 
 const breadcrumb = [
@@ -320,16 +326,15 @@ const breadcrumb = [
                 <p class="text-sm font-medium text-gray-900 truncate">{{ editor.name }}</p>
                 <p class="text-xs text-gray-400">Editor</p>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="h-1.5 bg-gray-100 rounded-full w-20 overflow-hidden">
-                  <div
-                    class="h-full bg-gray-900 rounded-full transition-all"
-                    :style="{ width: `${Math.min(100, (editor.activeJobs / 10) * 100)}%` }"
-                  />
+              <div class="text-right flex-shrink-0 flex items-center gap-3">
+                <div class="text-center">
+                  <p class="text-sm font-bold text-gray-800 font-number">{{ editor.activeJobs }}</p>
+                  <p class="text-[10px] text-gray-400">กำลังทำ</p>
                 </div>
-                <span class="text-xs font-bold text-gray-700 w-12 text-right">
-                  {{ editor.activeJobs }} งาน
-                </span>
+                <div class="text-center pl-3 border-l border-gray-200">
+                  <p class="text-sm font-bold text-emerald-600 font-number">{{ editor.completedJobs }}</p>
+                  <p class="text-[10px] text-gray-400">เสร็จแล้ว</p>
+                </div>
               </div>
             </div>
             <AdminEmptyState

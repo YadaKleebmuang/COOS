@@ -28,6 +28,7 @@ interface EditorLoad {
   name: string
   initials: string
   activeJobs: number
+  completedJobs: number
   email: string
 }
 
@@ -46,19 +47,26 @@ const assignModal = ref({ open: false, loading: false, order: null as WaitingOrd
 const fetchData = async () => {
   loading.value = true
   try {
-    const [allOrders, users] = await Promise.all([
-      apiFetch<any[]>("/orders"),
-      apiFetch<any[]>("/users")
+    const [ordersRes, usersRes] = await Promise.all([
+      apiFetch<any>("/orders?limit=1000"),
+      apiFetch<any>("/users?limit=1000")
     ])
     
-    waitingOrders.value = allOrders.filter(o => o.orderStatus === 'waiting_assignment')
-    const inProgressOrders = allOrders.filter(o => o.orderStatus === 'in_progress')
+    const allOrders = ordersRes.data || []
+    const users = usersRes.data || []
     
-    editors.value = users.filter(u => u.userRole === 'editor').map(u => ({
+    waitingOrders.value = allOrders.filter((o: any) => o.orderStatus === 'waiting_assignment')
+    const activeOrders = allOrders.filter((o: any) => 
+      ['waiting_to_start', 'in_progress', 'waiting_selection', 'waiting_final_payment'].includes(o.orderStatus)
+    )
+    const completedOrders = allOrders.filter((o: any) => o.orderStatus === 'completed')
+    
+    editors.value = users.filter((u: any) => u.userRole === 'editor').map((u: any) => ({
       userId: u.userId,
       name: `${u.userFirstName} ${u.userLastName}`,
       initials: `${u.userFirstName?.[0] || ''}${u.userLastName?.[0] || ''}`.toUpperCase(),
-      activeJobs: inProgressOrders.filter(o => o.editorId === u.userId).length,
+      activeJobs: activeOrders.filter((o: any) => o.editorId === u.userId).length,
+      completedJobs: completedOrders.filter((o: any) => o.editorId === u.userId).length,
       email: u.userEmail
     }))
   } finally {
@@ -184,7 +192,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100">
           <p class="text-sm font-bold text-gray-900">ภาระงาน Editor</p>
-          <p class="text-xs text-gray-400 mt-0.5">งานที่กำลังดำเนินการอยู่</p>
+          <p class="text-xs text-gray-400 mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
         </div>
         <div class="p-4 space-y-2">
           <div v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
@@ -193,9 +201,15 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
               <p class="text-sm font-medium text-gray-900 truncate">{{ ed.name }}</p>
               <p class="text-xs text-gray-400 truncate">{{ ed.email }}</p>
             </div>
-            <div class="text-right flex-shrink-0">
-              <p class="text-sm font-bold text-gray-900 font-number">{{ ed.activeJobs }}</p>
-              <p class="text-xs text-gray-400">งาน</p>
+            <div class="text-right flex-shrink-0 flex items-center gap-3">
+              <div class="text-center">
+                <p class="text-sm font-bold text-gray-800 font-number">{{ ed.activeJobs }}</p>
+                <p class="text-[10px] text-gray-400">กำลังทำ</p>
+              </div>
+              <div class="text-center pl-3 border-l border-gray-200">
+                <p class="text-sm font-bold text-emerald-600 font-number">{{ ed.completedJobs }}</p>
+                <p class="text-[10px] text-gray-400">เสร็จแล้ว</p>
+              </div>
             </div>
           </div>
         </div>
