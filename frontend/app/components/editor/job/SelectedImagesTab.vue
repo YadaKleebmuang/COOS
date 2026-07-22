@@ -17,7 +17,7 @@ const selectedImages = computed(() => {
     <!-- Section Header -->
     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
       <div>
-        <h3 class="text-base font-bold text-gray-800">🏆 ภาพผลงานขั้นสุดท้ายที่ลูกค้าคัดเลือก</h3>
+        <h3 class="text-base font-bold text-gray-800">ภาพผลงานขั้นสุดท้ายที่ลูกค้าคัดเลือก</h3>
         <p class="text-xs text-gray-400 mt-0.5">ภาพที่ลูกค้าเลือกรับเป็นไฟล์ขนาดจริงหลังชำระเงินเรียบร้อย</p>
       </div>
       <span v-if="selectedImages.length > 0" class="bg-green-50 text-green-700 border border-green-200 text-xs font-bold px-3 py-1 rounded-full">
@@ -48,7 +48,7 @@ const selectedImages = computed(() => {
           <img :src="img.imageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           <!-- Selected Badge -->
           <span class="absolute top-2 left-2 bg-green-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow tracking-wider">
-            CLIENT SELECTED ✓
+            CLIENT SELECTED
           </span>
           <!-- Hover Overlay -->
           <div class="absolute inset-0 bg-gray-900/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">

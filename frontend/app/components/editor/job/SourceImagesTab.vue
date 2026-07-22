@@ -17,7 +17,7 @@ const sourceImages = computed(() => {
     <!-- Section Header -->
     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
       <div>
-        <h3 class="text-base font-bold text-gray-800">📸 รูปภาพอ้างอิงต้นฉบับ (Reference Images)</h3>
+        <h3 class="text-base font-bold text-gray-800">รูปภาพอ้างอิงต้นฉบับ (Reference Images)</h3>
         <p class="text-xs text-gray-400 mt-0.5">ใช้รูปภาพเหล่านี้อ้างอิงในการสร้างภาพ AI</p>
       </div>
       <span v-if="sourceImages.length > 0" class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full">

@@ -26,7 +26,7 @@ const copyPrompt = async (text: string, key: string) => {
   <div class="space-y-6">
     <!-- Section Header -->
     <div class="border-b border-gray-100 pb-3">
-      <h3 class="text-base font-bold text-gray-800">📜 บันทึกพร้อมท์และพารามิเตอร์ (AI Prompt Logs)</h3>
+      <h3 class="text-base font-bold text-gray-800">บันทึกพร้อมท์และพารามิเตอร์ (AI Prompt Logs)</h3>
       <p class="text-xs text-gray-400 mt-0.5">พารามิเตอร์ที่ใช้ป้อนให้กับระบบ AI สำหรับแต่ละภาพในออเดอร์นี้</p>
     </div>
 
@@ -87,7 +87,7 @@ const copyPrompt = async (text: string, key: string) => {
                 <svg v-if="copiedKey !== `pos-${img.orderImageId}`" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
-                {{ copiedKey === `pos-${img.orderImageId}` ? "คัดลอกแล้ว ✓" : "คัดลอก" }}
+                {{ copiedKey === `pos-${img.orderImageId}` ? "คัดลอกแล้ว" : "คัดลอก" }}
               </button>
             </div>
             <div class="bg-white p-3 rounded-xl border border-gray-100 text-gray-600 font-mono leading-relaxed select-all break-all">
@@ -109,7 +109,7 @@ const copyPrompt = async (text: string, key: string) => {
                 <svg v-if="copiedKey !== `neg-${img.orderImageId}`" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
-                {{ copiedKey === `neg-${img.orderImageId}` ? "คัดลอกแล้ว ✓" : "คัดลอก" }}
+                {{ copiedKey === `neg-${img.orderImageId}` ? "คัดลอกแล้ว" : "คัดลอก" }}
               </button>
             </div>
             <div class="bg-white p-3 rounded-xl border border-red-50 text-gray-600 font-mono leading-relaxed select-all break-all">

@@ -108,7 +108,7 @@ const handleSubmitImage = async () => {
 <template>
   <div class="space-y-8">
     <div class="border-b border-gray-50 pb-2.5">
-      <h3 class="text-base font-bold text-gray-800">🤖 รูปภาพที่สังเคราะห์ด้วยปัญญาประดิษฐ์ (AI Generated Layouts)</h3>
+      <h3 class="text-base font-bold text-gray-800">ผลงานภาพ AI (Generated Images)</h3>
       <p class="text-xs text-gray-400 mt-0.5">ส่วนสำหรับอัปโหลดภาพดราฟต์ที่สังเคราะห์จากระบบหรือประมวลผลขึ้นมา เพื่อส่งให้ลูกค้าคัดเลือก</p>
     </div>
 
