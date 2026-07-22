@@ -17,7 +17,6 @@ const loading = ref(true)
 const error = ref("")
 const selectedFilter = ref("all")
 const searchQuery = ref("")
-const assignLoading = ref<number | null>(null)
 const confirmDialog = ref({
   open: false,
   orderId: 0,
@@ -104,25 +103,6 @@ const columns = [
 ]
 
 // ── Actions ────────────────────────────────────────────────────
-const handleAssignEditor = async (orderId: number, event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const editorId = target.value ? Number(target.value) : null
-  assignLoading.value = orderId
-  try {
-    const res = await apiFetch(`/orders/${orderId}/assign`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ editorId })
-    })
-    alert(res.message || "มอบหมายงานสำเร็จ")
-    fetchAdminData()
-  } catch (err: any) {
-    alert(err?.message || "มอบหมายงานไม่สำเร็จ")
-  } finally {
-    assignLoading.value = null
-  }
-}
-
 const openVerifyDialog = (orderId: number, paymentId: number, status: "approved" | "rejected") => {
   confirmDialog.value = { open: true, orderId, paymentId, status, loading: false }
 }
@@ -162,6 +142,11 @@ const formatDate = (dateStr: string) => {
 
 const pendingPayment = (order: any) =>
   order.payments?.find((p: any) => p.paymentStatus === "pending")
+
+const getEditorName = (id: number) => {
+  const editor = editors.value.find((e: any) => e.userId === id)
+  return editor ? `${editor.userFirstName} ${editor.userLastName}` : "ไม่ทราบชื่อ"
+}
 
 const breadcrumb = [
   { label: "หน้าแรก", to: "/admin/dashboard" },
@@ -255,17 +240,10 @@ const breadcrumb = [
 
         <!-- Editor Assign dropdown -->
         <template #cell-editorAssign="{ row }">
-          <select
-            :value="row.editorId || ''"
-            @change="handleAssignEditor(row.orderId, $event)"
-            :disabled="assignLoading === row.orderId"
-            class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:opacity-50"
-          >
-            <option value="">— ยังไม่มอบหมาย —</option>
-            <option v-for="ed in editors" :key="ed.userId" :value="ed.userId">
-              {{ ed.userFirstName }} {{ ed.userLastName }}
-            </option>
-          </select>
+          <span v-if="row.editorId" class="text-xs text-gray-700 font-medium bg-gray-100 px-2 py-1 rounded-md">
+            {{ getEditorName(row.editorId) }}
+          </span>
+          <span v-else class="text-xs text-gray-400">— ยังไม่มอบหมาย —</span>
         </template>
 
         <!-- Payment slip -->
