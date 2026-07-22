@@ -292,8 +292,8 @@ const formatDate = (dateStr?: string) => {
       
       <!-- Nav Header -->
       <div class="mb-8 flex items-center justify-between">
-        <NuxtLink to="/customer/orders" class="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition">
-          <svg class="w-4.5 h-4.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <NuxtLink to="/customer/orders" class="inline-flex items-center justify-center bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium px-4 py-2 rounded-xl shadow-sm transition text-sm">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
           </svg>
           ย้อนกลับไปรายการออเดอร์
