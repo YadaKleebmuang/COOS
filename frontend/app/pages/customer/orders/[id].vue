@@ -308,13 +308,13 @@ const formatDate = (dateStr?: string) => {
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white rounded-3xl shadow-xl p-16 text-center border border-gray-100">
+      <div v-if="loading" class="bg-white rounded-2xl shadow-xl p-16 text-center border border-gray-100">
         <div class="animate-spin w-12 h-12 border-4 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
         <p class="text-gray-500 font-bold">กำลังดึงข้อมูลออเดอร์...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error || !order" class="bg-white rounded-3xl shadow-xl p-12 text-center border border-red-100">
+      <div v-else-if="error || !order" class="bg-white rounded-2xl shadow-xl p-12 text-center border border-red-100">
         <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -330,7 +330,7 @@ const formatDate = (dateStr?: string) => {
       <div v-else class="space-y-8">
         
         <!-- ==================== ส่วนที่ 1: Order Summary Card ==================== -->
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div class="px-6 sm:px-8 py-5 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block">หมายเลขออเดอร์</span>
@@ -404,7 +404,7 @@ const formatDate = (dateStr?: string) => {
         </div>
 
         <!-- ==================== ส่วนที่ 2: Status Timeline ==================== -->
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           <h3 class="text-lg font-bold text-gray-800 mb-6">📌 ลำดับขั้นตอนดำเนินงาน</h3>
           
           <!-- Stepper List -->
@@ -482,19 +482,19 @@ const formatDate = (dateStr?: string) => {
         <!-- ==================== ส่วนที่ 2.5: Photo Selection (รอคัดเลือกภาพ) ==================== -->
         <div
           v-if="order.orderStatus === 'waiting_selection' && aiGeneratedImages.length > 0"
-          class="bg-white rounded-3xl shadow-sm border-2 border-pink-100 p-6 sm:p-8"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
         >
           <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-4">
             <div>
               <h3 class="text-xl font-bold text-gray-900">✨ คัดเลือกรูปภาพที่ชื่นชอบ</h3>
               <p class="text-sm text-gray-500 mt-1">
-                คลิกเลือกรูปภาพที่คุณต้องการรับเป็นไฟล์จริง แพ็กเกจของคุณสามารถเลือกได้สูงสุด <strong class="text-pink-600">{{ order.packageImageCount }} ภาพ</strong>
+                คลิกเลือกรูปภาพที่คุณต้องการรับเป็นไฟล์จริง แพ็กเกจของคุณสามารถเลือกได้สูงสุด <strong class="text-gray-900">{{ order.packageImageCount }} ภาพ</strong>
               </p>
             </div>
             <div class="text-right flex flex-col items-end">
               <span class="text-sm text-gray-500 font-semibold mb-1">เลือกแล้ว</span>
               <div class="flex items-baseline gap-1">
-                <span class="text-3xl font-black" :class="selectedFinalImageIds.length === order.packageImageCount ? 'text-green-600' : 'text-pink-600'">
+                <span class="text-3xl font-black" :class="selectedFinalImageIds.length === order.packageImageCount ? 'text-green-600' : 'text-gray-900'">
                   {{ selectedFinalImageIds.length }}
                 </span>
                 <span class="text-lg text-gray-400 font-bold">/ {{ order.packageImageCount }}</span>
@@ -508,16 +508,16 @@ const formatDate = (dateStr?: string) => {
               :key="img.orderImageId"
               @click="toggleImageSelection(img.orderImageId)"
               class="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border-4 transition-all duration-200 group"
-              :class="selectedFinalImageIds.includes(img.orderImageId) ? 'border-pink-500 shadow-md transform scale-[1.02]' : 'border-transparent hover:border-gray-300'"
+              :class="selectedFinalImageIds.includes(img.orderImageId) ? 'border-gray-900 shadow-md transform scale-[1.02]' : 'border-transparent hover:border-gray-300'"
             >
               <img :src="img.imageUrl" class="w-full h-full object-cover" />
               
               <!-- Selected Overlay -->
               <div
                 v-if="selectedFinalImageIds.includes(img.orderImageId)"
-                class="absolute inset-0 bg-pink-500/20 flex items-center justify-center"
+                class="absolute inset-0 bg-black/20 flex items-center justify-center"
               >
-                <div class="bg-pink-500 text-white rounded-full p-2 shadow-lg transform scale-110">
+                <div class="bg-gray-900 text-white rounded-full p-2 shadow-lg transform scale-110">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                   </svg>
@@ -544,7 +544,7 @@ const formatDate = (dateStr?: string) => {
             <button
               @click="submitPhotoSelection"
               :disabled="selectedFinalImageIds.length === 0 || submittingSelection"
-              class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+              class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
             >
               <span v-if="submittingSelection" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
               {{ submittingSelection ? "กำลังบันทึก..." : "ยืนยันการเลือกรูปภาพ" }}
@@ -554,7 +554,7 @@ const formatDate = (dateStr?: string) => {
 
         <div
           v-if="order.orderStatus === 'waiting_deposit' || order.orderStatus === 'waiting_final_payment'"
-          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
         >
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-gray-50 pb-4">
             <div>
@@ -636,7 +636,7 @@ const formatDate = (dateStr?: string) => {
         </div>
 
         <!-- Previous Payments History -->
-        <div v-if="order.payments && order.payments.length > 0" class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <div v-if="order.payments && order.payments.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           <h3 class="text-lg font-bold text-gray-800 mb-4">💳 ประวัติการแจ้งชำระเงิน</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
@@ -682,7 +682,7 @@ const formatDate = (dateStr?: string) => {
         <!-- ==================== ส่วนที่ 4: ดาวน์โหลดภาพปลายทาง ==================== -->
         <div
           v-if="order.orderStatus === 'completed' || order.orderStatus === 'delivered'"
-          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8"
         >
           <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-50 pb-4">
             <div>
