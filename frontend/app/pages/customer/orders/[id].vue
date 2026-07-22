@@ -303,7 +303,7 @@ const formatDate = (dateStr?: string) => {
           @click="cancelOrder"
           class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/70 border border-red-200 px-3.5 py-1.5 rounded-lg transition"
         >
-          ❌ ยกเลิกออเดอร์นี้
+          ยกเลิกออเดอร์นี้
         </button>
       </div>
 
@@ -346,26 +346,26 @@ const formatDate = (dateStr?: string) => {
 
           <div class="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">🎨 ประเภทงาน</span>
-              <span class="font-bold text-gray-800 text-base">🎨 {{ order.workTypeName }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">ประเภทงาน</span>
+              <span class="font-bold text-gray-800 text-base">{{ order.workTypeName }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">📦 แพ็กเกจ</span>
-              <span class="font-bold text-gray-800 text-base">📦 {{ order.packageName }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">แพ็กเกจ</span>
+              <span class="font-bold text-gray-800 text-base">{{ order.packageName }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">📅 วันส่งมอบเป้าหมาย</span>
-              <span class="font-bold text-gray-800 text-base">📅 {{ formatDate(order.orderRequiredDate).split("เวลา")[0] }}</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">วันส่งมอบเป้าหมาย</span>
+              <span class="font-bold text-gray-800 text-base">{{ formatDate(order.orderRequiredDate).split("เวลา")[0] }}</span>
             </div>
             <div>
-              <span class="text-xs text-gray-400 font-bold block mb-1">💰 ยอดเงินรวมทั้งสิ้น</span>
+              <span class="text-xs text-gray-400 font-bold block mb-1">ยอดเงินรวมทั้งสิ้น</span>
               <span class="font-black text-gray-900 text-xl">฿{{ formatPrice(order.orderTotalPrice) }}</span>
             </div>
           </div>
 
           <!-- Additional details expander -->
           <div v-if="order.orderStyle || order.orderColorTone || order.orderComposition || order.orderNote" class="px-6 sm:px-8 pb-6 pt-2 border-t border-gray-50">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📝 รายละเอียดความต้องการเพิ่มเติม</h4>
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">รายละเอียดความต้องการเพิ่มเติม</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-gray-50/50 rounded-2xl p-4">
               <div v-if="order.orderStyle">
                 <span class="text-gray-500 font-semibold">สไตล์ภาพ:</span>
@@ -388,7 +388,7 @@ const formatDate = (dateStr?: string) => {
 
           <!-- Source image previews -->
           <div v-if="sourceImages.length > 0" class="px-6 sm:px-8 pb-8 pt-2">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">🖼️ รูปต้นฉบับ/รูปอ้างอิงของท่าน ({{ sourceImages.length }})</h4>
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">รูปต้นฉบับ/รูปอ้างอิงของท่าน ({{ sourceImages.length }})</h4>
             <div class="flex flex-wrap gap-3">
               <a
                 v-for="img in sourceImages"
@@ -405,7 +405,7 @@ const formatDate = (dateStr?: string) => {
 
         <!-- ==================== ส่วนที่ 2: Status Timeline ==================== -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          <h3 class="text-lg font-bold text-gray-800 mb-6">📌 ลำดับขั้นตอนดำเนินงาน</h3>
+          <h3 class="text-lg font-bold text-gray-800 mb-6">ลำดับขั้นตอนดำเนินงาน</h3>
           
           <!-- Stepper List -->
           <div class="relative pl-6 border-l-2 border-gray-100 space-y-8">
@@ -458,7 +458,6 @@ const formatDate = (dateStr?: string) => {
                 :key="log.logId"
                 class="flex items-start gap-3 text-xs bg-gray-50 rounded-xl p-3"
               >
-                <div class="text-lg">🕒</div>
                 <div class="space-y-1">
                   <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span class="font-bold text-gray-700">อัปเดตสถานะ</span>
@@ -486,7 +485,7 @@ const formatDate = (dateStr?: string) => {
         >
           <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-4">
             <div>
-              <h3 class="text-xl font-bold text-gray-900">✨ คัดเลือกรูปภาพที่ชื่นชอบ</h3>
+              <h3 class="text-xl font-bold text-gray-900">คัดเลือกรูปภาพที่ชื่นชอบ</h3>
               <p class="text-sm text-gray-500 mt-1">
                 คลิกเลือกรูปภาพที่คุณต้องการรับเป็นไฟล์จริง แพ็กเกจของคุณสามารถเลือกได้สูงสุด <strong class="text-gray-900">{{ order.packageImageCount }} ภาพ</strong>
               </p>
@@ -558,7 +557,7 @@ const formatDate = (dateStr?: string) => {
         >
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-gray-50 pb-4">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">💳 แนบหลักฐานการชำระเงิน</h3>
+              <h3 class="text-lg font-bold text-gray-800">แนบหลักฐานการชำระเงิน</h3>
               <p class="text-xs text-gray-500 mt-1">
                 กรุณาโอนเงินเข้าบัญชีธนาคารของร้านเพื่อแจ้งชำระเงิน
               </p>
@@ -572,7 +571,6 @@ const formatDate = (dateStr?: string) => {
           <!-- Bank Account Info -->
           <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/60 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="text-3xl">🏦</div>
               <div>
                 <p class="text-sm font-bold text-gray-800">ธนาคารไทยพาณิชย์ (SCB)</p>
                 <p class="text-xs text-gray-500">บจก. คูส สตูดิโอ (COOS Studio Co., Ltd.)</p>
@@ -607,8 +605,7 @@ const formatDate = (dateStr?: string) => {
                 <p class="text-[10px] text-gray-400 underline">คลิกหรือลากสลิปใหม่มาวางที่นี่เพื่อเปลี่ยนไฟล์</p>
               </div>
               <div v-else class="flex flex-col items-center justify-center space-y-2">
-                <div class="text-3xl text-gray-900">🧾</div>
-                <p class="text-sm font-semibold text-gray-700">ลากรูปภาพสลิปมาวาง หรือคลิกเพื่ออัปโหลด</p>
+                <p class="text-sm font-semibold text-gray-700 mt-2">ลากรูปภาพสลิปมาวาง หรือคลิกเพื่ออัปโหลด</p>
                 <p class="text-xs text-gray-400">รองรับไฟล์สลิปรูปภาพ JPG, PNG (สูงสุด 10MB)</p>
               </div>
             </div>
@@ -637,7 +634,7 @@ const formatDate = (dateStr?: string) => {
 
         <!-- Previous Payments History -->
         <div v-if="order.payments && order.payments.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          <h3 class="text-lg font-bold text-gray-800 mb-4">💳 ประวัติการแจ้งชำระเงิน</h3>
+          <h3 class="text-lg font-bold text-gray-800 mb-4">ประวัติการแจ้งชำระเงิน</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
@@ -659,7 +656,7 @@ const formatDate = (dateStr?: string) => {
                   </td>
                   <td class="py-4 pr-4">
                     <a :href="pay.paymentSlipUrl" target="_blank" class="inline-flex items-center gap-1 text-xs text-gray-900 hover:underline font-bold">
-                      📎 เปิดดูสลิป
+                      เปิดดูสลิป
                     </a>
                   </td>
                   <td class="py-4 pr-4 text-gray-500 font-medium">
@@ -686,7 +683,7 @@ const formatDate = (dateStr?: string) => {
         >
           <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-50 pb-4">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">📥 ดาวน์โหลดผลงานสุดท้าย</h3>
+              <h3 class="text-lg font-bold text-gray-800">ดาวน์โหลดผลงานสุดท้าย</h3>
               <p class="text-xs text-gray-500 mt-1">
                 คลิกที่รูปภาพเพื่อดาวน์โหลดผลงานไฟล์ขนาดใหญ่หรือภาพที่เสร็จสิ้นสมบูรณ์แล้ว
               </p>
@@ -697,7 +694,7 @@ const formatDate = (dateStr?: string) => {
           </div>
 
           <div v-if="finalImages.length === 0" class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed text-gray-500 text-sm">
-            🎨 กำลังจัดเตรียมภาพสำหรับส่งมอบ กรุณารอแอดมินหรือช่างแต่งภาพอัปโหลดรูปภาพ
+            กำลังจัดเตรียมภาพสำหรับส่งมอบ กรุณารอแอดมินหรือช่างแต่งภาพอัปโหลดรูปภาพ
           </div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div
