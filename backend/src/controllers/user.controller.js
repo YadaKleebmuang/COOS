@@ -242,3 +242,40 @@ exports.getMyProfile = async (req, res, next) => {
     next(err);
   }
 };
+
+// PATCH /users/me/password
+exports.updateMyPassword = async (req, res, next) => {
+  try {
+    const userId = req.session.userId;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Missing oldPassword or newPassword" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "New password must be at least 8 characters long" });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.userPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const result = await UserModel.updatePassword(userId, hashedNewPassword);
+
+    if (!result) {
+      return res.status(500).json({ message: "Failed to update password" });
+    }
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
