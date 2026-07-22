@@ -8,6 +8,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 interface Hashtag { tagId: number; tagName: string; imageCount: number; createdAt: string }
@@ -33,7 +34,7 @@ const fetchData = async () => {
       createdAt: t.createdAt || new Date().toISOString()
     }))
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message, "error")
   } finally {
     loading.value = false
   }
@@ -66,7 +67,7 @@ const saveTag = async () => {
     }
     tagModal.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาด: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาด: " + error.message, "error")
   } finally {
     tagModal.value.loading = false
   }
@@ -79,7 +80,7 @@ const confirmTagDelete = async () => {
     hashtags.value = hashtags.value.filter(t => t.tagId !== tagDelete.value.id)
     tagDelete.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการลบ: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการลบ: " + error.message, "error")
   } finally {
     tagDelete.value.loading = false
   }

@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["refresh"])
 const updating = ref(false)
+const { alert, confirm } = useAlert()
 
 const canStart = computed(() => props.order.orderStatus === "waiting_to_start")
 const canSubmit = computed(() => props.order.orderStatus === "in_progress")
@@ -19,7 +20,7 @@ const updateStatus = async (nextStatus: OrderStatus, note: string) => {
     await orderService.updateOrderStatus(props.order.orderId, nextStatus, note)
     emit("refresh")
   } catch (err: any) {
-    alert(err?.message || "เปลี่ยนสถานะไม่สำเร็จ")
+    alert("เกิดข้อผิดพลาด", err?.message || "เปลี่ยนสถานะไม่สำเร็จ", "error")
   } finally {
     updating.value = false
   }
@@ -29,8 +30,9 @@ const handleStartJob = () => {
   updateStatus("in_progress", "ช่างแต่งภาพกดรับงานและเริ่มดำเนินการ")
 }
 
-const handleSubmitJob = () => {
-  if (confirm("ต้องการส่งมอบภาพเพื่อให้ลูกค้าเลือกรูปภาพสุดท้ายหรือไม่? (ภาพ AI Generated ทั้งหมดจะปรากฏในหน้าของลูกค้า)")) {
+const handleSubmitJob = async () => {
+  const confirmed = await confirm("ยืนยันการส่งมอบงาน", "ต้องการส่งมอบภาพเพื่อให้ลูกค้าเลือกรูปภาพสุดท้ายหรือไม่? (ภาพ AI Generated ทั้งหมดจะปรากฏในหน้าของลูกค้า)")
+  if (confirmed) {
     updateStatus("waiting_selection", "ช่างแต่งภาพจัดส่งผลงาน AI Generated เพื่อให้ลูกค้าเลือกภาพไฟนอล")
   }
 }

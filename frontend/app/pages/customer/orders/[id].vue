@@ -8,6 +8,7 @@ const token = useCookie<string | null>("token")
 const route = useRoute()
 const router = useRouter()
 const orderId = route.params.id as string
+const { alert, confirm } = useAlert()
 
 definePageMeta({
   layout: "customer",
@@ -112,7 +113,7 @@ const toggleImageSelection = (imageId: number) => {
     if (selectedFinalImageIds.value.length < limit) {
       selectedFinalImageIds.value.push(imageId)
     } else {
-      alert(`คุณสามารถเลือกรูปภาพได้สูงสุด ${limit} ภาพตามแพ็กเกจ`)
+      alert("ข้อจำกัดจำนวนภาพ", `คุณสามารถเลือกรูปภาพได้สูงสุด ${limit} ภาพตามแพ็กเกจ`, "warning")
     }
   }
 }
@@ -125,7 +126,8 @@ const submitPhotoSelection = async () => {
     return
   }
   
-  if (!confirm(`ยืนยันการเลือกรูปภาพจำนวน ${selectedFinalImageIds.value.length} ภาพ ใช่หรือไม่? (เมื่อยืนยันแล้วจะไม่สามารถแก้ไขได้)`)) {
+  const confirmed = await confirm("ยืนยันการเลือกรูปภาพ", `ยืนยันการเลือกรูปภาพจำนวน ${selectedFinalImageIds.value.length} ภาพ ใช่หรือไม่? (เมื่อยืนยันแล้วจะไม่สามารถแก้ไขได้)`)
+  if (!confirmed) {
     return
   }
 
@@ -260,13 +262,14 @@ const submitSlip = async () => {
 // ── Cancel Order (Customer can cancel when waiting_deposit) ──
 const cancelOrder = async () => {
   if (!order.value) return
-  if (!confirm("คุณแน่ใจหรือไม่ที่จะยกเลิกออเดอร์นี้?")) return
+  const confirmed = await confirm("ยืนยันการยกเลิก", "คุณแน่ใจหรือไม่ที่จะยกเลิกออเดอร์นี้?")
+  if (!confirmed) return
 
   try {
     await orderService.updateOrderStatus(order.value.orderId, "cancelled", "ลูกค้ายกเลิกคำสั่งงานด้วยตนเอง")
     await fetchOrderDetails()
   } catch (err: any) {
-    alert(err?.message || "ยกเลิกคำสั่งงานไม่สำเร็จ")
+    alert("เกิดข้อผิดพลาด", err?.message || "ยกเลิกคำสั่งงานไม่สำเร็จ", "error")
   }
 }
 

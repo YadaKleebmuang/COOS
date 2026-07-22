@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── State ──────────────────────────────────────────────────────
 const users = ref<User[]>([])
@@ -132,7 +133,7 @@ const saveUser = async () => {
     closeModal()
     fetchUsers()
   } catch (err: any) {
-    alert(err?.message || "ดำเนินการไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ดำเนินการไม่สำเร็จ", "error")
   } finally {
     modal.value.loading = false
   }
@@ -150,7 +151,7 @@ const confirmDelete = async () => {
     deleteDialog.value.open = false
     fetchUsers()
   } catch (err: any) {
-    alert(err?.message || "ลบไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ลบไม่สำเร็จ", "error")
   } finally {
     deleteDialog.value.loading = false
   }

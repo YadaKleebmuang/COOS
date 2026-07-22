@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 interface SystemSettings {
@@ -126,7 +127,7 @@ const saveSection = async (section: string) => {
     savedSection.value = section
     setTimeout(() => { savedSection.value = null }, 2500)
   } catch (err: any) {
-    alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการบันทึก: " + err.message, "error")
   } finally {
     saving.value = null
   }

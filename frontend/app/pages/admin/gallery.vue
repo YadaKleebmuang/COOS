@@ -44,6 +44,7 @@ const fetchGallery = async () => {
   loading.value = true
   try {
     const { apiFetch } = useApi()
+const { alert } = useAlert()
     // [Fix] ?all=true ให้ admin เห็นทุกรูปรวมที่ hidden อยู่ด้วย
     const data = await apiFetch<any[]>("/gallery-images?all=true")
     images.value = data.map(img => ({
@@ -137,7 +138,7 @@ const confirmDelete = async () => {
     images.value = images.value.filter(i => i.imageId !== deleteDialog.value.imageId)
     deleteDialog.value.open = false
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาดในการลบรูปภาพ: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาดในการลบรูปภาพ: " + error.message, "error")
   } finally {
     deleteDialog.value.loading = false
   }
@@ -149,7 +150,7 @@ const toggleVisibility = async (image: GalleryImage) => {
     await apiFetch(`/gallery-images/${image.imageId}/toggle`, { method: "PATCH" })
     image.isPublic = !image.isPublic
   } catch (error: any) {
-    alert("เกิดข้อผิดพลาด: " + error.message)
+    alert("แจ้งเตือน", "เกิดข้อผิดพลาด: " + error.message, "error")
   }
 }
 

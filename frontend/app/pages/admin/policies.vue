@@ -8,6 +8,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 type PolicyType = "privacy" | "terms" | "refund"
@@ -145,7 +146,7 @@ const confirmDelete = async () => {
     deleteDialog.value.open = false
     fetchPolicies()
   } catch (err: any) {
-    alert(err?.message || "ลบไม่สำเร็จ")
+    alert("แจ้งเตือน", err?.message || "ลบไม่สำเร็จ", "error")
   } finally {
     deleteDialog.value.loading = false
   }

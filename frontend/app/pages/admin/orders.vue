@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { alert } = useAlert()
 
 const orders = ref<any[]>([])
 const editors = ref<any[]>([])
@@ -119,11 +120,11 @@ const confirmVerify = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentStatus: status, logNote: note })
     })
-    alert(res.message || "บันทึกเรียบร้อย")
+    alert("สำเร็จ", res.message || "บันทึกเรียบร้อย", "success")
     confirmDialog.value.open = false
     fetchAdminData()
   } catch (err: any) {
-    alert(err?.message || "เกิดข้อผิดพลาด")
+    alert("แจ้งเตือน", err?.message || "เกิดข้อผิดพลาด", "error")
   } finally {
     confirmDialog.value.loading = false
   }

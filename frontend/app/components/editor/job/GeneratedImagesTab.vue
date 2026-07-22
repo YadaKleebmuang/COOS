@@ -114,7 +114,7 @@ const handleSubmitImage = async () => {
 
     <!-- Upload Panel Form -->
     <div class="bg-gray-50 rounded-xl border border-gray-100 p-5 sm:p-6 space-y-6">
-      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">📤 อัปโหลดผลงานดราฟต์ใหม่</h4>
+      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">อัปโหลดผลงานดราฟต์ใหม่</h4>
       
       <!-- Drag & Drop Zone -->
       <div
@@ -128,7 +128,6 @@ const handleSubmitImage = async () => {
       >
         <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleFileSelect" />
         <div class="flex flex-col items-center justify-center space-y-2 text-xs">
-          <div class="text-3xl text-indigo-500">🌌</div>
           <p class="font-bold text-gray-700">ลากไฟล์ผลงานมาวางที่นี่ หรือคลิกเพื่ออัปโหลด</p>
           <p class="text-gray-400">รองรับไฟล์รูปภาพความละเอียดสูง (สูงสุด 10MB)</p>
         </div>
@@ -198,7 +197,7 @@ const handleSubmitImage = async () => {
 
     <!-- Generated Images Gallery -->
     <div class="space-y-4">
-      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">🖼️ คลังรูปภาพที่แนบไปแล้ว ({{ generatedImages.length }} รูป)</h4>
+      <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">คลังรูปภาพที่แนบไปแล้ว ({{ generatedImages.length }} รูป)</h4>
       
       <div v-if="generatedImages.length === 0" class="text-center py-8 text-gray-400 text-xs">
         ยังไม่มีการแนบรูปภาพที่สังเคราะห์จากระบบ AI ในตอนนี้
