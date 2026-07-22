@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
+import { useAlert } from "~/composables/useAlert"
 import { orderService } from "~/services/order.service"
 import type { OrderDetail, OrderStatus, Payment } from "~/types/order.types"
 
