@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { orderService } from "~/services/order.service"
 import type { OrderSummary, OrderStatus } from "~/types/order.types"
+import Pagination from "~/components/ui/Pagination.vue"
 
 // ── Auth & Cookies ──
 const token = useCookie<string | null>("token")
@@ -18,13 +19,22 @@ const loading = ref(true)
 const error = ref("")
 const selectedStatusFilter = ref<string>("all")
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalRecords = ref(0)
+const limit = 10
+
 // ── Fetch orders ──
-const fetchOrders = async () => {
+const fetchOrders = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    const res = await orderService.getMyOrders()
-    orders.value = res
+    const statusQuery = selectedStatusFilter.value !== "all" ? selectedStatusFilter.value : undefined
+    const res = await orderService.getMyOrders(page, limit, statusQuery)
+    orders.value = res.data || []
+    currentPage.value = res.page || 1
+    totalPages.value = res.totalPages || 1
+    totalRecords.value = res.total || 0
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถดึงข้อมูลรายการออเดอร์ได้"
   } finally {
@@ -40,12 +50,18 @@ onMounted(() => {
   fetchOrders()
 })
 
+const handlePageChange = (page: number) => {
+  fetchOrders(page)
+}
+
+watch(selectedStatusFilter, () => {
+  currentPage.value = 1
+  fetchOrders(1)
+})
+
 // ── Filtered Orders ──
 const filteredOrders = computed(() => {
-  if (selectedStatusFilter.value === "all") {
-    return orders.value
-  }
-  return orders.value.filter((o) => o.orderStatus === selectedStatusFilter.value)
+  return orders.value
 })
 
 // ── Status Config (Labels & Color Badges) ──
@@ -148,9 +164,9 @@ const filterTabs = [
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-4xl mx-auto py-8">
     <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 mt-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 tracking-tight">ประวัติออเดอร์ของฉัน</h1>
           <p class="text-gray-500 mt-1 text-sm">ติดตามสถานะ สลิปโอนเงิน และดาวน์โหลดไฟล์ผลงานทั้งหมดของคุณ</p>
@@ -194,7 +210,7 @@ const filterTabs = [
         </div>
         <h3 class="text-lg font-bold text-red-600 mb-1">เกิดข้อผิดพลาด</h3>
         <p class="text-gray-500 text-sm mb-4">{{ error }}</p>
-        <button @click="fetchOrders" class="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg transition text-sm">
+        <button @click="() => fetchOrders()" class="bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg transition text-sm">
           โหลดอีกครั้ง
         </button>
       </div>
@@ -266,5 +282,14 @@ const filterTabs = [
           </div>
         </NuxtLink>
       </div>
+
+      <Pagination 
+        v-if="!loading && filteredOrders.length > 0"
+        :current-page="currentPage" 
+        :total-pages="totalPages" 
+        :total="totalRecords" 
+        :limit="limit" 
+        @page-change="handlePageChange" 
+      />
     </div>
 </template>

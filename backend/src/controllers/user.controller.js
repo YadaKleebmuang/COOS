@@ -6,14 +6,18 @@ const bcrypt = require("bcrypt");
 exports.getUsers = async (req, res, next) => {
   // console.log('GET USERS controller start');
   try {
-    const user = await UserModel.findAll();
-    // เช็คว่ามี user ไหม
-    if (!user || user.length === 0) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const result = await UserModel.findAll({ page, limit });
+    
+    // เช็คว่ามี data ไหม
+    if (!result.data || result.data.length === 0) {
       return res.status(404).json({
         message: "User not found!",
       });
     }
-    res.status(200).json(user);
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

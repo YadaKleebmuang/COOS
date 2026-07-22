@@ -184,8 +184,8 @@ const breadcrumb = [
         <!-- Actions -->
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-1.5">
-            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row)">แก้ไข</AdminActionButton>
-            <AdminActionButton variant="danger" size="sm" @click="openDelete(row)">ลบ</AdminActionButton>
+            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row as any)">แก้ไข</AdminActionButton>
+            <AdminActionButton variant="danger" size="sm" @click="openDelete(row as any)">ลบ</AdminActionButton>
           </div>
         </template>
       </AdminDataTable>
@@ -201,12 +201,12 @@ const breadcrumb = [
             <h3 class="text-sm font-bold text-gray-900 mb-5">{{ modal.mode === "edit" ? "แก้ไขประเภทงาน" : "เพิ่มประเภทงานใหม่" }}</h3>
             <form @submit.prevent="handleSubmit" class="space-y-4">
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">ชื่อประเภทงาน *</label>
-                <input v-model="form.workTypeName" required type="text" placeholder="เช่น Realistic, Anime, Watercolor" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                <label for="workTypeName" class="block text-xs font-medium text-gray-500 mb-1">ชื่อประเภทงาน *</label>
+                <input id="workTypeName" v-model="form.workTypeName" required type="text" placeholder="เช่น Realistic, Anime, Watercolor" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">คำอธิบาย</label>
-                <textarea v-model="form.workTypeDescription" rows="3" placeholder="คำอธิบายสั้นๆ สำหรับแสดงให้ลูกค้าเห็น..." class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 resize-none" />
+                <label for="workTypeDescription" class="block text-xs font-medium text-gray-500 mb-1">คำอธิบาย</label>
+                <textarea id="workTypeDescription" v-model="form.workTypeDescription" rows="3" placeholder="คำอธิบายสั้นๆ สำหรับแสดงให้ลูกค้าเห็น..." class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 resize-none" />
               </div>
               <div class="flex items-center gap-2">
                 <input v-model="form.workTypeIsActive" type="checkbox" :true-value="1" :false-value="0" id="wt-active" class="rounded" />

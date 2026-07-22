@@ -79,12 +79,8 @@ exports.create = async (orderData, sourceImageUrls = []) => {
 };
 
 // 2. Find all orders with filters
-exports.findAll = async ({ customerId, editorId, status }) => {
-  let sql = `
-    SELECT o.*, 
-           u.userFirstName AS customerFirstName, u.userLastName AS customerLastName,
-           e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
-           p.packageName, wt.workTypeName
+exports.findAll = async ({ customerId, editorId, status, page = 1, limit = 10 }) => {
+  let baseQuery = `
     FROM orders o
     JOIN users u ON o.customerId = u.userId
     LEFT JOIN users e ON o.editorId = e.userId
@@ -95,24 +91,45 @@ exports.findAll = async ({ customerId, editorId, status }) => {
   const params = [];
 
   if (customerId) {
-    sql += " AND o.customerId = ?";
+    baseQuery += " AND o.customerId = ?";
     params.push(customerId);
   }
 
   if (editorId) {
-    sql += " AND o.editorId = ?";
+    baseQuery += " AND o.editorId = ?";
     params.push(editorId);
   }
 
   if (status) {
-    sql += " AND o.orderStatus = ?";
+    baseQuery += " AND o.orderStatus = ?";
     params.push(status);
   }
 
-  sql += " ORDER BY o.orderCreatedAt DESC";
+  // Count total records
+  const countSql = `SELECT COUNT(*) as total ${baseQuery}`;
+  const [[countResult]] = await pool.query(countSql, params);
+  const total = countResult.total;
 
-  const [rows] = await pool.query(sql, params);
-  return rows;
+  // Fetch paginated data
+  const offset = (page - 1) * limit;
+  const sql = `
+    SELECT o.*, 
+           u.userFirstName AS customerFirstName, u.userLastName AS customerLastName,
+           e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
+           p.packageName, wt.workTypeName
+    ${baseQuery}
+    ORDER BY o.orderCreatedAt DESC
+    LIMIT ? OFFSET ?
+  `;
+  const [rows] = await pool.query(sql, [...params, limit, offset]);
+
+  return {
+    data: rows,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit)
+  };
 };
 
 // 3. Find single order details

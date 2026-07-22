@@ -7,6 +7,7 @@ defineProps<{
   cancelLabel?: string
   danger?: boolean
   loading?: boolean
+  error?: string
 }>()
 
 const emit = defineEmits<{
@@ -72,6 +73,10 @@ const emit = defineEmits<{
             <p class="text-sm text-gray-500">
               {{ message ?? 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?' }}
             </p>
+
+            <div v-if="error" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p class="text-xs text-red-600">{{ error }}</p>
+            </div>
 
             <!-- Actions -->
             <div class="mt-6 flex gap-2 justify-end">

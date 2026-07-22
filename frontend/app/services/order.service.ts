@@ -7,6 +7,7 @@ import type {
   OrderDetail,
   OrderStatus,
 } from "../types/order.types"
+import type { PaginatedResponse } from "../types/pagination.types"
 
 export const orderService = {
   /**
@@ -42,9 +43,12 @@ export const orderService = {
   /**
    * ดึงรายการออเดอร์ของตนเอง
    */
-  async getMyOrders(): Promise<OrderSummary[]> {
+  async getMyOrders(page: number = 1, limit: number = 10, status?: string): Promise<PaginatedResponse<OrderSummary>> {
     const { apiFetch } = useApi()
-    return await apiFetch<OrderSummary[]>("/orders")
+    const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (status) query.append("status", status);
+    
+    return await apiFetch<PaginatedResponse<OrderSummary>>(`/orders?${query.toString()}`)
   },
 
   /**

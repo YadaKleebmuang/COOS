@@ -236,7 +236,7 @@ const formatDate = (dateStr?: string) => {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-4xl mx-auto py-8">
       
       <!-- Nav Header -->
       <div class="mb-8 flex items-center justify-between">

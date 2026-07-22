@@ -97,14 +97,14 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 
 | ID | Severity | Category | ชื่อปัญหา |
 |----|----------|----------|---------|
-| ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend |
-| ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client |
-| ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages |
-| ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast |
-| ISSUE-FE-005 | Medium | Code Quality | create.vue มี 851 บรรทัด — ควรแยก Step Components |
-| ISSUE-FE-006 | Medium | Type Safety | AuthResponse.user typed เป็น any |
+| ISSUE-FE-001 | High | Security | customer/editor middleware ไม่ verify กับ Backend (✅ FIXED) |
+| ISSUE-FE-002 | High | Security | httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client (✅ FIXED) |
+| ISSUE-FE-003 | High | Functionality | ไม่มี Pagination ใน List pages (✅ FIXED)|
+| ISSUE-FE-004 | Medium | UX/UI | alert() ใช้ใน admin/payments.vue แทน Toast (✅ FIXED) |
+| ISSUE-FE-005 | Medium | Code Quality | create.vue มี 851 บรรทัด — ควรแยก Step Components (✅ FIXED) |
+| ISSUE-FE-006 | Medium | Type Safety | AuthResponse.user typed เป็น any (✅ FIXED) |
 | ISSUE-FE-007 | Medium | UX | Upload error ไม่ reset เมื่อเปลี่ยนไฟล์ใหม่ |
-| ISSUE-FE-008 | Medium | Accessibility | ขาด aria-label, role, for attribute ในหลายส่วน |
+| ISSUE-FE-008 | Medium | Accessibility | ขาด aria-label, role, for attribute ในหลายส่วน (✅ FIXED) |
 | ISSUE-FE-009 | Low | Performance | ไม่ใช้ NuxtImg ในหลายที่ |
 | ISSUE-FE-010 | Low | Quality | axios และ better-sqlite3 ใน dependencies แต่ไม่ได้ใช้ |
 | ISSUE-FE-011 | Low | UX | ไม่มี Confirmation dialog เมื่อลบข้อมูลในบางหน้า |
@@ -114,8 +114,9 @@ Feature-based layout ที่ชัดเจน แยก Service layer ออ�
 
 ## 7. Detailed Issues
 
-### ISSUE-FE-001: Customer/Editor Middleware ไม่ Verify กับ Backend
+### ISSUE-FE-001: Customer/Editor Middleware ไม่ Verify กับ Backend (✅ FIXED)
 
+- **Status:** ✅ ดำเนินการสำเร็จแล้ว
 - **Severity:** High
 - **Category:** Security / Authorization
 - **File/Module:** frontend/app/middleware/customer.ts, editor.ts
@@ -145,8 +146,9 @@ export default defineNuxtRouteMiddleware(() => {
 
 ---
 
-### ISSUE-FE-002: httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client
+### ISSUE-FE-002: httpOnly: true ใน useCookie ไม่มีผลฝั่ง Client (✅ FIXED)
 
+- **Status:** ✅ ดำเนินการสำเร็จแล้ว
 - **Severity:** High
 - **Category:** Security
 - **File/Module:** frontend/app/services/auth.service.ts
@@ -171,7 +173,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-003: ไม่มี Pagination ใน List Pages
+### ISSUE-FE-003: ไม่มี Pagination ใน List Pages (✅ FIXED)
 
 - **Severity:** High
 - **Category:** Functionality / Performance
@@ -186,7 +188,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-004: alert() ใช้ใน admin/payments.vue แทน Toast
+### ISSUE-FE-004: alert() ใช้ใน admin/payments.vue แทน Toast (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** UX/UI
@@ -200,7 +202,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-005: create.vue มี 851 บรรทัด — ควรแยก Step Components
+### ISSUE-FE-005: create.vue มี 851 บรรทัด — ควรแยก Step Components (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** Code Quality / Maintainability
@@ -213,7 +215,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-006: AuthResponse.user typed เป็น any
+### ISSUE-FE-006: AuthResponse.user typed เป็น any (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** Type Safety
@@ -237,7 +239,7 @@ token.value = data.token;
 
 ---
 
-### ISSUE-FE-008: ขาด aria attributes ในหลายส่วน
+### ISSUE-FE-008: ขาด aria attributes ในหลายส่วน (✅ FIXED)
 
 - **Severity:** Medium
 - **Category:** Accessibility (A11y)

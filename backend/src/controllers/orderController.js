@@ -124,6 +124,9 @@ exports.getAll = async (req, res, next) => {
     const { userId, userRole } = req.session;
     const { status } = req.query;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
     let customerId = null;
     let editorId = null;
 
@@ -138,8 +141,8 @@ exports.getAll = async (req, res, next) => {
       if (req.query.editorId) editorId = req.query.editorId;
     }
 
-    const orders = await OrderModel.findAll({ customerId, editorId, status });
-    res.status(200).json(orders);
+    const result = await OrderModel.findAll({ customerId, editorId, status, page, limit });
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

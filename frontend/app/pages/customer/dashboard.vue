@@ -8,7 +8,7 @@ definePageMeta({
   middleware: ["auth", "customer"]
 })
 
-const token = useCookie<string | null>("token")
+const token = useCookie<string | null>("token") 
 const orders = ref<OrderSummary[]>([])
 const loading = ref(true)
 const error = ref("")
@@ -18,7 +18,7 @@ const fetchDashboardData = async () => {
   error.value = ""
   try {
     const res = await orderService.getMyOrders()
-    orders.value = res
+    orders.value = res.data
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถดึงข้อมูลแดชบอร์ดได้"
   } finally {
@@ -65,11 +65,10 @@ const formatDate = (dateStr: string) => {
 </script>
 
 <template>
-  <div class="space-y-8 max-w-5xl mx-auto">
+  <div class="space-y-8 max-w-4xl mx-auto py-8">
     <!-- Welcome Header Card -->
     <div class="rounded-2xl p-6 sm:p-8 text-black shadow-sm relative overflow-hidden">
       <div class="relative z-10 space-y-3">
-        <span class="bg-gray-800 text-gray-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">พื้นที่บริการลูกค้า</span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">ยินดีต้อนรับสู่ COOS Studio</h1>
         <p class="text-gray-500 text-sm sm:text-base max-w-xl">
           จัดการใบสั่งงานแต่งภาพ ตรวจสอบสถานะการตกแต่งภาพด้วยเทคโนโลยี AI และดาวน์โหลดผลงานสุดท้ายของคุณได้ที่นี่

@@ -185,46 +185,46 @@ const breadcrumb = [
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ชื่อจริง</label>
-            <input v-model="profileForm.userFirstName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="userFirstName" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ชื่อจริง</label>
+            <input id="userFirstName" v-model="profileForm.userFirstName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">นามสกุล</label>
-            <input v-model="profileForm.userLastName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="userLastName" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">นามสกุล</label>
+            <input id="userLastName" v-model="profileForm.userLastName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">อีเมล (ไม่สามารถเปลี่ยนได้)</label>
-          <input :value="profileForm.userEmail" disabled type="email" class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed" />
+          <label for="userEmail" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">อีเมล (ไม่สามารถเปลี่ยนได้)</label>
+          <input id="userEmail" :value="profileForm.userEmail" disabled type="email" class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์โทรศัพท์</label>
-            <input v-model="profileForm.userPhone" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="userPhone" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์โทรศัพท์</label>
+            <input id="userPhone" v-model="profileForm.userPhone" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์ติดต่อด่วน (Tel)</label>
-            <input v-model="profileForm.tel" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="tel" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์ติดต่อด่วน (Tel)</label>
+            <input id="tel" v-model="profileForm.tel" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
-          <textarea v-model="profileForm.userAddress" rows="2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition resize-none" />
+          <label for="userAddress" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
+          <textarea id="userAddress" v-model="profileForm.userAddress" rows="2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition resize-none" />
         </div>
 
         <h3 class="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3 pt-4">ช่องทางโซเชียลสำหรับการส่งงาน</h3>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Facebook Profile</label>
-            <input v-model="profileForm.facebook" type="text" placeholder="ชื่อ Facebook" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="facebook" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Facebook Profile</label>
+            <input id="facebook" v-model="profileForm.facebook" type="text" placeholder="ชื่อ Facebook" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Line ID</label>
-            <input v-model="profileForm.line" type="text" placeholder="ไลน์ไอดี" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
+            <label for="line" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Line ID</label>
+            <input id="line" v-model="profileForm.line" type="text" placeholder="ไลน์ไอดี" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
           </div>
         </div>
 

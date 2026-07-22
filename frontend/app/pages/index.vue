@@ -94,7 +94,7 @@ onMounted(() => {
     </section>
 
     <!-- Latest Works Section -->
-    <section class="py-24 bg-gray-50/50">
+    <section class="py-2 bg-gray-50/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-end mb-12">
           <div class="text-left">
@@ -127,9 +127,9 @@ onMounted(() => {
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="py-24 bg-white">
+    <section id="how-it-works" class="py-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-left mb-16 border-b border-gray-100 pb-6">
+        <div class="text-left mb-16 border-b border-gray-100 pb-2">
           <h3 class="text-xl font-bold text-gray-900 mb-1">ขั้นตอนการใช้งาน</h3>
           <p class="text-sm text-gray-500">4 ขั้นตอนง่ายๆ จากไอเดียถึงผลงาน</p>
         </div>
@@ -176,9 +176,9 @@ onMounted(() => {
     </section>
 
     <!-- Packages Section -->
-    <section id="packages" class="py-24 bg-white">
+    <section id="packages" class="py-2 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-left mb-16 border-b border-gray-100 pb-6">
+        <div class="text-left mb-16 border-b border-gray-100 pb-2">
           <h3 class="text-xl font-bold text-gray-900 mb-1">แพ็กเกจบริการ</h3>
           <p class="text-sm text-gray-500">เลือกแพ็กเกจที่เหมาะสมกับงานของคุณ</p>
         </div>
