@@ -167,8 +167,6 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       </div>
       <div class="flex gap-2">
         <AdminActionButton variant="secondary" size="sm" :loading="loading" @click="fetchGallery">รีเฟรช</AdminActionButton>
-        <!-- [Fix] เพิ่ม @click handler -->
-        <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="openUploadModal">เพิ่มรูปภาพ</AdminActionButton>
       </div>
     </div>
 

@@ -85,11 +85,63 @@ const sourceImages = computed(() => {
   return order.value.images.filter((img) => img.imageType === "source")
 })
 
+const aiGeneratedImages = computed(() => {
+  if (!order.value?.images) return []
+  return order.value.images.filter((img) => img.imageType === "ai_generated")
+})
+
 const finalImages = computed(() => {
   if (!order.value?.images) return []
-  // ดึงภาพที่เป็น ai_generated และ selected_final
-  return order.value.images.filter((img) => img.imageType === "ai_generated" || img.imageType === "selected_final")
+  // ดึงภาพที่เป็น selected_final (ดึงแค่ที่เลือกแล้ว)
+  return order.value.images.filter((img) => img.imageType === "selected_final")
 })
+
+// ── Photo Selection State ──
+const selectedFinalImageIds = ref<number[]>([])
+const submittingSelection = ref(false)
+const submitSelectionError = ref("")
+
+const toggleImageSelection = (imageId: number) => {
+  if (!order.value) return
+  const limit = order.value.packageImageCount
+  
+  const index = selectedFinalImageIds.value.indexOf(imageId)
+  if (index > -1) {
+    selectedFinalImageIds.value.splice(index, 1)
+  } else {
+    if (selectedFinalImageIds.value.length < limit) {
+      selectedFinalImageIds.value.push(imageId)
+    } else {
+      alert(`คุณสามารถเลือกรูปภาพได้สูงสุด ${limit} ภาพตามแพ็กเกจ`)
+    }
+  }
+}
+
+const submitPhotoSelection = async () => {
+  if (!order.value || submittingSelection.value) return
+  
+  if (selectedFinalImageIds.value.length === 0) {
+    submitSelectionError.value = "กรุณาเลือกรูปภาพอย่างน้อย 1 ภาพ"
+    return
+  }
+  
+  if (!confirm(`ยืนยันการเลือกรูปภาพจำนวน ${selectedFinalImageIds.value.length} ภาพ ใช่หรือไม่? (เมื่อยืนยันแล้วจะไม่สามารถแก้ไขได้)`)) {
+    return
+  }
+
+  submittingSelection.value = true
+  submitSelectionError.value = ""
+
+  try {
+    await orderService.selectFinalImages(order.value.orderId, selectedFinalImageIds.value)
+    selectedFinalImageIds.value = []
+    await fetchOrderDetails()
+  } catch (err: any) {
+    submitSelectionError.value = err?.message || "บันทึกการเลือกรูปภาพไม่สำเร็จ"
+  } finally {
+    submittingSelection.value = false
+  }
+}
 
 // ── Status Badges Color Map ──
 const getStatusBadgeClass = (status: OrderStatus) => {
@@ -366,14 +418,14 @@ const formatDate = (dateStr?: string) => {
               <div
                 class="absolute -left-10 top-0.5 w-8 h-8 rounded-full flex items-center justify-center border-4 text-xs font-extrabold shadow-sm transition-all duration-300"
                 :class="
-                  idx < currentStepIndex
+                  (idx < currentStepIndex || (order.orderStatus === 'completed' && idx === currentStepIndex))
                     ? 'bg-emerald-600 border-emerald-100 text-white'
                     : idx === currentStepIndex
                       ? 'bg-gray-900 border-gray-200 text-white animate-pulse'
                       : 'bg-white border-gray-200 text-gray-400'
                 "
               >
-                <svg v-if="idx < currentStepIndex" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-if="idx < currentStepIndex || (order.orderStatus === 'completed' && idx === currentStepIndex)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                 </svg>
                 <span v-else>{{ idx + 1 }}</span>
@@ -424,6 +476,79 @@ const formatDate = (dateStr?: string) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ==================== ส่วนที่ 2.5: Photo Selection (รอคัดเลือกภาพ) ==================== -->
+        <div
+          v-if="order.orderStatus === 'waiting_selection' && aiGeneratedImages.length > 0"
+          class="bg-white rounded-3xl shadow-sm border-2 border-pink-100 p-6 sm:p-8"
+        >
+          <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">✨ คัดเลือกรูปภาพที่ชื่นชอบ</h3>
+              <p class="text-sm text-gray-500 mt-1">
+                คลิกเลือกรูปภาพที่คุณต้องการรับเป็นไฟล์จริง แพ็กเกจของคุณสามารถเลือกได้สูงสุด <strong class="text-pink-600">{{ order.packageImageCount }} ภาพ</strong>
+              </p>
+            </div>
+            <div class="text-right flex flex-col items-end">
+              <span class="text-sm text-gray-500 font-semibold mb-1">เลือกแล้ว</span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-black" :class="selectedFinalImageIds.length === order.packageImageCount ? 'text-green-600' : 'text-pink-600'">
+                  {{ selectedFinalImageIds.length }}
+                </span>
+                <span class="text-lg text-gray-400 font-bold">/ {{ order.packageImageCount }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            <div
+              v-for="img in aiGeneratedImages"
+              :key="img.orderImageId"
+              @click="toggleImageSelection(img.orderImageId)"
+              class="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer border-4 transition-all duration-200 group"
+              :class="selectedFinalImageIds.includes(img.orderImageId) ? 'border-pink-500 shadow-md transform scale-[1.02]' : 'border-transparent hover:border-gray-300'"
+            >
+              <img :src="img.imageUrl" class="w-full h-full object-cover" />
+              
+              <!-- Selected Overlay -->
+              <div
+                v-if="selectedFinalImageIds.includes(img.orderImageId)"
+                class="absolute inset-0 bg-pink-500/20 flex items-center justify-center"
+              >
+                <div class="bg-pink-500 text-white rounded-full p-2 shadow-lg transform scale-110">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Hover Zoom -->
+              <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-end">
+                <span class="text-[10px] text-white/90 truncate">{{ img.aiEngine || 'AI Gen' }}</span>
+                <a :href="img.imageUrl" target="_blank" @click.stop class="text-white bg-black/40 hover:bg-black/70 rounded p-1 backdrop-blur-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+            <p v-if="submitSelectionError" class="text-sm text-red-600 font-bold">⚠️ {{ submitSelectionError }}</p>
+            <p v-else class="text-xs text-gray-400">
+              *เมื่อกดยืนยันแล้ว จะไม่สามารถเปลี่ยนรูปได้ และระบบจะพาท่านไปยังขั้นตอนชำระเงินส่วนที่เหลือ
+            </p>
+            
+            <button
+              @click="submitPhotoSelection"
+              :disabled="selectedFinalImageIds.length === 0 || submittingSelection"
+              class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+            >
+              <span v-if="submittingSelection" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              {{ submittingSelection ? "กำลังบันทึก..." : "ยืนยันการเลือกรูปภาพ" }}
+            </button>
           </div>
         </div>
 
