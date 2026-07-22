@@ -167,12 +167,13 @@ const changePassword = async () => {
 
   passwordSaving.value = true
   try {
-    await useApi("/users/me/password", {
+    await apiFetch("/users/me/password", {
       method: "PATCH",
-      body: {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         oldPassword: passwordForm.oldPassword,
         newPassword: passwordForm.newPassword,
-      }
+      })
     })
     passwordSuccess.value = "เปลี่ยนรหัสผ่านสำเร็จ"
     passwordForm.oldPassword = ""
