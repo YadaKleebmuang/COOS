@@ -12,6 +12,7 @@ const { validateMagicBytes } = require("../../middlewares/upload.middleware");
 // /me routes — ต้องอยู่ก่อน /:id เพื่อไม่ให้ "me" ถูกตีความเป็น id
 router.get("/me", controller.getMyProfile);
 router.patch("/me", uploadProfile.single("image"), validateMagicBytes, controller.updateMyProfile);
+router.patch("/me/password", controller.updateMyPassword);
 
 router.get("/", adminOnly, controller.getUsers);
 router.get("/:id", adminOnly, controller.getUserById);

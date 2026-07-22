@@ -181,31 +181,10 @@ exports.updateProfile = async (id, data) => {
 
   return result.affectedRows;
 };
-
-// บันทึก reset token + วันหมดอายุ
-exports.saveResetToken = async (email, token, expiry) => {
+// อัปเดตรหัสผ่าน
+exports.updatePassword = async (userId, hashedPassword) => {
   const [result] = await pool.query(
-    `UPDATE users SET userResetToken = ?, userResetTokenExpiry = ? WHERE userEmail = ?`,
-    [token, expiry, email]
-  );
-  return result.affectedRows;
-};
-
-// ค้นหา user จาก reset token ที่ยังไม่หมดอายุ
-exports.findByResetToken = async (token) => {
-  const [rows] = await pool.query(
-    `SELECT userId, userEmail, userFirstName, userLastName
-     FROM users
-     WHERE userResetToken = ? AND userResetTokenExpiry > NOW()`,
-    [token]
-  );
-  return rows[0];
-};
-
-// รีเซ็ตรหัสผ่าน + ลบ token
-exports.resetPassword = async (userId, hashedPassword) => {
-  const [result] = await pool.query(
-    `UPDATE users SET userPassword = ?, userResetToken = NULL, userResetTokenExpiry = NULL WHERE userId = ?`,
+    `UPDATE users SET userPassword = ? WHERE userId = ?`,
     [hashedPassword, userId]
   );
   return result.affectedRows;
