@@ -19,6 +19,13 @@ const loading = ref<boolean>(false)
 
 const auth = useAuth()
 
+const getSafeCustomerRedirect = (redirect: unknown) => {
+  if (typeof redirect !== 'string') return ''
+  if (!redirect.startsWith('/') || redirect.startsWith('//')) return ''
+  if (!redirect.startsWith('/customer')) return ''
+  return redirect
+}
+
 const getErrorMessage = (err: unknown, fallback: string) => {
   if (err instanceof Error && err.message) return err.message
   if (typeof err === 'object' && err !== null && 'message' in err) {
@@ -41,9 +48,9 @@ const login = async () => {
   try {
     const data = await auth.login(form.email, form.password)
     const userRole = data?.user?.userRole || 'customer'
-    const redirect = route.query.redirect as string
+    const redirect = getSafeCustomerRedirect(route.query.redirect)
 
-    if (redirect) {
+    if (redirect && userRole === 'customer') {
       await router.push(redirect)
     } else {
       if (userRole === 'admin') {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '~/composables/useApi'
 
@@ -12,9 +12,12 @@ type PublicUser = {
   userFirstName?: string
   userLastName?: string
   userEmail?: string
+  userProfileImage?: string
+  userRole?: string
 }
 
 const currentUser = ref<PublicUser | null>(null)
+const userRole = useCookie<string | null>('userRole')
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
 const activeSection = ref('home')
@@ -33,6 +36,18 @@ const checkAuth = async () => {
     }
   }
 }
+
+const isCustomer = computed(() => currentUser.value?.userRole === 'customer' || userRole.value === 'customer')
+
+const displayName = computed(() => {
+  const first = currentUser.value?.userFirstName || ''
+  const last = currentUser.value?.userLastName || ''
+  return `${first} ${last}`.trim() || currentUser.value?.userEmail || 'Customer'
+})
+
+const userInitial = computed(() => {
+  return currentUser.value?.userFirstName?.[0]?.toUpperCase() || 'C'
+})
 
 const toggleDropdown = (e: Event) => {
   e.stopPropagation()
@@ -180,29 +195,48 @@ onBeforeUnmount(() => {
       <!-- User / Auth Actions -->
       <div class="flex items-center gap-3">
         <template v-if="currentUser">
-          <div class="flex items-center gap-3">
+          <div
+            v-if="isCustomer"
+            class="flex items-center gap-2 sm:gap-3"
+          >
             <NuxtLink
-              to="/customer/orders/create"
-              class="hidden sm:flex coos-button-dark px-5 py-2.5"
+              to="/customer/orders"
+              class="hidden h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:inline-flex"
             >
-              เริ่มสั่งงาน
+              งานของฉัน
             </NuxtLink>
 
-            <!-- Greeting -->
-            <span class="text-sm font-medium text-neutral-500 hidden lg:inline">
-              สวัสดี, {{ currentUser.userFirstName }}
-            </span>
-
-            <!-- Avatar Dropdown -->
             <div class="relative">
               <button
-                class="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-bold text-neutral-800 shadow-sm transition-all duration-200 hover:border-black hover:bg-black hover:text-white"
+                class="flex h-11 items-center gap-2 rounded-full border border-black/[0.06] bg-white px-1.5 pr-3 text-sm font-semibold text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+                aria-label="เปิดเมนูบัญชีลูกค้า"
                 @click="toggleDropdown"
               >
-                {{ currentUser.userFirstName?.[0]?.toUpperCase() }}
+                <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
+                  <img
+                    v-if="currentUser.userProfileImage"
+                    :src="currentUser.userProfileImage"
+                    class="h-full w-full object-cover"
+                    alt=""
+                  >
+                  <span v-else>{{ userInitial }}</span>
+                </span>
+                <span class="hidden max-w-[118px] truncate sm:inline">{{ currentUser.userFirstName || 'Customer' }}</span>
+                <svg
+                  class="h-3.5 w-3.5 text-[#666666]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
 
-              <!-- Dropdown -->
               <Transition
                 enter-active-class="transition duration-150 ease-out"
                 enter-from-class="opacity-0 scale-95 translate-y-1"
@@ -213,28 +247,26 @@ onBeforeUnmount(() => {
               >
                 <div
                   v-if="dropdownOpen"
-                  class="absolute right-0 mt-3 w-56 origin-top-right rounded-2xl border border-black/5 bg-white py-2 shadow-[0_20px_50px_rgba(15,15,15,0.14)] z-50"
+                  class="fixed left-1/2 top-20 z-50 w-[calc(100vw-32px)] max-w-[320px] -translate-x-1/2 rounded-[14px] border border-black/[0.06] bg-white py-2 shadow-[0_16px_48px_rgba(0,0,0,0.08)] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-64 sm:max-w-none sm:translate-x-0 sm:origin-top-right"
                   @click.stop
                 >
-                  <!-- User Info Header -->
-                  <div class="px-4 py-3 border-b border-black/5">
-                    <p class="text-sm font-semibold text-neutral-950 truncate">
-                      {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
+                  <div class="border-b border-black/5 px-4 py-3">
+                    <p class="truncate text-sm font-semibold text-[#171717]">
+                      {{ displayName }}
                     </p>
-                    <p class="text-[11px] text-neutral-400 truncate">
+                    <p class="truncate text-[11px] text-[#929292]">
                       {{ currentUser.userEmail }}
                     </p>
                   </div>
 
-                  <!-- Links -->
                   <div class="py-1">
                     <NuxtLink
-                      to="/customer/orders"
-                      class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      to="/customer/dashboard"
+                      class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F3F3F1] hover:text-[#171717] focus:bg-[#F3F3F1] focus:text-[#171717] focus:outline-none"
                       @click="closeDropdown"
                     >
                       <svg
-                        class="w-4 h-4 text-gray-400"
+                        class="h-4 w-4 text-[#929292]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -243,18 +275,18 @@ onBeforeUnmount(() => {
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="1.5"
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          d="M3 12l9-9 9 9M5 10v10h14V10"
                         />
                       </svg>
-                      ประวัติออเดอร์
+                      แดชบอร์ด
                     </NuxtLink>
                     <NuxtLink
                       to="/customer/profile"
-                      class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F3F3F1] hover:text-[#171717] focus:bg-[#F3F3F1] focus:text-[#171717] focus:outline-none"
                       @click="closeDropdown"
                     >
                       <svg
-                        class="w-4 h-4 text-gray-400"
+                        class="h-4 w-4 text-[#929292]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -266,18 +298,17 @@ onBeforeUnmount(() => {
                           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                         />
                       </svg>
-                      แก้ไขโปรไฟล์
+                      โปรไฟล์
                     </NuxtLink>
                   </div>
 
-                  <!-- Logout -->
-                  <div class="border-t border-gray-100 pt-1">
+                  <div class="border-t border-black/[0.06] pt-1">
                     <button
-                      class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-red-600 transition-colors"
+                      class="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#FDEEEE] hover:text-[#B93B3B] focus:bg-[#FDEEEE] focus:text-[#B93B3B] focus:outline-none"
                       @click="logout"
                     >
                       <svg
-                        class="w-4 h-4"
+                        class="h-4 w-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -289,6 +320,73 @@ onBeforeUnmount(() => {
                           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                         />
                       </svg>
+                      ออกจากระบบ
+                    </button>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="flex items-center gap-3"
+          >
+            <span class="hidden text-sm font-medium text-neutral-500 lg:inline">
+              สวัสดี, {{ currentUser.userFirstName }}
+            </span>
+            <div class="relative">
+              <button
+                class="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-bold text-neutral-800 shadow-sm transition-all duration-200 hover:border-black hover:bg-black hover:text-white"
+                @click="toggleDropdown"
+              >
+                {{ currentUser.userFirstName?.[0]?.toUpperCase() }}
+              </button>
+
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 scale-95 translate-y-1"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 translate-y-1"
+              >
+                <div
+                  v-if="dropdownOpen"
+                  class="absolute right-0 z-50 mt-3 w-56 origin-top-right rounded-2xl border border-black/5 bg-white py-2 shadow-[0_20px_50px_rgba(15,15,15,0.14)]"
+                  @click.stop
+                >
+                  <div class="border-b border-black/5 px-4 py-3">
+                    <p class="truncate text-sm font-semibold text-neutral-950">
+                      {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
+                    </p>
+                    <p class="truncate text-[11px] text-neutral-400">
+                      {{ currentUser.userEmail }}
+                    </p>
+                  </div>
+
+                  <div class="py-1">
+                    <NuxtLink
+                      to="/customer/orders"
+                      class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                      @click="closeDropdown"
+                    >
+                      ประวัติออเดอร์
+                    </NuxtLink>
+                    <NuxtLink
+                      to="/customer/profile"
+                      class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                      @click="closeDropdown"
+                    >
+                      แก้ไขโปรไฟล์
+                    </NuxtLink>
+                  </div>
+
+                  <div class="border-t border-gray-100 pt-1">
+                    <button
+                      class="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-red-600"
+                      @click="logout"
+                    >
                       ออกจากระบบ
                     </button>
                   </div>
@@ -311,7 +409,7 @@ onBeforeUnmount(() => {
               to="/register"
               class="coos-button-dark px-5 py-2.5"
             >
-              เข้าสู่ระบบ
+              สมัครสมาชิก
             </NuxtLink>
           </div>
         </template>
@@ -410,6 +508,15 @@ onBeforeUnmount(() => {
           <div class="pt-4 mt-2 border-t border-gray-100 flex flex-col gap-2">
             <template v-if="currentUser">
               <NuxtLink
+                v-if="isCustomer"
+                to="/customer/orders"
+                class="coos-button-dark w-full py-2.5"
+                @click="mobileMenuOpen = false"
+              >
+                งานของฉัน
+              </NuxtLink>
+              <NuxtLink
+                v-else
                 to="/customer/orders/create"
                 class="coos-button-dark w-full py-2.5"
                 @click="mobileMenuOpen = false"

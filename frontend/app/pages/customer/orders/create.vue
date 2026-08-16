@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue"
-import { orderService } from "~/services/order.service"
+import { ref, reactive, computed, onMounted } from 'vue'
+import { orderService } from '~/services/order.service'
 import type {
   WorkType,
   Package,
   OrderFormPayload,
-  OrderCreateResponse,
-} from "~/types/order.types"
-import StepWorkType from "~/components/order/StepWorkType.vue"
-import StepPackage from "~/components/order/StepPackage.vue"
-import StepDetails from "~/components/order/StepDetails.vue"
-import StepConfirm from "~/components/order/StepConfirm.vue"
-import StepSuccess from "~/components/order/StepSuccess.vue"
+  OrderCreateResponse
+} from '~/types/order.types'
+import StepWorkType from '~/components/order/StepWorkType.vue'
+import StepPackage from '~/components/order/StepPackage.vue'
+import StepDetails from '~/components/order/StepDetails.vue'
+import StepConfirm from '~/components/order/StepConfirm.vue'
+import StepSuccess from '~/components/order/StepSuccess.vue'
 
 definePageMeta({
-  layout: "customer",
-  middleware: ["auth", "customer"],
+  layout: 'customer',
+  middleware: ['auth', 'customer']
 })
 
-const token = useCookie<string | null>("token")
+const token = useCookie<string | null>('token')
 const router = useRouter()
 const route = useRoute()
 
 // ── Stepper ──
 const currentStep = ref(1)
 const totalSteps = 4
-const stepLabels = ["ประเภทงาน", "แพ็กเกจ", "รายละเอียด", "ยืนยัน"]
+const stepLabels = ['ประเภทงาน', 'แพ็กเกจ', 'รายละเอียด', 'ยืนยัน']
 
 // ── Data from API ──
 const workTypes = ref<WorkType[]>([])
 const packages = ref<Package[]>([])
 const loadingData = ref(true)
-const dataError = ref("")
+const dataError = ref('')
 
 // ── Selected state ──
 const selectedWorkTypeId = ref<number | null>(null)
@@ -41,28 +41,31 @@ const acceptedDisclaimer = ref(false)
 
 // ── Order form ──
 const form = reactive({
-  orderStyle: "",
-  orderColorTone: "",
-  orderComposition: "",
-  orderNote: "",
-  orderRequiredDate: "",
+  orderStyle: '',
+  orderColorTone: '',
+  orderComposition: '',
+  orderNote: '',
+  orderRequiredDate: '',
   orderIsUrgent: false,
-  orderIsGalleryAllowed: false,
+  orderIsGalleryAllowed: false
 })
 
 // ── Submit state ──
 const submitting = ref(false)
-const submitError = ref("")
+const submitError = ref('')
 const submitSuccess = ref(false)
 const createdOrder = ref<OrderCreateResponse | null>(null)
 
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback
+
 // ── Computed helpers ──
 const selectedWorkType = computed(() =>
-  workTypes.value.find((wt) => wt.workTypeId === selectedWorkTypeId.value)
+  workTypes.value.find(wt => wt.workTypeId === selectedWorkTypeId.value)
 )
 
 const selectedPackage = computed(() =>
-  packages.value.find((p) => p.packageId === selectedPackageId.value)
+  packages.value.find(p => p.packageId === selectedPackageId.value)
 )
 
 const pricePreview = computed(() => {
@@ -87,7 +90,7 @@ const canGoNext = computed(() => {
     case 2:
       return selectedPackageId.value !== null
     case 3:
-      return form.orderRequiredDate !== ""
+      return form.orderRequiredDate !== ''
     default:
       return true
   }
@@ -118,12 +121,12 @@ const submitOrder = async () => {
   if (!selectedPackageId.value || !selectedWorkTypeId.value) return
 
   if (!acceptedDisclaimer.value) {
-    submitError.value = "กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อตกลงก่อนกดยืนยัน"
+    submitError.value = 'กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อตกลงก่อนกดยืนยัน'
     return
   }
 
   submitting.value = true
-  submitError.value = ""
+  submitError.value = ''
 
   try {
     const payload: OrderFormPayload = {
@@ -131,7 +134,7 @@ const submitOrder = async () => {
       workTypeId: selectedWorkTypeId.value,
       orderRequiredDate: form.orderRequiredDate,
       orderIsUrgent: form.orderIsUrgent,
-      orderIsGalleryAllowed: form.orderIsGalleryAllowed,
+      orderIsGalleryAllowed: form.orderIsGalleryAllowed
     }
 
     if (form.orderStyle.trim()) payload.orderStyle = form.orderStyle.trim()
@@ -143,8 +146,8 @@ const submitOrder = async () => {
     const result = await orderService.createOrder(payload)
     createdOrder.value = result
     submitSuccess.value = true
-  } catch (err: any) {
-    submitError.value = err?.message || "เกิดข้อผิดพลาดในการสร้างคำสั่งงาน"
+  } catch (err: unknown) {
+    submitError.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการสร้างคำสั่งงาน')
   } finally {
     submitting.value = false
   }
@@ -153,17 +156,17 @@ const submitOrder = async () => {
 // ── Fetch data on mount ──
 onMounted(async () => {
   if (!token.value) {
-    router.push("/login")
+    router.push('/login')
     return
   }
 
   loadingData.value = true
-  dataError.value = ""
+  dataError.value = ''
 
   try {
     const [wt, pkg] = await Promise.all([
       orderService.getWorkTypes(),
-      orderService.getPackages(),
+      orderService.getPackages()
     ])
     workTypes.value = wt
     packages.value = pkg
@@ -180,8 +183,8 @@ onMounted(async () => {
     } else if (selectedWorkTypeId.value) {
       currentStep.value = 2
     }
-  } catch (err: any) {
-    dataError.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
+  } catch (err: unknown) {
+    dataError.value = getErrorMessage(err, 'ไม่สามารถโหลดข้อมูลได้')
   } finally {
     loadingData.value = false
   }
@@ -189,146 +192,220 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto py-8">
+  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
     <!-- Header -->
-    <div class="mb-8 text-center">
-
-      <h1 class="text-2xl font-bold text-gray-900">สั่งทำภาพ</h1>
-      <p class="text-gray-500 text-sm mt-1">กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล</p>
+    <div class="mb-6 text-center">
+      <p class="mb-3 text-xs font-medium uppercase tracking-[0.28em] text-[#666666]">
+        CREATE ORDER
+      </p>
+      <h1 class="text-[30px] font-semibold leading-[1.3] text-[#171717] sm:text-[34px]">
+        สั่งทำภาพ
+      </h1>
+      <p class="mt-2 text-sm leading-[1.6] text-[#666666]">
+        กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล
+      </p>
     </div>
 
     <!-- Success State -->
-    <StepSuccess v-if="submitSuccess && createdOrder" :createdOrder="createdOrder" />
+    <StepSuccess
+      v-if="submitSuccess && createdOrder"
+      :created-order="createdOrder"
+    />
 
     <!-- Loading State -->
-    <div v-else-if="loadingData" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-      <div class="animate-spin w-8 h-8 border-2 border-slate-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
-      <p class="text-gray-500 font-medium text-sm">กำลังโหลดข้อมูล...</p>
+    <div
+      v-else-if="loadingData"
+      class="rounded-[24px] border border-black/[0.06] bg-white p-12 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+    >
+      <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
+      <p class="text-sm font-medium text-[#666666]">
+        กำลังโหลดข้อมูล...
+      </p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="dataError" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center">
-      <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div
+      v-else-if="dataError"
+      class="rounded-[24px] border border-[#FDEEEE] bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+    >
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FDEEEE]">
+        <svg
+          class="h-6 w-6 text-[#B93B3B]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        ><path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        /></svg>
       </div>
-      <p class="text-red-600 font-medium mb-1">เกิดข้อผิดพลาด</p>
-      <p class="text-gray-500 text-sm">{{ dataError }}</p>
+      <p class="mb-1 font-semibold text-[#B93B3B]">
+        เกิดข้อผิดพลาด
+      </p>
+      <p class="text-sm text-[#666666]">
+        {{ dataError }}
+      </p>
     </div>
 
     <!-- Form Wizard -->
     <div v-else>
       <!-- Stepper Navbar -->
-      <div class="flex items-center justify-center mb-8">
-        <template v-for="(label, idx) in stepLabels" :key="idx">
-          <button
-            @click="goToStep(idx + 1)"
-            class="flex items-center gap-2 transition-all duration-200"
-            :class="idx + 1 <= currentStep ? 'cursor-pointer' : 'cursor-default'"
+      <div class="mb-6 overflow-x-auto rounded-[20px] border border-black/[0.06] bg-white p-4 shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
+        <div class="flex min-w-max items-center justify-center">
+          <template
+            v-for="(label, idx) in stepLabels"
+            :key="idx"
           >
-            <div
-              class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
-              :class="
-                idx + 1 < currentStep
-                  ? 'bg-gray-900 text-white'
-                  : idx + 1 === currentStep
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-slate-100 text-gray-400'
-              "
+            <button
+              class="flex items-center gap-2 whitespace-nowrap rounded-xl px-1 py-1 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+              :class="idx + 1 <= currentStep ? 'cursor-pointer' : 'cursor-default'"
+              :aria-current="idx + 1 === currentStep ? 'step' : undefined"
+              @click="goToStep(idx + 1)"
             >
-              <svg v-if="idx + 1 < currentStep" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-              <span v-else>{{ idx + 1 }}</span>
-            </div>
-            <span
-              class="text-sm font-medium hidden sm:inline transition-colors duration-200"
-              :class="idx + 1 <= currentStep ? 'text-gray-900' : 'text-gray-400'"
-            >{{ label }}</span>
-          </button>
+              <div
+                class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition duration-200"
+                :class="
+                  idx + 1 < currentStep
+                    ? 'border-[#267A48] bg-[#EDF8F1] text-[#267A48]'
+                    : idx + 1 === currentStep
+                      ? 'border-[#171717] bg-[#171717] text-white'
+                      : 'border-black/[0.06] bg-[#F3F3F1] text-[#929292]'
+                "
+              >
+                <svg
+                  v-if="idx + 1 < currentStep"
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="3"
+                  d="M5 13l4 4L19 7"
+                /></svg>
+                <span v-else>{{ idx + 1 }}</span>
+              </div>
+              <span
+                class="hidden text-sm font-semibold transition-colors duration-200 sm:inline"
+                :class="idx + 1 <= currentStep ? 'text-[#171717]' : 'text-[#929292]'"
+              >{{ label }}</span>
+            </button>
 
-          <!-- Connector line -->
-          <div
-            v-if="idx < stepLabels.length - 1"
-            class="w-8 sm:w-16 h-px mx-2 transition-all duration-300"
-            :class="idx + 1 < currentStep ? 'bg-gray-900' : 'bg-slate-200'"
-          />
-        </template>
+            <!-- Connector line -->
+            <div
+              v-if="idx < stepLabels.length - 1"
+              class="mx-2 h-px w-8 transition-all duration-300 sm:w-16"
+              :class="idx + 1 < currentStep ? 'bg-[#267A48]' : 'bg-black/[0.06]'"
+            />
+          </template>
+        </div>
       </div>
 
       <!-- Card container -->
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        
+      <div class="overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
         <StepWorkType
           v-show="currentStep === 1"
-          :workTypes="workTypes"
           v-model="selectedWorkTypeId"
+          :work-types="workTypes"
         />
 
         <StepPackage
           v-show="currentStep === 2"
-          :packages="packages"
           v-model="selectedPackageId"
+          :packages="packages"
         />
 
         <StepDetails
           v-show="currentStep === 3"
-          v-model="form"
           v-model:images="sourceImageUrls"
-          :selectedPackage="selectedPackage || null"
-          :pricePreview="pricePreview"
+          :model-value="form"
+          :selected-package="selectedPackage || null"
+          :price-preview="pricePreview"
+          @update:model-value="Object.assign(form, $event)"
         />
 
         <StepConfirm
           v-show="currentStep === 4"
-          :form="form"
-          :selectedWorkType="selectedWorkType"
-          :selectedPackage="selectedPackage"
-          :pricePreview="pricePreview"
           v-model="acceptedDisclaimer"
-          :submitError="submitError"
+          :form="form"
+          :selected-work-type="selectedWorkType"
+          :selected-package="selectedPackage"
+          :source-images="sourceImageUrls"
+          :price-preview="pricePreview"
+          :submit-error="submitError"
         />
 
         <!-- Navigation Buttons -->
-        <div class="px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex flex-col-reverse gap-3 border-t border-black/[0.06] bg-[#F3F3F1] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <button
             v-if="currentStep > 1"
+            class="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-[18px] text-sm font-semibold text-[#171717] transition hover:bg-[#EEEEEC] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
             @click="prevStep"
-            class="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 font-medium transition text-sm py-2"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            /></svg>
             ย้อนกลับ
           </button>
-          <div v-else class="w-10"></div> <!-- Placeholder to keep Next button on the right -->
+          <div
+            v-else
+            class="w-10"
+          /> <!-- Placeholder to keep Next button on the right -->
 
           <button
             v-if="currentStep < totalSteps"
-            @click="nextStep"
             :disabled="!canGoNext"
-            class="flex items-center gap-1.5 font-medium transition text-sm px-5 py-2 rounded-lg"
+            class="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl px-[18px] text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed"
             :class="
               canGoNext
-                ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-sm'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929]'
+                : 'bg-[#E6E6E3] text-[#929292]'
             "
+            @click="nextStep"
           >
             ถัดไป
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            /></svg>
           </button>
 
           <button
             v-else
-            @click="submitOrder"
             :disabled="submitting || !acceptedDisclaimer"
-            class="flex items-center gap-2 font-medium transition text-sm px-6 py-2.5 rounded-lg"
+            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed"
             :class="
               submitting || !acceptedDisclaimer
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                ? 'bg-[#E6E6E3] text-[#929292]'
+                : 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929]'
             "
+            @click="submitOrder"
           >
-            <span v-if="submitting" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+            <span
+              v-if="submitting"
+              class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+            />
             <span v-else>ยืนยันการสั่งทำภาพ</span>
           </button>
         </div>
-
       </div>
     </div>
   </div>
