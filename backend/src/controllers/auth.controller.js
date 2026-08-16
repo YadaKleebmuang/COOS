@@ -2,6 +2,7 @@ const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { getJwtSecret } = require("../config/env");
 
 // POST /auth/register
 exports.register = async (req, res, next) => {
@@ -57,7 +58,8 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     // รับค่าจาก body
-    const { userEmail, userPassword } = req.body;
+    const userEmail = req.body.userEmail || req.body.email;
+    const userPassword = req.body.userPassword || req.body.password;
 
     // ตรวจสอบข้อมูลที่จำเป็น (Validation)
     if (!userEmail || !userPassword) {
@@ -98,7 +100,7 @@ exports.login = async (req, res, next) => {
         userEmail: user.userEmail,
         userProfileImage: user.userProfileImage,
       },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       {
         expiresIn: process.env.JWT_EXPIRES_IN || "1d",
       },
@@ -121,4 +123,3 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
-
