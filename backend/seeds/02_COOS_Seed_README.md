@@ -16,6 +16,41 @@ test-only accounts, and local upload paths intended for repeatable QA.
 - Payment split: 30% deposit / 70% final
 - Order price: base + urgent - gallery discount
 
+## Seed data coverage
+
+The seed is designed for backend QA and frontend UI testing. It creates:
+
+- 16 test users: 2 admins, 4 editors, and 10 customers.
+- 24 test orders covering all 9 order statuses.
+- 27 payments covering `pending`, `approved`, and `rejected` states.
+- Active and inactive gallery records.
+- Order images for source uploads, generated outputs, and selected final images.
+- Policies, work types, packages, tags, and workflow logs for dashboard and table coverage.
+
+The records use fixed negative IDs so they are easy to identify and can be
+re-seeded without mixing with normal positive AUTO_INCREMENT data.
+
+## Image assets
+
+The seed references real local test assets under these folders:
+
+- `backend/uploads/profiles/*.png`
+- `backend/uploads/gallery/*.png`
+- `backend/uploads/sources/*.png`
+- `backend/uploads/ai-generated/*.png`
+- `backend/uploads/slips/*.jpeg`
+
+Use the extensions exactly as referenced by the SQL. For example, slips use
+`.jpeg`, not `.png`.
+
+`backend/uploads` is ignored by Git in this project, so image files are not part
+of this seed commit. Keep those files available locally, and copy them into the
+Docker upload volume when running the backend through Docker Compose.
+
+Some asset files are intentionally reused across multiple seed records. This
+keeps order, payment, profile, and gallery scenarios covered without inventing
+fake filenames.
+
 ## Install
 
 1. Copy `backend/seeds/development_seed.sql` into your project.
@@ -33,6 +68,20 @@ test-only accounts, and local upload paths intended for repeatable QA.
 5. Ensure `backend/database.sql` and migrations have already been applied.
 6. If your backend is not `http://localhost:3000`, edit `@BACKEND_BASE_URL` near the top of the SQL.
 7. Run `development_seed.sql` against the **development** `coosdb` database.
+
+## Frontend UI testing
+
+This seed supports Public, Customer, Editor, and Admin UI testing:
+
+- Public pages can load gallery, work types, packages, policies, and image URLs.
+- Customer pages can test dashboards, order lists, order detail states, payments,
+  and empty-account scenarios.
+- Editor pages can test assigned, active, and completed work lists.
+- Admin pages can test dashboards, users, orders, payments, gallery, packages,
+  work types, policies, reports, and settings surfaces.
+
+Do not treat this data as business fixtures for production behavior. It is
+test-only coverage for local development, QA, and regression review.
 
 ## Image 404 checklist
 
@@ -68,6 +117,15 @@ Recommended accounts:
 - `editor.empty@seed.coos.test`
 - `customer.full@seed.coos.test`
 - `customer.empty@seed.coos.test`
+
+## Safety notes
+
+- Do not run this seed against production or any database containing real customer data.
+- Do not commit `.env`, secrets, credentials, database runtime files, or Docker
+  named-volume data.
+- Do not commit `backend/uploads` unless the repository policy changes
+  intentionally. It is currently ignored.
+- Review `@BACKEND_BASE_URL` before running the SQL in a non-default local setup.
 
 ## Important current-backend observation
 
