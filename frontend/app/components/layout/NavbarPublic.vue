@@ -142,51 +142,51 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-    <div class="coos-panel mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+  <header class="sticky top-0 z-50 px-4 pt-1 sm:px-5 sm:pt-2 lg:px-8">
+    <div class="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between rounded-[24px] border border-white/65 bg-white/[0.78] px-4 shadow-[0_16px_48px_rgba(0,0,0,0.08)] backdrop-blur-[18px] sm:px-5 lg:px-6">
       <!-- Logo -->
       <NuxtLink
         to="/"
-        class="flex flex-col leading-none text-black"
+        class="flex flex-col leading-none text-black min-w-[108px]"
       >
-        <span class="text-xl font-black tracking-[0.26em]">COOS</span>
-        <span class="mt-1 text-[7px] font-bold tracking-[0.46em]">STUDIO</span>
+        <span class="text-2xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO</span>
       </NuxtLink>
 
-      <!-- Navigation Links -->
-      <nav class="hidden md:flex items-center gap-7">
+      <!-- Navigation Links (Capsule shape matching NavbarCustomer visual style) -->
+      <nav class="hidden items-center gap-1 rounded-full border border-black/[0.06] bg-white/70 p-1 shadow-[0_4px_14px_rgba(0,0,0,0.04)] md:flex">
         <NuxtLink
           to="/"
-          class="text-sm font-semibold transition-colors duration-200"
-          :class="[activeSection === 'home' ? 'text-black font-bold' : 'text-neutral-500 hover:text-black']"
+          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'home' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
         >
           หน้าแรก
         </NuxtLink>
         <NuxtLink
           to="/gallery"
-          class="text-sm font-semibold transition-colors duration-200"
-          :class="[activeSection === 'gallery' ? 'text-black font-bold' : 'text-neutral-500 hover:text-black']"
+          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'gallery' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
         >
           ผลงาน
         </NuxtLink>
         <NuxtLink
           to="/#packages"
-          class="text-sm font-semibold transition-colors duration-200"
-          :class="[activeSection === 'packages' ? 'text-black font-bold' : 'text-neutral-500 hover:text-black']"
+          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'packages' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
         >
           บริการ
         </NuxtLink>
         <NuxtLink
           to="/#how-it-works"
-          class="text-sm font-semibold transition-colors duration-200"
-          :class="[activeSection === 'how-it-works' ? 'text-black font-bold' : 'text-neutral-500 hover:text-black']"
+          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'how-it-works' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
         >
           ขั้นตอนการสั่งงาน
         </NuxtLink>
         <NuxtLink
           to="/policy"
-          class="text-sm font-semibold transition-colors duration-200"
-          :class="[activeSection === 'policy' ? 'text-black font-bold' : 'text-neutral-500 hover:text-black']"
+          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'policy' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
         >
           เกี่ยวกับเรา
         </NuxtLink>
@@ -195,6 +195,7 @@ onBeforeUnmount(() => {
       <!-- User / Auth Actions -->
       <div class="flex items-center gap-3">
         <template v-if="currentUser">
+          <!-- Logged in Customer -->
           <div
             v-if="isCustomer"
             class="flex items-center gap-2 sm:gap-3"
@@ -328,6 +329,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
+          <!-- Logged in Staff (Admin/Editor) -->
           <div
             v-else
             class="flex items-center gap-3"
@@ -337,10 +339,26 @@ onBeforeUnmount(() => {
             </span>
             <div class="relative">
               <button
-                class="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-bold text-neutral-800 shadow-sm transition-all duration-200 hover:border-black hover:bg-black hover:text-white"
+                class="flex h-11 items-center gap-2 rounded-full border border-black/[0.06] bg-white px-1.5 pr-3 text-sm font-semibold text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
                 @click="toggleDropdown"
               >
-                {{ currentUser.userFirstName?.[0]?.toUpperCase() }}
+                <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
+                  {{ userInitial }}
+                </span>
+                <span class="hidden max-w-[118px] truncate sm:inline">{{ currentUser.userFirstName }}</span>
+                <svg
+                  class="h-3.5 w-3.5 text-[#666666]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
 
               <Transition
@@ -353,7 +371,7 @@ onBeforeUnmount(() => {
               >
                 <div
                   v-if="dropdownOpen"
-                  class="absolute right-0 z-50 mt-3 w-56 origin-top-right rounded-2xl border border-black/5 bg-white py-2 shadow-[0_20px_50px_rgba(15,15,15,0.14)]"
+                  class="absolute right-0 z-50 mt-3 w-56 origin-top-right rounded-[14px] border border-black/[0.06] bg-white py-2 shadow-[0_16px_48px_rgba(0,0,0,0.08)]"
                   @click.stop
                 >
                   <div class="border-b border-black/5 px-4 py-3">
@@ -384,7 +402,7 @@ onBeforeUnmount(() => {
 
                   <div class="border-t border-gray-100 pt-1">
                     <button
-                      class="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-red-600"
+                      class="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-[#666666] transition-colors hover:bg-gray-50 hover:text-red-600"
                       @click="logout"
                     >
                       ออกจากระบบ
@@ -396,18 +414,18 @@ onBeforeUnmount(() => {
           </div>
         </template>
 
-        <!-- Not logged in -->
+        <!-- Not logged in (Guest) -->
         <template v-else>
           <div class="flex items-center gap-2">
             <NuxtLink
               to="/login"
-              class="hidden text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:text-black sm:inline"
+              class="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-[#666666] transition-colors duration-200 hover:text-[#171717] sm:inline-block"
             >
               เข้าสู่ระบบ
             </NuxtLink>
             <NuxtLink
               to="/register"
-              class="coos-button-dark px-5 py-2.5"
+              class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
             >
               สมัครสมาชิก
             </NuxtLink>
@@ -417,7 +435,7 @@ onBeforeUnmount(() => {
 
       <!-- Hamburger Button -->
       <button
-        class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl border border-black/5 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors ml-2"
+        class="ml-1 flex h-11 w-11 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[#666666] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 md:hidden"
         @click="toggleMobileMenu"
       >
         <svg
@@ -462,55 +480,55 @@ onBeforeUnmount(() => {
     >
       <div
         v-show="mobileMenuOpen"
-        class="mx-auto mt-3 max-w-7xl overflow-hidden rounded-2xl border border-black/5 bg-white shadow-[0_18px_48px_rgba(15,15,15,0.12)] md:hidden"
+        class="mx-auto mt-3 max-w-[1280px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)] md:hidden"
       >
-        <nav class="flex flex-col px-4 pt-3 pb-4 space-y-1">
+        <nav class="flex flex-col space-y-1 px-4 pb-4 pt-3">
           <NuxtLink
             to="/"
-            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-            :class="[activeSection === 'home' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
+            :class="[activeSection === 'home' ? '!bg-[#171717] !text-white' : '']"
             @click="mobileMenuOpen = false"
           >
             หน้าแรก
           </NuxtLink>
           <NuxtLink
             to="/gallery"
-            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-            :class="[activeSection === 'gallery' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
+            :class="[activeSection === 'gallery' ? '!bg-[#171717] !text-white' : '']"
             @click="mobileMenuOpen = false"
           >
             ผลงาน
           </NuxtLink>
           <NuxtLink
             to="/#packages"
-            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-            :class="[activeSection === 'packages' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
+            :class="[activeSection === 'packages' ? '!bg-[#171717] !text-white' : '']"
             @click="mobileMenuOpen = false"
           >
             บริการ
           </NuxtLink>
           <NuxtLink
             to="/#how-it-works"
-            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-            :class="[activeSection === 'how-it-works' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
+            :class="[activeSection === 'how-it-works' ? '!bg-[#171717] !text-white' : '']"
             @click="mobileMenuOpen = false"
           >
             ขั้นตอนการสั่งงาน
           </NuxtLink>
           <NuxtLink
             to="/policy"
-            class="px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200"
-            :class="[activeSection === 'policy' ? 'text-gray-900 bg-gray-50 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
+            :class="[activeSection === 'policy' ? '!bg-[#171717] !text-white' : '']"
             @click="mobileMenuOpen = false"
           >
             เกี่ยวกับเรา
           </NuxtLink>
-          <div class="pt-4 mt-2 border-t border-gray-100 flex flex-col gap-2">
+          <div class="pt-4 mt-2 border-t border-black/[0.06] flex flex-col gap-2">
             <template v-if="currentUser">
               <NuxtLink
                 v-if="isCustomer"
                 to="/customer/orders"
-                class="coos-button-dark w-full py-2.5"
+                class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-4 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] w-full"
                 @click="mobileMenuOpen = false"
               >
                 งานของฉัน
@@ -518,7 +536,7 @@ onBeforeUnmount(() => {
               <NuxtLink
                 v-else
                 to="/customer/orders/create"
-                class="coos-button-dark w-full py-2.5"
+                class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-4 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] w-full"
                 @click="mobileMenuOpen = false"
               >
                 เริ่มสั่งงาน
@@ -527,14 +545,14 @@ onBeforeUnmount(() => {
             <template v-else>
               <NuxtLink
                 to="/register"
-                class="coos-button-dark w-full py-2.5"
+                class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-4 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] w-full"
                 @click="mobileMenuOpen = false"
               >
                 สร้างบัญชี
               </NuxtLink>
               <NuxtLink
                 to="/login"
-                class="coos-button-light w-full py-2.5"
+                class="inline-flex h-11 items-center justify-center rounded-xl border border-black/10 bg-white px-4 text-sm font-semibold text-neutral-950 shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#F3F3F1] w-full"
                 @click="mobileMenuOpen = false"
               >
                 เข้าสู่ระบบ
