@@ -1,8 +1,8 @@
 ---
 name: caveman
 description: >
-  Ultra-compressed communication mode. Cuts output tokens while keeping 
-  full technical accuracy. Supports intensity levels: lite (default), full, ultra, 
+  Ultra-compressed communication mode. Cuts output tokens while keeping
+  full technical accuracy. Supports intensity levels: lite (default), full, ultra,
   wenyan-lite, wenyan-full, wenyan-ultra.
 ---
 

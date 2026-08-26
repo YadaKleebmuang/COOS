@@ -1,8 +1,8 @@
 # COOS Design System v1
 
-> **System:** COOS  
-> **Design Direction:** COOS Soft Studio  
-> **Version:** 1.0  
+> **System:** COOS <br>
+> **Design Direction:** COOS Soft Studio <br>
+> **Version:** 1.0 <br>
 > **Scope:** Public / Customer / Editor / Admin
 
 ---
@@ -704,7 +704,7 @@ CTA (ถ้ามี)
 
 ตัวอย่าง:
 
-> ยังไม่มีคำสั่งซื้อ  
+> ยังไม่มีคำสั่งซื้อ <br>
 > เมื่อคุณเริ่มสั่งงาน รายการล่าสุดจะแสดงที่นี่
 
 CTA:
@@ -1177,7 +1177,7 @@ COOS ไม่ควรถูกนิยามว่าเป็น:
 
 หัวใจสำคัญ:
 
-> **Creative enough to feel like a studio.  
+> **Creative enough to feel like a studio. <br>
 > Clear enough to run a real business.**
 
 ---
