@@ -26,7 +26,7 @@ const currentPageTitle = computed(() => pageTitles[route.path] ?? "Admin Panel")
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans">
+  <div class="min-h-screen bg-[#F7F7F5] font-sans">
     <!-- Sidebar -->
     <AdminSidebar
       :collapsed="sidebarOpen"

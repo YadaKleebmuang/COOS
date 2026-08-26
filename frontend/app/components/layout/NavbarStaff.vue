@@ -136,11 +136,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
+  <header class="h-16 bg-white/80 backdrop-blur-[15px] border-b border-[#EFEFEA]/60 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
     <!-- Left: Hamburger + Title -->
     <div class="flex items-center gap-3">
       <!-- Mobile hamburger -->
-      <button aria-label="Toggle mobile menu" @click="toggleMobileMenu" class="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+      <button aria-label="Toggle mobile menu" @click="toggleMobileMenu" class="lg:hidden p-1.5 rounded-lg text-[#666660] hover:bg-[#EFEFEA]/40 transition-colors">
         <svg v-if="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -150,7 +150,7 @@ onBeforeUnmount(() => {
       </button>
 
       <!-- Page title -->
-      <h1 class="text-sm font-semibold text-gray-900">
+      <h1 class="text-sm font-bold text-[#171717]">
         {{ currentPageTitle }}
       </h1>
     </div>
@@ -158,39 +158,39 @@ onBeforeUnmount(() => {
     <!-- Right: Actions + User -->
     <div class="flex items-center gap-2">
       <!-- Search shortcut -->
-      <button aria-label="Search" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 text-xs hover:border-gray-300 transition-colors">
+      <button aria-label="Search" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#EFEFEA]/80 bg-[#F7F7F5]/50 text-[#9A9A95] text-xs hover:border-[#EFEFEA] hover:bg-[#F7F7F5] transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <span>ค้นหางาน...</span>
-        <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 rounded border border-gray-300 bg-white text-[10px] font-mono text-gray-400">⌘K</kbd>
+        <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 rounded border border-[#EFEFEA] bg-white text-[10px] font-mono text-[#9A9A95]">⌘K</kbd>
       </button>
 
       <!-- Notification -->
-      <button aria-label="Notifications" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors relative">
+      <button aria-label="Notifications" class="p-2 rounded-lg text-[#9A9A95] hover:bg-[#EFEFEA]/40 hover:text-[#171717] transition-colors relative">
         <svg class="w-4.5 h-4.5 w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
       </button>
 
       <!-- Divider -->
-      <div class="w-px h-5 bg-gray-200" />
+      <div class="w-px h-5 bg-[#EFEFEA]" />
 
       <!-- User avatar + dropdown -->
       <div v-if="currentUser" class="flex items-center gap-2.5">
         <!-- Name -->
         <div class="hidden md:block text-right">
-          <p class="text-xs font-semibold text-gray-900 leading-tight">
+          <p class="text-xs font-bold text-[#171717] leading-tight">
             {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
           </p>
-          <p class="text-[10px] text-gray-400">{{ roleConfig.subLabel }}</p>
+          <p class="text-[10px] text-[#9A9A95]">{{ roleConfig.subLabel }}</p>
         </div>
 
         <!-- Avatar + Dropdown -->
         <div class="relative">
           <button
             @click="toggleDropdown"
-            class="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center hover:bg-gray-700 transition-colors"
+            class="w-8 h-8 rounded-full bg-[#EFEFEA] text-[#171717] text-xs font-bold flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:bg-[#EFEFEA]/80 transition-colors"
           >
             {{ initials }}
           </button>
@@ -205,29 +205,29 @@ onBeforeUnmount(() => {
           >
             <div
               v-if="dropdownOpen"
-              class="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50"
+              class="absolute right-0 mt-2 w-52 bg-white/90 backdrop-blur-[15px] border border-[#EFEFEA]/80 rounded-[20px] shadow-lg py-1.5 z-50"
               @click.stop
             >
               <!-- User info -->
-              <div class="px-4 py-3 border-b border-gray-100">
-                <p class="text-sm font-semibold text-gray-900 truncate">
+              <div class="px-4 py-3 border-b border-[#EFEFEA]/60">
+                <p class="text-sm font-semibold text-[#171717] truncate">
                   {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
                 </p>
-                <p class="text-[11px] text-gray-400 truncate mt-0.5">
+                <p class="text-[11px] text-[#9A9A95] truncate mt-0.5">
                   {{ currentUser.userEmail }}
                 </p>
               </div>
 
               <!-- Links -->
-              <div class="py-1">
+              <div class="py-1 px-1.5">
                 <NuxtLink
                   v-for="link in roleConfig.dropdownLinks"
                   :key="link.to"
                   :to="link.to"
                   @click="closeDropdown"
-                  class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  class="flex items-center gap-2.5 px-3 py-2 text-sm text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717] rounded-lg transition-colors"
                 >
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-[#9A9A95]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="link.icon" />
                   </svg>
                   {{ link.label }}
@@ -235,10 +235,10 @@ onBeforeUnmount(() => {
               </div>
 
               <!-- Logout -->
-              <div class="border-t border-gray-100 pt-1">
+              <div class="border-t border-[#EFEFEA]/60 pt-1.5 px-1.5">
                 <button
                   @click="logout"
-                  class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  class="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -264,9 +264,9 @@ onBeforeUnmount(() => {
       leave-from-class="max-h-[500px] opacity-100"
       leave-to-class="max-h-0 opacity-0"
     >
-      <div v-show="mobileMenuOpen" class="lg:hidden absolute top-14 left-0 w-full overflow-y-auto bg-white border-b border-gray-100 shadow-lg z-40">
+      <div v-show="mobileMenuOpen" class="lg:hidden absolute top-16 left-0 w-full overflow-y-auto bg-white/90 backdrop-blur-[15px] border-b border-[#EFEFEA]/60 shadow-lg z-40">
         <nav class="flex flex-col px-4 py-3 space-y-1 max-h-[80vh]">
-          <p class="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 select-none">
+          <p class="px-2 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9A9A95] select-none">
             เมนูหลัก
           </p>
           <NuxtLink
@@ -274,16 +274,16 @@ onBeforeUnmount(() => {
             :key="item.path"
             :to="item.path"
             @click="mobileMenuOpen = false"
-            class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+            class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 border border-transparent"
             :class="[
               $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
-                ? 'bg-gray-900 text-white shadow-sm font-bold'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-[#EFEFEA] text-[#171717] font-bold border-white/50'
+                : 'text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717]'
             ]"
           >
             <svg
               class="w-4 h-4 flex-shrink-0"
-              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-white' : 'text-gray-400']"
+              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-[#171717]' : 'text-[#9A9A95]']"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
