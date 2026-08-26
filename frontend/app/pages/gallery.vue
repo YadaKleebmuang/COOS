@@ -187,29 +187,134 @@ const loadMore = () => {
 </script>
 
 <template>
-  <div class="coos-page min-h-screen">
-    <!-- Main Content -->
-    <main class="coos-shell space-y-8 py-10 md:py-14">
-      <div class="text-left">
-        <p class="coos-kicker mb-3">
-          COOS GALLERY
-        </p>
-        <h1 class="text-4xl font-black tracking-tight text-black md:text-5xl">
-          ผลงานทั้งหมด
-        </h1>
-        <p class="mt-3 max-w-2xl text-sm leading-7 text-neutral-500">
-          ค้นหา เลือกสไตล์ และใช้ผลงานตัวอย่างเป็นจุดเริ่มต้นสำหรับการสั่งงานของคุณ
-        </p>
-      </div>
+  <div class="coos-page min-h-screen relative overflow-hidden">
+    <!-- Ambient Canvas background image -->
+    <div class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat gallery-bg" />
 
-      <!-- Search & Filters Container -->
-      <div class="coos-panel space-y-6 p-5 text-left md:p-6">
-        <!-- Search bar & Sort dropdown -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+    <!-- Main Content -->
+    <main class="space-y-10 py-10 md:py-14 relative z-10">
+      <!-- Gallery Header -->
+      <section class="px-4 sm:px-5 lg:px-8">
+        <div class="mx-auto w-full max-w-[1280px]">
+          <div class="text-left">
+            <p class="coos-kicker mb-3">
+              COOS GALLERY
+            </p>
+            <h1 class="text-4xl font-black tracking-tight text-black md:text-5xl">
+              ผลงานทั้งหมด
+            </h1>
+            <p class="mt-3 max-w-2xl text-sm leading-7 text-neutral-500">
+              ค้นหา เลือกสไตล์ และใช้ผลงานตัวอย่างเป็นจุดเริ่มต้นสำหรับการสั่งงานของคุณ
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search & Filters Section -->
+      <section class="px-4 sm:px-5 lg:px-8">
+        <div class="mx-auto w-full max-w-[1280px]">
+          <!-- Search & Filters Container -->
+          <div class="coos-panel space-y-6 p-5 text-left md:p-6">
+            <!-- Search bar & Sort dropdown -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="relative flex-1">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <svg
+                    class="h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  v-model="search"
+                  type="text"
+                  placeholder="ค้นหาผลงาน เช่น portrait, รับปริญญา"
+                  class="coos-input pl-10 text-xs"
+                >
+              </div>
+
+              <select
+                v-model="sortBy"
+                class="rounded-xl border border-black/10 bg-white px-4 py-3 text-xs font-semibold text-neutral-600 shadow-sm transition-colors hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-black/10 w-full sm:w-auto"
+              >
+                <option value="newest">
+                  อัปเดตล่าสุด
+                </option>
+                <option value="oldest">
+                  อัปเดตเก่าสุด
+                </option>
+              </select>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex flex-wrap items-center gap-2 pt-2">
+              <button
+                v-for="tab in categoryTabs"
+                :key="tab.id ?? 'all'"
+                class="cursor-pointer rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200"
+                :class="selectedWorkTypeId === tab.id
+                  ? 'bg-black text-white border-black shadow-sm'
+                  : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/10'"
+                @click="selectedWorkTypeId = tab.id"
+              >
+                {{ tab.name }}
+              </button>
+            </div>
+
+            <!-- Divider Line -->
+            <hr class="border-black/5">
+
+            <!-- Hashtags Bar -->
+            <div class="space-y-2.5">
+              <span class="block text-xs font-bold uppercase tracking-[0.2em] text-neutral-400">แฮชแท็ก</span>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="tag in availableTags"
+                  :key="tag"
+                  class="cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200"
+                  :class="selectedTag === tag
+                    ? 'bg-black text-white border-black shadow-sm'
+                    : 'bg-white hover:bg-neutral-50 text-neutral-500 border-black/10'"
+                  @click="toggleTag(tag)"
+                >
+                  #{{ tag }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gallery Grid & States Section -->
+      <section class="px-4 sm:px-5 lg:px-8">
+        <div class="mx-auto w-full max-w-[1280px]">
+          <!-- ===== Loading State ===== -->
+          <div
+            v-if="loading"
+            class="py-24 text-center"
+          >
+            <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4" />
+            <p class="text-gray-400 text-sm font-medium">
+              กำลังโหลดผลงานแกลเลอรี...
+            </p>
+          </div>
+
+          <!-- ===== Error State ===== -->
+          <div
+            v-else-if="error"
+            class="py-16 text-center max-w-md mx-auto"
+          >
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
-                class="h-4 w-4 text-gray-400"
+                class="w-8 h-8 text-red-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -217,160 +322,73 @@ const loadMore = () => {
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2.2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
             </div>
-            <input
-              v-model="search"
-              type="text"
-              placeholder="ค้นหาผลงาน เช่น portrait, รับปริญญา"
-              class="coos-input pl-10 text-xs"
-            >
-          </div>
-
-          <select
-            v-model="sortBy"
-            class="rounded-xl border border-black/10 bg-white px-4 py-3 text-xs font-semibold text-neutral-600 shadow-sm transition-colors hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-black/10 w-full sm:w-auto"
-          >
-            <option value="newest">
-              อัปเดตล่าสุด
-            </option>
-            <option value="oldest">
-              อัปเดตเก่าสุด
-            </option>
-          </select>
-        </div>
-
-        <!-- Category Tabs -->
-        <div class="flex flex-wrap items-center gap-2 pt-2">
-          <button
-            v-for="tab in categoryTabs"
-            :key="tab.id ?? 'all'"
-            class="cursor-pointer rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200"
-            :class="selectedWorkTypeId === tab.id
-              ? 'bg-black text-white border-black shadow-sm'
-              : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/10'"
-            @click="selectedWorkTypeId = tab.id"
-          >
-            {{ tab.name }}
-          </button>
-        </div>
-
-        <!-- Divider Line -->
-        <hr class="border-black/5">
-
-        <!-- Hashtags Bar -->
-        <div class="space-y-2.5">
-          <span class="block text-xs font-bold uppercase tracking-[0.2em] text-neutral-400">แฮชแท็ก</span>
-          <div class="flex flex-wrap gap-2">
+            <h3 class="text-lg font-bold text-red-600 mb-1">
+              ไม่สามารถโหลดแกลเลอรีได้
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+              {{ error }}
+            </p>
             <button
-              v-for="tag in availableTags"
-              :key="tag"
-              class="cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200"
-              :class="selectedTag === tag
-                ? 'bg-black text-white border-black shadow-sm'
-                : 'bg-white hover:bg-neutral-50 text-neutral-500 border-black/10'"
-              @click="toggleTag(tag)"
+              class="coos-button-dark cursor-pointer px-5 py-2.5"
+              @click="loadData"
             >
-              #{{ tag }}
+              ลองใหม่อีกครั้ง
             </button>
           </div>
-        </div>
-      </div>
 
-      <!-- ===== Loading State ===== -->
-      <div
-        v-if="loading"
-        class="py-24 text-center"
-      >
-        <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4" />
-        <p class="text-gray-400 text-sm font-medium">
-          กำลังโหลดผลงานแกลเลอรี...
-        </p>
-      </div>
-
-      <!-- ===== Error State ===== -->
-      <div
-        v-else-if="error"
-        class="py-16 text-center max-w-md mx-auto"
-      >
-        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg
-            class="w-8 h-8 text-red-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        </div>
-        <h3 class="text-lg font-bold text-red-600 mb-1">
-          ไม่สามารถโหลดแกลเลอรีได้
-        </h3>
-        <p class="text-gray-500 text-sm mb-4">
-          {{ error }}
-        </p>
-        <button
-          class="coos-button-dark cursor-pointer px-5 py-2.5"
-          @click="loadData"
-        >
-          ลองใหม่อีกครั้ง
-        </button>
-      </div>
-
-      <!-- ===== Empty State ===== -->
-      <div
-        v-else-if="filteredImages.length === 0"
-        class="py-24 text-center"
-      >
-        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-black/10 bg-white text-2xl font-black text-black">
-          CO
-        </div>
-        <h3 class="text-lg font-bold text-gray-700 mb-1">
-          ไม่พบรูปภาพผลงาน
-        </h3>
-        <p class="text-gray-400 text-sm">
-          ไม่พบรูปภาพที่ตรงกับการค้นหาหรือตัวกรองนี้
-        </p>
-      </div>
-
-      <!-- ===== Gallery Grid ===== -->
-      <div
-        v-else
-        class="space-y-12"
-      >
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- ===== Empty State ===== -->
           <div
-            v-for="img in displayedImages"
-            :key="img.imageId"
+            v-else-if="filteredImages.length === 0"
+            class="py-24 text-center"
           >
-            <GalleryImageCard
-              :img="img"
-              @view-details="openDetails"
-            />
+            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-black/10 bg-white text-2xl font-black text-black">
+              CO
+            </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-1">
+              ไม่พบรูปภาพผลงาน
+            </h3>
+            <p class="text-gray-400 text-sm">
+              ไม่พบรูปภาพที่ตรงกับการค้นหาหรือตัวกรองนี้
+            </p>
+          </div>
+
+          <!-- ===== Gallery Grid ===== -->
+          <div
+            v-else
+            class="space-y-12"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div
+                v-for="img in displayedImages"
+                :key="img.imageId"
+              >
+                <GalleryImageCard
+                  :img="img"
+                  @view-details="openDetails"
+                />
+              </div>
+            </div>
+
+            <!-- LOAD MORE BUTTON -->
+            <div
+              v-if="hasMore"
+              class="flex justify-center pt-4"
+            >
+              <button
+                class="coos-button-light cursor-pointer px-6 py-2.5 text-xs"
+                @click="loadMore"
+              >
+                โหลดเพิ่มเติม
+              </button>
+            </div>
           </div>
         </div>
-
-        <!-- LOAD MORE BUTTON -->
-        <div
-          v-if="hasMore"
-          class="flex justify-center pt-4"
-        >
-          <button
-            class="coos-button-light cursor-pointer px-6 py-2.5 text-xs"
-            @click="loadMore"
-          >
-            โหลดเพิ่มเติม
-          </button>
-        </div>
-      </div>
+      </section>
     </main>
 
     <!-- Details Modal -->
@@ -381,3 +399,99 @@ const loadMore = () => {
     />
   </div>
 </template>
+
+<style scoped>
+.gallery-bg {
+  background-image: url('~/assets/images/public/coos-public.png');
+}
+
+/* Scoped Glass UI Styling overrides over the visual image background */
+
+/* Search & Filter glass panel (Medium Glass) */
+.coos-panel {
+  background-color: rgba(255, 255, 255, 0.68) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 24px !important;
+}
+
+/* Category & Tag Buttons (Very Light Glass) */
+button.border-black\/10 {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+button.border-black\/10:hover {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Sort Select dropdown */
+select.border-black\/10 {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+select.border-black\/10:hover {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Gallery Cards (Light Glass) targeting class structure in ImageCard.vue without editing it */
+:deep(.coos-card.group) {
+  background-color: rgba(255, 255, 255, 0.58) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.03) !important;
+  padding: 12px !important;
+  border-radius: 24px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+:deep(.coos-card.group:hover) {
+  transform: translateY(-4px) !important;
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Gallery Card inner tag chips & buttons */
+:deep(.coos-card.group .border-black\/5.bg-neutral-50) {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+:deep(.coos-card.group .border-black\/5.bg-neutral-50:hover) {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+:deep(.coos-card.group button.border-black\/10) {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+:deep(.coos-card.group button.border-black\/10:hover) {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Load More button (Light/Medium Glass) */
+.coos-button-light {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 12px !important;
+}
+.coos-button-light:hover {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Divider Line */
+hr.border-black\/5 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+</style>

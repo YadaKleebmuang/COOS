@@ -1,6 +1,6 @@
 <template>
-  <footer class="px-4 pb-6 pt-10 sm:px-6 lg:px-8">
-    <div class="coos-panel mx-auto grid max-w-7xl gap-8 p-7 text-sm text-neutral-500 md:grid-cols-[1.3fr_1fr_1fr] md:p-9">
+  <footer class="px-4 pb-6 pt-10 sm:px-5 lg:px-8">
+    <div class="coos-panel mx-auto grid max-w-[1280px] gap-8 p-7 text-sm text-neutral-500 md:grid-cols-[1.3fr_1fr_1fr] md:p-9 border border-white/45 bg-white/55 shadow-[0_12px_36px_rgba(0,0,0,0.02)] rounded-[24px] backdrop-blur-[14px]">
       <div>
         <NuxtLink
           to="/"
