@@ -156,13 +156,13 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-5 max-w-7xl mx-auto">
+  <div class="space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-xl font-bold text-gray-900">คำสั่งงาน</h1>
-        <p class="mt-0.5 text-sm text-gray-500">มอบหมายงาน, อนุมัติสลิปการโอนเงิน</p>
+        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">คำสั่งงาน</h1>
+        <p class="mt-0.5 text-xs text-[#9A9A95]">ดูและจัดการคำสั่งงานทั้งหมดในระบบ</p>
       </div>
       <AdminActionButton
         variant="secondary"
@@ -175,126 +175,135 @@ const breadcrumb = [
       </AdminActionButton>
     </div>
 
-    <!-- Filter + Search -->
-    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+    <!-- Filter + Search Toolbar -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
       <div class="overflow-x-auto flex-1">
         <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
       </div>
-      <div class="flex-shrink-0">
-        <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex-shrink-0 flex items-center">
+        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-[#171717]/30 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all">
+          <svg class="w-4 h-4 text-[#9A9A95] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="ค้นหาออเดอร์..."
-            class="text-sm text-gray-700 bg-transparent outline-none w-44 placeholder:text-gray-400"
+            placeholder="ค้นหาเลขที่, แพ็กเกจ..."
+            class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"
           />
         </div>
       </div>
     </div>
 
     <!-- Error -->
-    <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+    <div v-if="error" class="bg-white border border-red-100 rounded-2xl p-6 text-center">
       <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="() => fetchAdminData()" class="mt-2 text-xs text-gray-500 underline">ลองใหม่</button>
+      <button @click="() => fetchAdminData()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
     </div>
 
     <!-- Table -->
-    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <AdminDataTable
-        :columns="columns"
-        :rows="filteredOrders"
-        :loading="loading"
-        row-key="orderId"
-      >
-        <!-- Order ID -->
-        <template #cell-orderId="{ value }">
-          <span class="font-mono text-xs font-semibold text-gray-900">#{{ value }}</span>
-        </template>
+    <div v-else class="space-y-4">
+      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
+        <AdminDataTable
+          :columns="columns"
+          :rows="filteredOrders"
+          :loading="loading"
+          row-key="orderId"
+        >
+          <!-- Order ID -->
+          <template #cell-orderId="{ value }">
+            <span class="font-mono text-xs font-bold text-[#171717]">#{{ value }}</span>
+          </template>
 
-        <!-- Work type -->
-        <template #cell-workTypeName="{ value }">
-          <span class="text-xs text-gray-600">{{ value ?? "—" }}</span>
-        </template>
+          <!-- Work type -->
+          <template #cell-workTypeName="{ value }">
+            <span class="text-xs text-[#171717] font-medium">{{ value ?? "—" }}</span>
+          </template>
 
-        <!-- Package -->
-        <template #cell-packageName="{ value }">
-          <span class="text-xs text-gray-600">{{ value ?? "—" }}</span>
-        </template>
+          <!-- Package -->
+          <template #cell-packageName="{ value }">
+            <span class="text-xs text-[#666660]">{{ value ?? "—" }}</span>
+          </template>
 
-        <!-- Price -->
-        <template #cell-orderTotalPrice="{ value }">
-          <span class="text-xs font-semibold text-gray-900 font-number">{{ formatPrice(value) }}</span>
-        </template>
+          <!-- Price -->
+          <template #cell-orderTotalPrice="{ value }">
+            <span class="text-xs font-bold text-[#171717] font-number">{{ formatPrice(value) }}</span>
+          </template>
 
-        <!-- Status -->
-        <template #cell-orderStatus="{ value }">
-          <AdminStatusBadge :status="value" />
-        </template>
+          <!-- Status -->
+          <template #cell-orderStatus="{ value }">
+            <AdminStatusBadge :status="value" />
+          </template>
 
-        <!-- Required date -->
-        <template #cell-orderRequiredDate="{ value }">
-          <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
-        </template>
+          <!-- Required date -->
+          <template #cell-orderRequiredDate="{ value }">
+            <span class="text-xs text-[#9A9A95] font-medium">{{ formatDate(value) }}</span>
+          </template>
 
-        <!-- Editor Assign dropdown -->
-        <template #cell-editorAssign="{ row }">
-          <span v-if="row.editorId" class="text-xs text-gray-700 font-medium bg-gray-100 px-2 py-1 rounded-md">
-            {{ getEditorName(row.editorId) }}
-          </span>
-          <span v-else class="text-xs text-gray-400">— ยังไม่มอบหมาย —</span>
-        </template>
+          <!-- Editor Assign dropdown -->
+          <template #cell-editorAssign="{ row }">
+            <span v-if="row.editorId" class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold text-[#171717] bg-[#EFEFEA] border border-white/50 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.005)]">
+              {{ getEditorName(row.editorId) }}
+            </span>
+            <span v-else class="text-xs text-[#9A9A95] font-medium">— ยังไม่มอบหมาย —</span>
+          </template>
 
-        <!-- Payment slip -->
-        <template #cell-paymentAction="{ row }">
-          <div v-if="pendingPayment(row)" class="flex items-center gap-1.5 justify-center">
-            <a
-              :href="pendingPayment(row).paymentSlipUrl"
-              target="_blank"
-              class="text-xs text-gray-500 hover:text-gray-700 underline"
-            >
-              ดูสลิป
-            </a>
-            <AdminActionButton
-              variant="primary"
-              size="sm"
-              @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
-            >
-              อนุมัติ
-            </AdminActionButton>
-            <AdminActionButton
-              variant="danger"
-              size="sm"
-              @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'rejected')"
-            >
-              ปฏิเสธ
-            </AdminActionButton>
-          </div>
-          <span v-else class="text-xs text-gray-300 block text-center">—</span>
-        </template>
+          <!-- Payment slip -->
+          <template #cell-paymentAction="{ row }">
+            <div v-if="pendingPayment(row)" class="flex items-center gap-2 justify-center">
+              <a
+                :href="pendingPayment(row).paymentSlipUrl"
+                target="_blank"
+                class="text-[11px] text-[#666660] hover:text-[#171717] hover:underline transition-colors font-bold px-2 py-1 bg-[#F7F7F5] border border-[#EFEFEA] rounded-lg"
+              >
+                ดูสลิป
+              </a>
+              <button
+                @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
+                class="px-2 py-1 text-[11px] font-bold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded-lg border border-[#171717]"
+              >
+                อนุมัติ
+              </button>
+              <button
+                @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'rejected')"
+                class="px-2 py-1 text-[11px] font-bold text-red-600 bg-white hover:bg-red-50/50 border border-red-200 transition-colors rounded-lg"
+              >
+                ปฏิเสธ
+              </button>
+            </div>
+            <span v-else class="text-xs text-[#EFEFEA] block text-center">—</span>
+          </template>
 
-        <!-- Created at -->
-        <template #cell-orderCreatedAt="{ value }">
-          <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
-        </template>
-      </AdminDataTable>
-      <Pagination 
-        :current-page="currentPage" 
-        :total-pages="totalPages" 
-        :total="totalRecords" 
-        :limit="limit" 
-        @page-change="handlePageChange" 
-      />
+          <!-- Created at -->
+          <template #cell-orderCreatedAt="{ value }">
+            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
+          </template>
+        </AdminDataTable>
 
-      <!-- Empty state -->
-      <AdminEmptyState
-        v-if="!loading && filteredOrders.length === 0"
-        title="ไม่พบคำสั่งงาน"
-        description="ไม่มีคำสั่งงานที่ตรงกับเงื่อนไขที่เลือก ลองเปลี่ยนตัวกรองใหม่"
-        icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-      />
+        <!-- Empty state -->
+        <AdminEmptyState
+          v-if="!loading && filteredOrders.length === 0"
+          title="ไม่พบคำสั่งงาน"
+          description="ไม่มีคำสั่งงานที่ตรงกับเงื่อนไขที่เลือก ลองเปลี่ยนตัวกรองใหม่"
+          icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
+      </div>
+
+      <!-- Pagination wrapper -->
+      <div v-if="totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
+        <!-- Thai Pagination Summary -->
+        <div class="hidden sm:block text-xs text-[#666660]">
+          <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+        </div>
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total="totalRecords"
+          :limit="limit"
+          @page-change="handlePageChange"
+          class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
+        />
+      </div>
     </div>
 
     <!-- Confirm Dialog -->
@@ -312,3 +321,9 @@ const breadcrumb = [
     />
   </div>
 </template>
+
+<style scoped>
+:deep(p.text-sm.text-gray-700) {
+  display: none !important;
+}
+</style>

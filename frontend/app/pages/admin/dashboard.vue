@@ -167,8 +167,8 @@ const breadcrumb = [
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
-        <p class="mt-0.5 text-sm text-gray-500">ภาพรวมสถานะออเดอร์และระบบ COOS Studio</p>
+        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">แดชบอร์ดผู้ดูแลระบบ</h1>
+        <p class="mt-0.5 text-xs text-[#9A9A95]">ภาพรวมสถานะออเดอร์และระบบ COOS Studio</p>
       </div>
       <AdminActionButton
         variant="secondary"
@@ -182,13 +182,13 @@ const breadcrumb = [
 
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
-      <div v-for="i in 6" :key="i" class="bg-white border border-gray-200 rounded-xl p-5 h-24 animate-pulse" />
+      <div v-for="i in 6" :key="i" class="bg-white border border-[#EFEFEA]/60 rounded-2xl p-5 h-28 animate-pulse" />
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+    <div v-else-if="error" class="bg-white border border-red-100 rounded-2xl p-6 text-center">
       <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="fetchData" class="mt-3 text-xs text-gray-500 hover:text-gray-700 underline">
+      <button @click="fetchData" class="mt-3 text-xs text-[#9A9A95] hover:text-[#171717] underline">
         ลองโหลดใหม่
       </button>
     </div>
@@ -197,22 +197,32 @@ const breadcrumb = [
     <template v-else>
       <!-- ── Stat Cards ── -->
       <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
-        <AdminStatCard
+        <div
           v-for="card in statCards"
           :key="card.label"
-          :label="card.label"
-          :value="card.value"
-          :icon="card.icon"
-        />
+          class="bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex flex-col justify-between h-28 hover:shadow-md transition-all duration-300"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-[#666660] truncate">{{ card.label }}</span>
+            <div class="w-7 h-7 rounded-lg bg-[#EFEFEA]/50 flex items-center justify-center text-[#9A9A95] flex-shrink-0">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="card.icon" />
+              </svg>
+            </div>
+          </div>
+          <div class="mt-2 flex items-baseline">
+            <span class="text-2xl font-black text-[#171717] tracking-tight font-number">{{ card.value }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- ── Recent Orders ── -->
-      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
         <!-- Section header -->
-        <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="px-6 py-4 border-b border-[#EFEFEA]/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 class="text-sm font-bold text-gray-900">คำสั่งงานล่าสุด</h2>
-            <p class="text-xs text-gray-400 mt-0.5">รายการคำสั่งงานที่ต้องดำเนินการ</p>
+            <h2 class="text-sm font-black text-[#171717] tracking-tight">คำสั่งงานล่าสุด</h2>
+            <p class="text-xs text-[#9A9A95] mt-0.5">รายการคำสั่งงานที่ต้องดำเนินการ</p>
           </div>
           <AdminActionButton
             variant="secondary"
@@ -224,7 +234,7 @@ const breadcrumb = [
         </div>
 
         <!-- Filter bar -->
-        <div class="px-6 py-3 border-b border-gray-100 overflow-x-auto">
+        <div class="px-6 py-3 border-b border-[#EFEFEA]/60 overflow-x-auto">
           <AdminFilterBar
             v-model="statusFilter"
             :filters="filterOptions"
@@ -239,17 +249,17 @@ const breadcrumb = [
         >
           <!-- Order ID -->
           <template #cell-orderId="{ value }">
-            <span class="font-mono text-xs font-semibold text-gray-900">#{{ value }}</span>
+            <span class="font-mono text-xs font-bold text-[#171717]">#{{ value }}</span>
           </template>
 
           <!-- Customer -->
           <template #cell-customer="{ value }">
-            <span class="text-sm text-gray-700">{{ value }}</span>
+            <span class="text-xs font-medium text-[#171717]">{{ value }}</span>
           </template>
 
           <!-- Package -->
           <template #cell-packageName="{ value }">
-            <span class="text-xs text-gray-600">{{ value }}</span>
+            <span class="text-xs text-[#666660]">{{ value }}</span>
           </template>
 
           <!-- Status badge -->
@@ -259,12 +269,12 @@ const breadcrumb = [
 
           <!-- Date -->
           <template #cell-orderCreatedAt="{ value }">
-            <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
+            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
           </template>
 
           <!-- Editor -->
           <template #cell-editor="{ value }">
-            <span class="text-xs text-gray-500">{{ value }}</span>
+            <span class="text-xs text-[#666660]">{{ value }}</span>
           </template>
 
           <!-- Actions -->
@@ -273,6 +283,7 @@ const breadcrumb = [
               variant="ghost"
               size="sm"
               @click="router.push('/admin/orders')"
+              class="text-xs text-[#171717] hover:underline"
             >
               จัดการ
             </AdminActionButton>
@@ -290,24 +301,24 @@ const breadcrumb = [
       <!-- ── Bottom Grid ── -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <!-- Order Status Summary -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6">
-          <h2 class="text-sm font-bold text-gray-900 mb-4">สรุปสถานะออเดอร์</h2>
+        <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.01)]">
+          <h2 class="text-sm font-black text-[#171717] tracking-tight mb-4">สรุปสถานะออเดอร์</h2>
           <div class="space-y-3">
             <div
               v-for="card in statCards.filter(c => c.label !== 'คำสั่งงานทั้งหมด')"
               :key="card.label"
               class="flex items-center justify-between"
             >
-              <span class="text-xs text-gray-600">{{ card.label }}</span>
-              <span class="text-xs font-bold text-gray-900 font-number">{{ card.value }}</span>
+              <span class="text-xs text-[#666660]">{{ card.label }}</span>
+              <span class="text-xs font-bold text-[#171717] font-number">{{ card.value }}</span>
             </div>
           </div>
         </div>
 
         <!-- Editor Workload -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 xl:col-span-2">
+        <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl p-6 xl:col-span-2 shadow-[0_4px_16px_rgba(0,0,0,0.01)]">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-bold text-gray-900">ภาระงาน Editor</h2>
+            <h2 class="text-sm font-black text-[#171717] tracking-tight">ภาระงาน Editor</h2>
             <AdminActionButton variant="ghost" size="sm" @click="router.push('/admin/assignments')">
               มอบหมายงาน
             </AdminActionButton>
@@ -316,24 +327,24 @@ const breadcrumb = [
             <div
               v-for="editor in editorsWorkload"
               :key="editor.name"
-              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F7F7F5]/50 transition-colors border border-transparent"
             >
               <!-- Avatar initials -->
-              <div class="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 rounded-full bg-[#EFEFEA] text-[#171717] border border-white/50 text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
                 {{ editor.initials }}
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">{{ editor.name }}</p>
-                <p class="text-xs text-gray-400">Editor</p>
+                <p class="text-sm font-bold text-[#171717] truncate">{{ editor.name }}</p>
+                <p class="text-xs text-[#9A9A95] mt-0.5">Editor</p>
               </div>
               <div class="text-right flex-shrink-0 flex items-center gap-3">
                 <div class="text-center">
-                  <p class="text-sm font-bold text-gray-800 font-number">{{ editor.activeJobs }}</p>
-                  <p class="text-[10px] text-gray-400">กำลังทำ</p>
+                  <p class="text-sm font-bold text-[#171717] font-number">{{ editor.activeJobs }}</p>
+                  <p class="text-[10px] text-[#9A9A95]">กำลังทำ</p>
                 </div>
-                <div class="text-center pl-3 border-l border-gray-200">
+                <div class="text-center pl-3 border-l border-[#EFEFEA]">
                   <p class="text-sm font-bold text-emerald-600 font-number">{{ editor.completedJobs }}</p>
-                  <p class="text-[10px] text-gray-400">เสร็จแล้ว</p>
+                  <p class="text-[10px] text-[#9A9A95]">เสร็จแล้ว</p>
                 </div>
               </div>
             </div>

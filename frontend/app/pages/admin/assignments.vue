@@ -131,84 +131,93 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-5 max-w-7xl mx-auto">
+  <div class="space-y-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-xl font-bold text-gray-900">มอบหมายงานให้ทีมผลิตภาพ</h1>
-        <p class="mt-0.5 text-sm text-gray-500">คำสั่งงานที่รอการมอบหมายให้ Editor</p>
+        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">มอบหมายงาน</h1>
+        <p class="mt-0.5 text-xs text-[#9A9A95]">เลือกผู้รับผิดชอบให้กับคำสั่งงานที่รอมอบหมาย</p>
       </div>
-      <AdminActionButton variant="secondary" size="sm" :loading="loading" @click="fetchData">รีเฟรช</AdminActionButton>
+      <AdminActionButton variant="secondary" size="sm" :loading="loading" icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" @click="fetchData">รีเฟรช</AdminActionButton>
     </div>
 
-    <!-- Search + filter -->
-    <div class="flex flex-col sm:flex-row gap-3">
-      <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
-        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input v-model="searchQuery" type="text" placeholder="ค้นหาออเดอร์, ลูกค้า..." class="text-sm text-gray-700 bg-transparent outline-none w-44 placeholder:text-gray-400"/>
+    <!-- Filter + Search Toolbar -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+      <div class="overflow-x-auto flex-1">
+        <AdminFilterBar v-model="workTypeFilter" :filters="workTypeOptions" />
       </div>
-      <AdminFilterBar v-model="workTypeFilter" :filters="workTypeOptions" />
+      <div class="flex-shrink-0 flex items-center">
+        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-[#171717]/30 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all">
+          <svg class="w-4 h-4 text-[#9A9A95] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input v-model="searchQuery" type="text" placeholder="ค้นหาออเดอร์, ลูกค้า..." class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"/>
+        </div>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <!-- Orders table -->
-      <div class="xl:col-span-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-          <p class="text-sm font-bold text-gray-900">คำสั่งงานรอมอบหมาย</p>
-          <p class="text-xs text-gray-400 mt-0.5">{{ filteredOrders.length }} รายการ</p>
+      <div class="xl:col-span-2 bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
+        <div class="px-6 py-4 border-b border-[#EFEFEA]/60">
+          <p class="text-sm font-black text-[#171717] tracking-tight">คำสั่งงานรอมอบหมาย</p>
+          <p class="text-xs text-[#9A9A95] mt-0.5">{{ filteredOrders.length }} รายการ</p>
         </div>
         <AdminDataTable :columns="columns" :rows="filteredOrders" :loading="loading" row-key="orderId">
           <template #cell-orderId="{ value }">
-            <span class="font-mono text-xs font-bold text-gray-900">#{{ value }}</span>
+            <span class="font-mono text-xs font-bold text-[#171717]">#{{ value }}</span>
           </template>
           <template #cell-customerName="{ row }">
-            <span class="text-sm text-gray-700">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
+            <span class="text-xs font-medium text-[#171717]">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
           </template>
           <template #cell-workTypeName="{ value }">
-            <span class="text-xs text-gray-600">{{ value }}</span>
+            <span class="text-xs text-[#171717] font-medium">{{ value }}</span>
           </template>
           <template #cell-packageName="{ value }">
-            <span class="text-xs text-gray-500">{{ value }}</span>
+            <span class="text-xs text-[#666660]">{{ value }}</span>
           </template>
           <template #cell-orderTotalPrice="{ value }">
-            <span class="text-xs font-bold font-number text-gray-900">{{ formatPrice(value) }}</span>
+            <span class="text-xs font-bold font-number text-[#171717]">{{ formatPrice(value) }}</span>
           </template>
           <template #cell-orderRequiredDate="{ value }">
-            <span class="text-xs text-gray-500">{{ formatDate(value) }}</span>
+            <span class="text-xs text-[#9A9A95] font-medium">{{ formatDate(value) }}</span>
           </template>
           <template #cell-urgent="{ row }">
-            <span v-if="row.orderIsUrgent" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white text-red-600 border border-red-200">เร่งด่วน</span>
-            <span v-else class="text-gray-300 text-xs">—</span>
+            <span v-if="row.orderIsUrgent" class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 rounded-lg">เร่งด่วน</span>
+            <span v-else class="text-[#EFEFEA] text-xs">—</span>
           </template>
           <template #cell-action="{ row }">
-            <AdminActionButton variant="primary" size="sm" @click="openAssign(row as any)">มอบหมาย</AdminActionButton>
+            <button
+              @click="openAssign(row as any)"
+              class="px-3 py-1.5 text-xs font-bold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded-xl border border-[#171717]"
+            >
+              มอบหมาย
+            </button>
           </template>
         </AdminDataTable>
         <AdminEmptyState v-if="!loading && filteredOrders.length === 0" title="ไม่มีคำสั่งงานรอมอบหมาย" description="คำสั่งงานทั้งหมดถูกมอบหมาย Editor แล้ว" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
       </div>
 
       <!-- Editor Workload -->
-      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-          <p class="text-sm font-bold text-gray-900">ภาระงาน Editor</p>
-          <p class="text-xs text-gray-400 mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
+      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
+        <div class="px-6 py-4 border-b border-[#EFEFEA]/60">
+          <p class="text-sm font-black text-[#171717] tracking-tight">ภาระงาน Editor</p>
+          <p class="text-xs text-[#9A9A95] mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
         </div>
         <div class="p-4 space-y-2">
-          <div v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="w-9 h-9 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">{{ ed.initials }}</div>
+          <div v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F7F7F5]/50 transition-colors border border-transparent">
+            <div class="w-9 h-9 rounded-full bg-[#EFEFEA] text-[#171717] border border-white/50 text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">{{ ed.initials }}</div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 truncate">{{ ed.name }}</p>
-              <p class="text-xs text-gray-400 truncate">{{ ed.email }}</p>
+              <p class="text-sm font-bold text-[#171717] truncate">{{ ed.name }}</p>
+              <p class="text-xs text-[#9A9A95] truncate mt-0.5">{{ ed.email }}</p>
             </div>
             <div class="text-right flex-shrink-0 flex items-center gap-3">
               <div class="text-center">
-                <p class="text-sm font-bold text-gray-800 font-number">{{ ed.activeJobs }}</p>
-                <p class="text-[10px] text-gray-400">กำลังทำ</p>
+                <p class="text-sm font-bold text-[#171717] font-number">{{ ed.activeJobs }}</p>
+                <p class="text-[10px] text-[#9A9A95]">กำลังทำ</p>
               </div>
-              <div class="text-center pl-3 border-l border-gray-200">
+              <div class="text-center pl-3 border-l border-[#EFEFEA]">
                 <p class="text-sm font-bold text-emerald-600 font-number">{{ ed.completedJobs }}</p>
-                <p class="text-[10px] text-gray-400">เสร็จแล้ว</p>
+                <p class="text-[10px] text-[#9A9A95]">เสร็จแล้ว</p>
               </div>
             </div>
           </div>
@@ -220,22 +229,32 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <div v-if="assignModal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/40" @click="assignModal.open = false" />
-          <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md p-6">
-            <h3 class="text-sm font-bold text-gray-900 mb-1">มอบหมายงาน #{{ assignModal.order?.orderId }}</h3>
-            <p class="text-xs text-gray-400 mb-5">{{ assignModal.order?.customerFirstName }} {{ assignModal.order?.customerLastName }} — {{ assignModal.order?.packageName }}</p>
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]" @click="assignModal.open = false" />
+          <div class="relative bg-white/90 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-[#EFEFEA]/80 w-full max-w-md p-6">
+            <h3 class="text-base font-black text-[#171717] tracking-tight mb-1">มอบหมายงาน #{{ assignModal.order?.orderId }}</h3>
+            <p class="text-xs text-[#9A9A95] mb-5 pb-3 border-b border-[#EFEFEA]/60">{{ assignModal.order?.customerFirstName }} {{ assignModal.order?.customerLastName }} — {{ assignModal.order?.packageName }}</p>
             <div class="space-y-3">
-              <label class="block text-xs font-medium text-gray-500">เลือก Editor</label>
-              <select v-model="assignModal.selectedEditorId" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400">
+              <label class="block text-xs font-bold text-[#666660]">เลือก Editor</label>
+              <select v-model="assignModal.selectedEditorId" class="w-full text-xs px-3 py-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717]">
                 <option value="">— เลือก Editor —</option>
                 <option v-for="ed in editors" :key="ed.userId" :value="ed.userId">
                   {{ ed.name }} ({{ ed.activeJobs }} งาน)
                 </option>
               </select>
             </div>
-            <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-gray-100">
+            <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-[#EFEFEA]/60">
               <AdminActionButton variant="secondary" size="md" @click="assignModal.open = false">ยกเลิก</AdminActionButton>
-              <AdminActionButton variant="primary" size="md" :loading="assignModal.loading" :disabled="!assignModal.selectedEditorId" @click="handleAssign">มอบหมายงาน</AdminActionButton>
+              <button
+                :disabled="!assignModal.selectedEditorId || assignModal.loading"
+                @click="handleAssign"
+                class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white bg-[#171717] hover:bg-[#333333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl border border-[#171717]"
+              >
+                <svg v-if="assignModal.loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                มอบหมายงาน
+              </button>
             </div>
           </div>
         </div>

@@ -51,10 +51,7 @@ const fetchReport = async () => {
 
 onMounted(() => fetchReport())
 
-const exportCsv = () => {
-  // Future: trigger CSV download from API
-  alert("เร็วๆ นี้", "ฟีเจอร์นี้จะพร้อมใช้งานเร็วๆ นี้", "info")
-}
+// exportCsv placeholder removed
 
 const formatCurrency = (n: number) => `฿${Number(n).toLocaleString("th-TH")}`
 const maxRevenue = computed(() => {
@@ -75,7 +72,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         <p class="mt-0.5 text-sm text-gray-500">ภาพรวมผลการดำเนินงานของ COOS Studio</p>
       </div>
       <div class="flex items-center gap-2">
-        <AdminActionButton variant="secondary" size="sm" @click="exportCsv" icon="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">Export CSV</AdminActionButton>
+
         <AdminActionButton variant="primary" size="sm" :loading="loading" @click="fetchReport">โหลดรายงาน</AdminActionButton>
       </div>
     </div>

@@ -135,6 +135,8 @@ const handleSave = async () => {
 }
 
 // ── Delete ─────────────────────────────────────────────────────
+const asPolicy = (row: Record<string, unknown>): Policy => row as unknown as Policy
+
 const openDelete = (policy: Policy) => {
   deleteDialog.value = { open: true, loading: false, policyId: policy.policyId, name: policy.policyTitle }
 }
@@ -161,7 +163,7 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-5 max-w-5xl mx-auto">
+  <div class="space-y-5 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
@@ -312,7 +314,7 @@ const breadcrumb = [
           <template #cell-action="{ row }">
             <div class="flex items-center justify-center gap-1.5">
               <AdminActionButton variant="secondary" size="sm" @click="activeTab = row.policyType; preview = false">แก้ไข</AdminActionButton>
-              <AdminActionButton variant="danger" size="sm" @click="openDelete(row)">ลบ</AdminActionButton>
+              <AdminActionButton variant="danger" size="sm" @click="openDelete(asPolicy(row))">ลบ</AdminActionButton>
             </div>
           </template>
         </AdminDataTable>

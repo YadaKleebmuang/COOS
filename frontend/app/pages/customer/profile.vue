@@ -1,55 +1,80 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue"
-import { useApi } from "~/composables/useApi"
+import { ref, reactive, onMounted } from 'vue'
+import { useApi } from '~/composables/useApi'
 
 definePageMeta({
-  layout: "customer",
-  middleware: ["auth", "customer"]
+  layout: 'customer',
+  middleware: ['auth', 'customer']
 })
 
-const token = useCookie<string | null>("token")
+const token = useCookie<string | null>('token')
 const { apiFetch } = useApi()
+
+interface ContactChannels {
+  facebook?: string
+  line?: string
+  tel?: string
+}
+
+interface ProfileResponse {
+  userFirstName?: string
+  userLastName?: string
+  userEmail?: string
+  userPhone?: string
+  userAddress?: string
+  userProfileImage?: string
+  userContactChannels?: ContactChannels
+}
+
+interface ProfileSaveResponse {
+  user?: {
+    userProfileImage?: string
+  }
+}
 
 const loading = ref(true)
 const saving = ref(false)
-const successMessage = ref("")
-const errorMessage = ref("")
+const successMessage = ref('')
+const errorMessage = ref('')
 
 const profileForm = reactive({
-  userFirstName: "",
-  userLastName: "",
-  userEmail: "", // Display only
-  userPhone: "",
-  userAddress: "",
-  userProfileImage: "",
-  facebook: "",
-  line: "",
-  tel: ""
+  userFirstName: '',
+  userLastName: '',
+  userEmail: '', // Display only
+  userPhone: '',
+  userAddress: '',
+  userProfileImage: '',
+  facebook: '',
+  line: '',
+  tel: ''
 })
 
 const profileImageFile = ref<File | null>(null)
-const previewImageUrl = ref("")
+const previewImageUrl = ref('')
+
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback
 
 // Fetch user profile
 const fetchProfile = async () => {
   loading.value = true
-  errorMessage.value = ""
+  errorMessage.value = ''
   try {
-    const data = await apiFetch("/users/me")
-    profileForm.userFirstName = data.userFirstName || ""
-    profileForm.userLastName = data.userLastName || ""
-    profileForm.userEmail = data.userEmail || ""
-    profileForm.userPhone = data.userPhone || ""
-    profileForm.userAddress = data.userAddress || ""
-    profileForm.userProfileImage = data.userProfileImage || ""
-    
+    const data = await apiFetch<ProfileResponse>('/users/me')
+    profileForm.userFirstName = data.userFirstName || ''
+    profileForm.userLastName = data.userLastName || ''
+    profileForm.userEmail = data.userEmail || ''
+    profileForm.userPhone = data.userPhone || ''
+    profileForm.userAddress = data.userAddress || ''
+    profileForm.userProfileImage = data.userProfileImage || ''
+
     // Parse contact channels
     const channels = data.userContactChannels || {}
-    profileForm.facebook = channels.facebook || ""
-    profileForm.line = channels.line || ""
-    profileForm.tel = channels.tel || ""
-  } catch (err: any) {
-    errorMessage.value = err?.message || "ไม่สามารถโหลดข้อมูลโปรไฟล์ได้"
+    profileForm.facebook = channels.facebook || ''
+    profileForm.line = channels.line || ''
+    profileForm.tel = channels.tel || ''
+  } catch (err: unknown) {
+    errorMessage.value = getErrorMessage(err, 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้')
   } finally {
     loading.value = false
   }
@@ -63,8 +88,8 @@ const handleImageChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
-    if (!file.type.startsWith("image/")) {
-      errorMessage.value = "กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น"
+    if (!file.type.startsWith('image/')) {
+      errorMessage.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
       return
     }
     profileImageFile.value = file
@@ -74,63 +99,62 @@ const handleImageChange = (event: Event) => {
 
 const saveProfile = async () => {
   saving.value = true
-  successMessage.value = ""
-  errorMessage.value = ""
-  
+  successMessage.value = ''
+  errorMessage.value = ''
+
   try {
     const formData = new FormData()
-    formData.append("userFirstName", profileForm.userFirstName)
-    formData.append("userLastName", profileForm.userLastName)
-    formData.append("userPhone", profileForm.userPhone)
-    formData.append("userAddress", profileForm.userAddress)
-    
+    formData.append('userFirstName', profileForm.userFirstName)
+    formData.append('userLastName', profileForm.userLastName)
+    formData.append('userPhone', profileForm.userPhone)
+    formData.append('userAddress', profileForm.userAddress)
+
     // Append contact channels as JSON string (backend controller parses it)
     const channels = {
       facebook: profileForm.facebook,
       line: profileForm.line,
       tel: profileForm.tel
     }
-    formData.append("userContactChannels", JSON.stringify(channels))
-    
+    formData.append('userContactChannels', JSON.stringify(channels))
+
     if (profileImageFile.value) {
-      formData.append("profileImage", profileImageFile.value)
+      formData.append('profileImage', profileImageFile.value)
     }
 
     const config = useRuntimeConfig()
     // Manual Fetch with FormData due to upload boundary handling
     const headers = new Headers()
     if (token.value) {
-      headers.set("Authorization", "Bearer " + token.value)
+      headers.set('Authorization', 'Bearer ' + token.value)
     }
-    
+
     const response = await fetch(`${config.public.apiBase}/users/me`, {
-      method: "PATCH",
+      method: 'PATCH',
       headers,
       body: formData
     })
-    
+
     if (!response.ok) {
-      const errRes = await response.json().catch(() => ({}))
-      throw new Error(errRes.message || "บันทึกโปรไฟล์ไม่สำเร็จ")
+      const errRes = await response.json().catch((): { message?: string } => ({}))
+      throw new Error(errRes.message || 'บันทึกโปรไฟล์ไม่สำเร็จ')
     }
 
-    const resData = await response.json()
-    successMessage.value = "บันทึกข้อมูลโปรไฟล์เรียบร้อยแล้ว!"
-    
+    const resData = await response.json() as ProfileSaveResponse
+    successMessage.value = 'บันทึกข้อมูลโปรไฟล์เรียบร้อยแล้ว!'
+
     // Refresh states and navbar values
     if (resData.user) {
-      profileForm.userProfileImage = resData.user.userProfileImage || ""
+      profileForm.userProfileImage = resData.user.userProfileImage || ''
     }
     profileImageFile.value = null
-    previewImageUrl.value = ""
-    
+    previewImageUrl.value = ''
+
     // Reload window helper to refresh layout navbar states
     setTimeout(() => {
       window.location.reload()
     }, 1200)
-    
-  } catch (err: any) {
-    errorMessage.value = err?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล"
+  } catch (err: unknown) {
+    errorMessage.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการบันทึกข้อมูล')
   } finally {
     saving.value = false
   }
@@ -138,49 +162,49 @@ const saveProfile = async () => {
 
 // ── Change Password State ──
 const passwordForm = reactive({
-  oldPassword: "",
-  newPassword: "",
-  confirmPassword: "",
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
 })
 const passwordSaving = ref(false)
-const passwordSuccess = ref("")
-const passwordError = ref("")
+const passwordSuccess = ref('')
+const passwordError = ref('')
 
 const changePassword = async () => {
-  passwordError.value = ""
-  passwordSuccess.value = ""
+  passwordError.value = ''
+  passwordSuccess.value = ''
 
   if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-    passwordError.value = "กรุณากรอกข้อมูลให้ครบถ้วน"
+    passwordError.value = 'กรุณากรอกข้อมูลให้ครบถ้วน'
     return
   }
-  
+
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    passwordError.value = "รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน"
+    passwordError.value = 'รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน'
     return
   }
 
   if (passwordForm.newPassword.length < 8) {
-    passwordError.value = "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร"
+    passwordError.value = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร'
     return
   }
 
   passwordSaving.value = true
   try {
-    await apiFetch("/users/me/password", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+    await apiFetch('/users/me/password', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         oldPassword: passwordForm.oldPassword,
-        newPassword: passwordForm.newPassword,
+        newPassword: passwordForm.newPassword
       })
     })
-    passwordSuccess.value = "เปลี่ยนรหัสผ่านสำเร็จ"
-    passwordForm.oldPassword = ""
-    passwordForm.newPassword = ""
-    passwordForm.confirmPassword = ""
-  } catch (err: any) {
-    passwordError.value = err?.message || "เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน"
+    passwordSuccess.value = 'เปลี่ยนรหัสผ่านสำเร็จ'
+    passwordForm.oldPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+  } catch (err: unknown) {
+    passwordError.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน')
   } finally {
     passwordSaving.value = false
   }
@@ -188,144 +212,369 @@ const changePassword = async () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto py-8">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">แก้ไขข้อมูลโปรไฟล์</h1>
-      <p class="text-gray-500 text-sm mt-1">อัปเดตข้อมูลส่วนตัว ช่องทางการติดต่อ และรูปโปรไฟล์ของคุณ</p>
+  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
+    <section class="relative overflow-hidden rounded-[24px] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] sm:p-8">
+      <div class="pointer-events-none absolute -right-20 -top-24 h-64 w-80 rounded-full bg-[#EDF3FF]/70 blur-[56px]" />
+      <div class="pointer-events-none absolute right-28 top-8 hidden h-44 w-44 rounded-full bg-[#F0EEFF]/70 blur-[54px] lg:block" />
+
+      <div class="relative z-10">
+        <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#666666]">
+          CUSTOMER PROFILE
+        </p>
+        <h1 class="text-[26px] font-semibold leading-[1.3] text-[#171717] sm:text-[30px]">
+          แก้ไขข้อมูลโปรไฟล์
+        </h1>
+        <p class="mt-2 max-w-2xl text-sm font-normal leading-[1.6] text-[#666666]">
+          อัปเดตข้อมูลส่วนตัว ช่องทางการติดต่อ และรูปโปรไฟล์ของคุณ
+        </p>
+      </div>
+    </section>
+
+    <div
+      v-if="loading"
+      class="mt-6 rounded-[24px] border border-black/[0.06] bg-white p-12 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+    >
+      <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
+      <p class="text-sm font-medium text-[#666666]">
+        กำลังโหลดข้อมูลโปรไฟล์...
+      </p>
     </div>
 
-    <div v-if="loading" class="bg-white rounded-2xl p-16 text-center border shadow-sm">
-      <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4"></div>
-      <p class="text-gray-400 font-medium">กำลังโหลดข้อมูลโปรไฟล์...</p>
-    </div>
+    <div
+      v-else
+      class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]"
+    >
+      <aside class="self-start rounded-[20px] border border-black/[0.06] bg-white p-6 text-center shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
+        <p class="mb-5 text-xs font-medium uppercase tracking-[0.22em] text-[#929292]">
+          รูปโปรไฟล์
+        </p>
 
-    <form v-else @submit.prevent="saveProfile" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Left Column: Avatar & Quick Info -->
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm flex flex-col items-center text-center space-y-6">
-        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">รูปโปรไฟล์</h3>
-        
-        <div class="relative group">
-          <div class="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-100 shadow bg-gray-50 flex items-center justify-center">
-            <img v-if="previewImageUrl" :src="previewImageUrl" class="w-full h-full object-cover" />
-            <img v-else-if="profileForm.userProfileImage" :src="profileForm.userProfileImage.startsWith('/') ? profileForm.userProfileImage : profileForm.userProfileImage" class="w-full h-full object-cover" />
-            <div v-else class="text-4xl text-gray-400 font-black">
-              {{ profileForm.userFirstName[0]?.toUpperCase() }}
+        <div class="mx-auto w-fit">
+          <div class="relative">
+            <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-black/[0.08] bg-[#F3F3F1] shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
+              <img
+                v-if="previewImageUrl"
+                :src="previewImageUrl"
+                alt="ตัวอย่างรูปโปรไฟล์ใหม่"
+                class="h-full w-full object-cover"
+              >
+              <img
+                v-else-if="profileForm.userProfileImage"
+                :src="profileForm.userProfileImage.startsWith('/') ? profileForm.userProfileImage : profileForm.userProfileImage"
+                alt="รูปโปรไฟล์"
+                class="h-full w-full object-cover"
+              >
+              <div
+                v-else
+                class="text-[40px] font-semibold uppercase text-[#929292]"
+              >
+                {{ profileForm.userFirstName[0] || 'C' }}
+              </div>
+            </div>
+            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25">
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.2"
+                d="M3 9a2 2 0 012-2h1.2l1.1-1.7A2 2 0 019 4.4h6a2 2 0 011.7.9L17.8 7H19a2 2 0 012 2v8.5a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              /><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.2"
+                d="M15.5 13a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z"
+              /></svg>
+              <input
+                type="file"
+                accept="image/*"
+                class="sr-only"
+                @change="handleImageChange"
+              >
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <p class="break-words text-lg font-semibold leading-[1.45] text-[#171717]">
+            {{ profileForm.userFirstName || 'Customer' }} {{ profileForm.userLastName }}
+          </p>
+          <p
+            class="mt-1 truncate text-sm leading-[1.5] text-[#666666]"
+            :title="profileForm.userEmail"
+          >
+            {{ profileForm.userEmail || '-' }}
+          </p>
+        </div>
+
+        <label class="mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-black/[0.08] bg-white px-4 text-sm font-semibold text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-black/[0.12] hover:bg-[#F3F3F1] focus-within:ring-2 focus-within:ring-[#756CE8]/25">
+          เปลี่ยนรูปโปรไฟล์
+          <input
+            type="file"
+            accept="image/*"
+            class="sr-only"
+            @change="handleImageChange"
+          >
+        </label>
+      </aside>
+
+      <div class="space-y-6">
+        <form
+          class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:p-6"
+          @submit.prevent="saveProfile"
+        >
+          <div class="mb-5 border-b border-black/[0.06] pb-4">
+            <h2 class="text-base font-semibold leading-[1.45] text-[#171717]">
+              ข้อมูลส่วนตัวทั่วไป
+            </h2>
+            <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+              ข้อมูลนี้ใช้สำหรับการติดต่อและการประสานงานคำสั่งซื้อ
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label
+                for="userFirstName"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >ชื่อจริง</label>
+              <input
+                id="userFirstName"
+                v-model="profileForm.userFirstName"
+                required
+                type="text"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+            <div>
+              <label
+                for="userLastName"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >นามสกุล</label>
+              <input
+                id="userLastName"
+                v-model="profileForm.userLastName"
+                required
+                type="text"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+
+            <div class="sm:col-span-2">
+              <label
+                for="userEmail"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >อีเมล</label>
+              <input
+                id="userEmail"
+                :value="profileForm.userEmail"
+                disabled
+                type="email"
+                class="h-12 w-full cursor-not-allowed rounded-xl border border-black/[0.06] bg-[#F3F3F1] px-4 text-sm text-[#666666] outline-none disabled:opacity-100"
+              >
+              <p class="mt-2 text-xs leading-[1.5] text-[#929292]">
+                อีเมลเป็นข้อมูลสำหรับเข้าสู่ระบบ จึงไม่สามารถแก้ไขได้จากหน้านี้
+              </p>
+            </div>
+
+            <div>
+              <label
+                for="userPhone"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >เบอร์โทรศัพท์</label>
+              <input
+                id="userPhone"
+                v-model="profileForm.userPhone"
+                type="text"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+            <div>
+              <label
+                for="tel"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >เบอร์ติดต่อช่องทางด่วน</label>
+              <input
+                id="tel"
+                v-model="profileForm.tel"
+                type="text"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+
+            <div class="sm:col-span-2">
+              <label
+                for="userAddress"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
+              <textarea
+                id="userAddress"
+                v-model="profileForm.userAddress"
+                rows="3"
+                class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              />
             </div>
           </div>
-          <label class="absolute bottom-0 right-0 w-9 h-9 bg-gray-900 hover:bg-gray-800 text-white rounded-full flex items-center justify-center cursor-pointer shadow-md transition group-hover:scale-105">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            <input type="file" accept="image/*" class="hidden" @change="handleImageChange" />
-          </label>
-        </div>
-        
-        <div>
-          <p class="font-bold text-gray-900 text-lg">{{ profileForm.userFirstName }} {{ profileForm.userLastName }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">{{ profileForm.userEmail }}</p>
-        </div>
+
+          <div class="mt-6 border-t border-black/[0.06] pt-5">
+            <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+              ช่องทางโซเชียลสำหรับการส่งงาน
+            </h3>
+            <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  for="facebook"
+                  class="mb-2 block text-sm font-semibold text-[#171717]"
+                >Facebook</label>
+                <input
+                  id="facebook"
+                  v-model="profileForm.facebook"
+                  type="text"
+                  placeholder="ชื่อ Facebook"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                >
+              </div>
+              <div>
+                <label
+                  for="line"
+                  class="mb-2 block text-sm font-semibold text-[#171717]"
+                >LINE ID</label>
+                <input
+                  id="line"
+                  v-model="profileForm.line"
+                  type="text"
+                  placeholder="ไลน์ไอดี"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="successMessage"
+            class="mt-5 rounded-xl border border-[#EDF8F1] bg-[#EDF8F1] px-4 py-3"
+          >
+            <p class="text-sm font-medium text-[#267A48]">
+              {{ successMessage }}
+            </p>
+          </div>
+          <div
+            v-if="errorMessage"
+            class="mt-5 rounded-xl border border-[#FDEEEE] bg-[#FDEEEE] px-4 py-3"
+          >
+            <p class="text-sm font-medium text-[#B93B3B]">
+              {{ errorMessage }}
+            </p>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              :disabled="saving"
+              type="submit"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span
+                v-if="saving"
+                class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              />
+              {{ saving ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง' }}
+            </button>
+          </div>
+        </form>
+
+        <form
+          class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:p-6"
+          @submit.prevent="changePassword"
+        >
+          <div class="mb-5 border-b border-black/[0.06] pb-4">
+            <h2 class="text-base font-semibold leading-[1.45] text-[#171717]">
+              เปลี่ยนรหัสผ่าน
+            </h2>
+            <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+              ใช้รหัสผ่านเดิมเพื่อยืนยันตัวตนก่อนตั้งรหัสผ่านใหม่
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label
+                for="oldPassword"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >รหัสผ่านเดิม</label>
+              <input
+                id="oldPassword"
+                v-model="passwordForm.oldPassword"
+                required
+                type="password"
+                placeholder="รหัสผ่านเดิม"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+            <div>
+              <label
+                for="newPassword"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >รหัสผ่านใหม่</label>
+              <input
+                id="newPassword"
+                v-model="passwordForm.newPassword"
+                required
+                type="password"
+                placeholder="รหัสผ่านใหม่"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+            <div>
+              <label
+                for="confirmPassword"
+                class="mb-2 block text-sm font-semibold text-[#171717]"
+              >ยืนยันรหัสผ่านใหม่</label>
+              <input
+                id="confirmPassword"
+                v-model="passwordForm.confirmPassword"
+                required
+                type="password"
+                placeholder="ยืนยันรหัสผ่านใหม่"
+                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              >
+            </div>
+          </div>
+
+          <div
+            v-if="passwordSuccess"
+            class="mt-5 rounded-xl border border-[#EDF8F1] bg-[#EDF8F1] px-4 py-3"
+          >
+            <p class="text-sm font-medium text-[#267A48]">
+              {{ passwordSuccess }}
+            </p>
+          </div>
+          <div
+            v-if="passwordError"
+            class="mt-5 rounded-xl border border-[#FDEEEE] bg-[#FDEEEE] px-4 py-3"
+          >
+            <p class="text-sm font-medium text-[#B93B3B]">
+              {{ passwordError }}
+            </p>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              :disabled="passwordSaving"
+              type="submit"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span
+                v-if="passwordSaving"
+                class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              />
+              {{ passwordSaving ? 'กำลังบันทึก...' : 'อัปเดตรหัสผ่าน' }}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <!-- Right Column: Profile Fields Form (Col Span 2) -->
-      <div class="md:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-6">
-        <h3 class="text-base font-bold text-gray-900 border-b border-gray-50 pb-3">ข้อมูลส่วนตัวทั่วไป</h3>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="userFirstName" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ชื่อจริง</label>
-            <input id="userFirstName" v-model="profileForm.userFirstName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-          <div>
-            <label for="userLastName" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">นามสกุล</label>
-            <input id="userLastName" v-model="profileForm.userLastName" required type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-        </div>
-
-        <div>
-          <label for="userEmail" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">อีเมล (ไม่สามารถเปลี่ยนได้)</label>
-          <input id="userEmail" :value="profileForm.userEmail" disabled type="email" class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed" />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="userPhone" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์โทรศัพท์</label>
-            <input id="userPhone" v-model="profileForm.userPhone" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-          <div>
-            <label for="tel" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">เบอร์ติดต่อช่องทางด่วน (Tel)</label>
-            <input id="tel" v-model="profileForm.tel" type="text" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-        </div>
-
-        <div>
-          <label for="userAddress" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
-          <textarea id="userAddress" v-model="profileForm.userAddress" rows="2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition resize-none" />
-        </div>
-
-        <h3 class="text-base font-bold text-gray-900 border-b border-gray-50 pb-3 pt-4">ช่องทางโซเชียลสำหรับการส่งงาน</h3>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="facebook" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Facebook Profile</label>
-            <input id="facebook" v-model="profileForm.facebook" type="text" placeholder="ชื่อ Facebook" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-          <div>
-            <label for="line" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Line ID</label>
-            <input id="line" v-model="profileForm.line" type="text" placeholder="ไลน์ไอดี" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-        </div>
-
-        <!-- Success/Error alert box -->
-        <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-          <p class="text-green-600 text-xs font-bold text-center">✓ {{ successMessage }}</p>
-        </div>
-        <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-          <p class="text-red-600 text-xs font-bold text-center">⚠️ {{ errorMessage }}</p>
-        </div>
-
-        <div class="flex justify-end pt-4">
-          <button :disabled="saving" type="submit" class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition duration-200 shadow flex items-center gap-2">
-            <span v-if="saving" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-            {{ saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง" }}
-          </button>
-        </div>
-      </div>
-    </form>
-
-    <!-- Change Password Section -->
-    <form @submit.prevent="changePassword" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-      <div class="md:col-start-2 md:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm space-y-6">
-        <h3 class="text-base font-bold text-gray-900 border-b border-gray-50 pb-3">เปลี่ยนรหัสผ่าน</h3>
-        
-        <div>
-          <label for="oldPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">รหัสผ่านเดิม</label>
-          <input id="oldPassword" v-model="passwordForm.oldPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="newPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">รหัสผ่านใหม่</label>
-            <input id="newPassword" v-model="passwordForm.newPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-          <div>
-            <label for="confirmPassword" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">ยืนยันรหัสผ่านใหม่</label>
-            <input id="confirmPassword" v-model="passwordForm.confirmPassword" required type="password" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900 transition" />
-          </div>
-        </div>
-
-        <!-- Success/Error alert box -->
-        <div v-if="passwordSuccess" class="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-          <p class="text-green-600 text-xs font-bold text-center">✓ {{ passwordSuccess }}</p>
-        </div>
-        <div v-if="passwordError" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-          <p class="text-red-600 text-xs font-bold text-center">⚠️ {{ passwordError }}</p>
-        </div>
-
-        <div class="flex justify-end pt-4">
-          <button :disabled="passwordSaving" type="submit" class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition duration-200 shadow flex items-center gap-2">
-            <span v-if="passwordSaving" class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-            {{ passwordSaving ? "กำลังบันทึก..." : "อัปเดตรหัสผ่าน" }}
-          </button>
-        </div>
-      </div>
-    </form>
+    </div>
   </div>
 </template>

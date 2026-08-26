@@ -104,25 +104,25 @@ const menuItems = computed<SidebarItem[]>(() => {
 </script>
 
 <template>
-  <aside class="hidden lg:flex w-60 bg-white text-gray-600 min-h-screen flex-col border-r border-gray-200 flex-shrink-0">
+  <aside class="hidden lg:flex w-60 bg-white/84 backdrop-blur-[16px] text-gray-600 min-h-screen flex-col border-r border-[#EFEFEA]/60 flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.015)]">
 
     <!-- Brand Logo -->
-    <div class="h-14 flex items-center px-5 border-b border-gray-100 gap-2.5 flex-shrink-0">
-      <div class="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white flex-shrink-0">
+    <div class="h-16 flex items-center px-5 border-b border-[#EFEFEA]/60 gap-2.5 flex-shrink-0">
+      <div class="w-7 h-7 rounded-lg bg-[#171717] flex items-center justify-center text-white flex-shrink-0">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
       <div>
-        <p class="text-sm font-bold text-gray-900 leading-none">COOS Studio</p>
-        <p class="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">{{ role === 'editor' ? 'Editor Workspace' : 'Dashboard' }}</p>
+        <p class="text-sm font-bold text-[#171717] leading-none">COOS Studio</p>
+        <p class="text-[10px] text-[#9A9A95] mt-0.5 uppercase tracking-wider">{{ role === 'editor' ? 'Editor Workspace' : 'Dashboard' }}</p>
       </div>
     </div>
 
     <!-- Navigation List -->
-    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-4">
       <div>
-        <p class="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 select-none">
+        <p class="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#9A9A95] select-none">
           เมนูหลัก
         </p>
         <div class="space-y-0.5">
@@ -130,17 +130,17 @@ const menuItems = computed<SidebarItem[]>(() => {
             v-for="item in menuItems"
             :key="item.path"
             :to="item.path"
-            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 border border-transparent"
             :class="[
               $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
-                ? 'bg-gray-900 text-white shadow-sm hover:bg-gray-900 hover:text-white'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-[#EFEFEA] text-[#171717] font-bold border-[#EFEFEA] shadow-[0_2px_8px_rgba(0,0,0,0.01)] border border-white/50'
+                : 'text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717]'
             ]"
           >
             <!-- Icon -->
             <svg
               class="w-4 h-4 flex-shrink-0"
-              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-white' : 'text-gray-400']"
+              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-[#171717]' : 'text-[#9A9A95]']"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
@@ -152,8 +152,8 @@ const menuItems = computed<SidebarItem[]>(() => {
     </nav>
 
     <!-- Footer -->
-    <div class="px-4 py-3 border-t border-gray-100 flex-shrink-0">
-      <p class="text-[10px] text-gray-400 text-center">COOS © 2025</p>
+    <div class="px-4 py-3 border-t border-[#EFEFEA]/60 flex-shrink-0">
+      <p class="text-[10px] text-[#9A9A95] text-center">COOS © 2025</p>
     </div>
   </aside>
 </template>

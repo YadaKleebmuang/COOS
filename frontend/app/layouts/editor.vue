@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gray-50 font-sans">
+  <div class="flex min-h-screen bg-[#F7F7F5] font-sans">
     <LayoutSidebarDashboard role="editor" />
     <div class="flex-grow flex flex-col min-w-0">
       <LayoutNavbarStaff role="editor" />

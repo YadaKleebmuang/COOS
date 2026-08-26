@@ -13,7 +13,7 @@ A mid-tier model that follows this loop beats a stronger model that free-styles:
 /fable-method report       rewrite the answer you were about to send per Step 6
 ```
 
-Deeper material loads on demand: `references/failure-modes.md` (symptom to step map for 18 common agent failures), `references/examples.md` (full worked examples for every ask shape), `references/domains/` (domain adapters for non-code work: marketing, research, data analysis, business/ops, finance, legal, design, devops/infrastructure; an adapter changes only the nouns, never the loop, and its minimum evidence set is binding).
+The loop is self-contained. Use repository sources and relevant project documentation as primary evidence.
 
 **Triviality gate (run first).** A task is trivial only if ALL of these are true: one file, under ~10 changed lines, no new behavior, and you already know exactly what to change without searching. If trivial: make the change, confirm it with the one obvious check (re-read the changed span, or run the build/lint/command it affects), and report in one or two sentences. Everything else, and anything you are unsure about, gets the full loop.
 
@@ -118,6 +118,6 @@ Step 0: assessment; change nothing. Step 1: done = a cause backed by observation
 
 **plan** - run Steps 0 to 3 and stop. Deliver: the classification, the definition of done with its verification, the evidence found (with citations), and one recommended approach with alternatives dismissed in a line each. Do not touch any file.
 
-**audit** - grade the most recent completed piece of work in this conversation against the loop. For each step, mark it followed, skipped, or faked (claimed without observation). For every skip or fake, name the concrete risk it created; `references/failure-modes.md` maps symptoms to steps. Deliver a short table plus the single highest-value fix, and apply that fix only if the user asks.
+**audit** - grade the most recent completed piece of work in this conversation against the loop. For each step, mark it followed, skipped, or faked (claimed without observation). For every skip or fake, name the concrete risk created by that omission. Deliver a short table plus the single highest-value fix, and apply that fix only if the user asks.
 
 **report** - apply the Step 6 checklist to the answer you were about to send: outcome in the first sentence, load-bearing quotes only, caveats present, follow-ups only if they emerged from the work, hostile-reviewer reread done. Rewrite it, do not send the original.
