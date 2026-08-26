@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { useApi } from "~/composables/useApi"
-import type { Package } from "~/types/order.types"
+import { ref, onMounted } from 'vue'
+import { useApi } from '~/composables/useApi'
+import type { Package } from '~/types/order.types'
 
 definePageMeta({
-  layout: "default"
+  layout: 'default'
 })
 
 const { apiFetch } = useApi()
 
-const featuredImages = ref<any[]>([])
+type GalleryImage = {
+  imageId?: number | string
+  imageUrl?: string
+  imageTitle?: string
+  imageDescription?: string
+  imageTags?: string
+  workTypeId?: number
+  workTypeName?: string
+}
+
+const featuredImages = ref<GalleryImage[]>([])
 const packages = ref<Package[]>([])
 const loading = ref(true)
 
-const selectedImage = ref<any>(null)
+const selectedImage = ref<GalleryImage | null>(null)
 const isDetailsModalOpen = ref(false)
 
-const openDetails = (img: any) => {
+const openDetails = (img: GalleryImage) => {
   selectedImage.value = img
   isDetailsModalOpen.value = true
 }
@@ -24,8 +34,8 @@ const openDetails = (img: any) => {
 const loadData = async () => {
   try {
     const [imgData, pkgData] = await Promise.all([
-      apiFetch<any[]>("/gallery-images").catch(() => []),
-      apiFetch<Package[]>("/packages").catch(() => [])
+      apiFetch<GalleryImage[]>('/gallery-images').catch(() => []),
+      apiFetch<Package[]>('/packages').catch(() => [])
     ])
 
     // เอาแค่ 3 รูปล่าสุด
@@ -33,7 +43,7 @@ const loadData = async () => {
     // แพ็กเกจเอาเฉพาะที่เปิดใช้งาน
     packages.value = pkgData.filter(p => p.packageIsActive === 1)
   } catch (error) {
-    console.error("Failed to load landing data", error)
+    console.error('Failed to load landing data', error)
   } finally {
     loading.value = false
   }
@@ -45,172 +55,314 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-white">
+  <div class="coos-page">
     <!-- Hero Section -->
-    <section class="relative bg-gray-50/50 overflow-hidden py-24 md:py-32">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <!-- Text column -->
-          <div class="text-left space-y-6">
-            <span
-              class="inline-block bg-gray-100 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-gray-200">
-              COOS — Creative Order & Online Studio
-            </span>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
-              สั่งทำภาพสไตล์ที่คุณต้องการ<br class="hidden sm:block" />
-              ง่าย รวดเร็ว โปร่งใส
-            </h1>
-            <p class="text-base md:text-lg text-gray-500 leading-relaxed max-w-xl">
-              เลือกสไตล์จากแกลเลอรี เลือกแพ็กเกจ อัปโหลดภาพต้นฉบับ แล้วให้ทีมของเรานำเสนอผลงานให้คุณคัดเลือก
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
-              <NuxtLink to="/customer/orders/create"
-                class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-xl shadow hover:shadow-lg transition-all text-center text-sm">
-                เริ่มสั่งงาน
-              </NuxtLink>
-              <NuxtLink to="/gallery"
-                class="bg-white border border-gray-200 hover:border-gray-900 text-gray-900 font-bold py-4 px-8 rounded-xl shadow-sm hover:shadow transition-all text-center text-sm">
-                ดูแกลเลอรี
-              </NuxtLink>
+    <section class="relative overflow-hidden pb-12 pt-10 md:pb-16 md:pt-14">
+      <div class="coos-shell">
+        <div class="coos-panel relative overflow-hidden px-6 py-10 md:px-12 md:py-14 lg:min-h-[560px]">
+          <div class="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+            <div class="relative z-10 max-w-xl text-left">
+              <p class="coos-kicker mb-5">
+                COOS STUDIO
+              </p>
+              <h1 class="text-4xl font-black leading-[1.18] tracking-tight text-black md:text-6xl">
+                เปลี่ยนไอเดียของคุณ<br class="hidden sm:block">
+                ให้กลายเป็นภาพที่ใช่
+              </h1>
+              <p class="mt-5 max-w-lg text-base leading-8 text-neutral-600">
+                เลือกสไตล์จากแกลเลอรี เลือกแพ็กเกจ อัปโหลดภาพต้นฉบับ แล้วให้ทีมของเรานำเสนอผลงานให้คุณคัดเลือก
+              </p>
+              <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+                <NuxtLink
+                  to="/customer/orders/create"
+                  class="coos-button-dark"
+                >
+                  เริ่มสั่งงาน
+                </NuxtLink>
+                <NuxtLink
+                  to="/gallery"
+                  class="coos-button-light"
+                >
+                  ดูผลงาน
+                </NuxtLink>
+              </div>
+            </div>
+            <div class="relative min-h-[360px] lg:min-h-[500px]">
+              <img
+                src="https://images.unsplash.com/photo-1496440737103-cd596325d314?w=900&auto=format&fit=crop&q=85"
+                alt="COOS Studio portrait preview"
+                class="absolute inset-0 h-full w-full rounded-[1.4rem] object-cover object-center shadow-[0_24px_80px_rgba(15,15,15,0.18)]"
+              >
+              <div class="absolute inset-0 rounded-[1.4rem] bg-gradient-to-r from-white/45 via-transparent to-white/10" />
             </div>
           </div>
-          <!-- Grid of Images column -->
-          <div class="grid grid-cols-2 gap-4">
-            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=500&auto=format&fit=crop&q=80"
-              alt="COOS B&W 1"
-              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
-            <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=500&auto=format&fit=crop&q=80"
-              alt="COOS B&W 2"
-              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
-            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500&auto=format&fit=crop&q=80"
-              alt="COOS B&W 3"
-              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
-            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&auto=format&fit=crop&q=80"
-              alt="COOS B&W 4"
-              class="rounded-3xl w-full h-48 object-cover shadow-sm grayscale hover:grayscale-0 transition-all duration-500" />
+
+          <div class="coos-panel relative z-10 mt-8 grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-lg">
+                ✦
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-black">
+                  คุณภาพสูง
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  เก็บทุกรายละเอียด
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-lg">
+                ⌁
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-black">
+                  สั่งงานง่าย
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  ไม่ซับซ้อน
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-lg">
+                □
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-black">
+                  ติดตามงานได้
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  อัปเดตทุกขั้นตอน
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-lg">
+                ◇
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-black">
+                  ปลอดภัย
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  ข้อมูลของคุณปลอดภัย
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Latest Works Section -->
-    <section class="py-2 bg-gray-50/50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-end mb-12">
+    <section class="py-10">
+      <div class="coos-shell">
+        <div class="mb-6 flex items-end justify-between gap-4">
           <div class="text-left">
-            <h3 class="text-2xl font-bold text-gray-900 mb-1">ผลงานล่าสุด</h3>
-            <p class="text-sm text-gray-500">ตัวอย่างสไตล์ที่ลูกค้าเลือกใช้บริการ</p>
+            <h3 class="coos-section-title">
+              ผลงานล่าสุด
+            </h3>
+            <p class="mt-2 text-sm text-neutral-500">
+              ตัวอย่างสไตล์ที่ลูกค้าเลือกใช้บริการ
+            </p>
           </div>
-          <NuxtLink to="/gallery"
-            class="flex items-center text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+          <NuxtLink
+            to="/gallery"
+            class="flex shrink-0 items-center text-sm font-bold text-neutral-700 hover:text-black transition-colors"
+          >
             ดูทั้งหมด
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+            <svg
+              class="w-4 h-4 ml-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </NuxtLink>
         </div>
 
-        <div v-if="loading" class="flex justify-center py-12">
-          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        <div
+          v-if="loading"
+          class="flex justify-center py-12"
+        >
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full" />
         </div>
 
-        <div v-else-if="featuredImages.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="img in featuredImages" :key="img.imageId">
-            <GalleryImageCard :img="img" @view-details="openDetails" />
+        <div
+          v-else-if="featuredImages.length > 0"
+          class="grid grid-cols-1 gap-6 md:grid-cols-3"
+        >
+          <div
+            v-for="img in featuredImages"
+            :key="img.imageId"
+          >
+            <GalleryImageCard
+              :img="img"
+              @view-details="openDetails"
+            />
           </div>
         </div>
 
-        <div v-else class="text-center py-12">
-          <p class="text-gray-500 text-sm">ยังไม่มีผลงานแสดงในขณะนี้</p>
+        <div
+          v-else
+          class="text-center py-12"
+        >
+          <p class="text-gray-500 text-sm">
+            ยังไม่มีผลงานแสดงในขณะนี้
+          </p>
         </div>
       </div>
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="py-16 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-left mb-16 border-b border-gray-100 pb-2">
-          <h3 class="text-xl font-bold text-gray-900 mb-1">ขั้นตอนการใช้งาน</h3>
-          <p class="text-sm text-gray-500">4 ขั้นตอนง่ายๆ จากไอเดียถึงผลงาน</p>
+    <section
+      id="how-it-works"
+      class="py-10"
+    >
+      <div class="coos-shell">
+        <div class="mb-10 text-left">
+          <h3 class="coos-section-title">
+            ขั้นตอนการสั่งงาน
+          </h3>
+          <p class="mt-2 text-sm text-neutral-500">
+            4 ขั้นตอนง่ายๆ จากไอเดียถึงผลงาน
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="coos-panel grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-4 lg:p-8">
           <!-- Step 1 -->
           <div
-            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            class="text-left"
+          >
             <div
-              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
-              1</div>
-            <h4 class="text-base font-bold text-gray-900 mb-2">เลือกสไตล์</h4>
-            <p class="text-xs text-gray-500 leading-relaxed">ดูตัวอย่างในแกลเลอรีและเลือกแนวที่คุณชอบ</p>
+              class="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-black text-black shadow-sm"
+            >
+              1
+            </div>
+            <h4 class="mb-2 text-base font-bold text-black">
+              เลือกสไตล์
+            </h4>
+            <p class="text-sm leading-7 text-neutral-500">
+              ดูตัวอย่างในแกลเลอรีและเลือกแนวที่คุณชอบ
+            </p>
           </div>
           <!-- Step 2 -->
           <div
-            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            class="text-left"
+          >
             <div
-              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
-              2</div>
-            <h4 class="text-base font-bold text-gray-900 mb-2">เลือกแพ็กเกจ</h4>
-            <p class="text-xs text-gray-500 leading-relaxed">Basic, Standard หรือ Pro ตามความต้องการ</p>
+              class="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-black text-black shadow-sm"
+            >
+              2
+            </div>
+            <h4 class="mb-2 text-base font-bold text-black">
+              เลือกแพ็กเกจ
+            </h4>
+            <p class="text-sm leading-7 text-neutral-500">
+              Basic, Standard หรือ Pro ตามความต้องการ
+            </p>
           </div>
           <!-- Step 3 -->
           <div
-            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            class="text-left"
+          >
             <div
-              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
-              3</div>
-            <h4 class="text-base font-bold text-gray-900 mb-2">อัปโหลดภาพต้นฉบับ</h4>
-            <p class="text-xs text-gray-500 leading-relaxed">ส่งภาพอ้างอิงและรายละเอียดให้กับทีมงาน</p>
+              class="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-black text-black shadow-sm"
+            >
+              3
+            </div>
+            <h4 class="mb-2 text-base font-bold text-black">
+              อัปโหลดภาพต้นฉบับ
+            </h4>
+            <p class="text-sm leading-7 text-neutral-500">
+              ส่งภาพอ้างอิงและรายละเอียดให้กับทีมงาน
+            </p>
           </div>
           <!-- Step 4 -->
           <div
-            class="bg-white border border-gray-100 p-8 rounded-3xl text-left hover:border-gray-900 transition-all duration-300 relative shadow-sm">
+            class="text-left"
+          >
             <div
-              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 mb-6 border border-gray-100">
-              4</div>
-            <h4 class="text-base font-bold text-gray-900 mb-2">รับผลงาน</h4>
-            <p class="text-xs text-gray-500 leading-relaxed">คัดเลือกภาพและดาวน์โหลดเมื่อพร้อม</p>
+              class="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-black text-black shadow-sm"
+            >
+              4
+            </div>
+            <h4 class="mb-2 text-base font-bold text-black">
+              รับผลงาน
+            </h4>
+            <p class="text-sm leading-7 text-neutral-500">
+              คัดเลือกภาพและดาวน์โหลดเมื่อพร้อม
+            </p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Packages Section -->
-    <section id="packages" class="py-2 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-left mb-16 border-b border-gray-100 pb-2">
-          <h3 class="text-xl font-bold text-gray-900 mb-1">แพ็กเกจบริการ</h3>
-          <p class="text-sm text-gray-500">เลือกแพ็กเกจที่เหมาะสมกับงานของคุณ</p>
+    <section
+      id="packages"
+      class="py-10"
+    >
+      <div class="coos-shell">
+        <div class="mb-8 text-left">
+          <h3 class="coos-section-title">
+            แพ็กเกจบริการ
+          </h3>
+          <p class="mt-2 text-sm text-neutral-500">
+            เลือกแพ็กเกจที่เหมาะสมกับงานของคุณ
+          </p>
         </div>
 
-        <div v-if="loading" class="flex justify-center py-12">
-          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full"></div>
+        <div
+          v-if="loading"
+          class="flex justify-center py-12"
+        >
+          <div class="animate-spin w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full" />
         </div>
 
-        <div v-else-if="packages.length > 0" class="space-y-12">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div v-for="pkg in packages" :key="pkg.packageId"
-              class="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col hover:border-gray-900 hover:shadow-xl transition-all duration-300 relative">
+        <div
+          v-else-if="packages.length > 0"
+          class="space-y-12"
+        >
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div
+              v-for="pkg in packages"
+              :key="pkg.packageId"
+              class="coos-card coos-card-hover relative flex flex-col p-7"
+            >
               <!-- Badge container to keep heights identical -->
               <div class="h-8 mb-2 flex items-center">
-                <span v-if="pkg.packageName === 'Standard'"
-                  class="bg-gray-50 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border border-gray-200">
+                <span
+                  v-if="pkg.packageName === 'Standard'"
+                  class="bg-gray-50 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border border-gray-200"
+                >
                   ยอดนิยม
                 </span>
               </div>
 
               <!-- Header Row -->
               <div class="flex justify-between items-baseline mb-2">
-                <h4 class="text-2xl font-bold text-gray-900">{{ pkg.packageName }}</h4>
+                <h4 class="text-2xl font-black text-black">
+                  {{ pkg.packageName }}
+                </h4>
                 <div class="flex items-baseline gap-1">
-                  <span class="text-3xl font-extrabold text-gray-900">{{ Math.round(pkg.packagePrice).toLocaleString()
-                    }}</span>
+                  <span class="text-3xl font-black text-black">{{ Math.round(pkg.packagePrice).toLocaleString()
+                  }}</span>
                   <span class="text-xs text-gray-500 font-semibold uppercase">THB</span>
                 </div>
               </div>
 
-              <p class="text-gray-500 text-sm mb-6 flex-grow leading-relaxed">{{ pkg.packageDescription ||
-                'ไม่มีคำอธิบาย' }}</p>
+              <p class="text-neutral-500 text-sm mb-6 flex-grow leading-7">
+                {{ pkg.packageDescription
+                  || 'ไม่มีคำอธิบาย' }}
+              </p>
 
               <!-- Specs List -->
               <div class="border-t border-gray-100 my-6 pt-6">
@@ -234,23 +386,53 @@ onMounted(() => {
                 </div>
               </div>
 
-              <NuxtLink :to="`/customer/orders/create?packageId=${pkg.packageId}`"
-                class="w-full mt-auto border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-900 text-gray-900 font-semibold py-3.5 px-6 rounded-2xl text-center transition-all text-sm shadow-sm hover:shadow">
+              <NuxtLink
+                :to="`/customer/orders/create?packageId=${pkg.packageId}`"
+                class="coos-button-light mt-auto w-full"
+              >
                 เลือกแพ็กเกจนี้
               </NuxtLink>
             </div>
           </div>
-
-
         </div>
 
-        <div v-else class="text-center py-12">
-          <p class="text-gray-500 text-sm">ไม่มีข้อมูลแพ็กเกจในขณะนี้</p>
+        <div
+          v-else
+          class="text-center py-12"
+        >
+          <p class="text-gray-500 text-sm">
+            ไม่มีข้อมูลแพ็กเกจในขณะนี้
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-10">
+      <div class="coos-shell">
+        <div class="coos-panel grid items-center gap-6 overflow-hidden p-7 md:grid-cols-[1fr_auto] md:p-10">
+          <div>
+            <h3 class="text-2xl font-black tracking-tight text-black">
+              พร้อมเริ่มงานกับเราแล้วหรือยัง?
+            </h3>
+            <p class="mt-2 text-sm leading-7 text-neutral-500">
+              ให้เราช่วยสร้างสรรค์ผลงานที่ใช่สำหรับคุณ
+            </p>
+          </div>
+          <NuxtLink
+            to="/customer/orders/create"
+            class="coos-button-dark"
+          >
+            เริ่มสั่งงานเลย
+          </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- Details Modal -->
-    <GalleryDetailsModal :img="selectedImage" :is-open="isDetailsModalOpen" @close="isDetailsModalOpen = false" />
+    <GalleryDetailsModal
+      :img="selectedImage"
+      :is-open="isDetailsModalOpen"
+      @close="isDetailsModalOpen = false"
+    />
   </div>
 </template>

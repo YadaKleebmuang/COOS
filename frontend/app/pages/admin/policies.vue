@@ -161,7 +161,7 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-5 max-w-5xl mx-auto">
+  <div class="space-y-5 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>

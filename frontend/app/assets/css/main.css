@@ -7,8 +7,8 @@
 html,
 body {
   font-family: "Noto Sans Thai", "Inter", sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  background: #f7f7f5;
+  color: #080808;
   font-feature-settings: "liga" 1, "kern" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,4 +17,49 @@ body {
 
 * {
   font-family: inherit;
+}
+
+@layer components {
+  .coos-page {
+    @apply bg-[#f7f7f5] text-neutral-950;
+    background-image:
+      radial-gradient(circle at 16% 8%, rgba(255, 255, 255, 0.98), transparent 34%),
+      radial-gradient(circle at 88% 22%, rgba(255, 255, 255, 0.85), transparent 28%);
+  }
+
+  .coos-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .coos-panel {
+    @apply rounded-[1.4rem] border border-black/5 bg-white/[0.88] shadow-[0_18px_60px_rgba(15,15,15,0.08)] backdrop-blur-xl;
+  }
+
+  .coos-card {
+    @apply rounded-2xl border border-black/5 bg-white shadow-[0_14px_44px_rgba(15,15,15,0.07)] transition-all duration-300;
+  }
+
+  .coos-card-hover {
+    @apply hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(15,15,15,0.11)];
+  }
+
+  .coos-button-dark {
+    @apply inline-flex items-center justify-center rounded-xl bg-black px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition-all duration-300 hover:bg-neutral-800 hover:shadow-[0_16px_34px_rgba(0,0,0,0.28)] disabled:bg-neutral-300 disabled:shadow-none;
+  }
+
+  .coos-button-light {
+    @apply inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-6 py-3 text-sm font-bold text-neutral-950 shadow-[0_10px_28px_rgba(15,15,15,0.06)] transition-all duration-300 hover:border-black/20 hover:bg-neutral-50 hover:shadow-[0_14px_34px_rgba(15,15,15,0.1)];
+  }
+
+  .coos-input {
+    @apply w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-neutral-950 shadow-[0_8px_26px_rgba(15,15,15,0.04)] transition-all placeholder:text-neutral-400 focus:border-black focus:outline-none focus:ring-2 focus:ring-black/10;
+  }
+
+  .coos-kicker {
+    @apply text-[11px] font-bold uppercase tracking-[0.24em] text-neutral-600;
+  }
+
+  .coos-section-title {
+    @apply text-2xl font-extrabold tracking-tight text-neutral-950 md:text-3xl;
+  }
 }

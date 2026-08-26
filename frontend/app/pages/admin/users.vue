@@ -59,7 +59,7 @@ const handlePageChange = (page: number) => {
 const roleOptions = [
   { key: "all", label: "ทั้งหมด" },
   { key: "admin", label: "ผู้ดูแลระบบ" },
-  { key: "editor", label: "Editor" },
+  { key: "editor", label: "นักออกแบบ" },
   { key: "customer", label: "ลูกค้า" }
 ]
 
@@ -159,12 +159,12 @@ const confirmDelete = async () => {
 
 // ── Helpers ────────────────────────────────────────────────────
 const roleBadgeClass = (role: string) => ({
-  admin: "bg-gray-900 text-white border-gray-900",
-  editor: "bg-gray-200 text-gray-800 border-gray-300",
-  customer: "bg-white text-gray-600 border-gray-200"
-}[role] ?? "bg-gray-100 text-gray-500 border-gray-200")
+  admin: "bg-[#171717] text-white border-transparent",
+  editor: "bg-[#EFEFEA] text-[#171717] border-white/50 shadow-[0_1px_4px_rgba(0,0,0,0.005)]",
+  customer: "bg-[#F7F7F5] text-[#9A9A95] border-[#EFEFEA]"
+}[role] ?? "bg-[#F7F7F5] text-[#9A9A95] border-[#EFEFEA]")
 
-const roleLabel = (role: string) => ({ admin: "Admin", editor: "Editor", customer: "ลูกค้า" }[role] ?? role)
+const roleLabel = (role: string) => ({ admin: "ผู้ดูแลระบบ", editor: "นักออกแบบ", customer: "ลูกค้า" }[role] ?? role)
 
 const formatDate = (d: string) => d ? new Date(d).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "—"
 
@@ -177,140 +177,173 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-5 max-w-7xl mx-auto">
+  <div class="space-y-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-xl font-bold text-gray-900">จัดการบัญชีผู้ใช้</h1>
-        <p class="mt-0.5 text-sm text-gray-500">ดูรายชื่อสมาชิก ลูกค้า Editor และผู้ดูแลระบบทั้งหมด</p>
+        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">บัญชีผู้ใช้</h1>
+        <p class="mt-0.5 text-xs text-[#9A9A95]">จัดการบัญชีลูกค้า นักออกแบบ และผู้ดูแลระบบ</p>
       </div>
       <AdminActionButton variant="primary" size="sm" icon="M12 4v16m8-8H4" @click="openAdd">
         เพิ่มผู้ใช้ใหม่
       </AdminActionButton>
     </div>
 
-    <!-- Search + Filter -->
-    <div class="flex flex-col sm:flex-row gap-3">
-      <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 flex-1 max-w-sm">
-        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อ, อีเมล..." class="text-sm text-gray-700 bg-transparent outline-none flex-1 placeholder:text-gray-400" />
+    <!-- Filter + Search Toolbar -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+      <div class="overflow-x-auto flex-grow">
+        <AdminFilterBar v-model="roleFilter" :filters="roleOptions" />
       </div>
-      <AdminFilterBar v-model="roleFilter" :filters="roleOptions" />
-      <AdminActionButton variant="secondary" size="sm" icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" :loading="loading" @click="fetchUsers">รีเฟรช</AdminActionButton>
+      <div class="flex-shrink-0 flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-[#171717]/30 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all">
+          <svg class="w-4 h-4 text-[#9A9A95] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อ, อีเมล..." class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"/>
+        </div>
+        <AdminActionButton variant="secondary" size="sm" icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" :loading="loading" @click="() => fetchUsers(currentPage)">รีเฟรช</AdminActionButton>
+      </div>
     </div>
 
     <!-- Error -->
-    <div v-if="error" class="bg-white border border-red-200 rounded-xl p-6 text-center">
+    <div v-if="error" class="bg-white border border-red-100 rounded-2xl p-6 text-center">
       <p class="text-sm text-red-600">{{ error }}</p>
     </div>
 
     <!-- Table -->
-    <div v-else class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <AdminDataTable :columns="columns" :rows="filteredUsers" :loading="loading" row-key="userId">
-        <!-- Avatar + Name -->
-        <template #cell-avatar="{ row }">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
-              {{ initials(row as any) }}
+    <div v-else class="space-y-4">
+      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
+        <AdminDataTable :columns="columns" :rows="filteredUsers" :loading="loading" row-key="userId">
+          <!-- Avatar + Name -->
+          <template #cell-avatar="{ row }">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-[#EFEFEA] border border-white/50 flex items-center justify-center text-xs font-bold text-[#171717] flex-shrink-0 shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                {{ initials(row as any) }}
+              </div>
+              <span class="text-xs font-bold text-[#171717]">{{ row.userFirstName }} {{ row.userLastName }}</span>
             </div>
-            <span class="text-sm font-medium text-gray-900">{{ row.userFirstName }} {{ row.userLastName }}</span>
-          </div>
-        </template>
-        <!-- Email -->
-        <template #cell-userEmail="{ value }">
-          <span class="text-xs text-gray-600">{{ value }}</span>
-        </template>
-        <!-- Phone -->
-        <template #cell-userPhone="{ value }">
-          <span class="text-xs text-gray-500">{{ value || "—" }}</span>
-        </template>
-        <!-- Role badge -->
-        <template #cell-userRole="{ value }">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="roleBadgeClass(value)">
-            {{ roleLabel(value) }}
-          </span>
-        </template>
-        <!-- Date -->
-        <template #cell-userCreatedAt="{ value }">
-          <span class="text-xs text-gray-400">{{ formatDate(value) }}</span>
-        </template>
-        <!-- Actions -->
-        <template #cell-action="{ row }">
-          <div class="flex items-center justify-center gap-1.5">
-            <AdminActionButton variant="secondary" size="sm" @click="openEdit(row as any)">แก้ไข</AdminActionButton>
-            <AdminActionButton variant="danger" size="sm" @click="openDelete(row as any)">ลบ</AdminActionButton>
-          </div>
-        </template>
-      </AdminDataTable>
-      <Pagination 
-        :current-page="currentPage" 
-        :total-pages="totalPages" 
-        :total="totalRecords" 
-        :limit="limit" 
-        @page-change="handlePageChange" 
-      />
+          </template>
+          <!-- Email -->
+          <template #cell-userEmail="{ value }">
+            <span class="text-xs text-[#666660] font-medium font-number">{{ value }}</span>
+          </template>
+          <!-- Phone -->
+          <template #cell-userPhone="{ value }">
+            <span class="text-xs text-[#9A9A95] font-medium font-number">{{ value || "—" }}</span>
+          </template>
+          <!-- Role badge -->
+          <template #cell-userRole="{ value }">
+            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-lg border" :class="roleBadgeClass(value)">
+              {{ roleLabel(value) }}
+            </span>
+          </template>
+          <!-- Date -->
+          <template #cell-userCreatedAt="{ value }">
+            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
+          </template>
+          <!-- Actions -->
+          <template #cell-action="{ row }">
+            <div class="flex items-center justify-center gap-2">
+              <button
+                @click="openEdit(row as any)"
+                class="px-2 py-1 text-[11px] font-bold text-[#666660] hover:text-[#171717] bg-[#F7F7F5] hover:bg-[#EFEFEA] border border-[#EFEFEA] transition-colors rounded-lg"
+              >
+                แก้ไข
+              </button>
+              <button
+                @click="openDelete(row as any)"
+                class="px-2 py-1 text-[11px] font-bold text-red-600 bg-white hover:bg-red-50/50 border border-red-200 transition-colors rounded-lg"
+              >
+                ลบ
+              </button>
+            </div>
+          </template>
+        </AdminDataTable>
+        <AdminEmptyState v-if="!loading && filteredUsers.length === 0" title="ไม่พบผู้ใช้งาน" description="ไม่มีบัญชีผู้ใช้ที่ตรงกับเงื่อนไขที่เลือก" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+      </div>
 
-      <AdminEmptyState v-if="!loading && filteredUsers.length === 0" title="ไม่พบผู้ใช้งาน" description="ไม่มีบัญชีผู้ใช้ที่ตรงกับเงื่อนไขที่เลือก" icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+      <!-- Pagination wrapper -->
+      <div v-if="totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
+        <!-- Thai Pagination Summary -->
+        <div class="hidden sm:block text-xs text-[#666660]">
+          <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+        </div>
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total="totalRecords"
+          :limit="limit"
+          @page-change="handlePageChange"
+          class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
+        />
+      </div>
     </div>
 
     <!-- Add/Edit Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <div v-if="modal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/40" @click="closeModal" />
-          <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md p-6">
-            <h3 class="text-sm font-bold text-gray-900 mb-5">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]" @click="closeModal" />
+          <div class="relative bg-white/90 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-[#EFEFEA]/80 w-full max-w-md p-6">
+            <h3 class="text-base font-black text-[#171717] tracking-tight mb-1">
               {{ modal.mode === "edit" ? "แก้ไขบัญชีผู้ใช้" : "เพิ่มผู้ใช้ใหม่" }}
             </h3>
-            <form @submit.prevent="saveUser" class="space-y-4">
+            <p class="text-xs text-[#9A9A95] pb-3 border-b border-[#EFEFEA]/60">
+              {{ modal.mode === "edit" ? "แก้ไขข้อมูลรายละเอียดของบัญชีผู้ใช้ในระบบ" : "สร้างบัญชีผู้ใช้ใหม่สำหรับลูกค้า Editor หรือผู้ดูแลระบบ" }}
+            </p>
+            <form @submit.prevent="saveUser" class="space-y-4 mt-5">
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">ชื่อ</label>
-                  <input v-model="form.userFirstName" required type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                  <label class="block text-xs font-bold text-[#666660] mb-1.5">ชื่อ</label>
+                  <input v-model="form.userFirstName" required type="text" class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-500 mb-1">นามสกุล</label>
-                  <input v-model="form.userLastName" required type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                  <label class="block text-xs font-bold text-[#666660] mb-1.5">นามสกุล</label>
+                  <input v-model="form.userLastName" required type="text" class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" />
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">อีเมล</label>
-                <input v-model="form.userEmail" required type="email" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                <label class="block text-xs font-bold text-[#666660] mb-1.5">อีเมล</label>
+                <input v-model="form.userEmail" required type="email" class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">
+                <label class="block text-xs font-bold text-[#666660] mb-1.5">
                   รหัสผ่าน
-                  <span v-if="modal.mode === 'edit'" class="text-gray-400 font-normal">(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span>
+                  <span v-if="modal.mode === 'edit'" class="text-[#9A9A95] font-normal">(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span>
                 </label>
                 <input
                   v-model="form.userPassword"
                   :required="modal.mode === 'add'"
                   type="password"
                   :placeholder="modal.mode === 'edit' ? '••••••••' : 'รหัสผ่านใหม่'"
-                  class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]"
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">เบอร์โทรศัพท์</label>
-                <input v-model="form.userPhone" required type="text" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400" @input="phoneError = ''" maxlength="10" />
-                <p v-if="phoneError" class="text-xs text-red-500 mt-1">{{ phoneError }}</p>
+                <label class="block text-xs font-bold text-[#666660] mb-1.5">เบอร์โทรศัพท์</label>
+                <input v-model="form.userPhone" required type="text" class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" @input="phoneError = ''" maxlength="10" />
+                <p v-if="phoneError" class="text-[10px] font-bold text-red-600 mt-1">{{ phoneError }}</p>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">บทบาท (Role)</label>
-                <select v-model="form.userRole" class="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400">
+                <label class="block text-xs font-bold text-[#666660] mb-1.5">บทบาท (Role)</label>
+                <select v-model="form.userRole" class="w-full text-xs px-3 py-2.5 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl focus:outline-none focus:bg-white focus:border-[#171717]/30 transition-all font-medium text-[#171717]">
                   <option value="customer">ลูกค้า</option>
-                  <option value="editor">Editor</option>
+                  <option value="editor">นักออกแบบ</option>
                   <option value="admin">ผู้ดูแลระบบ</option>
                 </select>
               </div>
-              <div class="flex gap-2 justify-end pt-2 border-t border-gray-100 mt-4">
+              <div class="flex gap-2 justify-end pt-4 border-t border-[#EFEFEA]/60 mt-6">
                 <AdminActionButton variant="secondary" size="md" @click="closeModal">ยกเลิก</AdminActionButton>
-                <AdminActionButton variant="primary" size="md" :loading="modal.loading">
-                  <button type="submit" class="contents">บันทึก</button>
-                </AdminActionButton>
+                <button
+                  type="submit"
+                  :disabled="modal.loading"
+                  class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white bg-[#171717] hover:bg-[#333333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl border border-[#171717]"
+                >
+                  <svg v-if="modal.loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  บันทึก
+                </button>
               </div>
             </form>
           </div>
@@ -331,3 +364,9 @@ const breadcrumb = [
     />
   </div>
 </template>
+
+<style scoped>
+:deep(p.text-sm.text-gray-700) {
+  display: none !important;
+}
+</style>

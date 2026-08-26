@@ -1,47 +1,52 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
-import { orderService } from "~/services/order.service"
-import type { Package } from "~/types/order.types"
+import { ref, computed } from 'vue'
+import { orderService } from '~/services/order.service'
+import type { Package } from '~/types/order.types'
+
+interface OrderDetailsForm {
+  orderStyle: string
+  orderColorTone: string
+  orderComposition: string
+  orderNote: string
+  orderRequiredDate: string
+  orderIsUrgent: boolean
+  orderIsGalleryAllowed: boolean
+}
 
 const props = defineProps<{
-  modelValue: {
-    orderStyle: string
-    orderColorTone: string
-    orderComposition: string
-    orderNote: string
-    orderRequiredDate: string
-    orderIsUrgent: boolean
-    orderIsGalleryAllowed: boolean
-  }
+  modelValue: OrderDetailsForm
   images: string[]
   selectedPackage: Package | null
-  pricePreview: { base: number; urgent: number; discount: number; total: number }
+  pricePreview: { base: number, urgent: number, discount: number, total: number }
 }>()
 
 const emit = defineEmits<{
-  (e: "update:modelValue", val: any): void
-  (e: "update:images", urls: string[]): void
+  (e: 'update:modelValue', val: OrderDetailsForm): void
+  (e: 'update:images', urls: string[]): void
 }>()
 
 const form = computed({
   get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val)
+  set: val => emit('update:modelValue', val)
 })
 
 const sourceImages = computed({
   get: () => props.images,
-  set: (urls) => emit("update:images", urls)
+  set: urls => emit('update:images', urls)
 })
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const dragOver = ref(false)
 const uploadingSource = ref(false)
-const uploadError = ref("")
+const uploadError = ref('')
+
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback
 
 const minDate = computed(() => {
   const d = new Date()
   d.setDate(d.getDate() + 1)
-  return d.toISOString().split("T")[0]
+  return d.toISOString().split('T')[0]
 })
 
 const triggerFileInput = () => {
@@ -63,28 +68,28 @@ const handleDrop = (event: DragEvent) => {
 }
 
 const uploadFiles = async (files: File[]) => {
-  const validFiles = files.filter(f => f.type.startsWith("image/"))
+  const validFiles = files.filter(f => f.type.startsWith('image/'))
   if (validFiles.length === 0) {
-    uploadError.value = "กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น"
+    uploadError.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
     return
   }
 
   if (sourceImages.value.length + validFiles.length > 10) {
-    uploadError.value = "สามารถอัปโหลดรูปภาพได้สูงสุด 10 รูป"
+    uploadError.value = 'สามารถอัปโหลดรูปภาพได้สูงสุด 10 รูป'
     return
   }
 
-  uploadError.value = ""
+  uploadError.value = ''
   uploadingSource.value = true
   try {
     const urls = await orderService.uploadSourceImages(validFiles)
     sourceImages.value = [...sourceImages.value, ...urls]
-  } catch (err: any) {
-    uploadError.value = err?.message || "ไม่สามารถอัปโหลดไฟล์บางไฟล์ได้"
+  } catch (err: unknown) {
+    uploadError.value = getErrorMessage(err, 'ไม่สามารถอัปโหลดไฟล์บางไฟล์ได้')
   } finally {
     uploadingSource.value = false
     if (fileInput.value) {
-      fileInput.value.value = ""
+      fileInput.value.value = ''
     }
   }
 }
@@ -96,199 +101,289 @@ const removeImage = (index: number) => {
 }
 
 const formatPrice = (n: number) =>
-  Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 </script>
 
 <template>
   <div class="p-6 sm:p-8">
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-gray-900 mb-1">รายละเอียดงาน</h2>
-      <p class="text-gray-500 text-sm">กรอกข้อมูลเพิ่มเติมเพื่อให้ Editor เข้าใจสิ่งที่ต้องการ</p>
+      <h2 class="text-xl font-semibold leading-[1.4] text-[#171717]">
+        รายละเอียดงาน
+      </h2>
+      <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+        กรอกข้อมูลเพิ่มเติมเพื่อให้ Editor เข้าใจสิ่งที่ต้องการ
+      </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <!-- สไตล์ภาพ -->
-      <div>
-        <label for="order-style" class="block text-sm font-medium text-gray-700 mb-1">สไตล์ภาพ</label>
-        <input
-          id="order-style"
-          v-model="form.orderStyle"
-          type="text"
-          placeholder="เช่น Minimal, Retro, Anime, Realistic"
-          class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-        />
-      </div>
+    <div class="space-y-6">
+      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          รายละเอียดภาพ
+        </h3>
+        <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div>
+            <label
+              for="order-style"
+              class="mb-2 block text-sm font-semibold text-[#171717]"
+            >สไตล์ภาพ</label>
+            <input
+              id="order-style"
+              v-model="form.orderStyle"
+              type="text"
+              placeholder="เช่น Minimal, Retro, Anime, Realistic"
+              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+            >
+          </div>
 
-      <!-- โทนสี -->
-      <div>
-        <label for="order-color" class="block text-sm font-medium text-gray-700 mb-1">โทนสี</label>
-        <input
-          id="order-color"
-          v-model="form.orderColorTone"
-          type="text"
-          placeholder="เช่น Warm, Cool, Pastel, Earth Tone"
-          class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-        />
-      </div>
+          <div>
+            <label
+              for="order-color"
+              class="mb-2 block text-sm font-semibold text-[#171717]"
+            >โทนสี</label>
+            <input
+              id="order-color"
+              v-model="form.orderColorTone"
+              type="text"
+              placeholder="เช่น Warm, Cool, Pastel, Earth Tone"
+              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+            >
+          </div>
 
-      <!-- องค์ประกอบฉาก -->
-      <div class="md:col-span-2">
-        <label for="order-composition" class="block text-sm font-medium text-gray-700 mb-1">องค์ประกอบฉาก</label>
-        <textarea
-          id="order-composition"
-          v-model="form.orderComposition"
-          rows="3"
-          placeholder="อธิบายฉากหรือองค์ประกอบที่ต้องการ เช่น สวนดอกไม้ ฉากพระอาทิตย์ตก ริมทะเล"
-          class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none"
-        />
-      </div>
+          <div class="md:col-span-2">
+            <label
+              for="order-composition"
+              class="mb-2 block text-sm font-semibold text-[#171717]"
+            >องค์ประกอบฉาก</label>
+            <textarea
+              id="order-composition"
+              v-model="form.orderComposition"
+              rows="3"
+              placeholder="อธิบายฉากหรือองค์ประกอบที่ต้องการ เช่น สวนดอกไม้ ฉากพระอาทิตย์ตก ริมทะเล"
+              class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+            />
+          </div>
+        </div>
+      </section>
 
-      <!-- หมายเหตุ -->
-      <div class="md:col-span-2">
-        <label for="order-note" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุเพิ่มเติม</label>
-        <textarea
-          id="order-note"
-          v-model="form.orderNote"
-          rows="2"
-          placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้ง Editor"
-          class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none"
-        />
-      </div>
+      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          ข้อมูลเพิ่มเติม
+        </h3>
+        <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <label
+              for="order-note"
+              class="mb-2 block text-sm font-semibold text-[#171717]"
+            >หมายเหตุเพิ่มเติม</label>
+            <textarea
+              id="order-note"
+              v-model="form.orderNote"
+              rows="3"
+              placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้ง Editor"
+              class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+            />
+          </div>
 
-      <!-- วันที่ต้องการรับงาน -->
-      <div>
-        <label for="order-date" class="block text-sm font-medium text-gray-700 mb-1">
-          วันที่ต้องการรับงาน <span class="text-red-500">*</span>
-        </label>
-        <input
-          id="order-date"
-          v-model="form.orderRequiredDate"
-          type="date"
-          :min="minDate"
-          class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
-        />
-      </div>
+          <div>
+            <label
+              for="order-date"
+              class="mb-2 block text-sm font-semibold text-[#171717]"
+            >
+              วันที่ต้องการรับงาน <span class="text-[#B93B3B]">*</span>
+            </label>
+            <input
+              id="order-date"
+              v-model="form.orderRequiredDate"
+              type="date"
+              :min="minDate"
+              required
+              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+            >
+            <p class="mt-2 text-xs leading-[1.5] text-[#666666]">
+              ใช้สำหรับจัดคิวงานและประเมินกำหนดส่งมอบ
+            </p>
+          </div>
+        </div>
+      </section>
 
-      <!-- Spacer on desktop -->
-      <div class="hidden md:block" />
+      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <div class="mb-4">
+          <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+            รูปภาพต้นฉบับ / รูปอ้างอิง
+          </h3>
+          <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+            อัปโหลดได้สูงสุด 10 รูป เพื่อให้ทีมเข้าใจภาพตั้งต้นและทิศทางที่ต้องการ
+          </p>
+        </div>
 
-      <!-- อัปโหลดรูปภาพต้นฉบับ -->
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          รูปภาพต้นฉบับ/รูปอ้างอิง (สูงสุด 10 รูป)
-        </label>
-        
         <div
+          class="cursor-pointer rounded-[16px] border-2 border-dashed p-7 text-center transition"
+          :class="dragOver ? 'border-[#171717] bg-[#F3F3F1]' : 'border-black/[0.10] bg-white hover:border-black/[0.20]'"
           @dragover.prevent="dragOver = true"
           @dragleave.prevent="dragOver = false"
           @drop.prevent="handleDrop"
           @click="triggerFileInput"
-          class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors duration-200"
-          :class="dragOver ? 'border-gray-900 bg-slate-50' : 'border-gray-300 hover:border-gray-400 bg-gray-50'"
         >
           <input
-            type="file"
             ref="fileInput"
+            type="file"
             multiple
             accept="image/*"
             class="hidden"
             @change="handleFileSelect"
-          />
-          <div class="flex flex-col items-center justify-center space-y-2">
-            <p class="text-sm font-medium text-gray-700 mt-2">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
-            <p class="text-xs text-gray-400">รองรับไฟล์ JPEG, PNG, WebP (สูงสุด 20MB ต่อไฟล์)</p>
+          >
+          <div class="flex flex-col items-center justify-center gap-2">
+            <p class="text-sm font-semibold text-[#171717]">
+              ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์
+            </p>
+            <p class="text-xs leading-[1.5] text-[#666666]">
+              รองรับไฟล์ JPEG, PNG, WebP (สูงสุด 20MB ต่อไฟล์)
+            </p>
           </div>
         </div>
 
-        <!-- Upload progress / error -->
-        <div v-if="uploadingSource" class="mt-3 flex items-center justify-center gap-2 text-sm text-gray-900 font-medium">
-          <div class="animate-spin w-4 h-4 border-2 border-slate-200 border-t-gray-900 rounded-full"></div>
+        <div
+          v-if="uploadingSource"
+          class="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-[#171717]"
+        >
+          <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
           กำลังอัปโหลดรูปภาพ...
         </div>
-        <p v-if="uploadError" class="mt-2 text-xs text-red-600 font-medium">⚠️ {{ uploadError }}</p>
+        <p
+          v-if="uploadError"
+          class="mt-3 rounded-xl border border-[#FDEEEE] bg-[#FDEEEE] px-4 py-3 text-sm font-medium text-[#B93B3B]"
+        >
+          {{ uploadError }}
+        </p>
 
-        <!-- Previews -->
-        <div v-if="sourceImages.length > 0" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
+        <div
+          v-if="sourceImages.length > 0"
+          class="mt-4 grid gap-3"
+          :class="sourceImages.length === 1 ? 'max-w-[220px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 md:grid-cols-5'"
+        >
           <div
             v-for="(url, idx) in sourceImages"
             :key="url"
-            class="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-white"
+            class="group relative overflow-hidden rounded-[16px] border border-black/[0.06] bg-[#F3F3F1]"
+            :class="sourceImages.length === 1 ? 'aspect-[4/3]' : 'aspect-square'"
           >
-            <img :src="url" class="w-full h-full object-cover" />
-            <button
-              @click.stop="removeImage(idx)"
-              class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow transition opacity-90"
-              title="ลบรูปภาพ"
+            <img
+              :src="url"
+              :alt="`รูปภาพต้นฉบับหรือรูปอ้างอิง ${idx + 1}`"
+              class="h-full w-full object-contain p-1"
             >
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            <button
+              class="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FDEEEE] text-[#B93B3B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:bg-[#B93B3B] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#B93B3B]/20"
+              title="ลบรูปภาพ"
+              type="button"
+              @click.stop="removeImage(idx)"
+            >
+              <svg
+                class="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Toggle: เร่งด่วน -->
-      <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div>
-          <p class="font-bold text-gray-800 text-sm">บริการเร่งด่วน</p>
-          <p v-if="selectedPackage?.packageUrgentPrice" class="text-xs text-orange-600 mt-0.5">
-            +฿{{ formatPrice(selectedPackage.packageUrgentPrice) }}
-          </p>
-          <p v-else class="text-xs text-gray-400 mt-0.5">แพ็กเกจนี้ไม่รองรับบริการเร่งด่วน</p>
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div>
+            <p class="text-sm font-semibold text-[#171717]">
+              บริการเร่งด่วน
+            </p>
+            <p
+              v-if="selectedPackage?.packageUrgentPrice"
+              class="mt-1 text-xs leading-[1.5] text-[#9A6812]"
+            >
+              +฿{{ formatPrice(selectedPackage.packageUrgentPrice) }}
+            </p>
+            <p
+              v-else
+              class="mt-1 text-xs leading-[1.5] text-[#929292]"
+            >
+              แพ็กเกจนี้ไม่รองรับบริการเร่งด่วน
+            </p>
+          </div>
+          <button
+            :disabled="!selectedPackage?.packageUrgentPrice"
+            class="relative h-6 w-11 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:opacity-40"
+            :class="form.orderIsUrgent ? 'bg-[#171717]' : 'bg-[#E6E6E3]'"
+            type="button"
+            @click="form.orderIsUrgent = !form.orderIsUrgent"
+          >
+            <span
+              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+              :class="form.orderIsUrgent ? 'translate-x-5' : 'translate-x-0'"
+            />
+          </button>
         </div>
-        <button
-          @click="form.orderIsUrgent = !form.orderIsUrgent"
-          :disabled="!selectedPackage?.packageUrgentPrice"
-          class="relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-40"
-          :class="form.orderIsUrgent ? 'bg-orange-500' : 'bg-gray-200'"
-        >
-          <span
-            class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-            :class="form.orderIsUrgent ? 'translate-x-5' : 'translate-x-0'"
-          />
-        </button>
-      </div>
 
-      <!-- Toggle: Gallery -->
-      <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div>
-          <p class="font-bold text-gray-800 text-sm">อนุญาตโชว์ใน Gallery</p>
-          <p v-if="selectedPackage" class="text-xs text-blue-600 mt-0.5">
-            ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด ฿{{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
-          </p>
+        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div>
+            <p class="text-sm font-semibold text-[#171717]">
+              อนุญาตโชว์ใน Gallery
+            </p>
+            <p
+              v-if="selectedPackage"
+              class="mt-1 text-xs leading-[1.5] text-[#666666]"
+            >
+              ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด ฿{{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
+            </p>
+          </div>
+          <button
+            class="relative h-6 w-11 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+            :class="form.orderIsGalleryAllowed ? 'bg-[#171717]' : 'bg-[#E6E6E3]'"
+            type="button"
+            @click="form.orderIsGalleryAllowed = !form.orderIsGalleryAllowed"
+          >
+            <span
+              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+              :class="form.orderIsGalleryAllowed ? 'translate-x-5' : 'translate-x-0'"
+            />
+          </button>
         </div>
-        <button
-          @click="form.orderIsGalleryAllowed = !form.orderIsGalleryAllowed"
-          class="relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none"
-          :class="form.orderIsGalleryAllowed ? 'bg-blue-500' : 'bg-gray-200'"
-        >
-          <span
-            class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-            :class="form.orderIsGalleryAllowed ? 'translate-x-5' : 'translate-x-0'"
-          />
-        </button>
-      </div>
+      </section>
     </div>
 
-    <!-- Price Preview -->
-    <div v-if="selectedPackage" class="mt-6 bg-slate-50 rounded-xl p-5 border border-slate-100">
-      <h3 class="font-bold text-gray-900 text-sm mb-3">สรุปราคาเบื้องต้น</h3>
-      <div class="space-y-1.5 text-sm">
-        <div class="flex justify-between">
-          <span class="text-gray-500">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
-          <span class="font-medium text-gray-900">฿{{ formatPrice(pricePreview.base) }}</span>
+    <div
+      v-if="selectedPackage"
+      class="mt-6 rounded-[20px] border border-black/[0.06] bg-[#F3F3F1] p-5"
+    >
+      <h3 class="mb-3 text-sm font-semibold text-[#171717]">
+        สรุปราคาเบื้องต้น
+      </h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between gap-4">
+          <span class="text-[#666666]">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
+          <span class="font-medium text-[#171717]">฿{{ formatPrice(pricePreview.base) }}</span>
         </div>
-        <div v-if="pricePreview.urgent > 0" class="flex justify-between text-orange-600">
+        <div
+          v-if="pricePreview.urgent > 0"
+          class="flex justify-between gap-4 text-[#9A6812]"
+        >
           <span>ค่าเร่งด่วน</span>
           <span class="font-medium">+฿{{ formatPrice(pricePreview.urgent) }}</span>
         </div>
-        <div v-if="pricePreview.discount > 0" class="flex justify-between text-green-600">
+        <div
+          v-if="pricePreview.discount > 0"
+          class="flex justify-between gap-4 text-[#267A48]"
+        >
           <span>ส่วนลด Gallery</span>
           <span class="font-medium">-฿{{ formatPrice(pricePreview.discount) }}</span>
         </div>
-        <hr class="border-gray-200 my-2" />
-        <div class="flex justify-between text-base font-bold text-gray-900">
+        <hr class="my-2 border-black/[0.06]">
+        <div class="flex justify-between gap-4 text-base font-semibold text-[#171717]">
           <span>รวมโดยประมาณ</span>
           <span>฿{{ formatPrice(pricePreview.total) }}</span>
         </div>

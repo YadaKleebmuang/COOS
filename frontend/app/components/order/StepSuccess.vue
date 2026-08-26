@@ -1,56 +1,78 @@
 <script setup lang="ts">
-import type { OrderCreateResponse } from "~/types/order.types"
+import type { OrderCreateResponse } from '~/types/order.types'
 
 defineProps<{
   createdOrder: OrderCreateResponse
 }>()
 
 const formatPrice = (n: number) =>
-  Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center animate-fade-in">
-    <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
-      <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+  <div class="animate-fade-in rounded-[24px] border border-black/[0.06] bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
+    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#EDF8F1] bg-[#EDF8F1]">
+      <svg
+        class="h-8 w-8 text-[#267A48]"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      ><path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2.5"
+        d="M5 13l4 4L19 7"
+      /></svg>
     </div>
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">สร้างคำสั่งงานสำเร็จ!</h2>
-    <p class="text-gray-500 mb-6 text-sm">หมายเลขออเดอร์: <span class="font-bold text-gray-900">#{{ createdOrder.orderId }}</span></p>
+    <h2 class="mb-2 text-[30px] font-semibold leading-[1.3] text-[#171717]">
+      สร้างคำสั่งงานสำเร็จ!
+    </h2>
+    <p class="mb-6 text-sm leading-[1.6] text-[#666666]">
+      หมายเลขออเดอร์: <span class="font-semibold text-[#171717]">#COOS-{{ Math.abs(createdOrder.orderId) }}</span>
+    </p>
 
-    <div class="bg-slate-50 border border-slate-100 rounded-xl p-5 max-w-sm mx-auto mb-6 text-left space-y-2">
+    <div class="mx-auto mb-6 max-w-sm space-y-2 rounded-[20px] border border-black/[0.06] bg-[#F3F3F1] p-5 text-left">
       <div class="flex justify-between text-sm">
-        <span class="text-gray-500">ราคาแพ็กเกจ</span>
-        <span class="font-medium text-gray-900">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
+        <span class="text-[#666666]">ราคาแพ็กเกจ</span>
+        <span class="font-medium text-[#171717]">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
       </div>
-      <div v-if="createdOrder.orderUrgentPrice > 0" class="flex justify-between text-sm">
-        <span class="text-gray-500">ค่าเร่งด่วน</span>
-        <span class="font-medium text-orange-600">+฿{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
+      <div
+        v-if="createdOrder.orderUrgentPrice > 0"
+        class="flex justify-between text-sm"
+      >
+        <span class="text-[#666666]">ค่าเร่งด่วน</span>
+        <span class="font-medium text-[#9A6812]">+฿{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
       </div>
-      <div v-if="createdOrder.orderDiscount > 0" class="flex justify-between text-sm">
-        <span class="text-gray-500">ส่วนลด Gallery</span>
-        <span class="font-medium text-green-600">-฿{{ formatPrice(createdOrder.orderDiscount) }}</span>
+      <div
+        v-if="createdOrder.orderDiscount > 0"
+        class="flex justify-between text-sm"
+      >
+        <span class="text-[#666666]">ส่วนลด Gallery</span>
+        <span class="font-medium text-[#267A48]">-฿{{ formatPrice(createdOrder.orderDiscount) }}</span>
       </div>
-      <hr class="border-gray-200 my-2"/>
+      <hr class="my-2 border-black/[0.06]">
       <div class="flex justify-between text-base font-bold">
-        <span class="text-gray-900">รวมทั้งหมด</span>
-        <span class="text-gray-900">฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
+        <span class="text-[#171717]">รวมทั้งหมด</span>
+        <span class="text-[#171717]">฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
       </div>
     </div>
 
-    <p class="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-6 max-w-sm mx-auto font-medium">
+    <p class="mx-auto mb-6 max-w-sm rounded-xl border border-[#FFF7E6] bg-[#FFF7E6] p-3 text-sm font-medium text-[#9A6812]">
       สถานะ: <strong>รอชำระมัดจำ</strong> — กรุณาชำระมัดจำ 30% เพื่อเริ่มดำเนินการ
     </p>
 
-    <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
-      <NuxtLink to="/customer/orders"
-        class="inline-block w-full sm:w-auto bg-white border border-gray-300 hover:bg-slate-50 text-gray-900 font-medium px-6 py-2.5 rounded-lg transition"
+    <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <NuxtLink
+        to="/customer/orders"
+        class="inline-flex h-11 w-full items-center justify-center rounded-xl border border-black/[0.08] bg-white px-[18px] text-sm font-semibold text-[#171717] transition hover:bg-[#EEEEEC] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:w-auto"
       >
         ดูรายการสั่งงาน
       </NuxtLink>
-      <NuxtLink to="/"
-        class="inline-block w-full sm:w-auto bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-2.5 rounded-lg transition"
+      <NuxtLink
+        :to="`/customer/orders/${createdOrder.orderId}`"
+        class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:w-auto"
       >
-        กลับหน้าหลัก
+        ดูรายละเอียดออเดอร์
       </NuxtLink>
     </div>
   </div>
