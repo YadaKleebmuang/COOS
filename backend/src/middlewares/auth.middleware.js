@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getJwtSecret } = require("../config/env");
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -13,13 +14,17 @@ module.exports = (req, res, next) => {
 
   try {
     // ตรวจสอบความถูกต้องของ token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
 
     // session จาก JWT
     req.session = decoded;
 
     next();
   } catch (err) {
+    if (err.code === "CONFIG_MISSING_JWT_SECRET") {
+      return next(err);
+    }
+
     return res.status(401).json({ message: "Invalid token" });
   }
 };
