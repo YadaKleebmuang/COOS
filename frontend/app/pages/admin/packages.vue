@@ -80,6 +80,8 @@ const openAdd = () => {
   modal.value = { open: true, mode: "add" }
 }
 
+const asPackage = (row: Record<string, unknown>): Package => row as unknown as Package
+
 const openEdit = (pkg: Package) => {
   editingId.value = pkg.packageId
   form.packageName = pkg.packageName
@@ -209,13 +211,13 @@ const breadcrumb = [
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-2">
             <button
-              @click="openEdit(row)"
+              @click="openEdit(asPackage(row))"
               class="px-2 py-1 text-[11px] font-bold text-[#666660] hover:text-[#171717] bg-[#F7F7F5] hover:bg-[#EFEFEA] border border-[#EFEFEA] transition-colors rounded-lg"
             >
               แก้ไข
             </button>
             <button
-              @click="openDelete(row)"
+              @click="openDelete(asPackage(row))"
               class="px-2 py-1 text-[11px] font-bold text-red-600 bg-white hover:bg-red-50/50 border border-red-200 transition-colors rounded-lg"
             >
               ลบ

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 
+const { alert } = useAlert()
+
 definePageMeta({
   layout: "admin",
   middleware: ["auth", "admin"]
@@ -44,7 +46,6 @@ const fetchGallery = async () => {
   loading.value = true
   try {
     const { apiFetch } = useApi()
-    const { alert } = useAlert()
     // [Fix] ?all=true ให้ admin เห็นทุกรูปรวมที่ hidden อยู่ด้วย
     const data = await apiFetch<any[]>("/gallery-images?all=true")
     images.value = data.map(img => ({
