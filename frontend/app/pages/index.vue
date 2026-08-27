@@ -32,6 +32,15 @@ const loading = ref(true)
 const selectedImage = ref<GalleryImage | null>(null)
 const isDetailsModalOpen = ref(false)
 
+const selectedExplorerIndex = ref(0)
+
+const selectWorkType = (type: string) => {
+  const index = featuredImages.value.findIndex(img => img.workTypeName === type)
+  if (index !== -1) {
+    selectedExplorerIndex.value = index
+  }
+}
+
 const openDetails = (img: GalleryImage) => {
   selectedImage.value = img
   isDetailsModalOpen.value = true
@@ -428,6 +437,159 @@ onUnmounted(() => {
               </template>
             </template>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         SECTION 4.5: WORK EXPLORER
+         ======================================================== -->
+    <section
+      v-if="featuredImages.length > 0"
+      class="pt-24 pb-24 sm:pb-32 border-b border-black/[0.06] bg-[#FAFAFA]"
+    >
+      <div class="coos-shell max-w-[1100px] mx-auto flex flex-col items-center">
+        <!-- Main Composition Layout (Thumbnails Left + Showcase Right) -->
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-10 items-stretch w-full justify-center reveal-init">
+          <!-- LEFT: Thumbnail Rail -->
+          <div class="flex lg:flex-col gap-3 lg:gap-4 overflow-x-auto hide-scrollbar w-full lg:w-[110px] shrink-0 lg:justify-center relative z-10">
+            <button
+              v-for="(img, idx) in featuredImages"
+              :key="'preview-'+idx"
+              class="relative w-[90px] lg:w-full aspect-[4/3] rounded-[16px] p-1.5 shrink-0 transition-all duration-400 focus-visible:outline-2 focus-visible:outline-neutral-900 text-left outline-none group bg-white border shadow-[0_4px_16px_rgba(0,0,0,0.03)]"
+              :class="[
+                selectedExplorerIndex === idx
+                  ? 'border-black/15 ring-1 ring-black/5 -translate-y-0.5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] z-10'
+                  : 'border-black/[0.04] opacity-60 hover:opacity-100 hover:border-black/10 hover:-translate-y-0.5'
+              ]"
+              :aria-label="`Select preview ${img.imageTitle || idx + 1}`"
+              @click="selectedExplorerIndex = idx"
+            >
+              <div class="relative w-full h-full rounded-[10px] overflow-hidden bg-neutral-100">
+                <img
+                  v-if="img.imageUrl"
+                  :src="img.imageUrl"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  alt=""
+                >
+                <!-- Subtle Active Glow inside thumbnail image area -->
+                <div
+                  v-if="selectedExplorerIndex === idx"
+                  class="absolute inset-0 rounded-[10px] border border-white/60 mix-blend-overlay z-10 pointer-events-none"
+                />
+              </div>
+
+              <!-- Connector Line (Desktop only) -->
+              <div
+                v-if="selectedExplorerIndex === idx"
+                class="hidden lg:block absolute top-1/2 -right-[40px] w-[40px] h-[1px] bg-neutral-300 pointer-events-none transition-opacity duration-300 z-0"
+              />
+            </button>
+          </div>
+
+          <!-- RIGHT: Main Framed Showcase Object -->
+          <div class="flex-1 w-full max-w-[880px] rounded-[28px] lg:rounded-[32px] border border-black/[0.06] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col isolate reveal-init z-20 transition-all duration-500">
+            <!-- Top: 3-Panel Presentation Area -->
+            <div class="relative w-full aspect-[4/3] lg:aspect-[16/10] bg-neutral-50 overflow-hidden isolate">
+              <transition
+                name="explorer-fade"
+                mode="out-in"
+              >
+                <div
+                  :key="selectedExplorerIndex"
+                  class="absolute inset-0 flex"
+                >
+                  <!-- Left Panel (Faded/Blurred) -->
+                  <div class="hidden lg:block w-1/4 h-full border-r border-black/[0.03] overflow-hidden opacity-30 grayscale-[20%]">
+                    <img
+                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
+                      class="w-full h-full object-cover object-left blur-sm scale-110"
+                      alt=""
+                    >
+                  </div>
+                  <!-- Center Main Panel -->
+                  <div class="w-full lg:w-2/4 h-full overflow-hidden lg:shadow-[0_0_40px_rgba(0,0,0,0.1)] z-10 bg-white">
+                    <img
+                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
+                      class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+                      alt=""
+                    >
+                  </div>
+                  <!-- Right Panel (Faded/Blurred) -->
+                  <div class="hidden lg:block w-1/4 h-full border-l border-black/[0.03] overflow-hidden opacity-30 grayscale-[20%]">
+                    <img
+                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
+                      class="w-full h-full object-cover object-right blur-sm scale-110"
+                      alt=""
+                    >
+                  </div>
+                </div>
+              </transition>
+              <!-- Delicate inset highlight for the whole visual area -->
+              <div class="absolute inset-0 rounded-t-[28px] lg:rounded-t-[32px] border-b border-black/[0.04] pointer-events-none z-20 mix-blend-overlay shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]" />
+            </div>
+
+            <!-- Bottom: Info Strip -->
+            <div class="px-5 py-4 lg:px-6 lg:py-5 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-black/[0.04]">
+              <transition
+                name="explorer-fade"
+                mode="out-in"
+              >
+                <div
+                  :key="selectedExplorerIndex"
+                  class="flex-1 min-w-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-6 w-full"
+                >
+                  <!-- Left side = title -->
+                  <div class="w-full sm:w-1/3 shrink-0 truncate">
+                    <h3 class="text-[15px] sm:text-base font-medium text-neutral-900 truncate">
+                      {{ featuredImages[selectedExplorerIndex]?.imageTitle || 'Untitled Work' }}
+                    </h3>
+                  </div>
+
+                  <!-- Center = short subtitle / description -->
+                  <div class="hidden sm:block w-1/3 shrink-0 text-center">
+                    <p
+                      v-if="featuredImages[selectedExplorerIndex]?.imageDescription"
+                      class="text-[12px] sm:text-[13px] text-neutral-500 line-clamp-1"
+                    >
+                      {{ featuredImages[selectedExplorerIndex]?.imageDescription }}
+                    </p>
+                  </div>
+
+                  <!-- Right side = info action / label -->
+                  <div class="w-full sm:w-1/3 shrink-0 sm:text-right flex justify-start sm:justify-end">
+                    <button
+                      v-if="featuredImages[selectedExplorerIndex]"
+                      class="inline-flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-200/80 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-neutral-700 transition-colors hover:bg-neutral-100"
+                      @click="openDetails(featuredImages[selectedExplorerIndex]!)"
+                    >
+                      ดูรายละเอียด
+                    </button>
+                  </div>
+                </div>
+              </transition>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom: Category Pills -->
+        <div
+          v-if="availableWorkTypes.length > 0"
+          class="mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-2.5 reveal-init"
+        >
+          <button
+            v-for="(type, idx) in availableWorkTypes"
+            :key="'nav-'+idx"
+            class="px-5 py-1.5 rounded-full text-[13px] font-medium tracking-wide transition-all border"
+            :class="[
+              featuredImages[selectedExplorerIndex]?.workTypeName === type
+                ? 'bg-neutral-900 border-neutral-900 text-white shadow-sm'
+                : 'bg-white border-black/[0.08] text-neutral-500 hover:text-neutral-900 hover:border-black/20 hover:bg-neutral-50 shadow-sm'
+            ]"
+            @click="selectWorkType(type)"
+          >
+            {{ type }}
+          </button>
         </div>
       </div>
     </section>
@@ -1316,6 +1478,30 @@ onUnmounted(() => {
 }
 .gallery-card-wrapper:hover .gallery-card-info {
   transform: translateY(-2px);
+}
+
+/* Explorer Transition */
+.explorer-fade-enter-active,
+.explorer-fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.explorer-fade-enter-from {
+  opacity: 0;
+  transform: translateY(4px) scale(0.995);
+}
+.explorer-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.995);
+}
+@media (prefers-reduced-motion: reduce) {
+  .explorer-fade-enter-active,
+  .explorer-fade-leave-active {
+    transition: opacity 0.4s ease;
+  }
+  .explorer-fade-enter-from,
+  .explorer-fade-leave-to {
+    transform: none;
+  }
 }
 
 /* Process Window State Transition */
