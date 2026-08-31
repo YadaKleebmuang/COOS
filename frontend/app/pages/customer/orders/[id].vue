@@ -310,7 +310,7 @@ const getStepState = (idx: number) => {
 const nextAction = computed(() => {
   if (!order.value) return null
 
-  const map: Partial<Record<OrderStatus, { label: string, description: string, href: string }>> = {
+  const map: Partial<Record<OrderStatus, { label: string, description: string, href?: string, action?: string }>> = {
     waiting_deposit: {
       label: 'ชำระมัดจำ',
       description: 'แนบสลิปมัดจำ 30% เพื่อให้ทีมเริ่มจัดคิวงาน',
@@ -327,9 +327,9 @@ const nextAction = computed(() => {
       href: '#payment-section'
     },
     delivered: {
-      label: 'ตรวจรับงาน',
-      description: 'ตรวจสอบไฟล์ส่งมอบและดาวน์โหลดผลงานสุดท้าย',
-      href: '#delivery-section'
+      label: 'ยืนยันว่าได้รับผลงานแล้ว',
+      description: 'ตรวจสอบไฟล์ส่งมอบและกดยืนยันเพื่อเสร็จสิ้นคำสั่งงาน',
+      action: 'confirmDelivery'
     }
   }
 
@@ -347,6 +347,21 @@ const cancelOrder = async () => {
     await fetchOrderDetails()
   } catch (err: unknown) {
     alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'ยกเลิกคำสั่งงานไม่สำเร็จ'), 'error')
+  }
+}
+
+// ── Confirm Delivery (Customer confirms receipt when delivered) ──
+const confirmDelivery = async () => {
+  if (!order.value) return
+  const confirmed = await confirm('ยืนยันว่าได้รับผลงานแล้ว?', 'เมื่อยืนยันแล้ว คำสั่งงานนี้จะเปลี่ยนเป็นสถานะเสร็จสมบูรณ์')
+  if (!confirmed) return
+
+  try {
+    await orderService.updateOrderStatus(order.value.orderId, 'completed', 'ลูกค้ายืนยันการรับมอบผลงานเรียบร้อยแล้ว')
+    await fetchOrderDetails()
+    alert('สำเร็จ', 'ยืนยันการรับมอบผลงานเรียบร้อยแล้ว', 'success')
+  } catch (err: unknown) {
+    alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'ยืนยันรับมอบผลงานไม่สำเร็จ'), 'error')
   }
 }
 
@@ -986,10 +1001,21 @@ const formatDeliveryDate = (dateStr?: string) => {
                 {{ nextAction.label }}
               </p><p class="mt-1 text-xs font-normal leading-[1.5] text-[#666666]">
                 {{ nextAction.description }}
-              </p><a
-                :href="nextAction.href"
-                class="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
-              >{{ nextAction.label }}</a>
+              </p>
+              <template v-if="nextAction.action === 'confirmDelivery'">
+                <button
+                  @click="confirmDelivery"
+                  class="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-[#267A48] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#1f633a] focus:outline-none focus:ring-2 focus:ring-[#267A48]/25"
+                >
+                  {{ nextAction.label }}
+                </button>
+              </template>
+              <template v-else>
+                <a
+                  :href="nextAction.href"
+                  class="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+                >{{ nextAction.label }}</a>
+              </template>
             </div>
           </section>
 

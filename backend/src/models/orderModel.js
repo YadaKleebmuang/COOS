@@ -355,7 +355,7 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
       if (payment.paymentType === "deposit" && currentStatus === "waiting_deposit") {
         nextStatus = order.editorId ? "waiting_to_start" : "waiting_assignment";
       } else if (payment.paymentType === "final" && currentStatus === "waiting_final_payment") {
-        nextStatus = "completed";
+        nextStatus = "delivered";
       }
 
       if (nextStatus !== currentStatus) {

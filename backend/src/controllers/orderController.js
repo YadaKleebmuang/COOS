@@ -16,12 +16,12 @@ const isValidTransition = (from, to, role) => {
   const customerTransitions = {
     waiting_deposit: ["cancelled"],
     waiting_selection: ["waiting_final_payment"],
+    delivered: ["completed"],
   };
 
   const editorTransitions = {
     waiting_to_start: ["in_progress"],
     in_progress: ["waiting_selection"],
-    delivered: ["completed"],
   };
 
   if (role === "customer") {

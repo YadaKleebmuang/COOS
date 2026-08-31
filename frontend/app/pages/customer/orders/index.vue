@@ -81,7 +81,7 @@ const statusMeta: Record<OrderStatus, StatusConfig> = {
     label: 'ส่งมอบงานแล้ว',
     tone: 'bg-[#EDF8F1] text-[#267A48] border-[#EDF8F1]',
     progress: 94,
-    actionLabel: 'ตรวจรับงาน'
+    actionLabel: 'ยืนยันรับงาน'
   },
   completed: {
     label: 'เสร็จสมบูรณ์',

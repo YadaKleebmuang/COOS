@@ -22,13 +22,14 @@ describe('Order Controller - Unit Tests', () => {
     it('should allow customer to cancel before deposit or pay final', () => {
       expect(isValidTransition('waiting_deposit', 'cancelled', 'customer')).toBe(true);
       expect(isValidTransition('waiting_selection', 'waiting_final_payment', 'customer')).toBe(true);
+      expect(isValidTransition('delivered', 'completed', 'customer')).toBe(true);
       expect(isValidTransition('in_progress', 'cancelled', 'customer')).toBe(false); // Customer can't cancel if in progress
     });
 
     it('should allow editor to progress workflow', () => {
       expect(isValidTransition('waiting_to_start', 'in_progress', 'editor')).toBe(true);
       expect(isValidTransition('in_progress', 'waiting_selection', 'editor')).toBe(true);
-      expect(isValidTransition('delivered', 'completed', 'editor')).toBe(true);
+      expect(isValidTransition('delivered', 'completed', 'editor')).toBe(false);
       expect(isValidTransition('waiting_deposit', 'in_progress', 'editor')).toBe(false);
     });
   });
