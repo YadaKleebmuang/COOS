@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '~/composables/useApi'
 import type { WorkType } from '~/types/order.types'
 
@@ -73,7 +74,6 @@ const search = ref('')
 const selectedWorkTypeId = ref<number | null>(null) // null means "ทั้งหมด"
 const selectedTag = ref<string | null>(null)
 const sortBy = ref('newest') // newest, oldest
-const displayLimit = ref(9) // Number of images to display initially (multiple of 3)
 
 const availableTags = ref<string[]>([])
 
@@ -84,6 +84,34 @@ const toggleTag = (tag: string) => {
     selectedTag.value = tag
   }
 }
+
+// Pagination
+const route = useRoute()
+const router = useRouter()
+const currentPage = ref(parseInt(route.query.page as string) || 1)
+const itemsPerPage = 16
+
+const updateUrl = () => {
+  router.replace({
+    query: {
+      ...route.query,
+      page: currentPage.value === 1 ? undefined : currentPage.value
+    }
+  })
+}
+
+// Reset pagination when filters change
+watch([search, selectedWorkTypeId, selectedTag, sortBy], () => {
+  currentPage.value = 1
+  updateUrl()
+})
+
+watch(currentPage, () => {
+  updateUrl()
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+})
 
 const loadData = async () => {
   loading.value = true
@@ -173,40 +201,45 @@ const categoryTabs = computed(() => {
 })
 
 // --- Paginated Images ---
+const totalPages = computed(() => Math.ceil(filteredImages.value.length / itemsPerPage))
+
 const displayedImages = computed(() => {
-  return filteredImages.value.slice(0, displayLimit.value)
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredImages.value.slice(start, end)
 })
 
-const hasMore = computed(() => {
-  return filteredImages.value.length > displayLimit.value
-})
-
-const loadMore = () => {
-  displayLimit.value += 6
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
 }
 </script>
 
 <template>
   <div class="coos-page min-h-screen relative overflow-hidden">
-    <!-- Ambient Canvas background image -->
-    <div class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat gallery-bg" />
-
+    <!-- Progressive Top Blur Layer (Fixed to viewport) -->
+    <Teleport to="body">
+      <div class="fixed top-0 left-0 right-0 h-[100px] sm:h-[120px] lg:h-[140px] z-[150] pointer-events-none progressive-blur-layer" />
+    </Teleport>
+ 
+    <!-- Subtle Grid background -->
+    <div class="gallery-grid pointer-events-none fixed inset-0 z-0" />
+ 
     <!-- Main Content -->
     <main class="space-y-10 py-10 md:py-14 relative z-10">
       <!-- Gallery Header -->
-      <section class="px-4 sm:px-5 lg:px-8">
-        <div class="mx-auto w-full max-w-[1280px]">
-          <div class="text-left">
-            <p class="coos-kicker mb-3">
-              COOS GALLERY
-            </p>
-            <h1 class="text-4xl font-black tracking-tight text-black md:text-5xl">
-              ผลงานทั้งหมด
-            </h1>
-            <p class="mt-3 max-w-2xl text-sm leading-7 text-neutral-500">
-              ค้นหา เลือกสไตล์ และใช้ผลงานตัวอย่างเป็นจุดเริ่มต้นสำหรับการสั่งงานของคุณ
-            </p>
-          </div>
+      <section class="px-4 sm:px-5 lg:px-8 pt-6 sm:pt-10">
+        <div class="mx-auto w-full max-w-[1280px] text-center flex flex-col items-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400 mb-3 font-mono">
+            COOS GALLERY
+          </p>
+          <h1 class="text-3xl sm:text-4xl lg:text-[2.6rem] font-semibold tracking-tight text-[#171717]">
+            ผลงานทั้งหมด
+          </h1>
+          <p class="mt-4 sm:mt-5 max-w-[500px] mx-auto text-[13px] sm:text-[15px] leading-relaxed text-neutral-500">
+            ค้นหา เลือกสไตล์ และใช้ผลงานตัวอย่างเป็นจุดเริ่มต้นสำหรับการสั่งงานของคุณ
+          </p>
         </div>
       </section>
 
@@ -214,13 +247,13 @@ const loadMore = () => {
       <section class="px-4 sm:px-5 lg:px-8">
         <div class="mx-auto w-full max-w-[1280px]">
           <!-- Search & Filters Container -->
-          <div class="coos-panel space-y-6 p-5 text-left md:p-6">
+          <div class="coos-panel space-y-4 p-4 sm:p-5 text-left">
             <!-- Search bar & Sort dropdown -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div class="relative flex-1">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    class="h-4 w-4 text-gray-400"
+                    class="h-[18px] w-[18px] text-neutral-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -237,13 +270,13 @@ const loadMore = () => {
                   v-model="search"
                   type="text"
                   placeholder="ค้นหาผลงาน เช่น portrait, รับปริญญา"
-                  class="coos-input pl-10 text-xs"
+                  class="w-full h-[46px] pl-[42px] pr-4 text-[13px] font-medium text-neutral-800 placeholder-neutral-400 bg-white/60 backdrop-blur-md border border-white/60 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] transition-all duration-300 focus:outline-none focus:ring-[3px] focus:ring-black/5 focus:border-white focus:bg-white/80 focus:shadow-[0_8px_24px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)]"
                 >
               </div>
 
               <select
                 v-model="sortBy"
-                class="rounded-xl border border-black/10 bg-white px-4 py-3 text-xs font-semibold text-neutral-600 shadow-sm transition-colors hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-black/10 w-full sm:w-auto"
+                class="h-[46px] w-full sm:w-auto pl-4 pr-10 bg-white/60 backdrop-blur-md border border-white/60 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] text-[13px] font-semibold text-neutral-600 transition-all duration-300 hover:bg-white/75 focus:outline-none focus:ring-[3px] focus:ring-black/5 focus:border-white focus:bg-white/80 focus:shadow-[0_8px_24px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] cursor-pointer"
               >
                 <option value="newest">
                   อัปเดตล่าสุด
@@ -255,11 +288,11 @@ const loadMore = () => {
             </div>
 
             <!-- Category Tabs -->
-            <div class="flex flex-wrap items-center gap-2 pt-2">
+            <div class="flex flex-wrap items-center gap-1.5">
               <button
                 v-for="tab in categoryTabs"
                 :key="tab.id ?? 'all'"
-                class="cursor-pointer rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200"
+                class="cursor-pointer rounded-full border px-3.5 py-1.5 text-[11px] font-bold transition-all duration-200"
                 :class="selectedWorkTypeId === tab.id
                   ? 'bg-black text-white border-black shadow-sm'
                   : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/10'"
@@ -269,26 +302,28 @@ const loadMore = () => {
               </button>
             </div>
 
-            <!-- Divider Line -->
-            <hr class="border-black/5">
+            <template v-if="availableTags.length > 0">
+              <!-- Divider Line -->
+              <hr class="border-black/5">
 
-            <!-- Hashtags Bar -->
-            <div class="space-y-2.5">
-              <span class="block text-xs font-bold uppercase tracking-[0.2em] text-neutral-400">แฮชแท็ก</span>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="tag in availableTags"
-                  :key="tag"
-                  class="cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-200"
-                  :class="selectedTag === tag
-                    ? 'bg-black text-white border-black shadow-sm'
-                    : 'bg-white hover:bg-neutral-50 text-neutral-500 border-black/10'"
-                  @click="toggleTag(tag)"
-                >
-                  #{{ tag }}
-                </button>
+              <!-- Hashtags Bar -->
+              <div class="space-y-2">
+                <span class="block text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">แฮชแท็ก</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button
+                    v-for="tag in availableTags"
+                    :key="tag"
+                    class="cursor-pointer rounded-full border px-3 py-1 text-[11px] font-semibold transition-all duration-200"
+                    :class="selectedTag === tag
+                      ? 'bg-black text-white border-black shadow-sm'
+                      : 'bg-white hover:bg-neutral-50 text-neutral-500 border-black/10'"
+                    @click="toggleTag(tag)"
+                  >
+                    #{{ tag }}
+                  </button>
+                </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
       </section>
@@ -323,7 +358,7 @@ const loadMore = () => {
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0112 0z"
                 />
               </svg>
             </div>
@@ -362,7 +397,8 @@ const loadMore = () => {
             v-else
             class="space-y-12"
           >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 4-Column Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
               <div
                 v-for="img in displayedImages"
                 :key="img.imageId"
@@ -374,16 +410,41 @@ const loadMore = () => {
               </div>
             </div>
 
-            <!-- LOAD MORE BUTTON -->
+            <!-- NUMBERED PAGINATION -->
             <div
-              v-if="hasMore"
-              class="flex justify-center pt-4"
+              v-if="totalPages > 1"
+              class="flex justify-center items-center gap-2 pt-6 pb-12"
             >
               <button
-                class="coos-button-light cursor-pointer px-6 py-2.5 text-xs"
-                @click="loadMore"
+                class="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                :disabled="currentPage === 1"
+                @click="goToPage(currentPage - 1)"
               >
-                โหลดเพิ่มเติม
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                class="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-medium transition-all"
+                :class="currentPage === page
+                  ? 'bg-black text-white shadow-sm'
+                  : 'text-neutral-600 hover:bg-neutral-100'"
+                @click="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                class="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-transparent"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(currentPage + 1)"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
               </button>
             </div>
           </div>
@@ -395,17 +456,54 @@ const loadMore = () => {
     <GalleryDetailsModal
       :img="selectedImage"
       :is-open="isDetailsModalOpen"
+      variant="gallery"
       @close="isDetailsModalOpen = false"
     />
   </div>
 </template>
 
 <style scoped>
-.gallery-bg {
-  background-image: url('~/assets/images/public/coos-public.png');
+.gallery-grid {
+  background-size: 48px 48px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
 }
-
+ 
 /* Scoped Glass UI Styling overrides over the visual image background */
+
+/* ========================================================
+   PROGRESSIVE TOP BLUR
+   ======================================================== */
+.progressive-blur-layer {
+  backdrop-filter: blur(22px) saturate(1.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+  background: rgba(250, 249, 247, 0.12);
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
+}
+ 
+.progressive-blur-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(250, 249, 247, 0.22), rgba(250, 249, 247, 0.06) 55%, transparent);
+  pointer-events: none;
+}
 
 /* Search & Filter glass panel (Medium Glass) */
 .coos-panel {
