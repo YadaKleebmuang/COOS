@@ -31,32 +31,35 @@ onMounted(async () => {
 
 <template>
   <div class="coos-page min-h-screen relative overflow-hidden">
-    <!-- Ambient Canvas background image -->
-    <div class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat policy-bg" />
+    <!-- Progressive Top Blur Layer (Fixed to viewport) -->
+    <Teleport to="body">
+      <div class="fixed top-0 left-0 right-0 h-[100px] sm:h-[120px] lg:h-[140px] z-[150] pointer-events-none progressive-blur-layer" />
+    </Teleport>
+
+    <!-- Subtle Grid background -->
+    <div class="policy-grid pointer-events-none fixed inset-0 z-0" />
 
     <!-- Main Content -->
-    <div class="relative z-10 flex flex-col space-y-8">
+    <div class="relative z-10 flex flex-col space-y-8 py-10 md:py-14">
       <!-- Title Section -->
-      <section class="px-4 sm:px-5 lg:px-8 pt-10 md:pt-14">
-        <div class="mx-auto w-full max-w-[1280px]">
-          <div class="text-left">
-            <p class="coos-kicker mb-3">
-              COOS POLICY
-            </p>
-            <h1 class="text-4xl font-black tracking-tight text-black md:text-5xl">
-              นโยบายการใช้งาน
-            </h1>
-            <p class="mt-3 text-sm text-neutral-500">
-              เงื่อนไขการให้บริการและนโยบายความเป็นส่วนตัว
-            </p>
-          </div>
+      <section class="px-4 sm:px-5 lg:px-8 pt-6 sm:pt-10">
+        <div class="mx-auto w-full max-w-[1280px] text-center flex flex-col items-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400 mb-3 font-mono">
+            COOS POLICY
+          </p>
+          <h1 class="text-3xl sm:text-4xl lg:text-[2.6rem] font-semibold tracking-tight text-[#171717]">
+            นโยบายการใช้งาน
+          </h1>
+          <p class="mt-4 sm:mt-5 max-w-[500px] mx-auto text-[13px] sm:text-[15px] leading-relaxed text-neutral-500">
+            เงื่อนไขการให้บริการและนโยบายความเป็นส่วนตัว
+          </p>
         </div>
       </section>
 
       <!-- Divider -->
-      <section class="px-4 sm:px-5 lg:px-8">
+      <section class="px-4 sm:px-5 lg:px-8 hidden">
         <div class="mx-auto w-full max-w-[1280px]">
-          <hr class="border-white/20">
+          <hr class="border-black/5">
         </div>
       </section>
 
@@ -78,16 +81,16 @@ onMounted(async () => {
         v-else
         class="px-4 pb-16 sm:px-5 lg:px-8"
       >
-        <div class="mx-auto w-full max-w-[960px] space-y-6">
+        <div class="mx-auto w-full max-w-[840px] space-y-4">
           <div
             v-for="policy in policies"
             :key="policy.policyId"
-            class="coos-card p-6 sm:p-8"
+            class="relative bg-white/60 backdrop-blur-md rounded-[20px] p-6 lg:p-7 border border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,1)]"
           >
-            <h3 class="mb-3 text-lg font-black text-black">
+            <h3 class="mb-2.5 text-[17px] font-semibold tracking-tight text-neutral-900">
               {{ policy.policyTitle }}
             </h3>
-            <p class="whitespace-pre-wrap text-sm font-normal leading-8 text-neutral-700">
+            <p class="whitespace-pre-wrap text-[14px] leading-[2.2] text-neutral-600">
               {{ policy.policyContent }}
             </p>
           </div>
@@ -107,18 +110,44 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.policy-bg {
-  background-image: url('~/assets/images/public/coos-public.png');
+/* ========================================================
+   PROGRESSIVE TOP BLUR
+   ======================================================== */
+.progressive-blur-layer {
+  backdrop-filter: blur(22px) saturate(1.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+  background: rgba(250, 249, 247, 0.12);
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
+}
+ 
+.progressive-blur-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(250, 249, 247, 0.22), rgba(250, 249, 247, 0.06) 55%, transparent);
+  pointer-events: none;
 }
 
-/* Policy Content Panel (Readable Glass - stronger opacity for high text contrast) */
-.coos-card {
-  background-color: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.65) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03) !important;
-  border-radius: 24px !important;
+.policy-grid {
+  background-size: 48px 48px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-color: #fafafa;
 }
 
 /* Empty State Panel (Medium Glass) */
