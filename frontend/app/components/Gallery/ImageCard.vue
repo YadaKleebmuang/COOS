@@ -53,9 +53,6 @@ const getOrderParams = (img: GalleryImage) => {
     >
     
     <!-- Gradient Overlays for Readability -->
-    <!-- Always present but subtle base overlay -->
-    <div class="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-    
     <!-- Hover enhancement overlay -->
     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     
@@ -67,16 +64,6 @@ const getOrderParams = (img: GalleryImage) => {
       <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-[11px] font-semibold text-white tracking-wide shadow-sm">
         {{ img.workTypeName || 'ทั่วไป' }}
       </span>
-    </div>
-
-    <!-- Title and Description (Bottom) -->
-    <div class="absolute bottom-0 left-0 right-0 p-5 z-30 flex flex-col justify-end pointer-events-none">
-      <h3 class="text-white text-lg font-bold tracking-tight line-clamp-1 drop-shadow-md">
-        {{ img.imageTitle || 'ไม่มีชื่อผลงาน' }}
-      </h3>
-      <p class="text-white/80 text-[13px] leading-relaxed line-clamp-2 mt-1.5 drop-shadow-md font-medium">
-        {{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}
-      </p>
     </div>
   </div>
 </template>

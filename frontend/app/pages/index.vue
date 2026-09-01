@@ -679,9 +679,6 @@ onUnmounted(() => {
                 class="gallery-card-img h-full w-full object-cover"
               >
 
-              <!-- Contrast Gradient Overlay -->
-              <div class="gallery-card-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-
               <!-- Top Left: WorkType Badge -->
               <div
                 v-if="img.workTypeName"
@@ -716,18 +713,6 @@ onUnmounted(() => {
                 </span>
               </div>
 
-              <!-- Bottom Content Info -->
-              <div class="gallery-card-info absolute bottom-0 inset-x-0 p-4 sm:p-5 text-left text-white z-30">
-                <h3 class="text-base sm:text-[17px] font-semibold tracking-tight text-white line-clamp-1">
-                  {{ img.imageTitle || 'Untitled Work' }}
-                </h3>
-                <p
-                  v-if="img.imageDescription"
-                  class="mt-1 text-xs text-white/70 line-clamp-2 leading-relaxed font-light"
-                >
-                  {{ img.imageDescription }}
-                </p>
-              </div>
             </div>
           </div>
         </div>
