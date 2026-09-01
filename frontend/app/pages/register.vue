@@ -63,143 +63,104 @@ const register = async () => {
 
 <template>
   <div class="coos-page min-h-screen relative overflow-hidden flex flex-col justify-center items-center px-4 py-8 sm:px-6 lg:px-8">
-    <!-- Ambient Canvas background image -->
-    <div class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat register-bg" />
+    <!-- Progressive Top Blur Layer -->
+    <Teleport to="body">
+      <div class="fixed top-0 left-0 right-0 h-[100px] sm:h-[120px] lg:h-[140px] z-[150] pointer-events-none progressive-blur-layer" />
+    </Teleport>
+
+    <!-- Subtle Grid background -->
+    <div class="register-grid pointer-events-none fixed inset-0 z-0" />
 
     <!-- Main Auth Shell (Glass) -->
-    <div class="relative z-10 mx-auto w-full max-w-[1024px] overflow-hidden rounded-[24px] border border-white/40 bg-white/50 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.06)] grid grid-cols-1 md:grid-cols-[1fr_1.2fr] lg:min-h-[640px]">
-      <!-- Left: Visual Storytelling Panel (hidden on mobile) -->
-      <div class="hidden md:flex flex-col justify-between p-8 lg:p-12 relative overflow-hidden bg-cover bg-no-repeat left-bg border-r border-white/20">
-        <!-- Localized overlay: readable gradient on the left, clear on the right -->
-        <div class="absolute inset-0 z-0 bg-gradient-to-r from-white/90 via-white/50 to-transparent" />
-
-        <!-- Branding / Logo -->
-        <div class="relative z-10">
-          <NuxtLink to="/" class="inline-flex flex-col leading-none text-black">
-            <span class="text-2xl font-black tracking-[0.24em]">COOS</span>
-            <span class="mt-1 text-[8px] font-bold tracking-[0.48em] text-black">STUDIO</span>
-          </NuxtLink>
-        </div>
-
-        <!-- Headline & Benefits composition -->
-        <div class="relative z-10 my-auto py-12 max-w-sm">
-          <h2 class="text-3xl font-black leading-tight text-black md:text-4xl">
-            สร้างสรรค์ผลงานพิเศษ<br>
-            ในแบบที่เป็นคุณ
-          </h2>
-          <p class="mt-4 text-sm leading-7 text-neutral-600 font-medium">
-            ร่วมสัมผัสประสบการณ์การสั่งทำรูปภาพพอร์เทรตและผลงานศิลปะสุดพิเศษ ด้วยการสมัครสมาชิกเพื่อติดตามผลงานและจัดการคำสั่งซื้อของคุณ
-          </p>
-
-          <!-- Small Informational Trust Strip -->
-          <div class="mt-10 space-y-4 border-t border-black/5 pt-6">
-            <div class="flex items-center gap-3">
-              <span class="text-lg">✦</span>
-              <span class="text-xs font-bold text-neutral-800">สั่งงานและเลือกรับบริการได้หลากหลาย</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-lg">✦</span>
-              <span class="text-xs font-bold text-neutral-800">ติดตามและยืนยันแบบผ่านระบบแดชบอร์ด</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-lg">✦</span>
-              <span class="text-xs font-bold text-neutral-800">ดาวน์โหลดผลงานดิจิทัลและแชร์ได้ทันที</span>
-            </div>
+    <div class="relative z-10 w-full max-w-[520px] overflow-hidden rounded-[24px] border border-white/80 bg-white/60 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
+      
+      <!-- Center: Register Form Panel -->
+      <div class="flex flex-col p-8 sm:px-11 sm:py-9 bg-transparent relative z-10">
+        
+        <div class="w-full">
+          <!-- Logo -->
+          <div class="flex justify-center mb-10">
+            <NuxtLink to="/" class="flex flex-col items-center leading-none text-black">
+              <span class="text-3xl font-black tracking-[0.28em]">COOS</span>
+              <span class="mt-1 text-[9px] font-bold tracking-[0.48em]">STUDIO</span>
+            </NuxtLink>
           </div>
-        </div>
 
-        <!-- Copyright Info -->
-        <div class="relative z-10 text-[10px] font-semibold tracking-wider text-neutral-400">
-          © 2026 COOS STUDIO. ALL RIGHTS RESERVED.
-        </div>
-      </div>
-
-      <!-- Right: Register Form Panel (scrollable / auto-height) -->
-      <div class="flex flex-col justify-center p-7 sm:p-10 lg:p-12 bg-white/40 backdrop-blur-sm relative z-10">
-        <!-- Mobile Logo (shown only on mobile) -->
-        <div class="flex justify-center mb-8 md:hidden">
-          <NuxtLink to="/" class="flex flex-col items-center leading-none text-black">
-            <span class="text-3xl font-black tracking-[0.28em]">COOS</span>
-            <span class="mt-1 text-[9px] font-bold tracking-[0.48em]">STUDIO</span>
-          </NuxtLink>
-        </div>
-
-        <div class="w-full max-w-md mx-auto">
           <!-- Header -->
-          <div class="text-left mb-6">
-            <p class="coos-kicker mb-2">
+          <div class="text-center mb-8">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400 mb-3 font-mono">
               JOIN COOS
             </p>
-            <h1 class="text-3xl font-black tracking-tight text-black">
+            <h1 class="text-[28px] font-semibold tracking-tight text-[#171717]">
               สร้างบัญชีใหม่
             </h1>
-            <p class="mt-2 text-sm text-neutral-500">
+            <p class="mt-3 text-[14px] text-neutral-500">
               กรอกข้อมูลเพื่อสมัครสมาชิก COOS
             </p>
           </div>
 
           <!-- Form -->
-          <form class="space-y-4" @submit.prevent="register">
+          <form class="space-y-3" @submit.prevent="register">
             <!-- Name -->
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-xs font-bold text-neutral-700 uppercase tracking-wider">ชื่อ</label>
+                <label class="mb-1 block text-xs font-bold text-neutral-700 uppercase tracking-wider">ชื่อ</label>
                 <input
                   id="register-firstname"
                   v-model="form.firstName"
                   type="text"
                   placeholder="ชื่อ"
-                  class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3.5 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
+                  class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
               </div>
               <div>
-                <label class="mb-1.5 block text-xs font-bold text-neutral-700 uppercase tracking-wider">นามสกุล</label>
+                <label class="mb-1 block text-xs font-bold text-neutral-700 uppercase tracking-wider">นามสกุล</label>
                 <input
                   id="register-lastname"
                   v-model="form.lastName"
                   type="text"
                   placeholder="นามสกุล"
-                  class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3.5 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
+                  class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
                 >
               </div>
             </div>
 
             <!-- Email -->
             <div>
-              <label class="mb-1.5 block text-xs font-bold text-neutral-700 uppercase tracking-wider">อีเมล</label>
+              <label class="mb-1 block text-xs font-bold text-neutral-700 uppercase tracking-wider">อีเมล</label>
               <input
                 id="register-email"
                 v-model="form.email"
                 type="email"
                 placeholder="email@example.com"
                 autocomplete="email"
-                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3.5 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
+                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
               >
             </div>
 
             <!-- Password -->
             <div>
-              <label class="mb-1.5 block text-xs font-bold text-neutral-700 uppercase tracking-wider">รหัสผ่าน</label>
+              <label class="mb-1 block text-xs font-bold text-neutral-700 uppercase tracking-wider">รหัสผ่าน</label>
               <input
                 id="register-password"
                 v-model="form.password"
                 type="password"
                 placeholder="อย่างน้อย 8 ตัวอักษร"
                 autocomplete="new-password"
-                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3.5 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
+                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
               >
             </div>
 
             <!-- Confirm Password -->
             <div>
-              <label class="mb-1.5 block text-xs font-bold text-neutral-700 uppercase tracking-wider">ยืนยันรหัสผ่าน</label>
+              <label class="mb-1 block text-xs font-bold text-neutral-700 uppercase tracking-wider">ยืนยันรหัสผ่าน</label>
               <input
                 id="register-confirm-password"
                 v-model="form.confirmPassword"
                 type="password"
                 placeholder="กรอกรหัสผ่านอีกครั้ง"
                 autocomplete="new-password"
-                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3.5 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
+                class="w-full rounded-xl border border-white/40 bg-white/50 px-4 py-3 text-sm text-black placeholder-neutral-400 shadow-sm transition-all focus:border-black/30 focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-black/5"
               >
             </div>
 
@@ -218,7 +179,7 @@ const register = async () => {
               id="register-submit"
               type="submit"
               :disabled="loading"
-              class="w-full flex h-12 items-center justify-center rounded-xl bg-black text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-black/10 disabled:opacity-50 mt-6 cursor-pointer"
+              class="w-full flex h-[48px] items-center justify-center rounded-xl bg-black text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-black/10 disabled:opacity-50 mt-5 cursor-pointer"
             >
               <span
                 v-if="loading"
@@ -247,7 +208,7 @@ const register = async () => {
           </form>
 
           <!-- Footer -->
-          <p class="mt-8 text-center text-sm text-neutral-500">
+          <p class="mt-6 text-center text-sm text-neutral-500">
             มีบัญชีอยู่แล้ว?
             <NuxtLink
               to="/login"
@@ -263,12 +224,43 @@ const register = async () => {
 </template>
 
 <style scoped>
-.register-bg {
-  background-image: url('~/assets/images/public/coos-public.png');
+/* ========================================================
+   PROGRESSIVE TOP BLUR
+   ======================================================== */
+.progressive-blur-layer {
+  backdrop-filter: blur(22px) saturate(1.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+  background: rgba(250, 249, 247, 0.12);
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,0.98) 18%,
+    rgba(0,0,0,0.78) 45%,
+    rgba(0,0,0,0.38) 72%,
+    transparent 100%
+  );
 }
 
-.left-bg {
-  background-image: url('~/assets/images/public/coos-public-1.png');
-  background-position: 70% center;
+.progressive-blur-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(250, 249, 247, 0.22), rgba(250, 249, 247, 0.06) 55%, transparent);
+  pointer-events: none;
+}
+
+.register-grid {
+  background-size: 48px 48px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-color: #fafafa;
 }
 </style>
