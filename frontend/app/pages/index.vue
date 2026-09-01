@@ -8,6 +8,24 @@ import imgEditorial from '~/assets/images/public/home/coos-fashion-editorial.png
 import imgCenterpiece from '~/assets/images/public/home/coos-hero-centerpiece.png'
 import imgTexture from '~/assets/images/public/home/coos-graphic-texture-panel.png'
 import imgPortrait from '~/assets/images/public/home/coos-floating-portrait.png'
+import imgLandscape from '~/assets/images/public/home/coos-cinematic-landscape.png'
+import imgLuminousPortrait from '~/assets/images/public/home/coos-editorial-luminous-portrait.png'
+import imgLuxuryProduct from '~/assets/images/public/home/coos-luxury-product-stilllife.png'
+import imgCinematicDreamscape from '~/assets/images/public/home/coos-cinematic-dreamscape.png'
+import imgSculpturalAbstract from '~/assets/images/public/home/coos-sculptural-light-abstract.png'
+import imgCommercial from '~/assets/images/public/home/coos-commercial-product.png'
+
+import imgLuminousPortraitDetail1 from '~/assets/images/public/home/coos-editorial-luminous-portrait_details_1.jpeg'
+import imgLuminousPortraitDetail2 from '~/assets/images/public/home/coos-editorial-luminous-portrait_details_2.jpeg'
+import imgLuminousPortraitDetail3 from '~/assets/images/public/home/coos-editorial-luminous-portrait_details_3.jpeg'
+
+import imgEditorialDetail1 from '~/assets/images/public/home/coos-fashion-editorial_details_1.jpeg'
+import imgEditorialDetail2 from '~/assets/images/public/home/coos-fashion-editorial_details_2.jpeg'
+import imgEditorialDetail3 from '~/assets/images/public/home/coos-fashion-editorial_details_3.jpeg'
+
+import imgPortraitDetail1 from '~/assets/images/public/home/coos-floating-portrait_details_1.jpeg'
+import imgPortraitDetail2 from '~/assets/images/public/home/coos-floating-portrait_details_2.jpeg'
+import imgPortraitDetail3 from '~/assets/images/public/home/coos-floating-portrait_details_3.jpeg'
 
 definePageMeta({
   layout: 'default'
@@ -34,12 +52,29 @@ const isDetailsModalOpen = ref(false)
 
 const selectedExplorerIndex = ref(0)
 
-const selectWorkType = (type: string) => {
-  const index = featuredImages.value.findIndex(img => img.workTypeName === type)
-  if (index !== -1) {
-    selectedExplorerIndex.value = index
+const curatedExplorerSets = [
+  {
+    main: imgLuminousPortrait,
+    details: [imgLuminousPortraitDetail1, imgLuminousPortraitDetail2, imgLuminousPortraitDetail3],
+    label: 'พอร์ตเทรตแสงละมุน'
+  },
+  {
+    main: imgEditorial,
+    details: [imgEditorialDetail1, imgEditorialDetail2, imgEditorialDetail3],
+    label: 'แฟชั่นเอดิทอเรียล'
+  },
+  {
+    main: imgPortrait,
+    details: [imgPortraitDetail1, imgPortraitDetail2, imgPortraitDetail3],
+    label: 'พอร์ตเทรตอาร์ต'
   }
-}
+]
+
+const currentExplorerSet = computed(() => {
+  return curatedExplorerSets[selectedExplorerIndex.value % curatedExplorerSets.length]
+})
+
+
 
 const openDetails = (img: GalleryImage) => {
   selectedImage.value = img
@@ -76,28 +111,32 @@ const processSteps = [
     title: 'เลือกสไตล์งาน',
     desc: 'สำรวจแนวภาพที่ชอบจากแกลเลอรี หรือระบุโทนสีที่ต้องการ',
     stageTitle: 'คัดสรรสไตล์และแนวทางภาพ',
-    stageDesc: 'เลือกบรรยากาศ โทนสี แสง และมุมกล้องที่สะท้อนเอกลักษณ์ของคุณ'
+    stageDesc: 'เลือกบรรยากาศ โทนสี แสง และมุมกล้องที่สะท้อนเอกลักษณ์ของคุณ',
+    img: imgColorfield
   },
   {
     id: '02',
     title: 'เลือกแพ็กเกจ',
     desc: 'กำหนดจำนวนภาพ ความละเอียด และระยะเวลาส่งมอบ',
     stageTitle: 'กำหนดขนาดและขอบเขตงาน',
-    stageDesc: 'เลือกแพ็กเกจที่ลงตัวกับงบประมาณและกำหนดการใช้งานจริง'
+    stageDesc: 'เลือกแพ็กเกจที่ลงตัวกับงบประมาณและกำหนดการใช้งานจริง',
+    img: imgCommercial
   },
   {
     id: '03',
     title: 'ส่งบรีฟและภาพอ้างอิง',
     desc: 'อัปโหลดภาพต้นฉบับและรายละเอียดเพื่อให้ทีมงานเริ่มงาน',
     stageTitle: 'ส่งข้อมูลและภาพอ้างอิง',
-    stageDesc: 'แนบรายละเอียดและแนวทางที่ต้องการ เพื่อให้ทีมงานเริ่มดำเนินการ'
+    stageDesc: 'แนบรายละเอียดและแนวทางที่ต้องการ เพื่อให้ทีมงานเริ่มดำเนินการ',
+    img: imgTexture
   },
   {
     id: '04',
     title: 'ตรวจรับและดาวน์โหลด',
     desc: 'พรีวิวผลงาน คัดเลือกภาพที่ถูกใจ และรับไฟล์ความละเอียดสูง',
     stageTitle: 'ตรวจรับและรับไฟล์งานสมบูรณ์',
-    stageDesc: 'พรีวิวผลงาน คัดเลือกภาพที่ถูกใจ พร้อมดาวน์โหลดไฟล์ความละเอียดสูงสุด'
+    stageDesc: 'พรีวิวผลงาน คัดเลือกภาพที่ถูกใจ พร้อมดาวน์โหลดไฟล์ความละเอียดสูงสุด',
+    img: imgCenterpiece
   }
 ]
 
@@ -151,11 +190,11 @@ const loadData = async () => {
 // HERO MOTION LOGIC
 // ========================================================
 const heroCardsBase = [
-  { id: 'c1', title: 'COLORFIELD', num: '#04', img: imgColorfield, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
-  { id: 'c2', title: 'EDITORIAL', num: '#02', img: imgEditorial, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
+  { id: 'c1', title: 'EDITORIAL', num: '#01', img: imgLuminousPortrait, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
+  { id: 'c2', title: 'COMMERCIAL', num: '#02', img: imgLuxuryProduct, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
   { id: 'c3', title: 'WORKSPACE', num: 'STUDIO SELECTION', img: imgCenterpiece, type: 'local', colors: ['bg-red-400/80', 'bg-amber-400/80', 'bg-green-400/80'] },
-  { id: 'c4', title: 'PORTFOLIO', num: '#01', img: '', type: 'featured', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
-  { id: 'c5', title: 'TEXTURE', num: '#03', img: imgTexture, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] }
+  { id: 'c4', title: 'CINEMATIC', num: '#03', img: imgCinematicDreamscape, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] },
+  { id: 'c5', title: 'ABSTRACT', num: '#04', img: imgSculpturalAbstract, type: 'local', colors: ['bg-neutral-300', 'bg-neutral-300', 'bg-neutral-300'] }
 ]
 // Duplicate to ensure loop fills screen safely
 const heroCards = [...heroCardsBase, ...heroCardsBase.map(c => ({ ...c, id: c.id + '-dup' }))]
@@ -327,19 +366,6 @@ onUnmounted(() => {
               <!-- Image Area -->
               <div class="flex-1 overflow-hidden bg-neutral-100 rounded-[18px] sm:rounded-[24px]">
                 <img
-                  v-if="card.type === 'featured' && featuredImages[0]"
-                  :src="featuredImages[0].imageUrl"
-                  :alt="featuredImages[0].imageTitle || 'Featured Work'"
-                  class="h-full w-full object-cover"
-                >
-                <img
-                  v-else-if="card.type === 'featured'"
-                  :src="imgPortrait"
-                  alt="Portrait"
-                  class="h-full w-full object-cover"
-                >
-                <img
-                  v-else
                   :src="card.img"
                   :alt="card.title"
                   class="h-full w-full object-cover"
@@ -448,49 +474,78 @@ onUnmounted(() => {
       v-if="featuredImages.length > 0"
       class="pt-24 pb-24 sm:pb-32 border-b border-black/[0.06] bg-[#FAFAFA]"
     >
-      <div class="coos-shell max-w-[1100px] mx-auto flex flex-col items-center">
+      <div class="coos-shell max-w-[1020px] mx-auto flex flex-col items-center">
         <!-- Main Composition Layout (Thumbnails Left + Showcase Right) -->
-        <div class="flex flex-col lg:flex-row gap-6 lg:gap-10 items-stretch w-full justify-center reveal-init">
-          <!-- LEFT: Thumbnail Rail -->
-          <div class="flex lg:flex-col gap-3 lg:gap-4 overflow-x-auto hide-scrollbar w-full lg:w-[110px] shrink-0 lg:justify-center relative z-10">
-            <button
-              v-for="(img, idx) in featuredImages"
-              :key="'preview-'+idx"
-              class="relative w-[90px] lg:w-full aspect-[4/3] rounded-[16px] p-1.5 shrink-0 transition-all duration-400 focus-visible:outline-2 focus-visible:outline-neutral-900 text-left outline-none group bg-white border shadow-[0_4px_16px_rgba(0,0,0,0.03)]"
-              :class="[
-                selectedExplorerIndex === idx
-                  ? 'border-black/15 ring-1 ring-black/5 -translate-y-0.5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] z-10'
-                  : 'border-black/[0.04] opacity-60 hover:opacity-100 hover:border-black/10 hover:-translate-y-0.5'
-              ]"
-              :aria-label="`Select preview ${img.imageTitle || idx + 1}`"
-              @click="selectedExplorerIndex = idx"
+        <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch w-full justify-center reveal-init relative">
+          <!-- LEFT: Thumbnail Rail (Static Detail Views) -->
+          <div class="flex lg:flex-col gap-3 overflow-x-auto hide-scrollbar w-full lg:w-[104px] shrink-0 lg:justify-center relative z-10 pointer-events-none">
+            <div
+              v-for="(detailSrc, idx) in currentExplorerSet.details"
+              :key="'detail-'+idx"
+              class="relative w-[96px] lg:w-full rounded-[16px] p-1.5 shrink-0 bg-white border border-black/[0.05] shadow-[0_4px_16px_rgba(0,0,0,0.03)] opacity-85"
             >
-              <div class="relative w-full h-full rounded-[10px] overflow-hidden bg-neutral-100">
-                <img
-                  v-if="img.imageUrl"
-                  :src="img.imageUrl"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  alt=""
-                >
-                <!-- Subtle Active Glow inside thumbnail image area -->
-                <div
-                  v-if="selectedExplorerIndex === idx"
-                  class="absolute inset-0 rounded-[10px] border border-white/60 mix-blend-overlay z-10 pointer-events-none"
-                />
+              <!-- Small top tab / label-like cap -->
+              <div class="w-full flex justify-center pb-1.5 pt-0.5">
+                <div class="w-4 h-0.5 rounded-full bg-neutral-200" />
               </div>
 
-              <!-- Connector Line (Desktop only) -->
-              <div
-                v-if="selectedExplorerIndex === idx"
-                class="hidden lg:block absolute top-1/2 -right-[40px] w-[40px] h-[1px] bg-neutral-300 pointer-events-none transition-opacity duration-300 z-0"
-              />
-            </button>
+              <!-- Inner image area -->
+              <div class="relative w-full aspect-[3/4] rounded-[8px] overflow-hidden bg-neutral-100">
+                <transition name="explorer-fade" mode="out-in">
+                  <img
+                    :key="selectedExplorerIndex"
+                    :src="detailSrc"
+                    class="w-full h-full object-cover"
+                    alt=""
+                  >
+                </transition>
+              </div>
+            </div>
+          </div>
+
+          <!-- Central Hub & Connectors (Desktop only, requires 3 items) -->
+          <div
+            v-if="featuredImages.length >= 3"
+            class="hidden lg:flex flex-col justify-center items-center w-[24px] shrink-0 z-0 pointer-events-none -mx-2"
+          >
+            <!-- SVG curved lines linking the 3 thumbnails to the hub -->
+            <div class="relative w-[24px] h-[400px]">
+              <svg
+                width="24"
+                height="400"
+                viewBox="0 0 24 400"
+                fill="none"
+                class="absolute inset-0 transition-all duration-500"
+              >
+                <!-- All 3 paths are subtly visible, connecting all details to the main image -->
+                <path
+                  d="M0,43 C 12,43 12,200 24,200"
+                  stroke="#d4d4d4"
+                  stroke-width="1.2"
+                  class="opacity-70"
+                />
+                <path
+                  d="M0,200 L 24,200"
+                  stroke="#d4d4d4"
+                  stroke-width="1.2"
+                  class="opacity-70"
+                />
+                <path
+                  d="M0,357 C 12,357 12,200 24,200"
+                  stroke="#d4d4d4"
+                  stroke-width="1.2"
+                  class="opacity-70"
+                />
+              </svg>
+              <!-- Hub Node -->
+              <div class="absolute right-0 top-[200px] -translate-y-1/2 translate-x-[2px] w-[4px] h-[12px] rounded-full bg-neutral-300 border border-[#FAFAFA] shadow-sm z-10" />
+            </div>
           </div>
 
           <!-- RIGHT: Main Framed Showcase Object -->
-          <div class="flex-1 w-full max-w-[880px] rounded-[28px] lg:rounded-[32px] border border-black/[0.06] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col isolate reveal-init z-20 transition-all duration-500">
-            <!-- Top: 3-Panel Presentation Area -->
-            <div class="relative w-full aspect-[4/3] lg:aspect-[16/10] bg-neutral-50 overflow-hidden isolate">
+          <div class="flex-1 w-full max-w-[820px] p-1.5 lg:p-2 rounded-[20px] lg:rounded-[24px] border border-black/[0.06] bg-[#FCFCFC] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08),_0_0_0_1px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col isolate z-20 transition-all duration-500 relative after:absolute after:inset-0 after:rounded-[20px] lg:after:rounded-[24px] after:pointer-events-none after:ring-1 after:ring-inset after:ring-white/60">
+            <!-- Top: Presentation Area -->
+            <div class="relative w-full aspect-[4/3] lg:aspect-[16/10] bg-neutral-100 overflow-hidden isolate rounded-[14px] lg:rounded-[16px]">
               <transition
                 name="explorer-fade"
                 mode="out-in"
@@ -499,96 +554,39 @@ onUnmounted(() => {
                   :key="selectedExplorerIndex"
                   class="absolute inset-0 flex"
                 >
-                  <!-- Left Panel (Faded/Blurred) -->
-                  <div class="hidden lg:block w-1/4 h-full border-r border-black/[0.03] overflow-hidden opacity-30 grayscale-[20%]">
-                    <img
-                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
-                      class="w-full h-full object-cover object-left blur-sm scale-110"
-                      alt=""
-                    >
-                  </div>
                   <!-- Center Main Panel -->
-                  <div class="w-full lg:w-2/4 h-full overflow-hidden lg:shadow-[0_0_40px_rgba(0,0,0,0.1)] z-10 bg-white">
+                  <div class="w-full h-full overflow-hidden bg-white">
                     <img
-                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
+                      :src="currentExplorerSet.main"
                       class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
                       alt=""
                     >
                   </div>
-                  <!-- Right Panel (Faded/Blurred) -->
-                  <div class="hidden lg:block w-1/4 h-full border-l border-black/[0.03] overflow-hidden opacity-30 grayscale-[20%]">
-                    <img
-                      :src="featuredImages[selectedExplorerIndex]?.imageUrl"
-                      class="w-full h-full object-cover object-right blur-sm scale-110"
-                      alt=""
-                    >
-                  </div>
                 </div>
               </transition>
-              <!-- Delicate inset highlight for the whole visual area -->
-              <div class="absolute inset-0 rounded-t-[28px] lg:rounded-t-[32px] border-b border-black/[0.04] pointer-events-none z-20 mix-blend-overlay shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]" />
-            </div>
-
-            <!-- Bottom: Info Strip -->
-            <div class="px-5 py-4 lg:px-6 lg:py-5 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-black/[0.04]">
-              <transition
-                name="explorer-fade"
-                mode="out-in"
-              >
-                <div
-                  :key="selectedExplorerIndex"
-                  class="flex-1 min-w-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-6 w-full"
-                >
-                  <!-- Left side = title -->
-                  <div class="w-full sm:w-1/3 shrink-0 truncate">
-                    <h3 class="text-[15px] sm:text-base font-medium text-neutral-900 truncate">
-                      {{ featuredImages[selectedExplorerIndex]?.imageTitle || 'Untitled Work' }}
-                    </h3>
-                  </div>
-
-                  <!-- Center = short subtitle / description -->
-                  <div class="hidden sm:block w-1/3 shrink-0 text-center">
-                    <p
-                      v-if="featuredImages[selectedExplorerIndex]?.imageDescription"
-                      class="text-[12px] sm:text-[13px] text-neutral-500 line-clamp-1"
-                    >
-                      {{ featuredImages[selectedExplorerIndex]?.imageDescription }}
-                    </p>
-                  </div>
-
-                  <!-- Right side = info action / label -->
-                  <div class="w-full sm:w-1/3 shrink-0 sm:text-right flex justify-start sm:justify-end">
-                    <button
-                      v-if="featuredImages[selectedExplorerIndex]"
-                      class="inline-flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-200/80 px-3 py-1.5 text-[11px] font-semibold tracking-wider text-neutral-700 transition-colors hover:bg-neutral-100"
-                      @click="openDetails(featuredImages[selectedExplorerIndex]!)"
-                    >
-                      ดูรายละเอียด
-                    </button>
-                  </div>
-                </div>
-              </transition>
+              <!-- Delicate inset highlight for the visual area -->
+              <div class="absolute inset-0 rounded-[14px] lg:rounded-[16px] pointer-events-none z-20 mix-blend-overlay shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] border border-black/[0.03]" />
             </div>
           </div>
         </div>
 
         <!-- Bottom: Category Pills -->
         <div
-          v-if="availableWorkTypes.length > 0"
-          class="mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-2.5 reveal-init"
+          v-if="curatedExplorerSets.length > 0"
+          class="mt-6 lg:mt-8 flex flex-wrap items-center justify-center gap-1.5 reveal-init"
         >
           <button
-            v-for="(type, idx) in availableWorkTypes"
+            v-for="(set, idx) in curatedExplorerSets"
             :key="'nav-'+idx"
-            class="px-5 py-1.5 rounded-full text-[13px] font-medium tracking-wide transition-all border"
+            class="px-3.5 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all border"
             :class="[
-              featuredImages[selectedExplorerIndex]?.workTypeName === type
-                ? 'bg-neutral-900 border-neutral-900 text-white shadow-sm'
-                : 'bg-white border-black/[0.08] text-neutral-500 hover:text-neutral-900 hover:border-black/20 hover:bg-neutral-50 shadow-sm'
+              selectedExplorerIndex === idx
+                ? 'bg-white border-neutral-200/80 text-neutral-900 shadow-sm'
+                : 'bg-transparent border-transparent text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/50'
             ]"
-            @click="selectWorkType(type)"
+            @click="selectedExplorerIndex = idx"
           >
-            {{ type }}
+            {{ set.label }}
           </button>
         </div>
       </div>
@@ -787,12 +785,15 @@ onUnmounted(() => {
           </div>
 
           <!-- Main Stage Visual (Dominant) -->
-          <div class="relative aspect-[16/10] sm:aspect-[16/9] bg-[#FAFAF8] overflow-hidden">
-            <img
-              src="~/assets/images/public/home/coos-commercial-product.png"
-              alt="COOS Studio Production"
-              class="h-full w-full object-cover object-center"
-            >
+          <div class="relative aspect-[16/9] sm:aspect-[21/9] bg-[#FAFAF8] overflow-hidden">
+            <transition name="process-fade" mode="out-in">
+              <img
+                :key="activeProcessStep"
+                :src="processSteps[activeProcessStep]?.img"
+                alt="COOS Studio Production"
+                class="h-full w-full object-cover object-center"
+              >
+            </transition>
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
             <!-- Active Stage Text with Crossfade -->
@@ -868,7 +869,7 @@ onUnmounted(() => {
     <!-- ========================================================
          SECTION 7: CINEMATIC ART BREAK (Visual Breath)
          ======================================================== -->
-    <section class="py-10 sm:py-16 border-b border-black/[0.06] bg-[#FAFAF8]">
+    <!-- <section class="py-10 sm:py-16 border-b border-black/[0.06] bg-[#FAFAF8]">
       <div class="coos-shell reveal-init">
         <div class="mx-auto max-w-6xl overflow-hidden rounded-2xl">
           <div class="relative aspect-[16/9] sm:aspect-[24/9] overflow-hidden bg-neutral-100">
@@ -880,7 +881,7 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- ========================================================
          SECTION 8: QUIET PACKAGE INTRO

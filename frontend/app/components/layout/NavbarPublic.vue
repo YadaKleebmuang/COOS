@@ -142,51 +142,51 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 px-4 pt-1 sm:px-5 sm:pt-2 lg:px-8">
-    <div class="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between rounded-[24px] border border-white/65 bg-white/[0.78] px-4 shadow-[0_16px_48px_rgba(0,0,0,0.08)] backdrop-blur-[18px] sm:px-5 lg:px-6">
+  <header class="fixed inset-x-0 top-4 z-[200] px-4 sm:px-5 lg:px-8 pointer-events-none">
+    <div class="liquid-glass-nav pointer-events-auto mx-auto relative flex h-[58px] w-full items-center justify-between gap-4 px-3 sm:px-4 md:w-fit md:max-w-[calc(100vw-3rem)] lg:px-5">
       <!-- Logo -->
       <NuxtLink
         to="/"
-        class="flex flex-col leading-none text-black min-w-[108px]"
+        class="flex flex-col leading-none text-black min-w-[90px]"
       >
-        <span class="text-2xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="text-xl font-semibold tracking-[0.24em]">COOS</span>
         <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO</span>
       </NuxtLink>
 
-      <!-- Navigation Links (Capsule shape matching NavbarCustomer visual style) -->
-      <nav class="hidden items-center gap-1 rounded-full border border-black/[0.06] bg-white/70 p-1 shadow-[0_4px_14px_rgba(0,0,0,0.04)] md:flex">
+      <!-- Navigation Links (Capsule shape matching Liquid Glass style) -->
+      <nav class="hidden items-center gap-1 rounded-[22px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] md:flex">
         <NuxtLink
           to="/"
-          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
-          :class="[activeSection === 'home' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'home' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']"
         >
           หน้าแรก
         </NuxtLink>
         <NuxtLink
           to="/gallery"
-          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
-          :class="[activeSection === 'gallery' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'gallery' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']"
         >
           ผลงาน
         </NuxtLink>
         <NuxtLink
-          to="/#packages"
-          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
-          :class="[activeSection === 'packages' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
-        >
-          บริการ
-        </NuxtLink>
-        <NuxtLink
           to="/#how-it-works"
-          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
-          :class="[activeSection === 'how-it-works' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'how-it-works' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']"
         >
           ขั้นตอนการสั่งงาน
         </NuxtLink>
         <NuxtLink
+          to="/#packages"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'packages' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']"
+        >
+          บริการ
+        </NuxtLink>
+        <NuxtLink
           to="/policy"
-          class="rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
-          :class="[activeSection === 'policy' ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'text-[#666666] hover:bg-white hover:text-[#171717]']"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
+          :class="[activeSection === 'policy' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']"
         >
           เกี่ยวกับเรา
         </NuxtLink>
@@ -425,7 +425,7 @@ onBeforeUnmount(() => {
             </NuxtLink>
             <NuxtLink
               to="/register"
-              class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+              class="inline-flex h-[42px] items-center justify-center rounded-[18px] border border-white/80 bg-white/60 px-5 text-[13px] lg:text-sm font-semibold text-[#171717] shadow-[0_4px_12px_rgba(180,190,255,0.25),inset_0_2px_4px_rgba(255,255,255,1)] transition-all hover:scale-[1.02] hover:bg-white/80 hover:shadow-[0_6px_16px_rgba(180,190,255,0.35)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
             >
               สมัครสมาชิก
             </NuxtLink>
@@ -486,7 +486,7 @@ onBeforeUnmount(() => {
           <NuxtLink
             to="/"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            :class="[activeSection === 'home' ? '!bg-[#171717] !text-white' : '']"
+            :class="[activeSection === 'home' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false"
           >
             หน้าแรก
@@ -494,7 +494,7 @@ onBeforeUnmount(() => {
           <NuxtLink
             to="/gallery"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            :class="[activeSection === 'gallery' ? '!bg-[#171717] !text-white' : '']"
+            :class="[activeSection === 'gallery' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false"
           >
             ผลงาน
@@ -502,7 +502,7 @@ onBeforeUnmount(() => {
           <NuxtLink
             to="/#packages"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            :class="[activeSection === 'packages' ? '!bg-[#171717] !text-white' : '']"
+            :class="[activeSection === 'packages' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false"
           >
             บริการ
@@ -510,7 +510,7 @@ onBeforeUnmount(() => {
           <NuxtLink
             to="/#how-it-works"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            :class="[activeSection === 'how-it-works' ? '!bg-[#171717] !text-white' : '']"
+            :class="[activeSection === 'how-it-works' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false"
           >
             ขั้นตอนการสั่งงาน
@@ -518,7 +518,7 @@ onBeforeUnmount(() => {
           <NuxtLink
             to="/policy"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            :class="[activeSection === 'policy' ? '!bg-[#171717] !text-white' : '']"
+            :class="[activeSection === 'policy' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false"
           >
             เกี่ยวกับเรา
@@ -545,7 +545,7 @@ onBeforeUnmount(() => {
             <template v-else>
               <NuxtLink
                 to="/register"
-                class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-4 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] w-full"
+                class="inline-flex h-11 items-center justify-center rounded-xl border border-[#C4B5FD] bg-white px-4 text-sm font-semibold text-[#171717] shadow-[0_0_12px_rgba(196,181,253,0.3)] transition hover:shadow-[0_0_18px_rgba(196,181,253,0.45)] hover:border-[#A78BFA] w-full"
                 @click="mobileMenuOpen = false"
               >
                 สร้างบัญชี
@@ -564,3 +564,36 @@ onBeforeUnmount(() => {
     </Transition>
   </header>
 </template>
+
+<style scoped>
+.liquid-glass-nav {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 28px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(0, 0, 0, 0.03),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.02);
+}
+.liquid-glass-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+.liquid-glass-nav::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 29px;
+  background: linear-gradient(135deg, rgba(230, 220, 255, 0.3), rgba(255, 255, 255, 0) 60%, rgba(200, 230, 255, 0.2));
+  z-index: -1;
+  filter: blur(6px);
+  pointer-events: none;
+}
+</style>
