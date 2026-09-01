@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-[18px] px-4 py-2 text-[13px] font-medium text-[#666666] transition-all duration-200 hover:bg-white/40 hover:text-[#171717] lg:px-5"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium text-[#666666] transition-all duration-200 hover:bg-white/40 hover:text-[#171717] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/10 lg:px-5"
           exact-active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
           active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
         >
