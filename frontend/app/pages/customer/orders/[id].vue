@@ -387,7 +387,10 @@ const formatDeliveryDate = (dateStr?: string) => {
 
 <template>
   <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+    
+    <div class="relative z-10">
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <NuxtLink
         to="/customer/orders"
         class="inline-flex h-11 items-center justify-center self-start rounded-xl border border-black/[0.08] bg-white px-[18px] text-sm font-semibold text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
@@ -1036,6 +1039,15 @@ const formatDeliveryDate = (dateStr?: string) => {
           </section>
         </aside>
       </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.dashboard-grid {
+  background-size: 48px 48px;
+  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
+}
+</style>
