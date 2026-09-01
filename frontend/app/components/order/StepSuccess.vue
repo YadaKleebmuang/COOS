@@ -10,10 +10,10 @@ const formatPrice = (n: number) =>
 </script>
 
 <template>
-  <div class="animate-fade-in rounded-[24px] border border-black/[0.06] bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
-    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#EDF8F1] bg-[#EDF8F1]">
+  <div class="animate-fade-in overflow-hidden rounded-[24px] border border-black/5 bg-white/40 p-8 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-12">
+    <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#171717] text-white shadow-md">
       <svg
-        class="h-8 w-8 text-[#267A48]"
+        class="h-8 w-8"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -24,53 +24,53 @@ const formatPrice = (n: number) =>
         d="M5 13l4 4L19 7"
       /></svg>
     </div>
-    <h2 class="mb-2 text-[30px] font-semibold leading-[1.3] text-[#171717]">
-      สร้างคำสั่งงานสำเร็จ!
+    <h2 class="mb-2 text-[26px] font-semibold leading-tight text-[#171717]">
+      สร้างคำสั่งงานสำเร็จ
     </h2>
-    <p class="mb-6 text-sm leading-[1.6] text-[#666666]">
-      หมายเลขออเดอร์: <span class="font-semibold text-[#171717]">#COOS-{{ Math.abs(createdOrder.orderId) }}</span>
+    <p class="mb-8 text-[14px] font-medium text-[#666666]">
+      หมายเลขออเดอร์: <span class="font-bold text-[#171717]">#COOS-{{ Math.abs(createdOrder.orderId) }}</span>
     </p>
 
-    <div class="mx-auto mb-6 max-w-sm space-y-2 rounded-[20px] border border-black/[0.06] bg-[#F3F3F1] p-5 text-left">
-      <div class="flex justify-between text-sm">
-        <span class="text-[#666666]">ราคาแพ็กเกจ</span>
-        <span class="font-medium text-[#171717]">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
+    <div class="mx-auto mb-8 max-w-[340px] space-y-2.5 rounded-[20px] border border-black/5 bg-white/80 p-6 text-left shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
+      <div class="flex justify-between text-[13px] font-medium text-[#666666]">
+        <span>ราคาแพ็กเกจ</span>
+        <span class="font-bold text-[#171717]">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
       </div>
       <div
         v-if="createdOrder.orderUrgentPrice > 0"
-        class="flex justify-between text-sm"
+        class="flex justify-between text-[13px] font-medium text-[#171717]"
       >
-        <span class="text-[#666666]">ค่าเร่งด่วน</span>
-        <span class="font-medium text-[#9A6812]">+฿{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
+        <span>ค่าเร่งด่วน</span>
+        <span class="font-bold">+฿{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
       </div>
       <div
         v-if="createdOrder.orderDiscount > 0"
-        class="flex justify-between text-sm"
+        class="flex justify-between text-[13px] font-medium text-[#267A48]"
       >
-        <span class="text-[#666666]">ส่วนลด Gallery</span>
-        <span class="font-medium text-[#267A48]">-฿{{ formatPrice(createdOrder.orderDiscount) }}</span>
+        <span>ส่วนลด Gallery</span>
+        <span class="font-bold">-฿{{ formatPrice(createdOrder.orderDiscount) }}</span>
       </div>
-      <hr class="my-2 border-black/[0.06]">
-      <div class="flex justify-between text-base font-bold">
-        <span class="text-[#171717]">รวมทั้งหมด</span>
-        <span class="text-[#171717]">฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
+      <hr class="my-3 border-black/5">
+      <div class="flex justify-between text-[16px] font-bold text-[#171717]">
+        <span>รวมทั้งหมด</span>
+        <span>฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
       </div>
     </div>
 
-    <p class="mx-auto mb-6 max-w-sm rounded-xl border border-[#FFF7E6] bg-[#FFF7E6] p-3 text-sm font-medium text-[#9A6812]">
-      สถานะ: <strong>รอชำระมัดจำ</strong> — กรุณาชำระมัดจำ 30% เพื่อเริ่มดำเนินการ
+    <p class="mx-auto mb-8 max-w-[340px] rounded-xl border border-black/5 bg-white/60 p-4 text-[13px] font-medium leading-relaxed text-[#171717] shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
+      สถานะปัจจุบัน: <strong class="text-[#9A6812]">รอชำระมัดจำ</strong><br>กรุณาชำระมัดจำ 30% เพื่อเริ่มดำเนินการ
     </p>
 
     <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
       <NuxtLink
         to="/customer/orders"
-        class="inline-flex h-11 w-full items-center justify-center rounded-xl border border-black/[0.08] bg-white px-[18px] text-sm font-semibold text-[#171717] transition hover:bg-[#EEEEEC] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:w-auto"
+        class="inline-flex h-11 w-full items-center justify-center rounded-xl border border-black/10 bg-white/60 px-[18px] text-[14px] font-semibold text-[#171717] transition hover:border-black/20 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#171717]/20 sm:w-auto"
       >
         ดูรายการสั่งงาน
       </NuxtLink>
       <NuxtLink
         :to="`/customer/orders/${createdOrder.orderId}`"
-        class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:w-auto"
+        class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-[14px] font-semibold text-white shadow-md transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-[#171717]/20 sm:w-auto"
       >
         ดูรายละเอียดออเดอร์
       </NuxtLink>

@@ -107,88 +107,73 @@ const formatPrice = (n: number) =>
 <template>
   <div class="p-6 sm:p-8">
     <div class="mb-6">
-      <h2 class="text-xl font-semibold leading-[1.4] text-[#171717]">
+      <h2 class="text-[20px] font-semibold leading-tight text-[#171717]">
         รายละเอียดงาน
       </h2>
-      <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+      <p class="mt-1 text-[13px] font-medium text-[#666666]">
         กรอกข้อมูลเพิ่มเติมเพื่อให้ Editor เข้าใจสิ่งที่ต้องการ
       </p>
     </div>
 
     <div class="space-y-6">
-      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+      <section class="rounded-[20px] border border-black/5 bg-white/60 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] sm:p-6">
+        <h3 class="text-[15px] font-bold text-[#171717]">
           รายละเอียดภาพ
         </h3>
         <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
-            <label
-              for="order-style"
-              class="mb-2 block text-sm font-semibold text-[#171717]"
-            >สไตล์ภาพ</label>
+            <label for="order-style" class="mb-1.5 block text-[13px] font-bold text-[#171717]">สไตล์ภาพ</label>
             <input
               id="order-style"
               v-model="form.orderStyle"
               type="text"
               placeholder="เช่น Minimal, Retro, Anime, Realistic"
-              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             >
           </div>
 
           <div>
-            <label
-              for="order-color"
-              class="mb-2 block text-sm font-semibold text-[#171717]"
-            >โทนสี</label>
+            <label for="order-color" class="mb-1.5 block text-[13px] font-bold text-[#171717]">โทนสี</label>
             <input
               id="order-color"
               v-model="form.orderColorTone"
               type="text"
               placeholder="เช่น Warm, Cool, Pastel, Earth Tone"
-              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             >
           </div>
 
           <div class="md:col-span-2">
-            <label
-              for="order-composition"
-              class="mb-2 block text-sm font-semibold text-[#171717]"
-            >องค์ประกอบฉาก</label>
+            <label for="order-composition" class="mb-1.5 block text-[13px] font-bold text-[#171717]">องค์ประกอบฉาก</label>
             <textarea
               id="order-composition"
               v-model="form.orderComposition"
               rows="3"
               placeholder="อธิบายฉากหรือองค์ประกอบที่ต้องการ เช่น สวนดอกไม้ ฉากพระอาทิตย์ตก ริมทะเล"
-              class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              class="w-full resize-none rounded-xl border border-black/10 bg-white/80 p-4 text-[14px] font-medium leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             />
           </div>
         </div>
       </section>
 
-      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+      <section class="rounded-[20px] border border-black/5 bg-white/60 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] sm:p-6">
+        <h3 class="text-[15px] font-bold text-[#171717]">
           ข้อมูลเพิ่มเติม
         </h3>
         <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div class="md:col-span-2">
-            <label
-              for="order-note"
-              class="mb-2 block text-sm font-semibold text-[#171717]"
-            >หมายเหตุเพิ่มเติม</label>
+            <label for="order-note" class="mb-1.5 block text-[13px] font-bold text-[#171717]">หมายเหตุเพิ่มเติม</label>
             <textarea
               id="order-note"
               v-model="form.orderNote"
               rows="3"
               placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้ง Editor"
-              class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              class="w-full resize-none rounded-xl border border-black/10 bg-white/80 p-4 text-[14px] font-medium leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             />
           </div>
 
           <div>
-            <label
-              for="order-date"
-              class="mb-2 block text-sm font-semibold text-[#171717]"
-            >
+            <label for="order-date" class="mb-1.5 block text-[13px] font-bold text-[#171717]">
               วันที่ต้องการรับงาน <span class="text-[#B93B3B]">*</span>
             </label>
             <input
@@ -197,28 +182,28 @@ const formatPrice = (n: number) =>
               type="date"
               :min="minDate"
               required
-              class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+              class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             >
-            <p class="mt-2 text-xs leading-[1.5] text-[#666666]">
+            <p class="mt-1.5 text-[12px] font-medium text-[#666666]">
               ใช้สำหรับจัดคิวงานและประเมินกำหนดส่งมอบ
             </p>
           </div>
         </div>
       </section>
 
-      <section class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <section class="rounded-[20px] border border-black/5 bg-white/60 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] sm:p-6">
         <div class="mb-4">
-          <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          <h3 class="text-[15px] font-bold text-[#171717]">
             รูปภาพต้นฉบับ / รูปอ้างอิง
           </h3>
-          <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+          <p class="mt-1 text-[13px] font-medium text-[#666666]">
             อัปโหลดได้สูงสุด 10 รูป เพื่อให้ทีมเข้าใจภาพตั้งต้นและทิศทางที่ต้องการ
           </p>
         </div>
 
         <div
-          class="cursor-pointer rounded-[16px] border-2 border-dashed p-7 text-center transition"
-          :class="dragOver ? 'border-[#171717] bg-[#F3F3F1]' : 'border-black/[0.10] bg-white hover:border-black/[0.20]'"
+          class="cursor-pointer rounded-[16px] border border-dashed p-6 text-center transition-colors"
+          :class="dragOver ? 'border-[#171717] bg-[#f8f8f8]' : 'border-black/20 bg-white/80 hover:border-black/30 hover:bg-white'"
           @dragover.prevent="dragOver = true"
           @dragleave.prevent="dragOver = false"
           @drop.prevent="handleDrop"
@@ -232,11 +217,12 @@ const formatPrice = (n: number) =>
             class="hidden"
             @change="handleFileSelect"
           >
-          <div class="flex flex-col items-center justify-center gap-2">
-            <p class="text-sm font-semibold text-[#171717]">
+          <div class="flex flex-col items-center justify-center gap-1.5">
+            <svg class="mb-1 h-6 w-6 text-[#929292]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <p class="text-[14px] font-bold text-[#171717]">
               ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์
             </p>
-            <p class="text-xs leading-[1.5] text-[#666666]">
+            <p class="text-[12px] font-medium text-[#666666]">
               รองรับไฟล์ JPEG, PNG, WebP (สูงสุด 20MB ต่อไฟล์)
             </p>
           </div>
@@ -244,36 +230,36 @@ const formatPrice = (n: number) =>
 
         <div
           v-if="uploadingSource"
-          class="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-[#171717]"
+          class="mt-4 flex items-center justify-center gap-2 text-[13px] font-bold text-[#171717]"
         >
-          <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
+          <div class="h-4 w-4 animate-spin rounded-full border-2 border-black/10 border-t-[#171717]" />
           กำลังอัปโหลดรูปภาพ...
         </div>
         <p
           v-if="uploadError"
-          class="mt-3 rounded-xl border border-[#FDEEEE] bg-[#FDEEEE] px-4 py-3 text-sm font-medium text-[#B93B3B]"
+          class="mt-3 rounded-xl bg-[#FDEEEE]/80 px-4 py-3 text-[13px] font-bold text-[#B93B3B]"
         >
           {{ uploadError }}
         </p>
 
         <div
           v-if="sourceImages.length > 0"
-          class="mt-4 grid gap-3"
-          :class="sourceImages.length === 1 ? 'max-w-[220px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 md:grid-cols-5'"
+          class="mt-5 grid gap-3"
+          :class="sourceImages.length === 1 ? 'max-w-[200px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 md:grid-cols-5'"
         >
           <div
             v-for="(url, idx) in sourceImages"
             :key="url"
-            class="group relative overflow-hidden rounded-[16px] border border-black/[0.06] bg-[#F3F3F1]"
+            class="group relative overflow-hidden rounded-[14px] border border-black/5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
             :class="sourceImages.length === 1 ? 'aspect-[4/3]' : 'aspect-square'"
           >
             <img
               :src="url"
               :alt="`รูปภาพต้นฉบับหรือรูปอ้างอิง ${idx + 1}`"
-              class="h-full w-full object-contain p-1"
+              class="h-full w-full object-cover"
             >
             <button
-              class="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FDEEEE] text-[#B93B3B] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:bg-[#B93B3B] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#B93B3B]/20"
+              class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-[#171717] shadow-sm backdrop-blur-sm transition hover:bg-[#B93B3B] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#B93B3B]/20"
               title="ลบรูปภาพ"
               type="button"
               @click.stop="removeImage(idx)"
@@ -297,58 +283,58 @@ const formatPrice = (n: number) =>
       </section>
 
       <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/5 bg-white/60 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-colors hover:bg-white/80">
           <div>
-            <p class="text-sm font-semibold text-[#171717]">
+            <p class="text-[14px] font-bold text-[#171717]">
               บริการเร่งด่วน
             </p>
             <p
               v-if="selectedPackage?.packageUrgentPrice"
-              class="mt-1 text-xs leading-[1.5] text-[#9A6812]"
+              class="mt-0.5 text-[12px] font-bold text-[#171717]"
             >
               +฿{{ formatPrice(selectedPackage.packageUrgentPrice) }}
             </p>
             <p
               v-else
-              class="mt-1 text-xs leading-[1.5] text-[#929292]"
+              class="mt-0.5 text-[12px] font-medium text-[#929292]"
             >
               แพ็กเกจนี้ไม่รองรับบริการเร่งด่วน
             </p>
           </div>
           <button
             :disabled="!selectedPackage?.packageUrgentPrice"
-            class="relative h-6 w-11 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:opacity-40"
-            :class="form.orderIsUrgent ? 'bg-[#171717]' : 'bg-[#E6E6E3]'"
+            class="relative h-6 w-11 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]/20 disabled:opacity-40"
+            :class="form.orderIsUrgent ? 'bg-[#171717]' : 'bg-black/10'"
             type="button"
             @click="form.orderIsUrgent = !form.orderIsUrgent"
           >
             <span
-              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
               :class="form.orderIsUrgent ? 'translate-x-5' : 'translate-x-0'"
             />
           </button>
         </div>
 
-        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <div class="flex items-center justify-between gap-4 rounded-[20px] border border-black/5 bg-white/60 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-colors hover:bg-white/80">
           <div>
-            <p class="text-sm font-semibold text-[#171717]">
+            <p class="text-[14px] font-bold text-[#171717]">
               อนุญาตโชว์ใน Gallery
             </p>
             <p
               v-if="selectedPackage"
-              class="mt-1 text-xs leading-[1.5] text-[#666666]"
+              class="mt-0.5 text-[12px] font-bold text-[#267A48]"
             >
               ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด ฿{{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
             </p>
           </div>
           <button
-            class="relative h-6 w-11 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
-            :class="form.orderIsGalleryAllowed ? 'bg-[#171717]' : 'bg-[#E6E6E3]'"
+            class="relative h-6 w-11 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]/20"
+            :class="form.orderIsGalleryAllowed ? 'bg-[#171717]' : 'bg-black/10'"
             type="button"
             @click="form.orderIsGalleryAllowed = !form.orderIsGalleryAllowed"
           >
             <span
-              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+              class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
               :class="form.orderIsGalleryAllowed ? 'translate-x-5' : 'translate-x-0'"
             />
           </button>
@@ -358,32 +344,32 @@ const formatPrice = (n: number) =>
 
     <div
       v-if="selectedPackage"
-      class="mt-6 rounded-[20px] border border-black/[0.06] bg-[#F3F3F1] p-5"
+      class="mt-6 rounded-[20px] border border-black/5 bg-white/80 p-5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]"
     >
-      <h3 class="mb-3 text-sm font-semibold text-[#171717]">
+      <h3 class="mb-3 text-[14px] font-bold text-[#171717]">
         สรุปราคาเบื้องต้น
       </h3>
-      <div class="space-y-2 text-sm">
+      <div class="space-y-2 text-[13px] font-medium">
         <div class="flex justify-between gap-4">
           <span class="text-[#666666]">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
-          <span class="font-medium text-[#171717]">฿{{ formatPrice(pricePreview.base) }}</span>
+          <span class="font-bold text-[#171717]">฿{{ formatPrice(pricePreview.base) }}</span>
         </div>
         <div
           v-if="pricePreview.urgent > 0"
-          class="flex justify-between gap-4 text-[#9A6812]"
+          class="flex justify-between gap-4 text-[#171717]"
         >
           <span>ค่าเร่งด่วน</span>
-          <span class="font-medium">+฿{{ formatPrice(pricePreview.urgent) }}</span>
+          <span class="font-bold">+฿{{ formatPrice(pricePreview.urgent) }}</span>
         </div>
         <div
           v-if="pricePreview.discount > 0"
           class="flex justify-between gap-4 text-[#267A48]"
         >
           <span>ส่วนลด Gallery</span>
-          <span class="font-medium">-฿{{ formatPrice(pricePreview.discount) }}</span>
+          <span class="font-bold">-฿{{ formatPrice(pricePreview.discount) }}</span>
         </div>
-        <hr class="my-2 border-black/[0.06]">
-        <div class="flex justify-between gap-4 text-base font-semibold text-[#171717]">
+        <hr class="my-3 border-black/5">
+        <div class="flex justify-between gap-4 text-[16px] font-bold text-[#171717]">
           <span>รวมโดยประมาณ</span>
           <span>฿{{ formatPrice(pricePreview.total) }}</span>
         </div>

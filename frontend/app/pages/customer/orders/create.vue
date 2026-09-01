@@ -192,221 +192,173 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <!-- Header -->
-    <div class="mb-6 text-center">
-      <p class="mb-3 text-xs font-medium uppercase tracking-[0.28em] text-[#666666]">
-        CREATE ORDER
-      </p>
-      <h1 class="text-[30px] font-semibold leading-[1.3] text-[#171717] sm:text-[34px]">
-        สั่งทำภาพ
-      </h1>
-      <p class="mt-2 text-sm leading-[1.6] text-[#666666]">
-        กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล
-      </p>
-    </div>
-
-    <!-- Success State -->
-    <StepSuccess
-      v-if="submitSuccess && createdOrder"
-      :created-order="createdOrder"
-    />
-
-    <!-- Loading State -->
-    <div
-      v-else-if="loadingData"
-      class="rounded-[24px] border border-black/[0.06] bg-white p-12 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
-    >
-      <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
-      <p class="text-sm font-medium text-[#666666]">
-        กำลังโหลดข้อมูล...
-      </p>
-    </div>
-
-    <!-- Error State -->
-    <div
-      v-else-if="dataError"
-      class="rounded-[24px] border border-[#FDEEEE] bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
-    >
-      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FDEEEE]">
-        <svg
-          class="h-6 w-6 text-[#B93B3B]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        /></svg>
+  <div class="mx-auto w-full max-w-[800px] py-6 sm:py-8 lg:py-10">
+    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+    
+    <div class="relative z-10">
+      <!-- Header -->
+      <div class="mb-6 text-center">
+        <p class="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#929292]">
+          CREATE ORDER
+        </p>
+        <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
+          สั่งทำภาพ
+        </h1>
+        <p class="mt-1.5 text-[14px] font-medium text-[#666666]">
+          กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล
+        </p>
       </div>
-      <p class="mb-1 font-semibold text-[#B93B3B]">
-        เกิดข้อผิดพลาด
-      </p>
-      <p class="text-sm text-[#666666]">
-        {{ dataError }}
-      </p>
-    </div>
 
-    <!-- Form Wizard -->
-    <div v-else>
-      <!-- Stepper Navbar -->
-      <div class="mb-6 overflow-x-auto rounded-[20px] border border-black/[0.06] bg-white p-4 shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
-        <div class="flex min-w-max items-center justify-center">
-          <template
-            v-for="(label, idx) in stepLabels"
-            :key="idx"
-          >
-            <button
-              class="flex items-center gap-2 whitespace-nowrap rounded-xl px-1 py-1 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
-              :class="idx + 1 <= currentStep ? 'cursor-pointer' : 'cursor-default'"
-              :aria-current="idx + 1 === currentStep ? 'step' : undefined"
-              @click="goToStep(idx + 1)"
-            >
-              <div
-                class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition duration-200"
-                :class="
-                  idx + 1 < currentStep
-                    ? 'border-[#267A48] bg-[#EDF8F1] text-[#267A48]'
-                    : idx + 1 === currentStep
-                      ? 'border-[#171717] bg-[#171717] text-white'
-                      : 'border-black/[0.06] bg-[#F3F3F1] text-[#929292]'
-                "
-              >
-                <svg
-                  v-if="idx + 1 < currentStep"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="3"
-                  d="M5 13l4 4L19 7"
-                /></svg>
-                <span v-else>{{ idx + 1 }}</span>
-              </div>
-              <span
-                class="hidden text-sm font-semibold transition-colors duration-200 sm:inline"
-                :class="idx + 1 <= currentStep ? 'text-[#171717]' : 'text-[#929292]'"
-              >{{ label }}</span>
-            </button>
+      <!-- Success State -->
+      <StepSuccess
+        v-if="submitSuccess && createdOrder"
+        :created-order="createdOrder"
+      />
 
-            <!-- Connector line -->
-            <div
-              v-if="idx < stepLabels.length - 1"
-              class="mx-2 h-px w-8 transition-all duration-300 sm:w-16"
-              :class="idx + 1 < currentStep ? 'bg-[#267A48]' : 'bg-black/[0.06]'"
-            />
-          </template>
+      <!-- Loading State -->
+      <div
+        v-else-if="loadingData"
+        class="rounded-[24px] border border-black/5 bg-white/40 p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl"
+      >
+        <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-black/10 border-t-[#171717]" />
+        <p class="text-[14px] font-medium text-[#666666]">
+          กำลังโหลดข้อมูล...
+        </p>
+      </div>
+
+      <!-- Error State -->
+      <div
+        v-else-if="dataError"
+        class="rounded-[24px] border border-black/5 bg-[#FDEEEE]/80 p-8 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl"
+      >
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/80 shadow-sm">
+          <svg class="h-6 w-6 text-[#B93B3B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
+        <p class="mb-1 text-[15px] font-bold text-[#B93B3B]">
+          เกิดข้อผิดพลาด
+        </p>
+        <p class="text-[13px] font-medium text-[#B93B3B]/80">
+          {{ dataError }}
+        </p>
       </div>
 
-      <!-- Card container -->
-      <div class="overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
-        <StepWorkType
-          v-show="currentStep === 1"
-          v-model="selectedWorkTypeId"
-          :work-types="workTypes"
-        />
+      <!-- Form Wizard -->
+      <div v-else>
+        <!-- Stepper Navbar -->
+        <div class="mb-6 flex justify-center">
+          <div class="flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-black/5 bg-white/40 p-2 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl hide-scrollbar sm:gap-4 sm:px-6 sm:p-3">
+            <template v-for="(label, idx) in stepLabels" :key="idx">
+              <button
+                class="flex items-center gap-2.5 rounded-full px-2 py-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]/20"
+                :class="idx + 1 <= currentStep ? 'cursor-pointer' : 'cursor-default opacity-50'"
+                :aria-current="idx + 1 === currentStep ? 'step' : undefined"
+                @click="goToStep(idx + 1)"
+              >
+                <div
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-bold transition-colors duration-300"
+                  :class="
+                    idx + 1 < currentStep
+                      ? 'bg-[#171717] text-white'
+                      : idx + 1 === currentStep
+                        ? 'border-2 border-[#171717] bg-white text-[#171717]'
+                        : 'border-2 border-black/10 bg-[#f8f8f8] text-[#929292]'
+                  "
+                >
+                  <svg v-if="idx + 1 < currentStep" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                  <span v-else>{{ idx + 1 }}</span>
+                </div>
+                <span class="hidden text-[13px] font-bold transition-colors duration-300 sm:block" :class="idx + 1 <= currentStep ? 'text-[#171717]' : 'text-[#929292]'">{{ label }}</span>
+              </button>
+              <!-- Connector -->
+              <div v-if="idx < stepLabels.length - 1" class="h-px w-6 transition-colors duration-300 sm:w-10" :class="idx + 1 < currentStep ? 'bg-[#171717]' : 'bg-black/10'" />
+            </template>
+          </div>
+        </div>
 
-        <StepPackage
-          v-show="currentStep === 2"
-          v-model="selectedPackageId"
-          :packages="packages"
-        />
+        <!-- Card container -->
+        <div class="overflow-hidden rounded-[24px] border border-black/5 bg-white/40 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl">
+          <StepWorkType
+            v-show="currentStep === 1"
+            v-model="selectedWorkTypeId"
+            :work-types="workTypes"
+          />
 
-        <StepDetails
-          v-show="currentStep === 3"
-          v-model:images="sourceImageUrls"
-          :model-value="form"
-          :selected-package="selectedPackage || null"
-          :price-preview="pricePreview"
-          @update:model-value="Object.assign(form, $event)"
-        />
+          <StepPackage
+            v-show="currentStep === 2"
+            v-model="selectedPackageId"
+            :packages="packages"
+          />
 
-        <StepConfirm
-          v-show="currentStep === 4"
-          v-model="acceptedDisclaimer"
-          :form="form"
-          :selected-work-type="selectedWorkType"
-          :selected-package="selectedPackage"
-          :source-images="sourceImageUrls"
-          :price-preview="pricePreview"
-          :submit-error="submitError"
-        />
+          <StepDetails
+            v-show="currentStep === 3"
+            v-model:images="sourceImageUrls"
+            :model-value="form"
+            :selected-package="selectedPackage || null"
+            :price-preview="pricePreview"
+            @update:model-value="Object.assign(form, $event)"
+          />
 
-        <!-- Navigation Buttons -->
-        <div class="flex flex-col-reverse gap-3 border-t border-black/[0.06] bg-[#F3F3F1] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <button
-            v-if="currentStep > 1"
-            class="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-[18px] text-sm font-semibold text-[#171717] transition hover:bg-[#EEEEEC] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
-            @click="prevStep"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            /></svg>
-            ย้อนกลับ
-          </button>
-          <div
-            v-else
-            class="w-10"
-          /> <!-- Placeholder to keep Next button on the right -->
+          <StepConfirm
+            v-show="currentStep === 4"
+            v-model="acceptedDisclaimer"
+            :form="form"
+            :selected-work-type="selectedWorkType"
+            :selected-package="selectedPackage"
+            :source-images="sourceImageUrls"
+            :price-preview="pricePreview"
+            :submit-error="submitError"
+          />
 
-          <button
-            v-if="currentStep < totalSteps"
-            :disabled="!canGoNext"
-            class="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl px-[18px] text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed"
-            :class="
-              canGoNext
-                ? 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929]'
-                : 'bg-[#E6E6E3] text-[#929292]'
-            "
-            @click="nextStep"
-          >
-            ถัดไป
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            /></svg>
-          </button>
+          <!-- Navigation Buttons -->
+          <div class="flex flex-col-reverse gap-3 border-t border-black/5 bg-white/60 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              v-if="currentStep > 1"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-black/10 bg-white/80 px-[18px] text-[14px] font-semibold text-[#171717] transition hover:border-black/20 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+              @click="prevStep"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+              ย้อนกลับ
+            </button>
+            <div v-else class="w-10" />
 
-          <button
-            v-else
-            :disabled="submitting || !acceptedDisclaimer"
-            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed"
-            :class="
-              submitting || !acceptedDisclaimer
-                ? 'bg-[#E6E6E3] text-[#929292]'
-                : 'bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:bg-[#292929]'
-            "
-            @click="submitOrder"
-          >
-            <span
-              v-if="submitting"
-              class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-            />
-            <span v-else>ยืนยันการสั่งทำภาพ</span>
-          </button>
+            <button
+              v-if="currentStep < totalSteps"
+              :disabled="!canGoNext"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed"
+              :class="canGoNext ? 'bg-[#171717] text-white shadow-md hover:bg-black' : 'bg-black/5 text-[#929292]'"
+              @click="nextStep"
+            >
+              ถัดไป
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+            <button
+              v-else
+              :disabled="submitting || !acceptedDisclaimer"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed"
+              :class="submitting || !acceptedDisclaimer ? 'bg-black/5 text-[#929292]' : 'bg-[#171717] text-white shadow-md hover:bg-black'"
+              @click="submitOrder"
+            >
+              <span v-if="submitting" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span v-else>ยืนยันการสั่งทำภาพ</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.dashboard-grid {
+  background-size: 48px 48px;
+  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
