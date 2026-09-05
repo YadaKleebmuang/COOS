@@ -85,10 +85,13 @@ const filteredImages = computed(() => {
   if (categoryFilter.value !== "all") result = result.filter(i => i.category === categoryFilter.value)
   if (visibilityFilter.value === "public") result = result.filter(i => i.isPublic)
   if (visibilityFilter.value === "private") result = result.filter(i => !i.isPublic)
-  const q = searchQuery.value.toLowerCase()
-  if (q) result = result.filter(i => i.title.toLowerCase().includes(q) || i.hashtags.some(h => h.includes(q)))
-  const hq = hashtagFilter.value.toLowerCase().trim()
-  if (hq) result = result.filter(i => i.hashtags.some(h => h.includes(hq)))
+  
+  const q = searchQuery.value.toLowerCase().trim()
+  if (q) result = result.filter(i => i.title.toLowerCase().includes(q) || i.hashtags.some((h: string) => h.toLowerCase().includes(q)))
+  
+  const hq = hashtagFilter.value.toLowerCase().trim().replace(/^#/, '')
+  if (hq) result = result.filter(i => i.hashtags.some((h: string) => h.toLowerCase().includes(hq)))
+  
   return result
 })
 
