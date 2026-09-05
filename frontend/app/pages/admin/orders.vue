@@ -14,14 +14,6 @@ const { alert } = useAlert()
 const route = useRoute()
 const router = useRouter()
 
-const focusOrderId = computed(() => Number(route.query.focusOrderId) || null)
-
-const exitFocusedMode = () => {
-  const query = { ...route.query }
-  delete query.focusOrderId
-  router.replace({ query })
-}
-
 const orders = ref<any[]>([])
 const editors = ref<any[]>([])
 const loading = ref(true)
@@ -49,29 +41,13 @@ const fetchAdminData = async (page = 1) => {
     const usersRes = await apiFetch<any>("/users?limit=1000")
     editors.value = (usersRes.data || []).filter((u: any) => u.userRole === "editor")
 
-    if (focusOrderId.value) {
-      // FOCUSED ORDER MODE
-      try {
-        const orderRes = await orderService.getOrderById(focusOrderId.value)
-        orders.value = [orderRes]
-        currentPage.value = 1
-        totalPages.value = 1
-        totalRecords.value = 1
-      } catch (err: any) {
-        // Invalid or nonexistent ID
-        exitFocusedMode()
-        return // The watcher will trigger a normal fetch
-      }
-    } else {
-      // NORMAL MODE
-      const statusQuery = selectedFilter.value !== "all" ? selectedFilter.value : undefined
-      const ordersRes = await orderService.getMyOrders(page, limit, statusQuery)
-      
-      orders.value = ordersRes.data || []
-      currentPage.value = ordersRes.page || 1
-      totalPages.value = ordersRes.totalPages || 1
-      totalRecords.value = ordersRes.total || 0
-    }
+    const statusQuery = selectedFilter.value !== "all" ? selectedFilter.value : undefined
+    const ordersRes = await orderService.getMyOrders(page, limit, statusQuery)
+    
+    orders.value = ordersRes.data || []
+    currentPage.value = ordersRes.page || 1
+    totalPages.value = ordersRes.totalPages || 1
+    totalRecords.value = ordersRes.total || 0
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
@@ -79,12 +55,7 @@ const fetchAdminData = async (page = 1) => {
   }
 }
 
-watch(focusOrderId, (newId, oldId) => {
-  if (newId !== oldId) {
-    currentPage.value = 1
-    fetchAdminData(1)
-  }
-})
+
 
 onMounted(() => fetchAdminData())
 
@@ -93,14 +64,33 @@ const handlePageChange = (page: number) => {
 }
 
 // ── Filters ────────────────────────────────────────────────────
+const statusMap: Record<string, string> = {
+  waiting_deposit: "รอชำระมัดจำ",
+  waiting_assignment: "รอมอบหมายงาน",
+  waiting_to_start: "รอเริ่มงาน",
+  in_progress: "กำลังดำเนินการ",
+  waiting_selection: "รอเลือกผลงาน",
+  waiting_final_payment: "รอชำระส่วนที่เหลือ",
+  delivered: "ส่งมอบแล้ว",
+  completed: "เสร็จสมบูรณ์",
+  cancelled: "ยกเลิก"
+}
+
+const getStatusLabel = (status: string) => {
+  return statusMap[status] || status
+}
+
 const filterOptions = computed(() => [
   { key: "all", label: "ทั้งหมด" },
-  { key: "waiting_deposit", label: "รอมัดจำ" },
-  { key: "waiting_assignment", label: "รอมอบหมาย" },
-  { key: "in_progress", label: "กำลังดำเนินการ" },
-  { key: "waiting_final_payment", label: "รอชำระส่วนที่เหลือ" },
-  { key: "completed", label: "ส่งงานแล้ว" },
-  { key: "cancelled", label: "ยกเลิก" }
+  { key: "waiting_deposit", label: getStatusLabel("waiting_deposit") },
+  { key: "waiting_assignment", label: getStatusLabel("waiting_assignment") },
+  { key: "waiting_to_start", label: getStatusLabel("waiting_to_start") },
+  { key: "in_progress", label: getStatusLabel("in_progress") },
+  { key: "waiting_selection", label: getStatusLabel("waiting_selection") },
+  { key: "waiting_final_payment", label: getStatusLabel("waiting_final_payment") },
+  { key: "delivered", label: getStatusLabel("delivered") },
+  { key: "completed", label: getStatusLabel("completed") },
+  { key: "cancelled", label: getStatusLabel("cancelled") }
 ])
 
 watch(selectedFilter, () => {
@@ -190,45 +180,29 @@ const breadcrumb = [
   <div class="space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">คำสั่งงาน</h1>
-        <p class="mt-0.5 text-xs text-[#9A9A95]">ดูและจัดการคำสั่งงานทั้งหมดในระบบ</p>
-      </div>
-      <AdminActionButton
-        variant="secondary"
-        size="sm"
-        icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-        :loading="loading"
-        @click="fetchAdminData"
+      <AdminBreadcrumb :items="breadcrumb" />
+      <button
+        @click="() => fetchAdminData()"
+        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
       >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
         รีเฟรช
-      </AdminActionButton>
+      </button>
     </div>
 
-    <!-- Focused Order Panel -->
-    <div v-if="focusOrderId && !loading && orders.length > 0" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FDFDFB] border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
-      <div>
-        <h3 class="text-sm font-bold text-[#171717]">กำลังดูคำสั่งงานที่เลือกจากแดชบอร์ด</h3>
-        <p class="text-xs text-[#666660] mt-0.5">คำสั่งงาน #{{ focusOrderId }}</p>
-      </div>
-      <AdminActionButton
-        variant="secondary"
-        size="sm"
-        @click="exitFocusedMode"
-      >
-        แสดงคำสั่งงานทั้งหมด
-      </AdminActionButton>
-    </div>
-
-    <!-- Filter + Search Toolbar -->
-    <div v-if="!focusOrderId" class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
-      <div class="overflow-x-auto flex-1">
-        <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
-      </div>
-      <div class="flex-shrink-0 flex items-center">
-        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-[#171717]/30 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all">
-          <svg class="w-4 h-4 text-[#9A9A95] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Orders Workspace Card -->
+    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+      
+      <!-- Header & Search -->
+      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">คำสั่งงานทั้งหมด</h2>
+          <p class="text-[13px] font-medium text-[#666666] mt-0.5">ดูแลรายการคำสั่งงานและติดตามสถานะ</p>
+        </div>
+        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+          <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -239,17 +213,21 @@ const breadcrumb = [
           />
         </div>
       </div>
-    </div>
 
-    <!-- Error -->
-    <div v-if="error" class="bg-white border border-red-100 rounded-2xl p-6 text-center">
-      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="() => fetchAdminData()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
-    </div>
+      <!-- Filter Row -->
+      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
+        <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
+      </div>
 
-    <!-- Table -->
-    <div v-else class="space-y-4">
-      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
+      <!-- Error State -->
+      <div v-if="error" class="p-12 text-center">
+        <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+        <button @click="() => fetchAdminData()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
+      </div>
+
+      <!-- Table -->
+      <div v-else class="flex flex-col flex-1">
+        <div class="overflow-x-auto bg-[#FDFDFB]/30 orders-table-scope">
         <AdminDataTable
           :columns="columns"
           :rows="filteredOrders"
@@ -258,61 +236,70 @@ const breadcrumb = [
         >
           <!-- Order ID -->
           <template #cell-orderId="{ value }">
-            <span class="font-mono text-xs font-bold text-[#171717]">#{{ value }}</span>
+            <span class="font-mono text-xs font-semibold text-[#171717]">#{{ value }}</span>
           </template>
 
           <!-- Work type -->
           <template #cell-workTypeName="{ value }">
-            <span class="text-xs text-[#171717] font-medium">{{ value ?? "—" }}</span>
+            <span class="text-[13px] font-medium text-[#171717]">{{ value ?? "—" }}</span>
           </template>
 
           <!-- Package -->
           <template #cell-packageName="{ value }">
-            <span class="text-xs text-[#666660]">{{ value ?? "—" }}</span>
+            <span class="text-xs text-[#666666]">{{ value ?? "—" }}</span>
           </template>
 
           <!-- Price -->
           <template #cell-orderTotalPrice="{ value }">
-            <span class="text-xs font-bold text-[#171717] font-number">{{ formatPrice(value) }}</span>
+            <span class="text-[13px] font-bold text-[#171717] font-number">{{ formatPrice(value) }}</span>
           </template>
 
           <!-- Status -->
           <template #cell-orderStatus="{ value }">
-            <AdminStatusBadge :status="value" />
+            <span 
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
+              :class="{
+                'bg-[#171717] text-white border-[#171717] shadow-sm': value === 'completed' || value === 'delivered',
+                'bg-[#FFF5F5] text-[#C53030] border-[#FEB2B2]': value === 'cancelled',
+                'bg-[#F7F7F5] text-[#666666] border-black/[0.06]': value !== 'completed' && value !== 'delivered' && value !== 'cancelled'
+              }"
+            >
+              {{ getStatusLabel(value) }}
+            </span>
           </template>
 
           <!-- Required date -->
           <template #cell-orderRequiredDate="{ value }">
-            <span class="text-xs text-[#9A9A95] font-medium">{{ formatDate(value) }}</span>
+            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
           </template>
 
           <!-- Editor Assign dropdown -->
           <template #cell-editorAssign="{ row }">
-            <span v-if="row.editorId" class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold text-[#171717] bg-[#EFEFEA] border border-white/50 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.005)]">
+            <span v-if="row.editorId" class="inline-flex items-center px-2 py-1 text-[11px] font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
               {{ getEditorName(row.editorId) }}
             </span>
-            <span v-else class="text-xs text-[#9A9A95] font-medium">— ยังไม่มอบหมาย —</span>
+            <span v-else class="text-xs text-[#9A9A95]">— ยังไม่มอบหมาย —</span>
           </template>
 
           <!-- Payment slip -->
           <template #cell-paymentAction="{ row }">
-            <div v-if="pendingPayment(row)" class="flex items-center gap-2 justify-center">
+            <div v-if="pendingPayment(row)" class="flex items-center gap-1.5 justify-center">
               <a
                 :href="pendingPayment(row).paymentSlipUrl"
                 target="_blank"
-                class="text-[11px] text-[#666660] hover:text-[#171717] hover:underline transition-colors font-bold px-2 py-1 bg-[#F7F7F5] border border-[#EFEFEA] rounded-lg"
+                class="px-2 py-1 text-[11px] font-semibold text-[#171717] bg-white hover:bg-[#F7F7F5] transition-colors rounded shadow-sm border border-black/[0.06]"
               >
                 ดูสลิป
               </a>
               <button
                 @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
-                class="px-2 py-1 text-[11px] font-bold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded-lg border border-[#171717]"
+                class="px-2 py-1 text-[11px] font-semibold text-white bg-[#171717] hover:bg-black transition-colors rounded shadow-sm border border-transparent"
               >
                 อนุมัติ
               </button>
               <button
                 @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'rejected')"
-                class="px-2 py-1 text-[11px] font-bold text-red-600 bg-white hover:bg-red-50/50 border border-red-200 transition-colors rounded-lg"
+                class="px-2 py-1 text-[11px] font-semibold text-[#C53030] bg-[#FFF5F5] hover:bg-[#FED7D7] transition-colors rounded shadow-sm border border-[#FEB2B2]"
               >
                 ปฏิเสธ
               </button>
@@ -325,20 +312,20 @@ const breadcrumb = [
             <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
           </template>
         </AdminDataTable>
-
-        <!-- Empty state -->
-        <AdminEmptyState
-          v-if="!loading && filteredOrders.length === 0"
-          title="ไม่พบคำสั่งงาน"
-          description="ไม่มีคำสั่งงานที่ตรงกับเงื่อนไขที่เลือก ลองเปลี่ยนตัวกรองใหม่"
-          icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-        />
       </div>
 
+      <!-- Empty state -->
+      <AdminEmptyState
+        v-if="!loading && filteredOrders.length === 0"
+        title="ไม่พบคำสั่งงาน"
+        description="ไม่มีคำสั่งงานที่ตรงกับเงื่อนไขที่เลือก ลองเปลี่ยนตัวกรองใหม่"
+        icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+      />
+
       <!-- Pagination wrapper -->
-      <div v-if="!focusOrderId && totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-between bg-[#FDFDFB]/50">
         <!-- Thai Pagination Summary -->
-        <div class="hidden sm:block text-xs text-[#666660]">
+        <div class="hidden sm:block text-xs text-[#666666]">
           <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
         </div>
         <Pagination
@@ -350,6 +337,7 @@ const breadcrumb = [
           class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
         />
       </div>
+    </div>
     </div>
 
     <!-- Confirm Dialog -->
@@ -371,5 +359,27 @@ const breadcrumb = [
 <style scoped>
 :deep(p.text-sm.text-gray-700) {
   display: none !important;
+}
+
+/* 
+  Override shared DataTable styles to match Dashboard neutral tones
+  and remove rounded corners.
+*/
+.orders-table-scope :deep(.rounded-xl) {
+  border-radius: 0 !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.orders-table-scope :deep(thead.bg-gray-50) {
+  background-color: rgba(247, 247, 245, 0.8) !important; /* bg-[#F7F7F5]/80 */
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.orders-table-scope :deep(tbody.bg-white tr:hover) {
+  background-color: #FDFDFB !important; /* hover:bg-[#FDFDFB] */
+}
+
+.orders-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {
+  border-color: rgba(0, 0, 0, 0.04) !important;
 }
 </style>
