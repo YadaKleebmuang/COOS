@@ -126,44 +126,39 @@ const isActive = (path: string) => route.path === path
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-0 left-0 h-full w-60 bg-white/80 backdrop-blur-[15px] border-r border-[#EFEFEA]/60 flex flex-col z-40 transition-transform duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.015)]"
+    class="fixed top-0 left-0 h-full w-60 bg-white/70 backdrop-blur-xl border-r border-black/[0.06] flex flex-col z-40 transition-transform duration-300"
     :class="collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
   >
     <!-- Logo -->
-    <div class="h-16 flex items-center px-5 border-b border-[#EFEFEA]/60 gap-2.5 flex-shrink-0">
-      <div class="w-7 h-7 rounded-lg bg-[#171717] flex items-center justify-center flex-shrink-0">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div>
-        <p class="text-sm font-bold text-[#171717] leading-none">COOS Studio</p>
-        <p class="text-[10px] text-[#9A9A95] mt-0.5 uppercase tracking-wider">Admin Panel</p>
-      </div>
+    <div class="h-[68px] sm:h-[72px] flex items-center px-6 border-b border-black/[0.06] flex-shrink-0 bg-transparent">
+      <NuxtLink to="/admin/dashboard" class="flex flex-col leading-none text-black">
+        <span class="text-2xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO <span class="text-[#929292]">ADMIN</span></span>
+      </NuxtLink>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-4">
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-5">
       <div v-for="group in sidebarGroups" :key="group.label">
         <!-- Group Label -->
-        <p class="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#9A9A95] select-none">
+        <p class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#929292] select-none">
           {{ group.label }}
         </p>
         <!-- Group Items -->
-        <div class="space-y-0.5">
+        <div class="space-y-1">
           <NuxtLink
             v-for="item in group.items"
             :key="item.path"
             :to="item.path"
             @click="emit('close')"
-            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 border border-transparent"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 border border-transparent"
             :class="isActive(item.path)
-              ? 'bg-[#EFEFEA] text-[#171717] font-bold border-[#EFEFEA] shadow-[0_2px_8px_rgba(0,0,0,0.01)]'
-              : 'text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717]'"
+              ? 'bg-[#171717]/5 text-[#171717] font-semibold'
+              : 'text-[#666666] font-medium hover:bg-[#171717]/[0.03] hover:text-[#171717]'"
           >
             <svg
               class="w-4 h-4 flex-shrink-0"
-              :class="isActive(item.path) ? 'text-[#171717]' : 'text-[#9A9A95]'"
+              :class="isActive(item.path) ? 'text-[#171717]' : 'text-[#929292]'"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
