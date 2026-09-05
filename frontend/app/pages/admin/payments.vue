@@ -156,99 +156,145 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-lg font-black text-[#171717] tracking-tight">ตรวจสอบการชำระเงิน</h1>
-        <p class="mt-0.5 text-xs text-[#9A9A95]">ตรวจสอบหลักฐานและสถานะการชำระเงินของลูกค้า</p>
-      </div>
-      <AdminActionButton variant="secondary" size="sm" :loading="loading" icon="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" @click="fetchPayments">รีเฟรช</AdminActionButton>
+      <AdminBreadcrumb :items="breadcrumb" />
+      <button
+        @click="() => fetchPayments()"
+        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        รีเฟรช
+      </button>
     </div>
 
-    <!-- Filter + Search Toolbar -->
-    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
-      <div class="overflow-x-auto flex-grow">
+    <!-- Payments Workspace Card -->
+    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+      
+      <!-- Header & Search -->
+      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ตรวจสอบการชำระเงิน</h2>
+          <p class="text-[13px] font-medium text-[#666666] mt-0.5">ตรวจสอบหลักฐานและสถานะการชำระเงินของลูกค้า</p>
+        </div>
+        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+          <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="ค้นหาเลขออเดอร์, ลูกค้า..."
+            class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"
+          />
+        </div>
+      </div>
+
+      <!-- Filter Row -->
+      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
         <AdminFilterBar v-model="activeTab" :filters="tabs" />
       </div>
-      <div class="flex-shrink-0 flex items-center">
-        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-[#EFEFEA] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-[#171717]/30 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all">
-          <svg class="w-4 h-4 text-[#9A9A95] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input v-model="searchQuery" type="text" placeholder="ค้นหาเลขออเดอร์, ลูกค้า..." class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"/>
-        </div>
-      </div>
-    </div>
 
-    <!-- Error -->
-    <div v-if="error" class="bg-white border border-red-100 rounded-2xl p-6 text-center">
-      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-      <button @click="fetchPayments" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
-    </div>
-
-    <!-- Table -->
-    <div v-else class="space-y-4">
-      <div class="bg-white border border-[#EFEFEA]/60 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] overflow-hidden">
-        <AdminDataTable :columns="columns" :rows="paginatedPayments" :loading="loading" row-key="paymentId">
-          <template #cell-orderId="{ value }">
-            <span class="font-mono text-xs font-bold text-[#171717]">#{{ value }}</span>
-          </template>
-          <template #cell-customerName="{ row }">
-            <span class="text-xs font-medium text-[#171717]">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
-          </template>
-          <template #cell-paymentType="{ value }">
-            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-lg border border-transparent" :class="value === 'deposit' ? 'bg-[#EFEFEA] text-[#171717] border-white/50 shadow-[0_1px_4px_rgba(0,0,0,0.005)]' : 'bg-[#171717] text-white'">
-              {{ value === "deposit" ? "ค่ามัดจำ" : "ยอดคงเหลือ" }}
-            </span>
-          </template>
-          <template #cell-paymentAmount="{ value }">
-            <span class="text-xs font-bold font-number text-[#171717]">{{ formatPrice(value) }}</span>
-          </template>
-          <template #cell-paymentCreatedAt="{ value }">
-            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
-          </template>
-          <template #cell-paymentStatus="{ value }">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium border" :class="statusConfig[value]?.classes">
-              {{ statusConfig[value]?.label ?? value }}
-            </span>
-          </template>
-          <template #cell-action="{ row }">
-            <div class="flex items-center justify-center gap-2">
-              <a :href="row.paymentSlipUrl" target="_blank" class="text-[11px] text-[#666660] hover:text-[#171717] hover:underline font-bold px-2 py-1 bg-[#F7F7F5] border border-[#EFEFEA] rounded-lg transition-colors whitespace-nowrap">ดูสลิป</a>
-              <template v-if="row.paymentStatus === 'pending'">
-                <button
-                  @click="openConfirm(row as any, 'approved')"
-                  class="px-2 py-1 text-[11px] font-bold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded-lg border border-[#171717]"
-                >
-                  อนุมัติ
-                </button>
-                <button
-                  @click="openConfirm(row as any, 'rejected')"
-                  class="px-2 py-1 text-[11px] font-bold text-red-600 bg-white hover:bg-red-50/50 border border-red-200 transition-colors rounded-lg"
-                >
-                  ปฏิเสธ
-                </button>
-              </template>
-              <span v-else class="text-xs text-[#EFEFEA] block text-center">—</span>
-            </div>
-          </template>
-        </AdminDataTable>
-        <AdminEmptyState v-if="!loading && filteredPayments.length === 0" title="ไม่พบรายการชำระเงิน" description="ไม่มีหลักฐานการชำระเงินที่ตรงกับเงื่อนไข" icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <!-- Error State -->
+      <div v-if="error" class="p-12 text-center">
+        <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+        <button @click="() => fetchPayments()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
       </div>
 
-      <!-- Pagination wrapper -->
-      <div v-if="totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
-        <!-- Thai Pagination Summary -->
-        <div class="hidden sm:block text-xs text-[#666660]">
-          <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * pageSize, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+      <!-- Table -->
+      <div v-else class="flex flex-col flex-1">
+        <div class="overflow-x-auto bg-[#FDFDFB]/30 payments-table-scope">
+          <AdminDataTable
+            :columns="columns"
+            :rows="paginatedPayments"
+            :loading="loading"
+            row-key="paymentId"
+          >
+            <!-- Order ID -->
+            <template #cell-orderId="{ value }">
+              <span class="font-mono text-xs font-semibold text-[#171717]">#{{ value }}</span>
+            </template>
+            
+            <!-- Customer -->
+            <template #cell-customerName="{ row }">
+              <span class="text-[13px] font-medium text-[#171717]">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
+            </template>
+            
+            <!-- Payment Type -->
+            <template #cell-paymentType="{ value }">
+              <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-[6px] border border-transparent" :class="value === 'deposit' ? 'bg-[#EFEFEA] text-[#171717] border-black/[0.06]' : 'bg-[#171717] text-white'">
+                {{ value === "deposit" ? "ค่ามัดจำ" : "ยอดคงเหลือ" }}
+              </span>
+            </template>
+            
+            <!-- Amount -->
+            <template #cell-paymentAmount="{ value }">
+              <span class="text-[13px] font-semibold font-mono text-[#171717]">{{ formatPrice(value) }}</span>
+            </template>
+            
+            <!-- Created At -->
+            <template #cell-paymentCreatedAt="{ value }">
+              <span class="text-xs text-[#666666]">{{ formatDate(value) }}</span>
+            </template>
+            
+            <!-- Status -->
+            <template #cell-paymentStatus="{ value }">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-medium border" :class="statusConfig[value]?.classes">
+                {{ statusConfig[value]?.label ?? value }}
+              </span>
+            </template>
+            
+            <!-- Action -->
+            <template #cell-action="{ row }">
+              <div class="flex items-center justify-center gap-2">
+                <a :href="row.paymentSlipUrl" target="_blank" class="px-2 py-1 text-[11px] font-semibold text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded shadow-sm border border-black/[0.06] bg-white whitespace-nowrap">
+                  ดูสลิป
+                </a>
+                <template v-if="row.paymentStatus === 'pending'">
+                  <button
+                    @click="openConfirm(row as any, 'approved')"
+                    class="px-2 py-1 text-[11px] font-semibold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded shadow-sm border border-transparent"
+                  >
+                    อนุมัติ
+                  </button>
+                  <button
+                    @click="openConfirm(row as any, 'rejected')"
+                    class="px-2 py-1 text-[11px] font-semibold text-[#C53030] bg-[#FFF5F5] hover:bg-[#FED7D7] transition-colors rounded shadow-sm border border-[#FEB2B2]"
+                  >
+                    ปฏิเสธ
+                  </button>
+                </template>
+                <span v-else class="text-xs text-[#EFEFEA] block text-center">—</span>
+              </div>
+            </template>
+          </AdminDataTable>
         </div>
-        <Pagination
-          :current-page="currentPage"
-          :total-pages="totalPages"
-          :total="totalRecords"
-          :limit="pageSize"
-          @page-change="handlePageChange"
-          class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
+
+        <!-- Empty state -->
+        <AdminEmptyState
+          v-if="!loading && filteredPayments.length === 0"
+          title="ไม่พบรายการชำระเงิน"
+          description="ไม่มีหลักฐานการชำระเงินที่ตรงกับเงื่อนไข"
+          icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
+
+        <!-- Pagination wrapper -->
+        <div v-if="totalPages > 1" class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-between bg-[#FDFDFB]/50">
+          <!-- Thai Pagination Summary -->
+          <div class="hidden sm:block text-xs text-[#666666]">
+            <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * pageSize, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+          </div>
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total="totalRecords"
+            :limit="pageSize"
+            @page-change="handlePageChange"
+            class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
+          />
+        </div>
       </div>
     </div>
 
@@ -270,5 +316,27 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 <style scoped>
 :deep(p.text-sm.text-gray-700) {
   display: none !important;
+}
+
+/* 
+  Override shared DataTable styles to match Dashboard neutral tones
+  and remove rounded corners.
+*/
+.payments-table-scope :deep(.rounded-xl) {
+  border-radius: 0 !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.payments-table-scope :deep(thead.bg-gray-50) {
+  background-color: rgba(247, 247, 245, 0.8) !important; /* bg-[#F7F7F5]/80 */
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.payments-table-scope :deep(tbody.bg-white tr:hover) {
+  background-color: #FDFDFB !important; /* hover:bg-[#FDFDFB] */
+}
+
+.payments-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {
+  border-color: rgba(0, 0, 0, 0.04) !important;
 }
 </style>
