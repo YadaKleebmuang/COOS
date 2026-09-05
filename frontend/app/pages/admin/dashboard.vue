@@ -99,17 +99,32 @@ const orderTableColumns = [
   { key: "packageName", label: "แพ็กเกจ" },
   { key: "orderStatus", label: "สถานะ" },
   { key: "orderCreatedAt", label: "วันที่สั่งงาน" },
-  { key: "editor", label: "ผู้รับผิดชอบ" },
-  { key: "action", label: "การจัดการ", align: "center" as const }
+  { key: "editor", label: "ผู้รับผิดชอบ" }
 ]
+
+const statusMap: Record<string, string> = {
+  waiting_deposit: "รอชำระมัดจำ",
+  waiting_assignment: "รอมอบหมายงาน",
+  waiting_to_start: "รอเริ่มงาน",
+  in_progress: "กำลังดำเนินการ",
+  waiting_selection: "รอเลือกผลงาน",
+  waiting_final_payment: "รอชำระส่วนที่เหลือ",
+  delivered: "ส่งมอบแล้ว",
+  completed: "เสร็จสมบูรณ์",
+  cancelled: "ยกเลิก"
+}
+
+const getStatusLabel = (status: string) => {
+  return statusMap[status] || status
+}
 
 const filterOptions = computed(() => [
   { key: "all", label: "ทั้งหมด", count: stats.value.total },
-  { key: "waiting_deposit", label: "รอมัดจำ", count: stats.value.waitingDeposit },
-  { key: "waiting_assignment", label: "รอมอบหมาย", count: stats.value.waitingAssignment },
-  { key: "in_progress", label: "กำลังทำงาน", count: stats.value.inProgress },
-  { key: "completed", label: "เสร็จสมบูรณ์", count: stats.value.completed },
-  { key: "cancelled", label: "ยกเลิก", count: stats.value.cancelled }
+  { key: "waiting_deposit", label: getStatusLabel("waiting_deposit"), count: stats.value.waitingDeposit },
+  { key: "waiting_assignment", label: getStatusLabel("waiting_assignment"), count: stats.value.waitingAssignment },
+  { key: "in_progress", label: getStatusLabel("in_progress"), count: stats.value.inProgress },
+  { key: "completed", label: getStatusLabel("completed"), count: stats.value.completed },
+  { key: "cancelled", label: getStatusLabel("cancelled"), count: stats.value.cancelled }
 ])
 
 const tableRows = computed(() => {
@@ -257,10 +272,15 @@ const breadcrumb = [
           
           <!-- Panel 3 -->
           <div>
-            <h3 class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#929292] mb-3">ภาระงานทีมผลิตภาพ</h3>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#929292]">ภาระงานทีมผลิตภาพ</h3>
+              <NuxtLink to="/admin/assignments" class="text-[11px] font-semibold text-[#171717] hover:underline">
+                ดูทั้งหมด
+              </NuxtLink>
+            </div>
             <div class="p-4 rounded-xl border border-black/[0.06] bg-[#F7F7F5]/30">
               <div class="space-y-4">
-                <div v-for="editor in editorsWorkload.slice(0, 3)" :key="editor.name" class="flex items-center justify-between">
+                <div v-for="editor in editorsWorkload.slice(0, 5)" :key="editor.name" class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-white text-[#171717] text-[10px] font-bold flex items-center justify-center border border-black/[0.06] shadow-sm">
                       {{ editor.initials }}
@@ -328,10 +348,9 @@ const breadcrumb = [
                 <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[100px]">เลขที่</th>
                 <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">ลูกค้า</th>
                 <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[140px]">แพ็กเกจ</th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[140px]">สถานะ</th>
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[160px]">สถานะ</th>
                 <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[120px]">วันที่สั่งงาน</th>
                 <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[140px]">ผู้รับผิดชอบ</th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap text-right w-[100px]">การจัดการ</th>
               </tr>
             </thead>
             <tbody>
@@ -358,20 +377,14 @@ const breadcrumb = [
                 <!-- Status badge -->
                 <td class="px-6 py-3">
                   <span 
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
                     :class="{
                       'bg-[#171717] text-white border-[#171717] shadow-sm': row.orderStatus === 'completed' || row.orderStatus === 'delivered',
                       'bg-[#FFF5F5] text-[#C53030] border-[#FEB2B2]': row.orderStatus === 'cancelled',
                       'bg-[#F7F7F5] text-[#666666] border-black/[0.06]': row.orderStatus !== 'completed' && row.orderStatus !== 'delivered' && row.orderStatus !== 'cancelled'
                     }"
                   >
-                    {{ 
-                      row.orderStatus === 'waiting_deposit' ? 'รอมัดจำ' :
-                      row.orderStatus === 'waiting_assignment' ? 'รอมอบหมาย' :
-                      row.orderStatus === 'in_progress' ? 'กำลังทำงาน' :
-                      row.orderStatus === 'completed' || row.orderStatus === 'delivered' ? 'เสร็จสมบูรณ์' :
-                      row.orderStatus === 'cancelled' ? 'ยกเลิก' : row.orderStatus
-                    }}
+                    {{ getStatusLabel(row.orderStatus) }}
                   </span>
                 </td>
 
@@ -384,22 +397,11 @@ const breadcrumb = [
                 <td class="px-6 py-3">
                   <span class="text-xs text-[#666666]">{{ row.editor }}</span>
                 </td>
-
-                <!-- Actions -->
-                <td class="px-6 py-3 text-right">
-                  <button
-                    @click="router.push('/admin/orders')"
-                    class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border border-transparent bg-transparent text-[11px] font-semibold text-[#171717] group-hover:border-black/[0.06] group-hover:bg-white group-hover:shadow-sm transition-all"
-                  >
-                    จัดการ
-                    <svg class="w-3 h-3 text-[#929292]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                  </button>
-                </td>
               </tr>
               
               <!-- Empty state -->
               <tr v-if="tableRows.length === 0">
-                <td colspan="7">
+                <td colspan="6">
                   <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
                     <p class="text-[14px] font-medium text-[#171717]">ไม่พบคำสั่งงาน</p>
                     <p class="text-[13px] text-[#9A9A95] mt-1">ไม่มีคำสั่งงานที่ตรงกับสถานะที่เลือก</p>
@@ -411,65 +413,6 @@ const breadcrumb = [
         </div>
       </div>
 
-      <!-- ── Editor Workload ── -->
-      <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-        <div class="px-6 py-5 border-b border-black/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ภาระงาน Editor</h2>
-            <p class="text-[13px] font-medium text-[#666666] mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
-          </div>
-          <button
-            @click="router.push('/admin/assignments')"
-            class="px-4 py-2 rounded-lg border border-black/[0.06] bg-white text-[12px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm"
-          >
-            มอบหมายงาน
-          </button>
-        </div>
-        
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-[#F7F7F5]/80 border-b border-black/[0.06]">
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">Editor</th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[120px] text-center">กำลังทำ</th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap w-[120px] text-center">เสร็จแล้ว</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr 
-                v-for="editor in editorsWorkload" 
-                :key="editor.email"
-                class="border-b border-black/[0.04] last:border-0 hover:bg-[#FDFDFB] transition-colors"
-              >
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-4">
-                    <div class="w-9 h-9 rounded-full bg-[#EFEFEA] text-[#171717] border border-white/50 text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
-                      {{ editor.initials }}
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-[14px] font-bold text-[#171717] truncate">{{ editor.name }}</p>
-                      <p class="text-[12px] text-[#9A9A95] truncate mt-0.5">{{ editor.email }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span class="text-[15px] font-bold text-[#171717] font-number">{{ editor.activeJobs }}</span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span class="text-[15px] font-bold text-emerald-600 font-number">{{ editor.completedJobs }}</span>
-                </td>
-              </tr>
-              <tr v-if="editorsWorkload.length === 0">
-                <td colspan="3">
-                  <div class="flex flex-col items-center justify-center py-12 px-6 text-center">
-                    <p class="text-[14px] font-medium text-[#171717]">ไม่มีข้อมูลทีมผลิตภาพ</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </template>
   </div>
 </template>

@@ -113,14 +113,29 @@ const submitUpload = async () => {
   uploadError.value = ""
   try {
     const { apiFetch } = useApi()
-    const formData = new FormData()
-    formData.append("image", uploadFile.value)
-    formData.append("workTypeId", uploadForm.value.workTypeId)
-    if (uploadForm.value.imageTitle) formData.append("imageTitle", uploadForm.value.imageTitle)
-    if (uploadForm.value.imageTags) formData.append("imageTags", uploadForm.value.imageTags)
 
-    // ไม่ set Content-Type — browser จะ set multipart/form-data + boundary อัตโนมัติ
-    await apiFetch("/gallery-images", { method: "POST", body: formData })
+    // 1. อัปโหลดรูปภาพด้วยเส้นเดียวกับ Editor (/upload/gallery)
+    const fileFormData = new FormData()
+    fileFormData.append("image", uploadFile.value)
+    const uploadRes = await apiFetch<{ url: string }>("/upload/gallery", { 
+      method: "POST", 
+      body: fileFormData 
+    })
+
+    // 2. นำ URL ที่ได้มาสร้าง Gallery Image (ส่งเป็น JSON)
+    const payload = {
+      workTypeId: uploadForm.value.workTypeId,
+      imageTitle: uploadForm.value.imageTitle,
+      imageTags: uploadForm.value.imageTags,
+      imageUrl: uploadRes.url
+    }
+
+    await apiFetch("/gallery-images", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+
     uploadModal.value = false
     await fetchGallery()
   } catch (err: any) {

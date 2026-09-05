@@ -11,6 +11,16 @@ definePageMeta({
 
 const { apiFetch } = useApi()
 const { alert } = useAlert()
+const route = useRoute()
+const router = useRouter()
+
+const focusOrderId = computed(() => Number(route.query.focusOrderId) || null)
+
+const exitFocusedMode = () => {
+  const query = { ...route.query }
+  delete query.focusOrderId
+  router.replace({ query })
+}
 
 const orders = ref<any[]>([])
 const editors = ref<any[]>([])
@@ -35,25 +45,46 @@ const fetchAdminData = async (page = 1) => {
   loading.value = true
   error.value = ""
   try {
-    // Request up to 1000 users for the editor dropdown, but paginate orders
-    const statusQuery = selectedFilter.value !== "all" ? selectedFilter.value : undefined
-    const [usersRes, ordersRes] = await Promise.all([
-      apiFetch<any>("/users?limit=1000"),
-      orderService.getMyOrders(page, limit, statusQuery)
-    ])
-    
-    orders.value = ordersRes.data || []
-    currentPage.value = ordersRes.page || 1
-    totalPages.value = ordersRes.totalPages || 1
-    totalRecords.value = ordersRes.total || 0
-
+    // Request up to 1000 users for the editor dropdown
+    const usersRes = await apiFetch<any>("/users?limit=1000")
     editors.value = (usersRes.data || []).filter((u: any) => u.userRole === "editor")
+
+    if (focusOrderId.value) {
+      // FOCUSED ORDER MODE
+      try {
+        const orderRes = await orderService.getOrderById(focusOrderId.value)
+        orders.value = [orderRes]
+        currentPage.value = 1
+        totalPages.value = 1
+        totalRecords.value = 1
+      } catch (err: any) {
+        // Invalid or nonexistent ID
+        exitFocusedMode()
+        return // The watcher will trigger a normal fetch
+      }
+    } else {
+      // NORMAL MODE
+      const statusQuery = selectedFilter.value !== "all" ? selectedFilter.value : undefined
+      const ordersRes = await orderService.getMyOrders(page, limit, statusQuery)
+      
+      orders.value = ordersRes.data || []
+      currentPage.value = ordersRes.page || 1
+      totalPages.value = ordersRes.totalPages || 1
+      totalRecords.value = ordersRes.total || 0
+    }
   } catch (err: any) {
     error.value = err?.message || "ไม่สามารถโหลดข้อมูลได้"
   } finally {
     loading.value = false
   }
 }
+
+watch(focusOrderId, (newId, oldId) => {
+  if (newId !== oldId) {
+    currentPage.value = 1
+    fetchAdminData(1)
+  }
+})
 
 onMounted(() => fetchAdminData())
 
@@ -175,8 +206,23 @@ const breadcrumb = [
       </AdminActionButton>
     </div>
 
+    <!-- Focused Order Panel -->
+    <div v-if="focusOrderId && !loading && orders.length > 0" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FDFDFB] border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
+      <div>
+        <h3 class="text-sm font-bold text-[#171717]">กำลังดูคำสั่งงานที่เลือกจากแดชบอร์ด</h3>
+        <p class="text-xs text-[#666660] mt-0.5">คำสั่งงาน #{{ focusOrderId }}</p>
+      </div>
+      <AdminActionButton
+        variant="secondary"
+        size="sm"
+        @click="exitFocusedMode"
+      >
+        แสดงคำสั่งงานทั้งหมด
+      </AdminActionButton>
+    </div>
+
     <!-- Filter + Search Toolbar -->
-    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+    <div v-if="!focusOrderId" class="flex flex-col md:flex-row md:items-center gap-4 justify-between bg-white border border-[#EFEFEA]/60 rounded-2xl p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
       <div class="overflow-x-auto flex-1">
         <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
       </div>
@@ -290,7 +336,7 @@ const breadcrumb = [
       </div>
 
       <!-- Pagination wrapper -->
-      <div v-if="totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
+      <div v-if="!focusOrderId && totalPages > 1" class="bg-white border border-[#EFEFEA]/60 rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
         <!-- Thai Pagination Summary -->
         <div class="hidden sm:block text-xs text-[#666660]">
           <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
