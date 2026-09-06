@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAlert } from '~/composables/useAlert'
 import { orderService } from '~/services/order.service'
-import type { OrderDetail, OrderStatus, Payment } from '~/types/order.types'
+import type { OrderDetail, OrderStatus, Payment, OrderImage } from '~/types/order.types'
 
 // ── Auth & Route ──
 const token = useCookie<string | null>('token')
@@ -347,6 +347,50 @@ const cancelOrder = async () => {
     await fetchOrderDetails()
   } catch (err: unknown) {
     alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'ยกเลิกคำสั่งงานไม่สำเร็จ'), 'error')
+  }
+}
+
+// ── Image Download Handler ──
+const downloadingImageId = ref<number | null>(null)
+
+const downloadImage = async (img: OrderImage) => {
+  if (downloadingImageId.value === img.orderImageId) return
+  downloadingImageId.value = img.orderImageId
+  
+  try {
+    const response = await fetch(img.imageUrl)
+    if (!response.ok) throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้')
+    
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    
+    let filename = ''
+    const urlParts = img.imageUrl.split('/')
+    const lastPart = urlParts.pop()?.split('?')[0]
+    
+    if (lastPart && lastPart.includes('.')) {
+      filename = decodeURIComponent(lastPart)
+    } else {
+      let ext = ''
+      if (blob.type === 'image/png') ext = '.png'
+      else if (blob.type === 'image/jpeg') ext = '.jpg'
+      else if (blob.type === 'image/webp') ext = '.webp'
+      
+      filename = `COOS-Order-${order.value?.orderId}-Image-${img.orderImageId}${ext}`
+    }
+    
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    
+    document.body.removeChild(link)
+    URL.revokeObjectURL(objectUrl)
+  } catch (err: unknown) {
+    alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ'), 'error')
+  } finally {
+    downloadingImageId.value = null
   }
 }
 
@@ -914,12 +958,15 @@ const formatDeliveryDate = (dateStr?: string) => {
                     >
                       {{ img.positivePrompt }}
                     </p>
-                  </div><a
-                    :href="img.imageUrl"
-                    target="_blank"
-                    download
-                    class="flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929]"
-                  >ดาวน์โหลดรูปภาพ</a>
+                  </div><button
+                    type="button"
+                    :disabled="downloadingImageId === img.orderImageId"
+                    @click="downloadImage(img)"
+                    class="flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    <span v-if="downloadingImageId === img.orderImageId" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    {{ downloadingImageId === img.orderImageId ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลดรูปภาพ' }}
+                  </button>
                 </div>
               </div>
             </div>
