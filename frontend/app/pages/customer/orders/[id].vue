@@ -117,6 +117,7 @@ const requirementItems = computed(() => {
 })
 
 const canCancelOrder = computed(() => order.value?.orderStatus === 'waiting_deposit')
+const confirmingReceipt = ref(false)
 
 // ── Photo Selection State ──
 const selectedFinalImageIds = ref<number[]>([])
@@ -325,11 +326,6 @@ const nextAction = computed(() => {
       label: 'ชำระยอดคงเหลือ',
       description: 'แนบสลิปชำระเงินส่วนที่เหลือ 70% เพื่อรับไฟล์จริง',
       href: '#payment-section'
-    },
-    delivered: {
-      label: 'ตรวจรับงาน',
-      description: 'ตรวจสอบไฟล์ส่งมอบและดาวน์โหลดผลงานสุดท้าย',
-      href: '#delivery-section'
     }
   }
 
@@ -347,6 +343,26 @@ const cancelOrder = async () => {
     await fetchOrderDetails()
   } catch (err: unknown) {
     alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'ยกเลิกคำสั่งงานไม่สำเร็จ'), 'error')
+  }
+}
+
+const confirmReceipt = async () => {
+  if (!order.value || order.value.orderStatus !== 'delivered' || confirmingReceipt.value) return
+
+  const confirmed = await confirm(
+    'ยืนยันรับผลงาน',
+    'คุณได้ตรวจสอบและดาวน์โหลดผลงานเรียบร้อยแล้วใช่หรือไม่? เมื่อยืนยันแล้วคำสั่งงานจะเสร็จสมบูรณ์'
+  )
+  if (!confirmed) return
+
+  confirmingReceipt.value = true
+  try {
+    await orderService.updateOrderStatus(order.value.orderId, 'completed', 'ลูกค้ายืนยันรับผลงาน')
+    await fetchOrderDetails()
+  } catch (err: unknown) {
+    alert('เกิดข้อผิดพลาด', getErrorMessage(err, 'ยืนยันรับผลงานไม่สำเร็จ'), 'error')
+  } finally {
+    confirmingReceipt.value = false
   }
 }
 
@@ -969,6 +985,23 @@ const formatDeliveryDate = (dateStr?: string) => {
                   </button>
                 </div>
               </div>
+            </div>
+            <div
+              v-if="order.orderStatus === 'delivered'"
+              class="mt-5 flex justify-end border-t border-black/[0.06] pt-5"
+            >
+              <button
+                type="button"
+                :disabled="confirmingReceipt"
+                class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] disabled:cursor-not-allowed disabled:opacity-70"
+                @click="confirmReceipt"
+              >
+                <span
+                  v-if="confirmingReceipt"
+                  class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                />
+                {{ confirmingReceipt ? 'กำลังยืนยัน...' : 'ยืนยันรับผลงาน' }}
+              </button>
             </div>
           </section>
         </main>
