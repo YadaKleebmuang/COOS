@@ -5,6 +5,7 @@ import type {
   OrderCreateResponse,
   OrderSummary,
   OrderDetail,
+  OrderImage,
   OrderStatus,
 } from "../types/order.types"
 import type { PaginatedResponse } from "../types/pagination.types"
@@ -57,6 +58,14 @@ export const orderService = {
   async getOrderById(id: string | number): Promise<OrderDetail> {
     const { apiFetch } = useApi()
     return await apiFetch<OrderDetail>(`/orders/${id}`)
+  },
+
+  /**
+   * ดึงคลังบันทึก Prompt จากผลงานดราฟต์ของ Editor ที่เข้าสู่ระบบ
+   */
+  async getPromptNotes(): Promise<{ data: OrderImage[] }> {
+    const { apiFetch } = useApi()
+    return await apiFetch<{ data: OrderImage[] }>('/orders/prompt-notes')
   },
 
   /**
@@ -173,4 +182,3 @@ export const orderService = {
     })
   }
 }
-
