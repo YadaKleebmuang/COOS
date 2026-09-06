@@ -1,5 +1,6 @@
 <script setup lang="ts">
 type GalleryImage = {
+  imageId?: number | string
   imageUrl?: string
   imageTitle?: string
   imageDescription?: string
@@ -8,11 +9,13 @@ type GalleryImage = {
   workTypeName?: string
 }
 
-defineProps<{
+const props = defineProps<{
   img: GalleryImage | null
   isOpen: boolean
   variant?: 'default' | 'gallery'
 }>()
+
+const { publicGalleryUrl } = useProtectedAsset()
 
 defineEmits<{
   (e: 'close'): void
@@ -97,7 +100,7 @@ const getOrderParams = (img: GalleryImage) => {
           :class="variant === 'gallery' ? 'aspect-square md:aspect-auto' : 'aspect-[4/3] md:aspect-auto'"
         >
           <img
-            :src="img.imageUrl"
+            :src="props.img?.imageId != null ? publicGalleryUrl(props.img.imageId) : ''"
             class="w-full h-full object-cover"
           >
           <div v-if="variant === 'gallery'" class="absolute inset-0 pointer-events-none shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]" />

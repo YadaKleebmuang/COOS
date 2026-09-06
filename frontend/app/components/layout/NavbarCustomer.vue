@@ -7,6 +7,7 @@ const router = useRouter()
 const { apiFetch } = useApi()
 
 type CustomerUser = {
+  userId?: number
   userFirstName?: string
   userLastName?: string
   userEmail?: string
@@ -14,6 +15,8 @@ type CustomerUser = {
 }
 
 const currentUser = ref<CustomerUser | null>(null)
+const { protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
 
@@ -28,6 +31,7 @@ const checkAuth = async () => {
     try {
       const data = await apiFetch<CustomerUser>('/users/me')
       currentUser.value = data
+      await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
     } catch (err) {
       console.error('Auth check failed in NavbarCustomer:', err)
       token.value = null
@@ -136,7 +140,7 @@ onBeforeUnmount(() => {
             <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
               <img
                 v-if="currentUser.userProfileImage"
-                :src="currentUser.userProfileImage"
+                :src="currentUser.userId != null ? protectedAssetUrl(profileEndpoint(currentUser.userId)) : ''"
                 class="h-full w-full object-cover"
                 alt=""
               >

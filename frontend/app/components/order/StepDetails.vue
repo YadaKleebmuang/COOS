@@ -13,16 +13,22 @@ interface OrderDetailsForm {
   orderIsGalleryAllowed: boolean
 }
 
+interface PendingSourceImage {
+  file: File
+  previewUrl: string
+  uploadedUrl: string
+}
+
 const props = defineProps<{
   modelValue: OrderDetailsForm
-  images: string[]
+  images: PendingSourceImage[]
   selectedPackage: Package | null
   pricePreview: { base: number, urgent: number, discount: number, total: number }
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', val: OrderDetailsForm): void
-  (e: 'update:images', urls: string[]): void
+  (e: 'update:images', images: PendingSourceImage[]): void
 }>()
 
 const form = computed({
@@ -32,7 +38,7 @@ const form = computed({
 
 const sourceImages = computed({
   get: () => props.images,
-  set: urls => emit('update:images', urls)
+  set: images => emit('update:images', images)
 })
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -82,8 +88,16 @@ const uploadFiles = async (files: File[]) => {
   uploadError.value = ''
   uploadingSource.value = true
   try {
-    const urls = await orderService.uploadSourceImages(validFiles)
-    sourceImages.value = [...sourceImages.value, ...urls]
+    const uploadedUrls = await orderService.uploadSourceImages(validFiles)
+    if (uploadedUrls.length !== validFiles.length) {
+      throw new Error('จำนวนไฟล์ที่อัปโหลดสำเร็จไม่ตรงกับไฟล์ที่เลือก')
+    }
+    const uploadedImages = validFiles.map((file, index) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      uploadedUrl: uploadedUrls[index]
+    }))
+    sourceImages.value = [...sourceImages.value, ...uploadedImages]
   } catch (err: unknown) {
     uploadError.value = getErrorMessage(err, 'ไม่สามารถอัปโหลดไฟล์บางไฟล์ได้')
   } finally {
@@ -96,7 +110,8 @@ const uploadFiles = async (files: File[]) => {
 
 const removeImage = (index: number) => {
   const newImages = [...sourceImages.value]
-  newImages.splice(index, 1)
+  const [removedImage] = newImages.splice(index, 1)
+  if (removedImage) URL.revokeObjectURL(removedImage.previewUrl)
   sourceImages.value = newImages
 }
 
@@ -248,13 +263,13 @@ const formatPrice = (n: number) =>
           :class="sourceImages.length === 1 ? 'max-w-[200px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 md:grid-cols-5'"
         >
           <div
-            v-for="(url, idx) in sourceImages"
-            :key="url"
+            v-for="(image, idx) in sourceImages"
+            :key="image.previewUrl"
             class="group relative overflow-hidden rounded-[14px] border border-black/5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
             :class="sourceImages.length === 1 ? 'aspect-[4/3]' : 'aspect-square'"
           >
             <img
-              :src="url"
+              :src="image.previewUrl"
               :alt="`รูปภาพต้นฉบับหรือรูปอ้างอิง ${idx + 1}`"
               class="h-full w-full object-cover"
             >

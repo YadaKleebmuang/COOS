@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { WorkType, Package } from '~/types/order.types'
 
+interface PendingSourceImage {
+  file: File
+  previewUrl: string
+  uploadedUrl: string
+}
+
 defineProps<{
   form: {
     orderStyle: string
@@ -13,7 +19,7 @@ defineProps<{
   }
   selectedWorkType: WorkType | undefined
   selectedPackage: Package | undefined
-  sourceImages: string[]
+  sourceImages: PendingSourceImage[]
   pricePreview: { base: number, urgent: number, discount: number, total: number }
   modelValue: boolean // acceptedDisclaimer
   submitError: string
@@ -175,15 +181,15 @@ const formatDate = (dateStr?: string) => {
           :class="sourceImages.length === 1 ? 'max-w-[200px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-5'"
         >
           <a
-            v-for="(url, idx) in sourceImages"
-            :key="url"
-            :href="url"
+            v-for="(image, idx) in sourceImages"
+            :key="image.previewUrl"
+            :href="image.previewUrl"
             target="_blank"
             class="overflow-hidden rounded-[14px] border border-black/5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
             :class="sourceImages.length === 1 ? 'aspect-[4/3]' : 'aspect-square'"
           >
             <img
-              :src="url"
+              :src="image.previewUrl"
               :alt="`รูปต้นฉบับหรือรูปอ้างอิง ${idx + 1}`"
               class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             >

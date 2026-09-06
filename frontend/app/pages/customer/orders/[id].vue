@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useAlert } from '~/composables/useAlert'
 import { orderService } from '~/services/order.service'
 import type { OrderDetail, OrderStatus, Payment, OrderImage } from '~/types/order.types'
@@ -10,6 +10,14 @@ const route = useRoute()
 const router = useRouter()
 const orderId = route.params.id as string
 const { alert, confirm } = useAlert()
+const {
+  fetchProtectedBlob,
+  openProtectedAsset,
+  protectedAssetUrl,
+  syncProtectedAssets
+} = useProtectedAsset()
+const orderImageEndpoint = (imageId: number) => `/media/order-images/${imageId}`
+const paymentSlipEndpoint = (paymentId: number) => `/media/payments/${paymentId}/slip`
 
 definePageMeta({
   layout: 'customer',
@@ -27,6 +35,7 @@ const dragOver = ref(false)
 const uploadingSlip = ref(false)
 const uploadError = ref('')
 const uploadedSlipUrl = ref('')
+const uploadedSlipPreviewUrl = ref('')
 const submittingPayment = ref(false)
 const submitPaymentError = ref('')
 
@@ -100,6 +109,15 @@ const finalImages = computed(() => {
   // ดึงภาพที่เป็น selected_final (ดึงแค่ที่เลือกแล้ว)
   return order.value.images.filter(img => img.imageType === 'selected_final')
 })
+
+watch(
+  () => [
+    ...(order.value?.images || []).map(image => orderImageEndpoint(image.orderImageId)),
+    ...(order.value?.payments || []).map(payment => paymentSlipEndpoint(payment.paymentId))
+  ],
+  endpoints => syncProtectedAssets(endpoints),
+  { immediate: true }
+)
 
 const hasRequirements = computed(() => {
   return Boolean(order.value?.orderStyle || order.value?.orderColorTone || order.value?.orderComposition || order.value?.orderNote)
@@ -264,12 +282,16 @@ const uploadSlipFile = async (file: File) => {
 
   uploadError.value = ''
   uploadedSlipUrl.value = ''
+  if (uploadedSlipPreviewUrl.value) URL.revokeObjectURL(uploadedSlipPreviewUrl.value)
+  uploadedSlipPreviewUrl.value = URL.createObjectURL(file)
   uploadingSlip.value = true
 
   try {
     const url = await orderService.uploadSlip(file)
     uploadedSlipUrl.value = url
   } catch (err: unknown) {
+    URL.revokeObjectURL(uploadedSlipPreviewUrl.value)
+    uploadedSlipPreviewUrl.value = ''
     uploadError.value = getErrorMessage(err, 'ไม่สามารถอัปโหลดไฟล์สลิปได้')
   } finally {
     uploadingSlip.value = false
@@ -293,6 +315,8 @@ const submitSlip = async () => {
     )
     // Clear and reload
     uploadedSlipUrl.value = ''
+    URL.revokeObjectURL(uploadedSlipPreviewUrl.value)
+    uploadedSlipPreviewUrl.value = ''
     await fetchOrderDetails()
   } catch (err: unknown) {
     submitPaymentError.value = getErrorMessage(err, 'ส่งหลักฐานชำระเงินไม่สำเร็จ')
@@ -374,10 +398,7 @@ const downloadImage = async (img: OrderImage) => {
   downloadingImageId.value = img.orderImageId
   
   try {
-    const response = await fetch(img.imageUrl)
-    if (!response.ok) throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้')
-    
-    const blob = await response.blob()
+    const blob = await fetchProtectedBlob(orderImageEndpoint(img.orderImageId))
     const objectUrl = URL.createObjectURL(blob)
     
     let filename = ''
@@ -409,6 +430,10 @@ const downloadImage = async (img: OrderImage) => {
     downloadingImageId.value = null
   }
 }
+
+onBeforeUnmount(() => {
+  if (uploadedSlipPreviewUrl.value) URL.revokeObjectURL(uploadedSlipPreviewUrl.value)
+})
 
 // ── Format helpers ──
 const formatPrice = (n: number) =>
@@ -639,12 +664,13 @@ const formatDeliveryDate = (dateStr?: string) => {
               <a
                 v-for="(img, idx) in sourceImages"
                 :key="img.orderImageId"
-                :href="img.imageUrl"
+                href="#"
                 target="_blank"
                 class="group overflow-hidden rounded-[16px] border border-black/[0.06] bg-[#F3F3F1]"
+                @click.prevent="openProtectedAsset(orderImageEndpoint(img.orderImageId))"
               >
                 <img
-                  :src="img.imageUrl"
+                  :src="protectedAssetUrl(orderImageEndpoint(img.orderImageId))"
                   :alt="`รูปต้นฉบับหรือรูปอ้างอิง ${idx + 1} ของออเดอร์ #COOS-${Math.abs(order.orderId)}`"
                   class="aspect-[4/3] w-full bg-[#F3F3F1] object-contain p-1"
                 >
@@ -685,7 +711,7 @@ const formatDeliveryDate = (dateStr?: string) => {
                 @click="toggleImageSelection(img.orderImageId)"
               >
                 <img
-                  :src="img.imageUrl"
+                  :src="protectedAssetUrl(orderImageEndpoint(img.orderImageId))"
                   :alt="`ภาพตัวอย่างสำหรับคัดเลือก ${img.orderImageId}`"
                   class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                 >
@@ -710,10 +736,10 @@ const formatDeliveryDate = (dateStr?: string) => {
                 <div class="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
                   <span class="truncate text-[11px] font-medium text-white">{{ img.aiEngine || 'AI Gen' }}</span>
                   <a
-                    :href="img.imageUrl"
+                    href="#"
                     target="_blank"
                     class="rounded-lg bg-white/90 px-2 py-1 text-[11px] font-semibold text-[#171717]"
-                    @click.stop
+                    @click.stop.prevent="openProtectedAsset(orderImageEndpoint(img.orderImageId))"
                   >เปิดดู</a>
                 </div>
               </div>
@@ -803,7 +829,7 @@ const formatDeliveryDate = (dateStr?: string) => {
                   class="flex flex-col items-center justify-center gap-3"
                 >
                   <img
-                    :src="uploadedSlipUrl"
+                    :src="uploadedSlipPreviewUrl"
                     alt="ตัวอย่างสลิปที่อัปโหลด"
                     class="max-h-44 rounded-[16px] border border-black/[0.06] object-contain shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                   >
@@ -900,11 +926,11 @@ const formatDeliveryDate = (dateStr?: string) => {
                       ฿{{ formatPrice(pay.paymentAmount) }}
                     </td>
                     <td class="py-4 pr-4">
-                      <a
-                        :href="pay.paymentSlipUrl"
-                        target="_blank"
+                      <button
+                        type="button"
                         class="text-xs font-semibold text-[#171717] hover:underline"
-                      >เปิดดูสลิป</a>
+                        @click="openProtectedAsset(paymentSlipEndpoint(pay.paymentId))"
+                      >เปิดดูสลิป</button>
                     </td>
                     <td class="py-4 pr-4">
                       {{ formatDate(pay.paymentCreatedAt) }}
@@ -953,7 +979,7 @@ const formatDeliveryDate = (dateStr?: string) => {
               >
                 <div class="relative aspect-[4/3] overflow-hidden bg-[#F3F3F1]">
                   <img
-                    :src="img.imageUrl"
+                    :src="protectedAssetUrl(orderImageEndpoint(img.orderImageId))"
                     :alt="`ผลงานสุดท้าย ${img.orderImageId}`"
                     class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                   ><span class="absolute left-2 top-2 rounded-full bg-[#171717] px-2.5 py-1 text-[10px] font-semibold text-white">FINAL IMAGE</span>

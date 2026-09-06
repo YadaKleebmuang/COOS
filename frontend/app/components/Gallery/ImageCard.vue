@@ -1,5 +1,6 @@
 <script setup lang="ts">
 type GalleryImage = {
+  imageId?: number | string
   imageUrl?: string
   imageTitle?: string
   imageDescription?: string
@@ -8,9 +9,11 @@ type GalleryImage = {
   workTypeName?: string
 }
 
-defineProps<{
+const props = defineProps<{
   img: GalleryImage
 }>()
+
+const { publicGalleryUrl } = useProtectedAsset()
 
 defineEmits<{
   (e: 'view-details', img: GalleryImage): void
@@ -47,7 +50,7 @@ const getOrderParams = (img: GalleryImage) => {
   >
     <!-- Artwork Image -->
     <img
-      :src="img.imageUrl"
+      :src="props.img.imageId != null ? publicGalleryUrl(props.img.imageId) : ''"
       class="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-105"
       alt=""
     >

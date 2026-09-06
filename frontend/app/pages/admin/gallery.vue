@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 
 const { alert } = useAlert()
 
@@ -14,7 +14,6 @@ interface GalleryImage {
   title: string
   category: string
   hashtags: string[]
-  thumbnailUrl: string
   isPublic: boolean
   createdAt: string
 }
@@ -32,6 +31,14 @@ const categoryFilter = ref("all")
 const hashtagFilter = ref("")
 const visibilityFilter = ref("all")
 const deleteDialog = ref({ open: false, loading: false, imageId: 0 })
+const { protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const galleryMediaEndpoint = (imageId: number) => `/media/gallery/${imageId}`
+
+watch(
+  () => images.value.map(image => image.imageId),
+  ids => syncProtectedAssets(ids.map(galleryMediaEndpoint)),
+  { immediate: true }
+)
 
 // Upload Modal State
 const uploadModal = ref(false)
@@ -53,7 +60,6 @@ const fetchGallery = async () => {
       title: img.imageTitle || "ไม่มีชื่อภาพ",
       category: img.workTypeName || "ไม่มีหมวดหมู่",
       hashtags: img.imageTags ? img.imageTags.split(",").map((t: string) => t.trim()) : [],
-      thumbnailUrl: img.imageUrl,
       isPublic: img.imageIsActive === 1,
       createdAt: img.imageCreatedAt
     }))
@@ -273,7 +279,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       >
         <!-- Thumbnail -->
         <div class="aspect-square bg-[#F7F7F5]/50 flex items-center justify-center border-b border-[#EFEFEA]/40 relative overflow-hidden">
-          <img v-if="img.thumbnailUrl" :src="img.thumbnailUrl" class="w-full h-full object-cover select-none" />
+          <img v-if="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" :src="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" class="w-full h-full object-cover select-none" />
           <svg v-else class="w-10 h-10 text-[#D4D4D0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>

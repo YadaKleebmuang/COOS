@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { orderService } from '~/services/order.service'
 import type { OrderImage } from '~/types/order.types'
 
@@ -17,6 +17,14 @@ const detailImage = ref<OrderImage | null>(null)
 const copiedKey = ref<string | null>(null)
 const searchQuery = ref('')
 const dateFilter = ref<'all' | 'today' | '7days' | '30days'>('all')
+const { protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const orderImageEndpoint = (imageId: number) => `/media/order-images/${imageId}`
+
+watch(
+  () => promptNotes.value.map(image => orderImageEndpoint(image.orderImageId)),
+  endpoints => syncProtectedAssets(endpoints),
+  { immediate: true }
+)
 
 const breadcrumb = [
   { label: 'หน้าแรก', to: '/editor/dashboard' },
@@ -243,7 +251,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
               @click="detailImage = image"
             >
               <img
-                :src="image.imageThumbnailUrl || image.imageUrl"
+                :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
                 :alt="`ผลงานดราฟต์ งาน #${image.orderId}`"
                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               >
@@ -328,7 +336,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 
             <div class="space-y-5 p-6">
               <img
-                :src="detailImage.imageUrl"
+                :src="protectedAssetUrl(orderImageEndpoint(detailImage.orderImageId))"
                 :alt="`ผลงานดราฟต์ งาน #${detailImage.orderId}`"
                 class="max-h-80 w-full rounded-xl bg-[#F7F7F5] object-contain"
               >

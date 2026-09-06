@@ -11,6 +11,8 @@ definePageMeta({
 
 const { apiFetch } = useApi()
 const { alert } = useAlert()
+const { openProtectedAsset } = useProtectedAsset()
+const paymentSlipEndpoint = (paymentId: number) => `/media/payments/${paymentId}/slip`
 const route = useRoute()
 const router = useRouter()
 
@@ -284,13 +286,13 @@ const breadcrumb = [
           <!-- Payment slip -->
           <template #cell-paymentAction="{ row }">
             <div v-if="pendingPayment(row)" class="flex items-center gap-1.5 justify-center">
-              <a
-                :href="pendingPayment(row).paymentSlipUrl"
-                target="_blank"
+              <button
+                type="button"
+                @click="openProtectedAsset(paymentSlipEndpoint(pendingPayment(row).paymentId))"
                 class="px-2 py-1 text-[11px] font-semibold text-[#171717] bg-white hover:bg-[#F7F7F5] transition-colors rounded shadow-sm border border-black/[0.06]"
               >
                 ดูสลิป
-              </a>
+              </button>
               <button
                 @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
                 class="px-2 py-1 text-[11px] font-semibold text-white bg-[#171717] hover:bg-black transition-colors rounded shadow-sm border border-transparent"

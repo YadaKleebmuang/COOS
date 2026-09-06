@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount, onMounted } from 'vue'
 import { orderService } from '~/services/order.service'
 import type {
   WorkType,
@@ -36,7 +36,13 @@ const dataError = ref('')
 // ── Selected state ──
 const selectedWorkTypeId = ref<number | null>(null)
 const selectedPackageId = ref<number | null>(null)
-const sourceImageUrls = ref<string[]>([])
+interface PendingSourceImage {
+  file: File
+  previewUrl: string
+  uploadedUrl: string
+}
+
+const sourceImages = ref<PendingSourceImage[]>([])
 const acceptedDisclaimer = ref(false)
 
 // ── Order form ──
@@ -141,11 +147,15 @@ const submitOrder = async () => {
     if (form.orderColorTone.trim()) payload.orderColorTone = form.orderColorTone.trim()
     if (form.orderComposition.trim()) payload.orderComposition = form.orderComposition.trim()
     if (form.orderNote.trim()) payload.orderNote = form.orderNote.trim()
-    if (sourceImageUrls.value.length > 0) payload.sourceImageUrls = sourceImageUrls.value
+    if (sourceImages.value.length > 0) {
+      payload.sourceImageUrls = sourceImages.value.map(image => image.uploadedUrl)
+    }
 
     const result = await orderService.createOrder(payload)
     createdOrder.value = result
     submitSuccess.value = true
+    sourceImages.value.forEach(image => URL.revokeObjectURL(image.previewUrl))
+    sourceImages.value = []
   } catch (err: unknown) {
     submitError.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการสร้างคำสั่งงาน')
   } finally {
@@ -189,12 +199,16 @@ onMounted(async () => {
     loadingData.value = false
   }
 })
+
+onBeforeUnmount(() => {
+  sourceImages.value.forEach(image => URL.revokeObjectURL(image.previewUrl))
+})
 </script>
 
 <template>
   <div class="mx-auto w-full max-w-[800px] py-6 sm:py-8 lg:py-10">
     <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
-    
+
     <div class="relative z-10">
       <!-- Header -->
       <div class="mb-6 text-center">
@@ -291,7 +305,7 @@ onMounted(async () => {
 
           <StepDetails
             v-show="currentStep === 3"
-            v-model:images="sourceImageUrls"
+            v-model:images="sourceImages"
             :model-value="form"
             :selected-package="selectedPackage || null"
             :price-preview="pricePreview"
@@ -304,7 +318,7 @@ onMounted(async () => {
             :form="form"
             :selected-work-type="selectedWorkType"
             :selected-package="selectedPackage"
-            :source-images="sourceImageUrls"
+            :source-images="sourceImages"
             :price-preview="pricePreview"
             :submit-error="submitError"
           />

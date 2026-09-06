@@ -11,6 +11,8 @@ definePageMeta({
 const route = useRoute()
 const jobId = route.params.id as string
 const { alert, confirm } = useAlert()
+const { fetchProtectedBlob, openProtectedAsset, protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const orderImageEndpoint = (imageId: number) => `/media/order-images/${imageId}`
 
 const order = ref<OrderDetail | null>(null)
 const loading = ref(true)
@@ -62,6 +64,12 @@ const fetchOrderDetails = async () => {
 const sourceImages = computed(() => order.value?.images?.filter(image => image.imageType === 'source') ?? [])
 const generatedImages = computed(() => order.value?.images?.filter(image => image.imageType === 'ai_generated') ?? [])
 const selectedImages = computed(() => order.value?.images?.filter(image => image.imageType === 'selected_final') ?? [])
+
+watch(
+  () => (order.value?.images || []).map(image => orderImageEndpoint(image.orderImageId)),
+  endpoints => syncProtectedAssets(endpoints),
+  { immediate: true }
+)
 
 const statusLabels: Record<string, string> = {
   waiting_deposit: 'รอชำระมัดจำ',
@@ -226,10 +234,7 @@ const downloadReferenceImage = async (image: OrderImage) => {
   let link: HTMLAnchorElement | null = null
 
   try {
-    const response = await fetch(image.imageUrl)
-    if (!response.ok) throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้')
-
-    const blob = await response.blob()
+    const blob = await fetchProtectedBlob(orderImageEndpoint(image.orderImageId))
     objectUrl = URL.createObjectURL(blob)
 
     let filename = ''
@@ -561,7 +566,7 @@ const breadcrumb = computed(() => [
             >
               <div class="aspect-square overflow-hidden bg-[#F7F7F5]">
                 <img
-                  :src="image.imageUrl"
+                  :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
                   alt="รูปอ้างอิงจากลูกค้า"
                   class="h-full w-full object-cover"
                 >
@@ -631,7 +636,7 @@ const breadcrumb = computed(() => [
                 @click="detailImage = image"
               >
                 <img
-                  :src="image.imageThumbnailUrl || image.imageUrl"
+                  :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
                   alt="ผลงานดราฟต์"
                   class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 >
@@ -670,12 +675,13 @@ const breadcrumb = computed(() => [
               <a
                 v-for="image in selectedImages"
                 :key="image.orderImageId"
-                :href="image.imageUrl"
+                href="#"
                 target="_blank"
                 class="aspect-square overflow-hidden rounded-xl border border-black/[0.06] bg-[#F7F7F5]"
+                @click.prevent="openProtectedAsset(orderImageEndpoint(image.orderImageId))"
               >
                 <img
-                  :src="image.imageThumbnailUrl || image.imageUrl"
+                  :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
                   alt="ผลงานที่ลูกค้าเลือก"
                   class="h-full w-full object-cover"
                 >
@@ -895,7 +901,7 @@ const breadcrumb = computed(() => [
             </header>
             <div class="space-y-5 p-6">
               <img
-                :src="detailImage.imageUrl"
+                :src="protectedAssetUrl(orderImageEndpoint(detailImage.orderImageId))"
                 alt="ผลงานดราฟต์"
                 class="max-h-72 w-full rounded-xl bg-[#F7F7F5] object-contain"
               >

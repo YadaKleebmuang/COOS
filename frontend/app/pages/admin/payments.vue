@@ -10,6 +10,8 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { openProtectedAsset } = useProtectedAsset()
+const paymentSlipEndpoint = (paymentId: number) => `/media/payments/${paymentId}/slip`
 
 // ── Mock data (API-ready) ──────────────────────────────────────
 interface PaymentRow {
@@ -249,9 +251,9 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
             <!-- Action -->
             <template #cell-action="{ row }">
               <div class="flex items-center justify-center gap-2">
-                <a :href="row.paymentSlipUrl" target="_blank" class="px-2 py-1 text-[11px] font-semibold text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded shadow-sm border border-black/[0.06] bg-white whitespace-nowrap">
+                <button type="button" class="px-2 py-1 text-[11px] font-semibold text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded shadow-sm border border-black/[0.06] bg-white whitespace-nowrap" @click="openProtectedAsset(paymentSlipEndpoint(row.paymentId))">
                   ดูสลิป
-                </a>
+                </button>
                 <template v-if="row.paymentStatus === 'pending'">
                   <button
                     @click="openConfirm(row as any, 'approved')"

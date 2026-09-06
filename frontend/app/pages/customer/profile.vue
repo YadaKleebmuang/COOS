@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { useApi } from '~/composables/useApi'
 
 definePageMeta({
@@ -17,6 +17,7 @@ interface ContactChannels {
 }
 
 interface ProfileResponse {
+  userId?: number
   userFirstName?: string
   userLastName?: string
   userEmail?: string
@@ -51,6 +52,9 @@ const profileForm = reactive({
 
 const profileImageFile = ref<File | null>(null)
 const previewImageUrl = ref('')
+const profileUserId = ref<number | null>(null)
+const { protectedAssetUrl, refreshProtectedAsset, syncProtectedAssets } = useProtectedAsset()
+const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 
 const getErrorMessage = (err: unknown, fallback: string) =>
   err instanceof Error && err.message ? err.message : fallback
@@ -61,12 +65,14 @@ const fetchProfile = async () => {
   errorMessage.value = ''
   try {
     const data = await apiFetch<ProfileResponse>('/users/me')
+    profileUserId.value = data.userId ?? null
     profileForm.userFirstName = data.userFirstName || ''
     profileForm.userLastName = data.userLastName || ''
     profileForm.userEmail = data.userEmail || ''
     profileForm.userPhone = data.userPhone || ''
     profileForm.userAddress = data.userAddress || ''
     profileForm.userProfileImage = data.userProfileImage || ''
+    await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
 
     // Parse contact channels
     const channels = data.userContactChannels || {}
@@ -93,6 +99,7 @@ const handleImageChange = (event: Event) => {
       return
     }
     profileImageFile.value = file
+    if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
     previewImageUrl.value = URL.createObjectURL(file)
   }
 }
@@ -146,8 +153,12 @@ const saveProfile = async () => {
     if (resData.user) {
       profileForm.userProfileImage = resData.user.userProfileImage || ''
     }
+    if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
     profileImageFile.value = null
     previewImageUrl.value = ''
+    if (profileForm.userProfileImage && profileUserId.value != null) {
+      await refreshProtectedAsset(profileEndpoint(profileUserId.value))
+    }
 
     // Reload window helper to refresh layout navbar states
     setTimeout(() => {
@@ -159,6 +170,10 @@ const saveProfile = async () => {
     saving.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+})
 
 // ── Change Password State ──
 const passwordForm = reactive({
@@ -257,8 +272,8 @@ const changePassword = async () => {
                 class="h-full w-full object-cover"
               >
               <img
-                v-else-if="profileForm.userProfileImage"
-                :src="profileForm.userProfileImage.startsWith('/') ? profileForm.userProfileImage : profileForm.userProfileImage"
+                v-else-if="profileForm.userProfileImage && profileUserId != null"
+                :src="protectedAssetUrl(profileEndpoint(profileUserId))"
                 alt="รูปโปรไฟล์"
                 class="h-full w-full object-cover"
               >

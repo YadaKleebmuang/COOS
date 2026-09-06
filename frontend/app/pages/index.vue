@@ -32,6 +32,7 @@ definePageMeta({
 })
 
 const { apiFetch } = useApi()
+const { publicGalleryUrl } = useProtectedAsset()
 
 type GalleryImage = {
   imageId?: number | string
@@ -674,7 +675,7 @@ onUnmounted(() => {
 
               <!-- Full-bleed Image -->
               <img
-                :src="img.imageUrl"
+                :src="img.imageId != null ? publicGalleryUrl(img.imageId) : ''"
                 :alt="img.imageTitle || 'Gallery Work'"
                 class="gallery-card-img h-full w-full object-cover"
               >
@@ -1063,7 +1064,7 @@ onUnmounted(() => {
           >
             <div class="aspect-[3/4] overflow-hidden bg-neutral-100 p-1">
               <img
-                :src="featuredImages[2].imageUrl"
+                :src="featuredImages[2].imageId != null ? publicGalleryUrl(featuredImages[2].imageId) : ''"
                 :alt="featuredImages[2].imageTitle || 'Gallery Work'"
                 class="h-full w-full object-cover rounded-lg"
               >

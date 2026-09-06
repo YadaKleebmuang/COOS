@@ -16,6 +16,9 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const profileImageFile = ref<File | null>(null)
 const previewImageUrl = ref('')
+const profileUserId = ref<number | null>(null)
+const { protectedAssetUrl, refreshProtectedAsset, syncProtectedAssets } = useProtectedAsset()
+const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 
 const profileForm = reactive({
   userFirstName: '',
@@ -40,6 +43,7 @@ const fetchProfile = async () => {
 
   try {
     const data = await apiFetch('/users/me')
+    profileUserId.value = data.userId ?? null
     const channels = data.userContactChannels || {}
 
     profileForm.userFirstName = data.userFirstName || ''
@@ -49,6 +53,7 @@ const fetchProfile = async () => {
     profileForm.userPhone = data.userPhone || ''
     profileForm.userAddress = data.userAddress || ''
     profileForm.userProfileImage = data.userProfileImage || ''
+    await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
     profileForm.facebook = channels.facebook || ''
     profileForm.line = channels.line || ''
     profileForm.tel = channels.tel || ''
@@ -128,6 +133,9 @@ const saveProfile = async () => {
 
     profileImageFile.value = null
     clearPreviewUrl()
+    if (profileForm.userProfileImage && profileUserId.value != null) {
+      await refreshProtectedAsset(profileEndpoint(profileUserId.value))
+    }
     successMessage.value = 'บันทึกข้อมูลเรียบร้อยแล้ว'
   } catch (error: unknown) {
     errorMessage.value = getErrorMessage(error, 'เกิดข้อผิดพลาดในการบันทึกข้อมูล')
@@ -222,7 +230,7 @@ const breadcrumb = [
               <div class="w-24 h-24 rounded-full overflow-hidden border border-black/[0.08] bg-[#F7F7F5] flex items-center justify-center">
                 <img
                   v-if="previewImageUrl || profileForm.userProfileImage"
-                  :src="previewImageUrl || profileForm.userProfileImage"
+                  :src="previewImageUrl || (profileUserId != null ? protectedAssetUrl(profileEndpoint(profileUserId)) : '')"
                   alt="รูปโปรไฟล์"
                   class="w-full h-full object-cover"
                 >

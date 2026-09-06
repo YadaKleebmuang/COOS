@@ -11,7 +11,7 @@ const { alert } = useAlert()
 
 // ── Types ──────────────────────────────────────────────────────
 interface SystemFile {
-  fileId: number
+  fileId: string
   fileName: string
   fileType: "image" | "document" | "video" | "other"
   orderId: number | null
@@ -29,7 +29,21 @@ const loading = ref(true)
 const searchQuery = ref("")
 const typeFilter = ref("all")
 const statusFilter = ref("all")
-const deleteDialog = ref({ open: false, loading: false, fileId: 0, name: "" })
+const deleteDialog = ref({ open: false, loading: false, fileId: "", name: "" })
+const { openProtectedAsset } = useProtectedAsset()
+
+const fileMediaEndpoint = (fileId: string) => {
+  const match = /^(img|pay)_(\d+)$/.exec(fileId)
+  if (!match) return ''
+  return match[1] === 'img'
+    ? `/media/order-images/${match[2]}`
+    : `/media/payments/${match[2]}/slip`
+}
+
+const openSystemFile = (file: SystemFile) => {
+  const endpoint = fileMediaEndpoint(file.fileId)
+  if (endpoint) openProtectedAsset(endpoint)
+}
 
 // ── Fetch ──────────────────────────────────────────────────────
 const fetchFiles = async () => {
@@ -201,7 +215,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         <!-- Actions -->
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-1.5">
-            <a :href="row.fileUrl" target="_blank" class="text-xs text-gray-500 hover:text-gray-700 underline">ดูไฟล์</a>
+            <button type="button" class="text-xs text-gray-500 hover:text-gray-700 underline" @click="openSystemFile(row as SystemFile)">ดูไฟล์</button>
             <AdminActionButton variant="danger" size="sm" @click="deleteDialog = { open: true, loading: false, fileId: row.fileId, name: row.fileName }">ลบ</AdminActionButton>
           </div>
         </template>
