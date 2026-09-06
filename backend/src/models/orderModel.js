@@ -343,6 +343,19 @@ exports.findPaymentById = async (paymentId) => {
   return rows[0];
 };
 
+const getNextStatusAfterPayment = (paymentStatus, paymentType, currentStatus, editorId) => {
+  if (paymentStatus !== "approved") return currentStatus;
+  if (paymentType === "deposit" && currentStatus === "waiting_deposit") {
+    return editorId ? "waiting_to_start" : "waiting_assignment";
+  }
+  if (paymentType === "final" && currentStatus === "waiting_final_payment") {
+    return "delivered";
+  }
+  return currentStatus;
+};
+
+exports.getNextStatusAfterPayment = getNextStatusAfterPayment;
+
 // 12. Verify Payment (Approve / Reject)
 exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logNote) => {
   const connection = await pool.getConnection();
@@ -374,15 +387,14 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
     if (orders.length === 0) throw new Error("Order not found");
     const order = orders[0];
     const currentStatus = order.orderStatus;
-    let nextStatus = currentStatus;
+    const nextStatus = getNextStatusAfterPayment(
+      paymentStatus,
+      payment.paymentType,
+      currentStatus,
+      order.editorId
+    );
 
     if (paymentStatus === "approved") {
-      if (payment.paymentType === "deposit" && currentStatus === "waiting_deposit") {
-        nextStatus = order.editorId ? "waiting_to_start" : "waiting_assignment";
-      } else if (payment.paymentType === "final" && currentStatus === "waiting_final_payment") {
-        nextStatus = "completed";
-      }
-
       if (nextStatus !== currentStatus) {
         await connection.query(
           "UPDATE orders SET orderStatus = ? WHERE orderId = ?",
@@ -398,10 +410,6 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
        VALUES (?, ?, ?, ?, ?)`,
       [orderId, currentStatus, nextStatus, verifiedByAdminId, fullLogNote]
     );
-
-    if (nextStatus === 'completed' && currentStatus !== 'completed') {
-      await _autoPublishToGallery(connection, orderId);
-    }
 
     await connection.commit();
     return { orderId, nextStatus };
