@@ -159,6 +159,31 @@ exports.findImages = async (orderId) => {
   return rows;
 };
 
+// Fetch AI-generated draft metadata owned by one Editor
+exports.findPromptNotesByEditor = async (editorId) => {
+  const [rows] = await pool.query(
+    `SELECT
+       oi.orderImageId,
+       oi.orderId,
+       oi.imageUrl,
+       oi.imageThumbnailUrl,
+       oi.aiEngine,
+       oi.positivePrompt,
+       oi.negativePrompt,
+       oi.cfgScale,
+       oi.steps,
+       oi.seed,
+       oi.imageCreatedAt
+     FROM orderImages oi
+     JOIN orders o ON o.orderId = oi.orderId
+     WHERE o.editorId = ?
+       AND oi.imageType = 'ai_generated'
+     ORDER BY oi.imageCreatedAt DESC, oi.orderImageId DESC`,
+    [editorId]
+  );
+  return rows;
+};
+
 // 5. Fetch order payments
 exports.findPayments = async (orderId) => {
   const [rows] = await pool.query(
@@ -465,4 +490,3 @@ const _autoPublishToGallery = async (connection, orderId) => {
     }
   }
 };
-

@@ -148,6 +148,22 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
+// GET /api/v1/orders/prompt-notes (Editor draft prompt library)
+exports.getPromptNotes = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะ Editor เท่านั้นที่สามารถดูบันทึก Prompt ได้" });
+    }
+
+    const promptNotes = await OrderModel.findPromptNotesByEditor(userId);
+    res.status(200).json({ data: promptNotes });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // 3. GET /api/v1/orders/:id (Retrieve specific order details)
 exports.getById = async (req, res, next) => {
   try {
@@ -463,4 +479,3 @@ exports.selectImages = async (req, res, next) => {
     next(err);
   }
 };
-
