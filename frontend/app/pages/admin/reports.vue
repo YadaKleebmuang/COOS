@@ -137,6 +137,44 @@ const reportData = ref({
   revenueByMonth: [] as any[]
 })
 
+const getThaiStatus = (status: string) => {
+  const map: Record<string, string> = {
+    waiting_deposit: 'รอชำระมัดจำ',
+    waiting_assignment: 'รอมอบหมายงาน',
+    waiting_to_start: 'รอเริ่มงาน',
+    in_progress: 'กำลังดำเนินการ',
+    waiting_selection: 'รอเลือกผลงาน',
+    waiting_final_payment: 'รอชำระส่วนที่เหลือ',
+    delivered: 'ส่งมอบแล้ว',
+    completed: 'เสร็จสมบูรณ์',
+    cancelled: 'ยกเลิก'
+  }
+  return map[status] || status
+}
+
+const getThaiMonth = (month: string) => {
+  if (!month) return month;
+  const map: Record<string, string> = {
+    'Jan': 'ม.ค.', 'Feb': 'ก.พ.', 'Mar': 'มี.ค.', 'Apr': 'เม.ย.',
+    'May': 'พ.ค.', 'Jun': 'มิ.ย.', 'Jul': 'ก.ค.', 'Aug': 'ส.ค.',
+    'Sep': 'ก.ย.', 'Oct': 'ต.ค.', 'Nov': 'พ.ย.', 'Dec': 'ธ.ค.'
+  }
+  const prefix = month.substring(0, 3).charAt(0).toUpperCase() + month.substring(1, 3).toLowerCase();
+  return map[prefix] || month;
+}
+
+const exportPdf = () => {
+  closeCalendar();
+  const originalTitle = document.title;
+  document.title = `COOS_Report_${dateFrom.value}_to_${dateTo.value}`;
+  document.body.classList.add('reports-printing');
+  setTimeout(() => {
+    window.print();
+    document.title = originalTitle;
+    document.body.classList.remove('reports-printing');
+  }, 100);
+};
+
 const fetchReport = async () => {
   if (dateFrom.value && dateTo.value && dateFrom.value > dateTo.value) {
     alert("แจ้งเตือน", "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด", "warning")
@@ -196,15 +234,153 @@ const statCards = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="space-y-6 max-w-7xl mx-auto reports-print-area">
+    <!-- Print Only Header -->
+    <div class="reports-print-only mb-8">
+      <h1 class="text-2xl font-bold text-[#171717] mb-2">รายงานสรุปการดำเนินงานระบบ COOS</h1>
+      <p class="text-[13px] text-[#666666] mb-6">เว็บแอปพลิเคชันบริหารจัดการคำสั่งงานสร้างภาพสำหรับสตูดิโอออนไลน์</p>
+      
+      <div class="flex items-center justify-between text-[13px] text-[#171717]">
+        <div>
+          <span class="font-semibold">ช่วงข้อมูล:</span> {{ formatDisplayDate(dateFrom) }} – {{ formatDisplayDate(dateTo) }}
+        </div>
+        <div>
+          <span class="font-semibold">ออกรายงานเมื่อ:</span> {{ formatDisplayDate(getLocalDateString()) }}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Empty Report Warning for Print -->
+    <div class="reports-print-only text-center py-20" v-if="reportData.totalOrders === 0">
+      <p class="text-lg font-medium text-[#171717]">ไม่พบข้อมูลในช่วงเวลาที่เลือก</p>
+    </div>
+
+    <!-- Print Only Report Content -->
+    <div class="reports-print-only space-y-8" v-if="reportData.totalOrders > 0">
+      
+      <!-- Section 2: Summary -->
+      <div>
+        <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1" style="break-after: avoid;">สรุปข้อมูลหลัก</h2>
+        <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]">
+          <tbody>
+            <tr class="border-b border-black/[0.1]">
+              <td class="py-1.5 px-3 border-r border-black/[0.1] w-1/2">คำสั่งงานทั้งหมด</td>
+              <td class="py-1.5 px-3 font-number font-bold text-right">{{ reportData.totalOrders }}</td>
+            </tr>
+            <tr class="border-b border-black/[0.1]">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]">รายได้รวม / ยอดรวม</td>
+              <td class="py-1.5 px-3 font-number font-bold text-right">{{ formatCurrency(reportData.totalRevenue) }}</td>
+            </tr>
+            <tr class="border-b border-black/[0.1]">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]">งานเสร็จสมบูรณ์</td>
+              <td class="py-1.5 px-3 font-number font-bold text-right">{{ reportData.completedOrders }}</td>
+            </tr>
+            <tr class="border-b border-black/[0.1]">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]">ลูกค้าใหม่</td>
+              <td class="py-1.5 px-3 font-number font-bold text-right">{{ reportData.newCustomers }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 3: Status Summary -->
+      <div v-if="reportData.ordersByStatus?.length">
+        <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1" style="break-after: avoid;">สรุปสถานะออเดอร์</h2>
+        <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]">
+          <thead class="bg-[#F7F7F5]">
+            <tr class="border-b border-black/[0.1]">
+              <th class="py-1.5 px-3 text-left border-r border-black/[0.1]">สถานะ</th>
+              <th class="py-1.5 px-3 text-right">จำนวน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="s in reportData.ordersByStatus" :key="s.status" class="border-b border-black/[0.1]">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]">{{ getThaiStatus(s.status) }}</td>
+              <td class="py-1.5 px-3 font-number text-right">{{ s.count }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 4: Monthly Financial -->
+      <div class="break-inside-avoid" v-if="reportData.revenueByMonth?.length">
+        <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1">สรุปรายได้รายเดือน</h2>
+        
+        <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]">
+          <thead class="bg-[#F7F7F5]">
+            <tr class="border-b border-black/[0.1]">
+              <th class="py-1.5 px-3 text-left border-r border-black/[0.1]">เดือน</th>
+              <th class="py-1.5 px-3 text-right">จำนวนเงิน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in reportData.revenueByMonth" :key="item.month" class="border-b border-black/[0.1]" style="break-inside: avoid;">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]" style="color: #171717;">{{ getThaiMonth(item.month) }}</td>
+              <td class="py-1.5 px-3 font-number text-right" style="color: #171717;">{{ formatCurrency(item.revenue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 5: Additional Summaries (Packages) -->
+      <div v-if="reportData.popularPackages?.length" style="display: block; position: static; height: auto; min-height: 0; max-height: none; overflow: visible; opacity: 1; visibility: visible; background: #ffffff;">
+        <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1" style="color: #171717; break-after: avoid;">สรุปแพ็กเกจยอดนิยม</h2>
+        <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]" style="width: 100%; border-collapse: collapse; display: table;">
+          <thead class="bg-[#F7F7F5]" style="display: table-header-group;">
+            <tr class="border-b border-black/[0.1]" style="break-inside: avoid;">
+              <th class="py-1.5 px-3 text-left border-r border-black/[0.1]" style="color: #171717;">แพ็กเกจ</th>
+              <th class="py-1.5 px-3 text-center border-r border-black/[0.1]" style="color: #171717;">คำสั่งงาน</th>
+              <th class="py-1.5 px-3 text-right" style="color: #171717;">รายได้</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in reportData.popularPackages" :key="p.name" class="border-b border-black/[0.1]" style="break-inside: avoid;">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]" style="color: #171717;">{{ p.name }}</td>
+              <td class="py-1.5 px-3 font-number text-center border-r border-black/[0.1]" style="color: #171717;">{{ p.count }}</td>
+              <td class="py-1.5 px-3 font-number text-right" style="color: #171717;">{{ formatCurrency(p.revenue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 6: Additional Summaries (Editors) -->
+      <div v-if="reportData.editorWorkload?.length" style="display: block; position: static; height: auto; min-height: 0; max-height: none; overflow: visible; opacity: 1; visibility: visible; background: #ffffff;">
+        <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1" style="color: #171717; break-after: avoid;">สรุปปริมาณงาน Editor</h2>
+        <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]" style="width: 100%; border-collapse: collapse; display: table;">
+          <thead class="bg-[#F7F7F5]" style="display: table-header-group;">
+            <tr class="border-b border-black/[0.1]">
+              <th class="py-1.5 px-3 text-left border-r border-black/[0.1]" style="color: #171717;">นักออกแบบ</th>
+              <th class="py-1.5 px-3 text-center border-r border-black/[0.1]" style="color: #171717;">งานเสร็จ</th>
+              <th class="py-1.5 px-3 text-center" style="color: #171717;">เฉลี่ย (วัน)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="e in reportData.editorWorkload" :key="e.name" class="border-b border-black/[0.1]" style="break-inside: avoid;">
+              <td class="py-1.5 px-3 border-r border-black/[0.1]" style="color: #171717;">{{ e.name }}</td>
+              <td class="py-1.5 px-3 font-number text-center border-r border-black/[0.1]" style="color: #171717;">{{ e.completedJobs || 0 }}</td>
+              <td class="py-1.5 px-3 font-number text-center" style="color: #171717;">{{ Number(e.avgDays || 0).toFixed(1) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 reports-no-print">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
         <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#171717] tracking-tight">รายงาน</h1>
         <p class="mt-1 text-sm font-medium text-[#666666]">สรุปและติดตามข้อมูลการดำเนินงานของระบบ</p>
       </div>
       <div class="flex items-center gap-2 mt-1 sm:mt-0">
+        <button 
+          @click="exportPdf" 
+          :disabled="loading"
+          class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm disabled:opacity-50"
+        >
+          ส่งออก PDF
+        </button>
         <button
           @click="fetchReport"
           :disabled="loading"
@@ -222,7 +398,7 @@ const statCards = computed(() => [
     </div>
 
     <!-- Date range filter -->
-    <div class="relative z-30 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] px-6 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-wrap items-center gap-4">
+    <div class="relative z-30 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] px-6 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-wrap items-center gap-4 reports-no-print">
       <p class="text-[13px] font-semibold text-[#171717]">ช่วงเวลา:</p>
 
       <!-- Click outside overlay -->
@@ -314,7 +490,7 @@ const statCards = computed(() => [
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 break-inside-avoid reports-no-print">
       <div
         v-for="card in statCards"
         :key="card.label"
@@ -335,7 +511,7 @@ const statCards = computed(() => [
     </div>
 
     <!-- Charts row -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 reports-no-print">
 
       <!-- Revenue bar chart (CSS-based) -->
       <div class="xl:col-span-2 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col">
@@ -381,7 +557,7 @@ const statCards = computed(() => [
     </div>
 
     <!-- Bottom grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 reports-no-print">
 
       <!-- Popular packages -->
       <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
@@ -441,6 +617,56 @@ const statCards = computed(() => [
     </div>
   </div>
 </template>
+
+<style>
+/* Print Styles for Reports */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  body.reports-printing * {
+    visibility: hidden;
+  }
+  
+  body.reports-printing .reports-print-area,
+  body.reports-printing .reports-print-area * {
+    visibility: visible;
+  }
+  
+  body.reports-printing .reports-print-area {
+    position: static;
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  body.reports-printing .reports-no-print {
+    display: none !important;
+  }
+  
+  body.reports-printing .reports-print-only {
+    display: block !important;
+  }
+
+  body.reports-printing .break-inside-avoid {
+    break-inside: avoid;
+  }
+  
+  body.reports-printing thead {
+    display: table-header-group;
+  }
+}
+
+.reports-print-only {
+  display: none;
+}
+</style>
 
 <style scoped>
 /* Orders table visual language */
