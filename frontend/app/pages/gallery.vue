@@ -27,10 +27,6 @@ type GalleryImage = {
   workTypeName?: string
 }
 
-type GalleryTag = {
-  tagName: string
-}
-
 const getErrorMessage = (err: unknown, fallback: string) => {
   if (err instanceof Error && err.message) return err.message
   if (typeof err === 'object' && err !== null && 'message' in err) {
@@ -120,7 +116,7 @@ const loadData = async () => {
     const [imgData, wtData, tagsData] = await Promise.all([
       apiFetch<GalleryImage[]>('/gallery-images'),
       apiFetch<WorkType[]>('/work-types').catch(() => []),
-      apiFetch<GalleryTag[]>('/tags').catch(() => [])
+      apiFetch<string[]>('/gallery-images/tags').catch(() => [])
     ])
     images.value = imgData
 
@@ -138,7 +134,7 @@ const loadData = async () => {
     }
 
     if (tagsData && tagsData.length > 0) {
-      availableTags.value = tagsData.map(t => t.tagName)
+      availableTags.value = tagsData
     }
   } catch (err: unknown) {
     error.value = getErrorMessage(err, 'ไม่สามารถโหลดข้อมูลแกลเลอรีได้')

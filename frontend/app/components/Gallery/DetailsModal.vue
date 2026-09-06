@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 type GalleryImage = {
   imageUrl?: string
   imageTitle?: string
@@ -10,7 +8,7 @@ type GalleryImage = {
   workTypeName?: string
 }
 
-const props = defineProps<{
+defineProps<{
   img: GalleryImage | null
   isOpen: boolean
   variant?: 'default' | 'gallery'
@@ -47,69 +45,6 @@ const getOrderParams = (img: GalleryImage) => {
     .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
     .join('&')
 }
-
-// Inferred prompt details from tags
-const promptDetails = computed(() => {
-  if (!props.img) return null
-
-  const tags = props.img.imageTags
-    ? props.img.imageTags.split(',').map((t: string) => t.trim().toLowerCase())
-    : []
-
-  let style = 'Portrait'
-  let colorTone = 'Natural Tone'
-  let lighting = 'Natural Light'
-  let cameraAngle = 'Eye Level'
-  let timeOfDay = 'Daytime'
-
-  // Title-based custom prompt overrides
-  const title = (props.img.imageTitle || '').toLowerCase()
-  if (title.includes('romance') || title.includes('love')) {
-    style = 'Romantic / Cinematic'
-    colorTone = 'Warm Gold'
-    lighting = 'Sunset Glow'
-    cameraAngle = 'Medium Shot'
-    timeOfDay = 'Golden Hour'
-  } else if (title.includes('confidence')) {
-    style = 'Classic Studio'
-    colorTone = 'High Contrast'
-    lighting = 'Dramatic Key Light'
-    cameraAngle = 'Close-up'
-    timeOfDay = 'Studio Session'
-  } else if (title.includes('serene')) {
-    style = 'Minimalist'
-    colorTone = 'Soft Pastel'
-    lighting = 'Diffused Ambient'
-    cameraAngle = 'Medium Close-up'
-    timeOfDay = 'Morning'
-  } else if (title.includes('golden')) {
-    style = 'Outdoor Warm'
-    colorTone = 'Warm Orange/Gold'
-    lighting = 'Sunset Glow'
-    cameraAngle = 'Wide Landscape'
-    timeOfDay = 'Golden Hour'
-  } else if (title.includes('thoughtful')) {
-    style = 'Moody Portrait'
-    colorTone = 'Cool / Desaturated'
-    lighting = 'Side Window Light'
-    cameraAngle = 'Close-up'
-    timeOfDay = 'Afternoon'
-  } else if (title.includes('black tone') || tags.includes('blackwhite') || tags.includes('blacktone')) {
-    style = 'Fine Art B&W'
-    colorTone = 'Monochrome'
-    lighting = 'High Contrast Light'
-    cameraAngle = 'Cinematic Angle'
-    timeOfDay = 'Day'
-  }
-
-  return {
-    style,
-    colorTone,
-    lighting,
-    cameraAngle,
-    timeOfDay
-  }
-})
 </script>
 
 <template>
@@ -168,7 +103,7 @@ const promptDetails = computed(() => {
           <div v-if="variant === 'gallery'" class="absolute inset-0 pointer-events-none shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]" />
         </div>
 
-        <!-- Right side: Details & Prompts -->
+        <!-- Right side: Persisted public details -->
         <div 
           class="flex max-h-[50vh] w-full flex-col justify-between overflow-y-auto md:max-h-full md:w-1/2"
           :class="variant === 'gallery' ? 'p-7 md:p-8 lg:p-10' : 'p-7 md:p-8'"
@@ -196,45 +131,6 @@ const promptDetails = computed(() => {
               >
                 {{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}
               </p>
-            </div>
-
-            <!-- Prompt Metadata -->
-            <div 
-              class="border-t border-black/5"
-              :class="variant === 'gallery' ? 'pt-6 lg:pt-8' : 'pt-6'"
-            >
-              <h4 
-                class="uppercase text-neutral-400"
-                :class="variant === 'gallery' ? 'mb-4 text-[11px] font-bold tracking-[0.2em]' : 'mb-4 text-xs font-bold tracking-widest'"
-              >
-                Prompt Metadata
-              </h4>
-
-              <div
-                v-if="promptDetails"
-                class="space-y-3.5"
-              >
-                <div class="flex justify-between" :class="variant === 'gallery' ? 'text-[13px]' : 'text-sm'">
-                  <span :class="variant === 'gallery' ? 'text-neutral-500' : 'text-neutral-400'">สไตล์ (Style)</span>
-                  <span class="font-semibold" :class="variant === 'gallery' ? 'text-neutral-900' : 'text-black'">{{ promptDetails.style }}</span>
-                </div>
-                <div class="flex justify-between" :class="variant === 'gallery' ? 'text-[13px]' : 'text-sm'">
-                  <span :class="variant === 'gallery' ? 'text-neutral-500' : 'text-neutral-400'">โทนสี (Color Tone)</span>
-                  <span class="font-semibold" :class="variant === 'gallery' ? 'text-neutral-900' : 'text-black'">{{ promptDetails.colorTone }}</span>
-                </div>
-                <div class="flex justify-between" :class="variant === 'gallery' ? 'text-[13px]' : 'text-sm'">
-                  <span :class="variant === 'gallery' ? 'text-neutral-500' : 'text-neutral-400'">แสง (Lighting)</span>
-                  <span class="font-semibold" :class="variant === 'gallery' ? 'text-neutral-900' : 'text-black'">{{ promptDetails.lighting }}</span>
-                </div>
-                <div class="flex justify-between" :class="variant === 'gallery' ? 'text-[13px]' : 'text-sm'">
-                  <span :class="variant === 'gallery' ? 'text-neutral-500' : 'text-neutral-400'">มุมกล้อง (Camera Angle)</span>
-                  <span class="font-semibold" :class="variant === 'gallery' ? 'text-neutral-900' : 'text-black'">{{ promptDetails.cameraAngle }}</span>
-                </div>
-                <div class="flex justify-between" :class="variant === 'gallery' ? 'text-[13px]' : 'text-sm'">
-                  <span :class="variant === 'gallery' ? 'text-neutral-500' : 'text-neutral-400'">เวลา (Time of Day)</span>
-                  <span class="font-semibold" :class="variant === 'gallery' ? 'text-neutral-900' : 'text-black'">{{ promptDetails.timeOfDay }}</span>
-                </div>
-              </div>
             </div>
 
             <!-- Tags -->
