@@ -4,11 +4,12 @@ const GalleryImageModel = require("../models/galleryImage.model");
 exports.getGalleryImages = async (req, res, next) => {
   try {
     const { workTypeId, tag, all } = req.query;
+    const isAdmin = req.session?.userRole === "admin";
 
     const filters = {
       workTypeId: workTypeId || null,
       tag: tag || null,
-      activeOnly: all !== "true", // ถ้าส่ง ?all=true จะดึงทั้ง active/inactive
+      activeOnly: !(isAdmin && all === "true"),
     };
 
     const images = await GalleryImageModel.findAll(filters);
@@ -40,7 +41,8 @@ exports.getTags = async (req, res, next) => {
 // GET /gallery-images/:id — ดึงรูปภาพตาม id
 exports.getGalleryImageById = async (req, res, next) => {
   try {
-    const image = await GalleryImageModel.findById(req.params.id);
+    const isAdmin = req.session?.userRole === "admin";
+    const image = await GalleryImageModel.findById(req.params.id, { activeOnly: !isAdmin });
 
     if (!image) {
       return res.status(404).json({ message: "Gallery image not found" });

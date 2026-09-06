@@ -4,10 +4,11 @@ const PolicyModel = require("../models/policy.model");
 exports.getPolicies = async (req, res, next) => {
   try {
     const { policyType, all } = req.query;
+    const isAdmin = req.session?.userRole === "admin";
 
     const filters = {
       policyType: policyType || null,
-      activeOnly: all !== "true", // ถ้าส่ง ?all=true จะดึงทั้ง active/inactive
+      activeOnly: !(isAdmin && all === "true"),
     };
 
     const policies = await PolicyModel.findAll(filters);
@@ -44,7 +45,8 @@ exports.getPolicyByType = async (req, res, next) => {
 // GET /policies/:id — ดึง policy ตาม id
 exports.getPolicyById = async (req, res, next) => {
   try {
-    const policy = await PolicyModel.findById(req.params.id);
+    const isAdmin = req.session?.userRole === "admin";
+    const policy = await PolicyModel.findById(req.params.id, { activeOnly: !isAdmin });
 
     if (!policy) {
       return res.status(404).json({ message: "Policy not found" });

@@ -51,7 +51,8 @@ exports.findAll = async (filters = {}) => {
 };
 
 // ดึง gallery image ตาม id
-exports.findById = async (id) => {
+exports.findById = async (id, { activeOnly = true } = {}) => {
+  const activeClause = activeOnly ? " AND gi.imageIsActive = 1" : "";
   const [rows] = await pool.query(
     `SELECT
       gi.imageId,
@@ -68,7 +69,7 @@ exports.findById = async (id) => {
     JOIN workTypes wt ON gi.workTypeId = wt.workTypeId
     LEFT JOIN galleryImageTags git ON gi.imageId = git.imageId
     LEFT JOIN tags t ON git.tagId = t.tagId
-    WHERE gi.imageId = ?
+    WHERE gi.imageId = ?${activeClause}
     GROUP BY gi.imageId`,
     [id]
   );
