@@ -10,7 +10,7 @@
 --   default backend port = 3000
 --   static root: app.use('/uploads', express.static(backend/uploads))
 --
--- All seed accounts use password: CoosTest123!
+-- All seed accounts use the DEVELOPMENT-ONLY fixture credential documented in the approved local QA setup.
 -- Change @BACKEND_BASE_URL below if your backend host/port is different.
 -- ================================================================
 
@@ -391,8 +391,3 @@ SELECT COUNT(*) AS `activeGalleryImages` FROM `galleryImages` WHERE `imageId` BE
 SELECT COUNT(*) AS `inactiveGalleryImages` FROM `galleryImages` WHERE `imageId` BETWEEN -4005 AND -4001 AND `imageIsActive` = 0;
 
 -- Primary QA accounts:
--- admin.main@seed.coos.test      / CoosTest123!
--- editor.busy@seed.coos.test     / CoosTest123!
--- editor.empty@seed.coos.test    / CoosTest123!
--- customer.full@seed.coos.test   / CoosTest123!
--- customer.empty@seed.coos.test  / CoosTest123!

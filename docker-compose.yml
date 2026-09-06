@@ -5,7 +5,7 @@ services:
     container_name: coos-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       MYSQL_DATABASE: coosdb
     ports:
       - "3306:3306"
@@ -13,7 +13,7 @@ services:
       - db_data:/var/lib/mysql
       - ./backend/database.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot1234"]
+      test: ["CMD-SHELL", 'mysqladmin ping -h localhost -u root -p"$${MYSQL_ROOT_PASSWORD}"']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,6 +27,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/.env
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
     ports:
       - "3000:3000"
     volumes:

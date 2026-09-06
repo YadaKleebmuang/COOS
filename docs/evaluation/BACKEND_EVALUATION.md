@@ -130,8 +130,8 @@ MVC separation ชัดเจน Business logic อยู่ใน controller/m
 - **File/Module:** backend/.env, .gitignore
 - **Problem:** ไฟล์ backend/.env ถูก commit เข้า git repository ทำให้ JWT_SECRET และ DB_PASSWORD ถูก expose ใน git history ทั้งหมด
 - **Evidence:**
-  - backend/.env มี JWT_SECRET=f759ea4bd246ed7ec8119c123b9b163a0860dd3accd22764a5263f88110b4ef8
-  - backend/.env มี DB_PASSWORD=root1234
+  - backend/.env มี JWT_SECRET=<redacted>
+  - backend/.env มี DB_PASSWORD=<configured via environment>
   - docs/ai/03_PROJECT_STATE.md ระบุว่า "backend/.env ถูก commit เข้า git" เป็น Known Issue ที่ยังไม่แก้
 - **Root Cause:** ไม่มี backend/.env ใน .gitignore
 - **Impact:** ผู้ที่มีสิทธิ์เข้าถึง git repo สามารถนำ JWT_SECRET ไป forge JWT token ที่ถูกต้องสมบูรณ์ได้ และเข้าถึง database โดยตรง
