@@ -95,6 +95,18 @@ const saveProfile = async () => {
   successMessage.value = ''
   errorMessage.value = ''
 
+  const phoneRegex = /^[0-9]{10}$/
+  if (profileForm.userPhone && !phoneRegex.test(profileForm.userPhone)) {
+    errorMessage.value = 'กรุณากรอกเบอร์โทรศัพท์เป็นตัวเลข 10 หลัก'
+    saving.value = false
+    return
+  }
+  if (profileForm.tel && !phoneRegex.test(profileForm.tel)) {
+    errorMessage.value = 'กรุณากรอกเบอร์ติดต่อเป็นตัวเลข 10 หลัก'
+    saving.value = false
+    return
+  }
+
   try {
     const formData = new FormData()
     formData.append('userFirstName', profileForm.userFirstName)
@@ -340,6 +352,9 @@ const breadcrumb = [
                   id="userPhone"
                   v-model="profileForm.userPhone"
                   type="tel"
+                  inputmode="numeric"
+                  maxlength="10"
+                  @input="profileForm.userPhone = ($event.target as HTMLInputElement).value.replace(/\\D/g, '').slice(0, 10)"
                   autocomplete="tel"
                   class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
                 >
@@ -405,6 +420,9 @@ const breadcrumb = [
                   id="tel"
                   v-model="profileForm.tel"
                   type="tel"
+                  inputmode="numeric"
+                  maxlength="10"
+                  @input="profileForm.tel = ($event.target as HTMLInputElement).value.replace(/\\D/g, '').slice(0, 10)"
                   class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
                 >
               </div>
