@@ -26,6 +26,10 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
     }
 
+    // if (userPhone && !/^[0-9]{10}$/.test(userPhone)) {
+    //   return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+    // }
+
     // [Security] role ถูก hardcode เป็น "customer" เสมอ
     // การสร้าง editor/admin ทำได้ผ่าน Admin Panel เท่านั้น
     const role = "customer";
