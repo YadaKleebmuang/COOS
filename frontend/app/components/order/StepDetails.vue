@@ -142,6 +142,7 @@ const formatPrice = (n: number) =>
               id="order-style"
               v-model="form.orderStyle"
               type="text"
+              maxlength="255"
               placeholder="เช่น Minimal, Retro, Anime, Realistic"
               class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             >
@@ -153,6 +154,7 @@ const formatPrice = (n: number) =>
               id="order-color"
               v-model="form.orderColorTone"
               type="text"
+              maxlength="255"
               placeholder="เช่น Warm, Cool, Pastel, Earth Tone"
               class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
             >

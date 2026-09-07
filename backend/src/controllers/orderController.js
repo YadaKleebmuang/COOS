@@ -76,6 +76,14 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ message: "แพ็กเกจนี้ปิดการใช้งานชั่วคราว" });
     }
 
+    // Validate string lengths to prevent DB ER_DATA_TOO_LONG
+    if (orderStyle && orderStyle.length > 255) {
+      return res.status(400).json({ message: "ข้อมูลสไตล์ภาพมีความยาวเกินที่กำหนด กรุณาตรวจสอบข้อมูลอีกครั้ง" });
+    }
+    if (orderColorTone && orderColorTone.length > 255) {
+      return res.status(400).json({ message: "ข้อมูลโทนสีมีความยาวเกินที่กำหนด กรุณาตรวจสอบข้อมูลอีกครั้ง" });
+    }
+
     // Dynamic price calculation on backend
     const orderBasePrice = Number(packageItem.packagePrice);
     const orderUrgentPrice = orderIsUrgent ? Number(packageItem.packageUrgentPrice || 0) : 0.00;

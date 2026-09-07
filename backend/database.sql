@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `packageId`           INT NOT NULL,
   `workTypeId`          INT NOT NULL,
   `orderStyle`          VARCHAR(255) NULL,  -- สไตล์ภาพ
-  `orderColorTone`      VARCHAR(100) NULL,  -- โทนสี
+  `orderColorTone`      VARCHAR(255) NULL,  -- โทนสี
   `orderComposition`    TEXT NULL,          -- องค์ประกอบฉาก
   `orderNote`           TEXT NULL,          -- หมายเหตุเพิ่มเติม
   `orderRequiredDate`   DATE NOT NULL,      -- วันที่ต้องการรับผลงาน
