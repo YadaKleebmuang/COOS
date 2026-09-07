@@ -50,9 +50,23 @@ const profileForm = reactive({
   tel: ''
 })
 
+const persistedProfile = reactive({
+  userFirstName: '',
+  userLastName: '',
+  userPhone: '',
+  userAddress: '',
+  facebook: '',
+  line: '',
+  tel: ''
+})
+
 const profileImageFile = ref<File | null>(null)
 const previewImageUrl = ref('')
 const profileUserId = ref<number | null>(null)
+const isUploadingAvatar = ref(false)
+const avatarSuccessMessage = ref('')
+const avatarErrorMessage = ref('')
+let avatarSuccessTimer: ReturnType<typeof setTimeout> | null = null
 const { protectedAssetUrl, refreshProtectedAsset, syncProtectedAssets } = useProtectedAsset()
 const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 
@@ -72,6 +86,12 @@ const fetchProfile = async () => {
     profileForm.userPhone = data.userPhone || ''
     profileForm.userAddress = data.userAddress || ''
     profileForm.userProfileImage = data.userProfileImage || ''
+
+    // Keep persistedProfile in sync with the latest confirmed backend state
+    persistedProfile.userFirstName = data.userFirstName || ''
+    persistedProfile.userLastName = data.userLastName || ''
+    persistedProfile.userPhone = data.userPhone || ''
+    persistedProfile.userAddress = data.userAddress || ''
     await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
 
     // Parse contact channels
@@ -90,17 +110,81 @@ onMounted(() => {
   fetchProfile()
 })
 
-const handleImageChange = (event: Event) => {
+const handleImageChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
     if (!file.type.startsWith('image/')) {
-      errorMessage.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
+      avatarErrorMessage.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
       return
     }
     profileImageFile.value = file
     if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
     previewImageUrl.value = URL.createObjectURL(file)
+
+    avatarSuccessMessage.value = ''
+    avatarErrorMessage.value = ''
+    isUploadingAvatar.value = true
+
+    if (avatarSuccessTimer) {
+      clearTimeout(avatarSuccessTimer)
+      avatarSuccessTimer = null
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append('userFirstName', persistedProfile.userFirstName)
+      formData.append('userLastName', persistedProfile.userLastName)
+      formData.append('userPhone', persistedProfile.userPhone)
+      formData.append('userAddress', persistedProfile.userAddress)
+
+      const channels = {
+        facebook: persistedProfile.facebook,
+        line: persistedProfile.line,
+        tel: persistedProfile.tel
+      }
+      formData.append('userContactChannels', JSON.stringify(channels))
+      formData.append('profileImage', profileImageFile.value)
+
+      const config = useRuntimeConfig()
+      const headers = new Headers()
+      if (token.value) {
+        headers.set('Authorization', 'Bearer ' + token.value)
+      }
+
+      const response = await fetch(`${config.public.apiBase}/users/me`, {
+        method: 'PATCH',
+        headers,
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errRes = await response.json().catch((): { message?: string } => ({}))
+        throw new Error(errRes.message || 'บันทึกรูปโปรไฟล์ไม่สำเร็จ')
+      }
+
+      const resData = await response.json() as ProfileSaveResponse
+      if (resData.user) {
+        profileForm.userProfileImage = resData.user.userProfileImage || ''
+      }
+
+      if (profileForm.userProfileImage && profileUserId.value != null) {
+        await refreshProtectedAsset(profileEndpoint(profileUserId.value))
+      }
+
+      avatarSuccessMessage.value = 'เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว'
+
+      avatarSuccessTimer = setTimeout(() => {
+        avatarSuccessMessage.value = ''
+      }, 5000)
+
+      // Update Navbar custom event instead of full page reload for better UX
+      window.dispatchEvent(new Event('profile-updated'))
+    } catch (err: unknown) {
+      avatarErrorMessage.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ')
+    } finally {
+      isUploadingAvatar.value = false
+    }
   }
 }
 
@@ -110,6 +194,18 @@ const saveProfile = async () => {
   errorMessage.value = ''
 
   try {
+    const phoneRegex = /^[0-9]{10}$/
+    if (profileForm.userPhone && !phoneRegex.test(profileForm.userPhone)) {
+      errorMessage.value = 'กรุณากรอกเบอร์โทรศัพท์เป็นตัวเลข 10 หลัก'
+      saving.value = false
+      return
+    }
+    if (profileForm.tel && !phoneRegex.test(profileForm.tel)) {
+      errorMessage.value = 'กรุณากรอกเบอร์ติดต่อเป็นตัวเลข 10 หลัก'
+      saving.value = false
+      return
+    }
+
     const formData = new FormData()
     formData.append('userFirstName', profileForm.userFirstName)
     formData.append('userLastName', profileForm.userLastName)
@@ -173,6 +269,9 @@ const saveProfile = async () => {
 
 onBeforeUnmount(() => {
   if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+  if (avatarSuccessTimer) {
+    clearTimeout(avatarSuccessTimer)
+  }
 })
 
 // ── Change Password State ──
@@ -185,12 +284,24 @@ const passwordSaving = ref(false)
 const passwordSuccess = ref('')
 const passwordError = ref('')
 
+const showOldPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
 
-  if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-    passwordError.value = 'กรุณากรอกข้อมูลให้ครบถ้วน'
+  if (!passwordForm.oldPassword) {
+    passwordError.value = 'กรุณากรอกรหัสผ่านเดิม'
+    return
+  }
+  if (!passwordForm.newPassword) {
+    passwordError.value = 'กรุณากรอกรหัสผ่านใหม่'
+    return
+  }
+  if (!passwordForm.confirmPassword) {
+    passwordError.value = 'กรุณายืนยันรหัสผ่านใหม่'
     return
   }
 
@@ -219,7 +330,7 @@ const changePassword = async () => {
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
   } catch (err: unknown) {
-    passwordError.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน')
+    passwordError.value = getErrorMessage(err, 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง')
   } finally {
     passwordSaving.value = false
   }
@@ -284,7 +395,7 @@ const changePassword = async () => {
                 {{ profileForm.userFirstName[0] || 'C' }}
               </div>
             </div>
-            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25">
+            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25" :class="{ 'opacity-50 cursor-not-allowed': isUploadingAvatar }">
               <svg
                 class="h-4 w-4"
                 fill="none"
@@ -305,9 +416,16 @@ const changePassword = async () => {
                 type="file"
                 accept="image/*"
                 class="sr-only"
+                :disabled="isUploadingAvatar"
                 @change="handleImageChange"
               >
             </label>
+          </div>
+          <div v-if="avatarSuccessMessage" class="absolute -bottom-8 left-0 right-0 whitespace-nowrap text-center text-xs font-semibold text-[#267A48] bg-[#EDF8F1] px-2 py-1 rounded-md">
+            {{ avatarSuccessMessage }}
+          </div>
+          <div v-if="avatarErrorMessage" class="absolute -bottom-8 left-0 right-0 whitespace-nowrap text-center text-xs font-semibold text-[#B93B3B] bg-[#FDEEEE] px-2 py-1 rounded-md">
+            {{ avatarErrorMessage }}
           </div>
         </div>
 
@@ -397,11 +515,14 @@ const changePassword = async () => {
               <label
                 for="userPhone"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์โทรศัพท์</label>
+              >เบอร์โทรศัพท์ <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="userPhone"
                 v-model="profileForm.userPhone"
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                @input="profileForm.userPhone = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
                 class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
@@ -409,11 +530,14 @@ const changePassword = async () => {
               <label
                 for="tel"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์ติดต่อช่องทางด่วน</label>
+              >เบอร์ติดต่อช่องทางด่วน <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="tel"
                 v-model="profileForm.tel"
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                @input="profileForm.tel = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
                 class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
@@ -512,47 +636,95 @@ const changePassword = async () => {
           </div>
 
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-2 relative">
               <label
                 for="oldPassword"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
               >รหัสผ่านเดิม</label>
-              <input
-                id="oldPassword"
-                v-model="passwordForm.oldPassword"
-                required
-                type="password"
-                placeholder="รหัสผ่านเดิม"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
-              >
+              <div class="relative">
+                <input
+                  id="oldPassword"
+                  v-model="passwordForm.oldPassword"
+                  required
+                  :type="showOldPassword ? 'text' : 'password'"
+                  placeholder="รหัสผ่านเดิม"
+                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 pl-4 pr-11 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                >
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none"
+                  @click="showOldPassword = !showOldPassword"
+                  :aria-label="showOldPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'"
+                >
+                  <svg v-if="showOldPassword" class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg v-else class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div>
+            <div class="relative">
               <label
                 for="newPassword"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
               >รหัสผ่านใหม่</label>
-              <input
-                id="newPassword"
-                v-model="passwordForm.newPassword"
-                required
-                type="password"
-                placeholder="รหัสผ่านใหม่"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
-              >
+              <div class="relative">
+                <input
+                  id="newPassword"
+                  v-model="passwordForm.newPassword"
+                  required
+                  :type="showNewPassword ? 'text' : 'password'"
+                  placeholder="รหัสผ่านใหม่"
+                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 pl-4 pr-11 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                >
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none"
+                  @click="showNewPassword = !showNewPassword"
+                  :aria-label="showNewPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'"
+                >
+                  <svg v-if="showNewPassword" class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg v-else class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div>
+            <div class="relative">
               <label
                 for="confirmPassword"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
               >ยืนยันรหัสผ่านใหม่</label>
-              <input
-                id="confirmPassword"
-                v-model="passwordForm.confirmPassword"
-                required
-                type="password"
-                placeholder="ยืนยันรหัสผ่านใหม่"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
-              >
+              <div class="relative">
+                <input
+                  id="confirmPassword"
+                  v-model="passwordForm.confirmPassword"
+                  required
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  placeholder="ยืนยันรหัสผ่านใหม่"
+                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 pl-4 pr-11 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                >
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none"
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  :aria-label="showConfirmPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'"
+                >
+                  <svg v-if="showConfirmPassword" class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg v-else class="h-5 w-5 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 

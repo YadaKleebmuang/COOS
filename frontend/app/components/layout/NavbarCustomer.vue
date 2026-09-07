@@ -78,11 +78,13 @@ onMounted(() => {
   checkAuth()
   window.addEventListener('click', closeDropdown)
   window.addEventListener('resize', closeMobileMenuOnDesktop)
+  window.addEventListener('profile-updated', checkAuth)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', closeDropdown)
   window.removeEventListener('resize', closeMobileMenuOnDesktop)
+  window.removeEventListener('profile-updated', checkAuth)
 })
 </script>
 
