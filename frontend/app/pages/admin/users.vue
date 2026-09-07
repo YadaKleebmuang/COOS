@@ -105,9 +105,16 @@ const closeModal = () => { modal.value.open = false }
 const saveUser = async () => {
   // Validate phone
   const phoneRegex = /^[0-9]{10}$/
-  if (!form.value.userPhone || !phoneRegex.test(form.value.userPhone)) {
-    phoneError.value = "กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก"
-    return
+  if (modal.value.mode === 'add') {
+    if (!form.value.userPhone || !phoneRegex.test(form.value.userPhone)) {
+      phoneError.value = "กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก"
+      return
+    }
+  } else {
+    if (form.value.userPhone && !phoneRegex.test(form.value.userPhone)) {
+      phoneError.value = "กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก"
+      return
+    }
   }
   phoneError.value = ""
 
@@ -354,8 +361,11 @@ const breadcrumb = [
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-[#171717] mb-1.5">เบอร์โทรศัพท์</label>
-                  <input v-model="form.userPhone" required type="text" class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" @input="phoneError = ''" maxlength="10" />
+                  <label class="block text-xs font-semibold text-[#171717] mb-1.5">
+                    เบอร์โทรศัพท์
+                    <span v-if="modal.mode === 'edit'" class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span>
+                  </label>
+                  <input v-model="form.userPhone" :required="modal.mode === 'add'" type="tel" inputmode="numeric" class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" @input="form.userPhone = ($event.target as HTMLInputElement).value.replace(/\\D/g, '').slice(0, 10); phoneError = ''" maxlength="10" />
                   <p v-if="phoneError" class="text-[10px] font-bold text-red-600 mt-1">{{ phoneError }}</p>
                 </div>
                 <div>
