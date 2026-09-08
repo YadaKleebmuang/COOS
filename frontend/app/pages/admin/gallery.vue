@@ -313,11 +313,11 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           <div v-if="img.status !== 'public'" class="absolute inset-0 bg-[#171717]/10 pointer-events-none transition-all"></div>
 
           <!-- Visibility badge -->
-          <div class="absolute top-4 left-4 flex gap-2">
-            <span class="px-3 py-1.5 text-xs font-medium bg-white/90 backdrop-blur-md text-[#171717] rounded-full shadow-lg border border-white/20">
+          <div class="absolute top-2 left-2 flex flex-nowrap items-center gap-1 max-w-[calc(100%-16px)]">
+            <span class="inline-flex items-center justify-center h-[26px] px-2.5 text-[11px] leading-none font-medium bg-white/90 backdrop-blur-sm text-[#171717] rounded-full shadow-sm border border-white/20 whitespace-nowrap flex-none">
               {{ img.category }}
             </span>
-            <span class="px-3 py-1.5 text-xs font-medium backdrop-blur-md rounded-full shadow-lg border border-white/20"
+            <span class="inline-flex items-center justify-center h-[26px] px-2.5 text-[11px] leading-none font-medium backdrop-blur-sm rounded-full shadow-sm border border-white/20 whitespace-nowrap flex-none"
               :class="img.status === 'public' ? 'bg-green-500/90 text-white' : img.status === 'pending' ? 'bg-yellow-500/90 text-white' : 'bg-gray-800/90 text-white'">
               {{ img.status === 'public' ? 'สาธารณะ' : img.status === 'pending' ? 'รออนุมัติ' : 'ส่วนตัว' }}
             </span>
