@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "close"): void
-  (e: "refresh"): void
+  (e: "refresh", payload?: { orderImageId: number; imageChanged: boolean }): void
 }>()
 
 const { protectedAssetUrl, loadProtectedAsset } = useProtectedAsset()
@@ -49,7 +49,7 @@ watch(
       paramsForm.cfgScale = props.img.cfgScale || 7.5
       paramsForm.steps = props.img.steps || 30
       paramsForm.seed = props.img.seed ? Number(props.img.seed) : -1
-      
+
       loadProtectedAsset(orderImageEndpoint(props.img.orderImageId))
       handleCancelNewImage()
     }
@@ -101,7 +101,7 @@ const uploadImage = async (file: File) => {
   uploadError.value = ""
   uploadedFileUrl.value = ""
   uploading.value = true
-  
+
   try {
     const url = await orderService.uploadGeneratedImageFile(file)
     uploadedFileUrl.value = url
@@ -117,7 +117,7 @@ const uploadImage = async (file: File) => {
 const handleSave = async () => {
   if (!props.img) return
   if (submitting.value || uploading.value) return
-  
+
   submitting.value = true
   uploadError.value = ""
   try {
@@ -134,10 +134,14 @@ const handleSave = async () => {
       updatePayload.imageUrl = uploadedFileUrl.value
       updatePayload.imageThumbnailUrl = uploadedFileUrl.value
     }
-    
+
     await orderService.updateOrderImage(props.orderId, props.img.orderImageId, updatePayload)
-    
-    emit("refresh")
+
+    emit("refresh", {
+      orderImageId: props.img.orderImageId,
+      imageChanged: Boolean(uploadedFileUrl.value)
+    })
+
     handleClose()
     toast("แก้ไขผลงานดราฟต์เรียบร้อยแล้ว", "success")
   } catch (err: any) {
@@ -167,7 +171,7 @@ onBeforeUnmount(() => {
       ></button>
 
       <div class="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/95 shadow-2xl backdrop-blur-[15px]">
-        
+
         <!-- Header -->
         <header class="flex items-start justify-between gap-4 border-b border-black/[0.06] p-6 pb-4">
           <div>
@@ -177,7 +181,7 @@ onBeforeUnmount(() => {
               แก้ไขรูปภาพและข้อมูลที่ใช้ในการสร้างผลงาน
             </p>
           </div>
-          <button 
+          <button
             @click="handleClose"
             :disabled="submitting || uploading"
             class="rounded-lg p-2 text-[#666666] hover:bg-[#F7F7F5]"
@@ -190,7 +194,7 @@ onBeforeUnmount(() => {
         <!-- Body -->
         <div class="p-6 overflow-y-auto bg-[#FDFDFB]/50">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             <!-- Image Area -->
             <div class="space-y-4">
               <div class="aspect-[4/3] bg-[#F7F7F5] rounded-xl overflow-hidden relative border border-black/[0.06] flex items-center justify-center">
@@ -210,9 +214,9 @@ onBeforeUnmount(() => {
 
               <div class="flex flex-col items-center">
                 <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleFileSelect" />
-                
+
                 <template v-if="!previewUrl">
-                  <button 
+                  <button
                     @click="triggerFileInput"
                     class="text-[13px] font-semibold text-[#171717] hover:bg-[#F7F7F5] border border-black/[0.06] rounded-xl px-4 py-2 w-full transition-colors bg-white shadow-sm"
                   >
@@ -220,7 +224,7 @@ onBeforeUnmount(() => {
                   </button>
                 </template>
                 <template v-else>
-                  <button 
+                  <button
                     @click="handleCancelNewImage"
                     class="text-[13px] font-semibold text-red-600 hover:bg-red-50 border border-red-100 rounded-xl px-4 py-2 w-full transition-colors bg-white shadow-sm"
                   >
@@ -228,7 +232,7 @@ onBeforeUnmount(() => {
                   </button>
                 </template>
               </div>
-              
+
               <div v-if="uploading" class="text-center text-xs font-medium text-[#666666]">
                 กำลังประมวลผลไฟล์รูปภาพ...
               </div>
@@ -249,7 +253,7 @@ onBeforeUnmount(() => {
                   <input v-model="paramsForm.seed" type="number" class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
                 </label>
               </div>
-              
+
               <label class="block">
                 <span class="mb-1 block font-semibold text-[#666666]">Positive Prompt</span>
                 <textarea v-model="paramsForm.positivePrompt" rows="3" class="w-full resize-none rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
@@ -277,14 +281,14 @@ onBeforeUnmount(() => {
 
         <!-- Footer -->
         <footer class="flex items-center justify-end gap-3 border-t border-black/[0.06] bg-white p-6 pt-4">
-          <button 
+          <button
             @click="handleClose"
             :disabled="submitting || uploading"
             class="px-4 py-2 text-sm font-medium text-[#666666]"
           >
             ยกเลิก
           </button>
-          <button 
+          <button
             @click="handleSave"
             :disabled="submitting || uploading"
             class="rounded-xl border border-transparent bg-[#171717] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-40"

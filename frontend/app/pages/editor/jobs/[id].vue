@@ -13,7 +13,7 @@ definePageMeta({
 const route = useRoute()
 const jobId = route.params.id as string
 const { alert, confirm } = useAlert()
-const { fetchProtectedBlob, openProtectedAsset, protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const { fetchProtectedBlob, openProtectedAsset, protectedAssetUrl, syncProtectedAssets, refreshProtectedAsset } = useProtectedAsset()
 const orderImageEndpoint = (imageId: number) => `/media/order-images/${imageId}`
 
 const order = ref<OrderDetail | null>(null)
@@ -69,6 +69,13 @@ const fetchOrderDetails = async () => {
     error.value = err instanceof Error ? err.message : 'ไม่สามารถดึงข้อมูลรายละเอียดออเดอร์นี้ได้'
   } finally {
     loading.value = false
+  }
+}
+
+const handleImageUpdated = async (event?: { orderImageId: number, imageChanged: boolean }) => {
+  await fetchOrderDetails()
+  if (event?.imageChanged && event?.orderImageId) {
+    await refreshProtectedAsset(orderImageEndpoint(event.orderImageId))
   }
 }
 
@@ -1072,7 +1079,7 @@ const breadcrumb = computed(() => [
         :img="editingImage"
         :orderId="order?.orderId ?? Number(jobId)"
         @close="isEditModalOpen = false"
-        @refresh="fetchOrderDetails"
+        @refresh="handleImageUpdated"
       />
     </Teleport>
   </div>
