@@ -26,30 +26,8 @@ defineEmits<{
 
 // Helper to generate query parameters for the create order wizard
 const getOrderParams = (img: GalleryImage) => {
-  if (!img) return ''
-  const params: Record<string, string> = {
-    workTypeId: String(img.workTypeId)
-  }
-  if (img.imageTags) {
-    const tags = img.imageTags.split(',').map((t: string) => t.trim().toLowerCase())
-
-    // Detect style
-    if (tags.includes('minimal')) params.style = 'Minimal'
-    else if (tags.includes('romantic')) params.style = 'Romantic'
-    else if (tags.includes('classic')) params.style = 'Classic'
-    else if (tags.includes('moody')) params.style = 'Moody'
-    else if (tags.includes('natural')) params.style = 'Natural'
-    else if (tags.includes('modern')) params.style = 'Modern'
-
-    // Detect colorTone
-    if (tags.includes('warm')) params.colorTone = 'Warm Tone'
-    else if (tags.includes('blackwhite') || tags.includes('black tone') || tags.includes('blacktone')) params.colorTone = 'Black & White'
-    else if (tags.includes('softtone') || tags.includes('soft')) params.colorTone = 'Soft Tone'
-  }
-
-  return Object.entries(params)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join('&')
+  if (!img || !img.imageId) return ''
+  return `galleryImageId=${img.imageId}`
 }
 </script>
 

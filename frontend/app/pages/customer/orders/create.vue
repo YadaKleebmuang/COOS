@@ -21,6 +21,21 @@ definePageMeta({
 const token = useCookie<string | null>('token')
 const router = useRouter()
 const route = useRoute()
+const { apiFetch } = useApi()
+const { publicGalleryUrl } = useProtectedAsset()
+
+type GalleryImage = {
+  imageId?: number | string
+  imageUrl?: string
+  imageTitle?: string
+  imageDescription?: string
+  imageTags?: string
+  workTypeId?: number
+  workTypeName?: string
+  orderStyle?: string
+  orderColorTone?: string
+  orderComposition?: string
+}
 
 // ── Stepper ──
 const currentStep = ref(1)
@@ -36,6 +51,8 @@ const dataError = ref('')
 // ── Selected state ──
 const selectedWorkTypeId = ref<number | null>(null)
 const selectedPackageId = ref<number | null>(null)
+const galleryReference = ref<GalleryImage | null>(null)
+
 interface PendingSourceImage {
   file: File
   previewUrl: string
@@ -181,12 +198,29 @@ onMounted(async () => {
     workTypes.value = wt
     packages.value = pkg
 
-    // Prefill from query params
-    if (route.query.workTypeId) selectedWorkTypeId.value = Number(route.query.workTypeId)
+    // Handle Gallery Reference Prefill
+    if (route.query.galleryImageId) {
+      try {
+        const id = String(route.query.galleryImageId)
+        const data = await apiFetch<GalleryImage>(`/gallery-images/${id}`)
+        if (data && data.imageId) {
+          galleryReference.value = data
+          if (data.workTypeId) selectedWorkTypeId.value = Number(data.workTypeId)
+          if (data.orderStyle) form.orderStyle = String(data.orderStyle)
+          if (data.orderColorTone) form.orderColorTone = String(data.orderColorTone)
+          if (data.orderComposition) form.orderComposition = String(data.orderComposition)
+        }
+      } catch (err) {
+        console.warn('Could not fetch gallery reference:', err)
+      }
+    }
+
+    // Prefill from other query params
+    if (route.query.workTypeId && !galleryReference.value) selectedWorkTypeId.value = Number(route.query.workTypeId)
     if (route.query.packageId) selectedPackageId.value = Number(route.query.packageId)
-    if (route.query.style) form.orderStyle = String(route.query.style)
-    if (route.query.colorTone) form.orderColorTone = String(route.query.colorTone)
-    if (route.query.composition) form.orderComposition = String(route.query.composition)
+    if (route.query.style && !galleryReference.value) form.orderStyle = String(route.query.style)
+    if (route.query.colorTone && !galleryReference.value) form.orderColorTone = String(route.query.colorTone)
+    if (route.query.composition && !galleryReference.value) form.orderComposition = String(route.query.composition)
 
     if (selectedWorkTypeId.value && selectedPackageId.value) {
       currentStep.value = 3
@@ -258,6 +292,58 @@ onBeforeUnmount(() => {
 
       <!-- Form Wizard -->
       <div v-else>
+        <!-- Gallery Reference Block -->
+        <div
+          v-if="galleryReference"
+          class="mb-6 overflow-hidden rounded-[24px] border border-black/5 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)] sm:flex"
+        >
+          <!-- Thumbnail -->
+          <div class="relative h-32 shrink-0 bg-neutral-100 sm:h-auto sm:w-48 flex items-center justify-center overflow-hidden">
+            <img
+              :src="galleryReference.imageId != null ? publicGalleryUrl(galleryReference.imageId) : ''"
+              class="h-full w-full object-cover"
+            >
+            <div class="absolute inset-0 pointer-events-none shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]" />
+          </div>
+          <!-- Details -->
+          <div class="flex flex-1 flex-col justify-between p-5 sm:p-6">
+            <div>
+              <div class="mb-3">
+                <span class="rounded-full border border-black/5 bg-neutral-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                  อ้างอิงจากผลงานที่เลือก
+                </span>
+              </div>
+              <h3 class="mb-1 text-[18px] font-bold text-black leading-tight">
+                {{ galleryReference.imageTitle }}
+              </h3>
+              <p class="text-[13px] font-medium text-neutral-500">
+                {{ galleryReference.workTypeName || 'General' }}
+              </p>
+
+              <div v-if="galleryReference.imageTags" class="mt-3 flex flex-wrap gap-1.5">
+                <span
+                  v-for="tag in galleryReference.imageTags.split(',')"
+                  :key="tag"
+                  class="text-[12.5px] font-medium text-neutral-400"
+                >
+                  #{{ tag.trim() }}
+                </span>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
+              <p class="text-[12.5px] font-medium text-neutral-500">
+                ใช้รายละเอียดของผลงานนี้เป็นแนวทางเริ่มต้น คุณสามารถปรับรายละเอียดคำสั่งงานได้
+              </p>
+              <button
+                @click="galleryReference = null"
+                class="text-[12.5px] font-semibold text-red-500 hover:text-red-600 transition-colors shrink-0 ml-4"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Stepper Navbar -->
         <div class="mb-6 flex justify-center">
           <div class="flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-black/5 bg-white/40 p-2 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl hide-scrollbar sm:gap-4 sm:px-6 sm:p-3">
