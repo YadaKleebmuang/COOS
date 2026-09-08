@@ -87,8 +87,8 @@ exports.create = async (req, res, next) => {
     // Dynamic price calculation on backend
     const orderBasePrice = Number(packageItem.packagePrice);
     const orderUrgentPrice = orderIsUrgent ? Number(packageItem.packageUrgentPrice || 0) : 0.00;
-    const orderDiscount = orderIsGalleryAllowed 
-      ? (orderBasePrice * Number(packageItem.packageGalleryDiscount || 20.00)) / 100 
+    const orderDiscount = orderIsGalleryAllowed
+      ? (orderBasePrice * Number(packageItem.packageGalleryDiscount || 20.00)) / 100
       : 0.00;
     const orderTotalPrice = orderBasePrice + orderUrgentPrice - orderDiscount;
 
@@ -446,7 +446,7 @@ exports.submitPayment = async (req, res, next) => {
     const expectedFinal   = Math.round(order.orderTotalPrice * 0.70 * 100) / 100;
     const expected = paymentType === "deposit" ? expectedDeposit : expectedFinal;
     const submitted = Number(paymentAmount);
-    
+
     if (Math.abs(submitted - expected) > 1) { // tolerance 1 บาท
       return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
     }
@@ -536,7 +536,7 @@ exports.selectImages = async (req, res, next) => {
     }
 
     if (selectedImageIds.length > order.packageImageCount) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `คุณเลือกรูปเกินโควตา แพ็กเกจของคุณเลือกได้สูงสุด ${order.packageImageCount} ภาพ`
       });
     }
@@ -548,6 +548,73 @@ exports.selectImages = async (req, res, next) => {
       message: "ยืนยันการเลือกรูปภาพสำเร็จ",
       nextOrderStatus: nextStatus,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 10. PATCH /api/v1/orders/:id/images/:imageId/gallery-metadata
+exports.updateGalleryMetadata = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะผู้แต่งภาพที่สามารถอัปเดตข้อมูล Gallery ได้" });
+    }
+
+    const { id: orderId, imageId } = req.params;
+    const { tagIds } = req.body;
+
+    // 1. Validate Order exists and assigned to Editor
+    const order = await OrderModel.findById(orderId);
+    if (!order) return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+    if (order.editorId !== userId) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์จัดการข้อมูล Gallery ในออเดอร์นี้" });
+    }
+
+    // 2. Validate Image belongs to Order and is 'selected_final'
+    const orderImages = await OrderModel.findImages(orderId);
+    const targetImage = orderImages.find(img => img.orderImageId === parseInt(imageId, 10));
+
+    if (!targetImage) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพในออเดอร์นี้" });
+    }
+    if (targetImage.imageType !== 'selected_final') {
+      return res.status(400).json({ message: "สามารถเพิ่มข้อมูล Gallery ได้เฉพาะรูปภาพที่ลูกค้าเลือก (selected_final) เท่านั้น" });
+    }
+
+    // 3. Update Gallery Metadata via Model
+    await OrderModel.updateGalleryMetadata(imageId, tagIds);
+
+    res.status(200).json({ message: "บันทึกข้อมูล Gallery สำเร็จ" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 11. GET /api/v1/orders/:id/images/:imageId/gallery-metadata
+exports.getGalleryMetadata = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะผู้แต่งภาพที่สามารถดูข้อมูล Gallery ได้" });
+    }
+
+    const { id: orderId, imageId } = req.params;
+
+    // 1. Validate Order
+    const order = await OrderModel.findById(orderId);
+    if (!order) return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+    if (order.editorId !== userId) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์จัดการข้อมูล Gallery ในออเดอร์นี้" });
+    }
+
+    // 2. Fetch metadata
+    const metadata = await OrderModel.getGalleryMetadata(imageId);
+    if (!metadata) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพนี้" });
+    }
+
+    res.status(200).json(metadata);
   } catch (err) {
     next(err);
   }

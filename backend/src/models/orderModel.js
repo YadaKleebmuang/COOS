@@ -113,7 +113,7 @@ exports.findAll = async ({ customerId, editorId, status, page = 1, limit = 10 })
   // Fetch paginated data
   const offset = (page - 1) * limit;
   const sql = `
-    SELECT o.*, 
+    SELECT o.*,
            u.userFirstName AS customerFirstName, u.userLastName AS customerLastName,
            e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
            p.packageName, wt.workTypeName
@@ -135,7 +135,7 @@ exports.findAll = async ({ customerId, editorId, status, page = 1, limit = 10 })
 // 3. Find single order details
 exports.findById = async (id) => {
   const [rows] = await pool.query(
-    `SELECT o.*, 
+    `SELECT o.*,
             u.userFirstName AS customerFirstName, u.userLastName AS customerLastName, u.userEmail AS customerEmail, u.userPhone AS customerPhone,
             e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
             p.packageName, p.packageResolution, p.packageImageCount, wt.workTypeName
@@ -268,8 +268,8 @@ exports.assignEditor = async (orderId, editorId, changedById) => {
       );
     }
 
-    const editorLogNote = editorId 
-      ? `มอบหมายงานให้ Editor ID: ${editorId}` 
+    const editorLogNote = editorId
+      ? `มอบหมายงานให้ Editor ID: ${editorId}`
       : "ยกเลิกการมอบหมายงาน";
 
     await connection.query(
@@ -434,7 +434,7 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
 
     // 1. Update Payment Status
     await connection.query(
-      `UPDATE payments 
+      `UPDATE payments
        SET paymentStatus = ?, paymentVerifiedAt = CURRENT_TIMESTAMP, verifiedByAdminId = ?
        WHERE paymentId = ?`,
       [paymentStatus, verifiedByAdminId, paymentId]
@@ -502,8 +502,8 @@ exports.selectFinalImages = async (orderId, selectedImageIds, customerId) => {
       // Create placeholders e.g., "?, ?, ?"
       const placeholders = selectedImageIds.map(() => '?').join(',');
       await connection.query(
-        `UPDATE orderImages 
-         SET imageType = 'selected_final' 
+        `UPDATE orderImages
+         SET imageType = 'selected_final'
          WHERE orderId = ? AND orderImageId IN (${placeholders})`,
         [orderId, ...selectedImageIds]
       );
@@ -542,29 +542,100 @@ const _autoPublishToGallery = async (connection, orderId) => {
     [orderId]
   );
   if (!orders.length || orders[0].orderIsGalleryAllowed !== 1) return;
-  
-  const workTypeId = orders[0].workTypeId;
-  
+
+  const orderWorkTypeId = orders[0].workTypeId;
+
   // 2. Fetch all selected_final images
   const [images] = await connection.query(
-    "SELECT imageUrl FROM orderImages WHERE orderId = ? AND imageType = 'selected_final'",
+    "SELECT orderImageId, imageUrl FROM orderImages WHERE orderId = ? AND imageType = 'selected_final'",
     [orderId]
   );
-  
+
   if (!images.length) return;
-  
+
   // 3. Insert into galleryImages with imageIsActive = 0 (Pending Approval)
   for (const img of images) {
     const [existing] = await connection.query(
-      "SELECT imageId FROM galleryImages WHERE imageUrl = ?", 
+      "SELECT imageId FROM galleryImages WHERE imageUrl = ?",
       [img.imageUrl]
     );
+
+    let newGalleryImageId = null;
     if (!existing.length) {
-      await connection.query(
-        `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageIsActive)
-         VALUES (?, ?, ?, 0)`,
-        [img.imageUrl, workTypeId, `Order #${orderId} (รออนุมัติ)`]
+      const [result] = await connection.query(
+        `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageApprovalStatus, imageIsActive)
+         VALUES (?, ?, ?, 'pending', 0)`,
+        [img.imageUrl, orderWorkTypeId, `Order #${orderId} (รออนุมัติ)`]
       );
+      newGalleryImageId = result.insertId;
+    } else {
+      newGalleryImageId = existing[0].imageId;
     }
+
+    // 4. Migrate tags from orderImageTags to galleryImageTags
+    if (newGalleryImageId) {
+      const [tags] = await connection.query(
+        "SELECT tagId FROM orderImageTags WHERE orderImageId = ?",
+        [img.orderImageId]
+      );
+      for (const tag of tags) {
+        await connection.query(
+          "INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)",
+          [newGalleryImageId, tag.tagId]
+        );
+      }
+    }
+  }
+};
+
+exports.getGalleryMetadata = async (orderImageId) => {
+  const [images] = await pool.query(
+    "SELECT orderImageId FROM orderImages WHERE orderImageId = ?",
+    [orderImageId]
+  );
+  if (!images.length) return null;
+
+  const [tags] = await pool.query(
+    `SELECT t.tagId, t.tagName
+     FROM tags t
+     JOIN orderImageTags oit ON t.tagId = oit.tagId
+     WHERE oit.orderImageId = ?`,
+    [orderImageId]
+  );
+
+  return {
+    tags
+  };
+};
+
+exports.updateGalleryMetadata = async (orderImageId, tagIds) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Sync Tags
+    await connection.query("DELETE FROM orderImageTags WHERE orderImageId = ?", [orderImageId]);
+
+    if (tagIds && Array.isArray(tagIds)) {
+      const uniqueTagIds = [...new Set(tagIds)];
+
+      for (const tagId of uniqueTagIds) {
+        // Just verify tagId exists in tags table
+        const [existingTag] = await connection.query("SELECT tagId FROM tags WHERE tagId = ?", [tagId]);
+        if (existingTag.length > 0) {
+          await connection.query(
+            "INSERT IGNORE INTO orderImageTags (orderImageId, tagId) VALUES (?, ?)",
+            [orderImageId, tagId]
+          );
+        }
+      }
+    }
+
+    await connection.commit();
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
   }
 };

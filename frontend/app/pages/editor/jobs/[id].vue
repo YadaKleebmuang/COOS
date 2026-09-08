@@ -3,6 +3,7 @@ import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { orderService } from '~/services/order.service'
 import type { OrderDetail, OrderImage, OrderStatus } from '~/types/order.types'
 import EditGeneratedImageModal from '~/components/editor/job/EditGeneratedImageModal.vue'
+import GalleryMetadataModal from '~/components/editor/job/GalleryMetadataModal.vue'
 
 definePageMeta({
   layout: 'editor',
@@ -22,6 +23,7 @@ const error = ref('')
 const uploadModalOpen = ref(false)
 const historyDrawerOpen = ref(false)
 const detailImage = ref<OrderImage | null>(null)
+const metadataImage = ref<OrderImage | null>(null)
 const isEditModalOpen = ref(false)
 const editingImage = ref<OrderImage | null>(null)
 
@@ -690,26 +692,48 @@ const breadcrumb = computed(() => [
               </h3>
               <span class="text-xs text-[#666666]">{{ selectedImages.length }} รูป</span>
             </div>
-            <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
-              <a
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div
                 v-for="image in selectedImages"
                 :key="image.orderImageId"
-                href="#"
-                target="_blank"
-                class="aspect-square overflow-hidden rounded-xl border border-black/[0.06] bg-[#F7F7F5]"
-                @click.prevent="openProtectedAsset(orderImageEndpoint(image.orderImageId))"
+                class="flex flex-col rounded-xl border border-black/[0.06] bg-white overflow-hidden shadow-sm"
               >
-                <img
-                  :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
-                  alt="ผลงานที่ลูกค้าเลือก"
-                  class="h-full w-full object-cover"
+                <a
+                  href="#"
+                  target="_blank"
+                  class="aspect-square w-full block bg-[#F7F7F5]"
+                  @click.prevent="openProtectedAsset(orderImageEndpoint(image.orderImageId))"
                 >
-              </a>
+                  <img
+                    :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
+                    alt="ผลงานที่ลูกค้าเลือก"
+                    class="h-full w-full object-cover"
+                  >
+                </a>
+                <div class="p-3 border-t border-black/[0.06] flex justify-center">
+                  <button
+                    class="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[11px] font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-100 w-full"
+                    @click="metadataImage = image"
+                  >
+                    ข้อมูล Gallery
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
     </template>
+
+    <!-- Gallery Metadata Modal -->
+    <GalleryMetadataModal
+      v-if="metadataImage"
+      :image="metadataImage"
+      :order="order"
+      :resolved-image-url="protectedAssetUrl(orderImageEndpoint(metadataImage.orderImageId))"
+      @close="metadataImage = null"
+      @saved="fetchOrderDetails"
+    />
 
     <Teleport to="body">
       <Transition

@@ -1,7 +1,13 @@
 const { pool } = require("../config/db");
 
 exports.findAll = async () => {
-  const [rows] = await pool.query("SELECT * FROM tags ORDER BY createdAt DESC");
+  const [rows] = await pool.query(`
+    SELECT t.*, COUNT(DISTINCT git.imageId) AS imageCount
+    FROM tags t
+    LEFT JOIN galleryImageTags git ON t.tagId = git.tagId
+    GROUP BY t.tagId
+    ORDER BY t.createdAt DESC
+  `);
   return rows;
 };
 

@@ -10,7 +10,9 @@ exports.findAll = async (filters = {}) => {
       wt.workTypeName,
       gi.imageTitle,
       gi.imageDescription,
+      gi.imageApprovalStatus,
       GROUP_CONCAT(t.tagName SEPARATOR ',') AS imageTags,
+      GROUP_CONCAT(t.tagId SEPARATOR ',') AS tagIds,
       gi.imageIsActive,
       gi.imageCreatedAt,
       gi.imageUpdatedAt
@@ -24,7 +26,7 @@ exports.findAll = async (filters = {}) => {
 
   // Filter: เฉพาะ active
   if (filters.activeOnly !== false) {
-    query += ` AND gi.imageIsActive = 1`;
+    query += ` AND gi.imageApprovalStatus = 'approved' AND gi.imageIsActive = 1`;
   }
 
   // Filter: ตาม workTypeId
@@ -36,9 +38,9 @@ exports.findAll = async (filters = {}) => {
   // Filter: ตาม tag (Exact match)
   if (filters.tag) {
     query += ` AND gi.imageId IN (
-      SELECT git2.imageId 
-      FROM galleryImageTags git2 
-      JOIN tags t2 ON git2.tagId = t2.tagId 
+      SELECT git2.imageId
+      FROM galleryImageTags git2
+      JOIN tags t2 ON git2.tagId = t2.tagId
       WHERE t2.tagName = ?
     )`;
     params.push(filters.tag.trim());
@@ -52,16 +54,18 @@ exports.findAll = async (filters = {}) => {
 
 // ดึง gallery image ตาม id
 exports.findById = async (id, { activeOnly = true } = {}) => {
-  const activeClause = activeOnly ? " AND gi.imageIsActive = 1" : "";
+  const activeClause = activeOnly ? " AND gi.imageApprovalStatus = 'approved' AND gi.imageIsActive = 1" : "";
   const [rows] = await pool.query(
     `SELECT
       gi.imageId,
       gi.imageUrl,
+      gi.imageApprovalStatus,
       gi.workTypeId,
       wt.workTypeName,
       gi.imageTitle,
       gi.imageDescription,
       GROUP_CONCAT(t.tagName SEPARATOR ',') AS imageTags,
+      GROUP_CONCAT(t.tagId SEPARATOR ',') AS tagIds,
       gi.imageIsActive,
       gi.imageCreatedAt,
       gi.imageUpdatedAt
@@ -82,6 +86,19 @@ exports.create = async (data) => {
   try {
     await connection.beginTransaction();
 
+    let uniqueTagIds = [];
+    if (data.tagIds && Array.isArray(data.tagIds) && data.tagIds.length > 0) {
+      uniqueTagIds = [...new Set(data.tagIds)];
+
+      // 1. Validate all tags exist before mutating
+      const placeholders = uniqueTagIds.map(() => '?').join(',');
+      const [tagRows] = await connection.query(`SELECT tagId FROM tags WHERE tagId IN (${placeholders})`, uniqueTagIds);
+
+      if (tagRows.length !== uniqueTagIds.length) {
+        throw new Error("INVALID_TAG_ID");
+      }
+    }
+
     const [result] = await connection.query(
       `INSERT INTO galleryImages (
         imageUrl, workTypeId, imageTitle, imageDescription
@@ -96,17 +113,10 @@ exports.create = async (data) => {
 
     const imageId = result.insertId;
 
-    if (data.imageTags) {
-      const tags = data.imageTags.split(",").map(t => t.trim().replace(/^#/, '')).filter(t => t);
-      for (const tag of tags) {
-        // Insert tag if not exists
-        await connection.query("INSERT IGNORE INTO tags (tagName) VALUES (?)", [tag]);
-        // Get tagId
-        const [tagRows] = await connection.query("SELECT tagId FROM tags WHERE tagName = ?", [tag]);
-        if (tagRows.length > 0) {
-          const tagId = tagRows[0].tagId;
-          await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [imageId, tagId]);
-        }
+    if (uniqueTagIds.length > 0) {
+      // 2. Insert associations
+      for (const tagId of uniqueTagIds) {
+        await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [imageId, tagId]);
       }
     }
 
@@ -136,38 +146,53 @@ exports.update = async (id, data) => {
       return null;
     }
 
+    const updates = [
+      "imageUrl = ?",
+      "workTypeId = ?",
+      "imageTitle = ?",
+      "imageDescription = ?"
+    ];
+    const params = [
+      data.imageUrl,
+      data.workTypeId,
+      data.imageTitle || null,
+      data.imageDescription || null,
+    ];
+
+    if (data.imageIsActive !== undefined) {
+      updates.push("imageIsActive = ?");
+      params.push(data.imageIsActive);
+    }
+
+    params.push(id);
+
     const [result] = await connection.query(
-      `UPDATE galleryImages SET
-        imageUrl = ?,
-        workTypeId = ?,
-        imageTitle = ?,
-        imageDescription = ?,
-        imageIsActive = ?
-      WHERE imageId = ?`,
-      [
-        data.imageUrl,
-        data.workTypeId,
-        data.imageTitle || null,
-        data.imageDescription || null,
-        data.imageIsActive !== undefined ? data.imageIsActive : 1,
-        id,
-      ]
+      `UPDATE galleryImages SET ${updates.join(", ")} WHERE imageId = ?`,
+      params
     );
 
-    if (data.imageTags !== undefined) {
-      // Clear old tags
-      await connection.query("DELETE FROM galleryImageTags WHERE imageId = ?", [id]);
+    if (data.tagIds !== undefined) {
+      if (Array.isArray(data.tagIds) && data.tagIds.length > 0) {
+        const uniqueTagIds = [...new Set(data.tagIds)];
 
-      if (data.imageTags) {
-        const tags = data.imageTags.split(",").map(t => t.trim().replace(/^#/, '')).filter(t => t);
-        for (const tag of tags) {
-          await connection.query("INSERT IGNORE INTO tags (tagName) VALUES (?)", [tag]);
-          const [tagRows] = await connection.query("SELECT tagId FROM tags WHERE tagName = ?", [tag]);
-          if (tagRows.length > 0) {
-            const tagId = tagRows[0].tagId;
-            await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [id, tagId]);
-          }
+        // 1. Validate all tags exist before mutating
+        const placeholders = uniqueTagIds.map(() => '?').join(',');
+        const [tagRows] = await connection.query(`SELECT tagId FROM tags WHERE tagId IN (${placeholders})`, uniqueTagIds);
+
+        if (tagRows.length !== uniqueTagIds.length) {
+          throw new Error("INVALID_TAG_ID");
         }
+
+        // 2. Clear old tags
+        await connection.query("DELETE FROM galleryImageTags WHERE imageId = ?", [id]);
+
+        // 3. Insert associations
+        for (const tagId of uniqueTagIds) {
+          await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [id, tagId]);
+        }
+      } else {
+        // If empty array passed, just clear
+        await connection.query("DELETE FROM galleryImageTags WHERE imageId = ?", [id]);
       }
     }
 
@@ -193,7 +218,7 @@ exports.remove = async (id) => {
 // Toggle active/inactive
 exports.toggleActive = async (id) => {
   const [rows] = await pool.query(
-    "SELECT imageIsActive FROM galleryImages WHERE imageId = ?",
+    "SELECT imageIsActive, imageApprovalStatus FROM galleryImages WHERE imageId = ?",
     [id]
   );
 
@@ -201,9 +226,9 @@ exports.toggleActive = async (id) => {
 
   const newStatus = rows[0].imageIsActive === 1 ? 0 : 1;
   const [result] = await pool.query(
-    "UPDATE galleryImages SET imageIsActive = ? WHERE imageId = ?",
+    "UPDATE galleryImages SET imageIsActive = ?, imageApprovalStatus = 'approved' WHERE imageId = ?",
     [newStatus, id]
   );
 
-  return { affectedRows: result.affectedRows, imageIsActive: newStatus };
+  return { affectedRows: result.affectedRows, imageIsActive: newStatus, imageApprovalStatus: 'approved' };
 };
