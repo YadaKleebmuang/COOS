@@ -25,6 +25,9 @@ type GalleryImage = {
   imageTags?: string
   workTypeId?: number
   workTypeName?: string
+  orderStyle?: string
+  orderColorTone?: string
+  orderComposition?: string
 }
 
 const getErrorMessage = (err: unknown, fallback: string) => {

@@ -7,6 +7,9 @@ type GalleryImage = {
   imageTags?: string
   workTypeId?: number
   workTypeName?: string
+  orderStyle?: string
+  orderColorTone?: string
+  orderComposition?: string
 }
 
 const props = defineProps<{
@@ -107,63 +110,95 @@ const getOrderParams = (img: GalleryImage) => {
         </div>
 
         <!-- Right side: Persisted public details -->
-        <div 
-          class="flex max-h-[50vh] w-full flex-col justify-between overflow-y-auto md:max-h-full md:w-1/2"
-          :class="variant === 'gallery' ? 'p-7 md:p-8 lg:p-10' : 'p-7 md:p-8'"
+        <div
+          class="flex max-h-[50vh] w-full flex-col md:max-h-full md:w-1/2 min-h-0"
         >
-          <div :class="variant === 'gallery' ? 'space-y-6 lg:space-y-8' : 'space-y-6'">
-            <!-- Header (Category, Title, Description) -->
-            <div>
-              <span 
-                class="mb-3 inline-block rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
-                :class="variant === 'gallery' 
-                  ? 'border-black/5 bg-black/[0.03] text-neutral-600' 
-                  : 'border-black/5 bg-neutral-50 text-neutral-700'"
-              >
-                {{ img.workTypeName || 'General' }}
-              </span>
-              <h3 
-                class="leading-tight text-black"
-                :class="variant === 'gallery' ? 'text-2xl lg:text-3xl font-semibold tracking-tight' : 'text-2xl font-black'"
-              >
-                {{ img.imageTitle || 'Untitled' }}
-              </h3>
-              <p 
-                class="mt-3 text-[14px] leading-relaxed text-neutral-500"
-                :class="variant === 'gallery' ? 'font-medium' : 'text-sm leading-7'"
-              >
-                {{ img.imageDescription || 'ไม่มีคำอธิบายเพิ่มเติม' }}
-              </p>
-            </div>
-
-            <!-- Tags -->
-            <div
-              v-if="img.imageTags"
-              class="border-t border-black/5"
-              :class="variant === 'gallery' ? 'pt-6 lg:pt-8' : 'pt-6'"
-            >
-              <h4 
-                class="uppercase text-neutral-400"
-                :class="variant === 'gallery' ? 'mb-3 text-[11px] font-bold tracking-[0.2em]' : 'mb-3 text-xs font-bold tracking-widest'"
-              >
-                แท็กคีย์เวิร์ด
-              </h4>
-              <div class="flex flex-wrap gap-1.5">
+          <!-- Scrollable Content Body -->
+          <div
+            class="flex-1 overflow-y-auto min-h-0"
+            :class="variant === 'gallery' ? 'p-7 md:p-8 lg:px-10 lg:pt-10' : 'p-7 md:p-8'"
+          >
+            <div :class="variant === 'gallery' ? 'space-y-6 lg:space-y-8 pb-6 lg:pb-8' : 'space-y-6 pb-6'">
+              <!-- Header (Category, Title, Description) -->
+              <div>
                 <span
-                  v-for="tag in img.imageTags.split(',')"
-                  :key="tag"
-                  class="rounded-full border border-black/5 bg-neutral-50 font-medium text-neutral-500"
-                  :class="variant === 'gallery' ? 'px-3 py-1.5 text-[11px]' : 'px-2.5 py-1 text-xs'"
+                  class="mb-3 inline-block rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
+                  :class="variant === 'gallery'
+                    ? 'border-black/5 bg-black/[0.03] text-neutral-600'
+                    : 'border-black/5 bg-neutral-50 text-neutral-700'"
                 >
-                  #{{ tag.trim() }}
+                  {{ img.workTypeName || 'General' }}
                 </span>
+                <h3
+                  class="leading-tight text-black"
+                  :class="variant === 'gallery' ? 'text-2xl lg:text-3xl font-semibold tracking-tight' : 'text-2xl font-black'"
+                >
+                  {{ img.imageTitle || 'Untitled' }}
+                </h3>
+              </div>
+
+              <!-- Order Brief (รายละเอียดงาน) -->
+              <div
+                v-if="img.orderStyle || img.orderColorTone || img.orderComposition || img.imageDescription"
+                class="border-t border-black/5"
+                :class="variant === 'gallery' ? 'pt-6 lg:pt-8 mt-6 lg:mt-8' : 'pt-6 mt-6'"
+              >
+                <h4
+                  class="uppercase text-neutral-400"
+                  :class="variant === 'gallery' ? 'mb-4 text-[11px] font-bold tracking-[0.2em]' : 'mb-3 text-xs font-bold tracking-widest'"
+                >
+                  รายละเอียดงาน
+                </h4>
+                <div class="space-y-4">
+                  <div v-if="img.orderStyle" class="flex flex-col">
+                    <span class="text-[11px] font-medium text-neutral-400 mb-1">สไตล์</span>
+                    <span class="text-[13.5px] leading-relaxed text-neutral-800">{{ img.orderStyle }}</span>
+                  </div>
+                  <div v-if="img.orderColorTone" class="flex flex-col">
+                    <span class="text-[11px] font-medium text-neutral-400 mb-1">โทนสี</span>
+                    <span class="text-[13.5px] leading-relaxed text-neutral-800">{{ img.orderColorTone }}</span>
+                  </div>
+                  <div v-if="img.orderComposition" class="flex flex-col">
+                    <span class="text-[11px] font-medium text-neutral-400 mb-1">องค์ประกอบภาพ</span>
+                    <span class="text-[13.5px] leading-relaxed text-neutral-800">{{ img.orderComposition }}</span>
+                  </div>
+                  <div v-if="img.imageDescription" class="flex flex-col">
+                    <span class="text-[11px] font-medium text-neutral-400 mb-1">รายละเอียดเพิ่มเติม</span>
+                    <span class="text-[13.5px] leading-relaxed text-neutral-800">{{ img.imageDescription }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tags -->
+              <div
+                v-if="img.imageTags"
+                class="border-t border-black/5"
+                :class="variant === 'gallery' ? 'pt-6 lg:pt-8' : 'pt-6'"
+              >
+                <h4
+                  class="uppercase text-neutral-400"
+                  :class="variant === 'gallery' ? 'mb-3 text-[11px] font-bold tracking-[0.2em]' : 'mb-3 text-xs font-bold tracking-widest'"
+                >
+                  แท็กคีย์เวิร์ด
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="tag in img.imageTags.split(',')"
+                    :key="tag"
+                    class="rounded-full border border-black/5 bg-neutral-50 font-medium text-neutral-500"
+                    :class="variant === 'gallery' ? 'px-3 py-1.5 text-[11px]' : 'px-2.5 py-1 text-xs'"
+                  >
+                    #{{ tag.trim() }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div 
-            class="border-t border-black/5"
-            :class="variant === 'gallery' ? 'mt-8 pt-6 lg:pt-8 shrink-0' : 'mt-6 pt-8'"
+          <!-- Stable Footer CTA -->
+          <div
+            class="flex-none border-t border-black/5"
+            :class="variant === 'gallery' ? 'p-7 md:p-8 lg:px-10 lg:py-6' : 'p-7 md:p-8 md:py-6 py-6'"
           >
             <NuxtLink
               :to="`/customer/orders/create?${getOrderParams(img)}`"

@@ -15,11 +15,16 @@ exports.findAll = async (filters = {}) => {
       GROUP_CONCAT(t.tagId SEPARATOR ',') AS tagIds,
       gi.imageIsActive,
       gi.imageCreatedAt,
-      gi.imageUpdatedAt
+      gi.imageUpdatedAt,
+      MAX(o.orderStyle) AS orderStyle,
+      MAX(o.orderColorTone) AS orderColorTone,
+      MAX(o.orderComposition) AS orderComposition
     FROM galleryImages gi
     JOIN workTypes wt ON gi.workTypeId = wt.workTypeId
     LEFT JOIN galleryImageTags git ON gi.imageId = git.imageId
     LEFT JOIN tags t ON git.tagId = t.tagId
+    LEFT JOIN orderImages oi ON gi.imageUrl = oi.imageUrl
+    LEFT JOIN orders o ON oi.orderId = o.orderId
     WHERE 1=1
   `;
   const params = [];
@@ -68,11 +73,16 @@ exports.findById = async (id, { activeOnly = true } = {}) => {
       GROUP_CONCAT(t.tagId SEPARATOR ',') AS tagIds,
       gi.imageIsActive,
       gi.imageCreatedAt,
-      gi.imageUpdatedAt
+      gi.imageUpdatedAt,
+      MAX(o.orderStyle) AS orderStyle,
+      MAX(o.orderColorTone) AS orderColorTone,
+      MAX(o.orderComposition) AS orderComposition
     FROM galleryImages gi
     JOIN workTypes wt ON gi.workTypeId = wt.workTypeId
     LEFT JOIN galleryImageTags git ON gi.imageId = git.imageId
     LEFT JOIN tags t ON git.tagId = t.tagId
+    LEFT JOIN orderImages oi ON gi.imageUrl = oi.imageUrl
+    LEFT JOIN orders o ON oi.orderId = o.orderId
     WHERE gi.imageId = ?${activeClause}
     GROUP BY gi.imageId`,
     [id]

@@ -113,4 +113,45 @@ describe('Gallery Status Architecture', () => {
   it('GAL-STATUS-10: No code path creates pending/1', async () => {
     expect(true).toBe(true);
   });
+
+  describe('Gallery Brief Details', () => {
+    it('GALLERY-BRIEF-01 & 04 & 05: Public approved Gallery response includes safe order fields and excludes pending/private', async () => {
+      pool.query.mockResolvedValueOnce([[]]);
+      await galleryImageModel.findAll({ activeOnly: true });
+
+      const selectCall = pool.query.mock.calls[0][0];
+      expect(selectCall).toContain("MAX(o.orderStyle) AS orderStyle");
+      expect(selectCall).toContain("MAX(o.orderColorTone) AS orderColorTone");
+      expect(selectCall).toContain("MAX(o.orderComposition) AS orderComposition");
+      expect(selectCall).toContain("gi.imageApprovalStatus = 'approved'");
+      expect(selectCall).toContain("gi.imageIsActive = 1");
+    });
+
+    it('GALLERY-BRIEF-02 & 03: orderNote and private order fields are NOT exposed', async () => {
+      pool.query.mockResolvedValueOnce([[]]);
+      await galleryImageModel.findAll({});
+
+      const selectCall = pool.query.mock.calls[0][0];
+      expect(selectCall).not.toContain("o.orderNote");
+      expect(selectCall).not.toContain("o.customerId");
+      expect(selectCall).not.toContain("o.*");
+    });
+
+    it('GALLERY-BRIEF-06: Join does not duplicate Gallery rows', async () => {
+      pool.query.mockResolvedValueOnce([[]]);
+      await galleryImageModel.findAll({});
+
+      const selectCall = pool.query.mock.calls[0][0];
+      expect(selectCall).toContain("GROUP BY gi.imageId");
+    });
+
+    it('GALLERY-BRIEF-07: Single fetch includes safe fields safely without note', async () => {
+      pool.query.mockResolvedValueOnce([[]]);
+      await galleryImageModel.findById(1, { activeOnly: true });
+
+      const selectCall = pool.query.mock.calls[0][0];
+      expect(selectCall).toContain("MAX(o.orderStyle) AS orderStyle");
+      expect(selectCall).not.toContain("o.orderNote");
+    });
+  });
 });
