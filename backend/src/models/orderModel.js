@@ -565,7 +565,7 @@ const _autoPublishToGallery = async (connection, orderId) => {
       const [result] = await connection.query(
         `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageApprovalStatus, imageIsActive)
          VALUES (?, ?, ?, 'pending', 0)`,
-        [img.imageUrl, orderWorkTypeId, `Order #${orderId} (รออนุมัติ)`]
+        [img.imageUrl, orderWorkTypeId, `Order #${orderId}`]
       );
       newGalleryImageId = result.insertId;
     } else {
@@ -613,20 +613,45 @@ exports.updateGalleryMetadata = async (orderImageId, tagIds) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Sync Tags
-    await connection.query("DELETE FROM orderImageTags WHERE orderImageId = ?", [orderImageId]);
-
+    let uniqueTagIds = [];
     if (tagIds && Array.isArray(tagIds)) {
-      const uniqueTagIds = [...new Set(tagIds)];
+      uniqueTagIds = [...new Set(tagIds)];
 
-      for (const tagId of uniqueTagIds) {
-        // Just verify tagId exists in tags table
-        const [existingTag] = await connection.query("SELECT tagId FROM tags WHERE tagId = ?", [tagId]);
-        if (existingTag.length > 0) {
-          await connection.query(
-            "INSERT IGNORE INTO orderImageTags (orderImageId, tagId) VALUES (?, ?)",
-            [orderImageId, tagId]
-          );
+      // Validate ALL tags first to ensure atomic failure (TAG-SYNC-07)
+      if (uniqueTagIds.length > 0) {
+        const [existingTags] = await connection.query(
+          "SELECT tagId FROM tags WHERE tagId IN (?)",
+          [uniqueTagIds]
+        );
+        if (existingTags.length !== uniqueTagIds.length) {
+          const err = new Error("INVALID_TAG");
+          err.code = "INVALID_TAG";
+          throw err;
+        }
+      }
+    }
+
+    // 1. Sync orderImageTags
+    await connection.query("DELETE FROM orderImageTags WHERE orderImageId = ?", [orderImageId]);
+    for (const tagId of uniqueTagIds) {
+      await connection.query(
+        "INSERT IGNORE INTO orderImageTags (orderImageId, tagId) VALUES (?, ?)",
+        [orderImageId, tagId]
+      );
+    }
+
+    // 2. Synchronize to pending gallery image if exists
+    const [images] = await connection.query("SELECT imageUrl FROM orderImages WHERE orderImageId = ?", [orderImageId]);
+    if (images.length > 0) {
+      const imageUrl = images[0].imageUrl;
+      const [galleries] = await connection.query("SELECT imageId, imageApprovalStatus FROM galleryImages WHERE imageUrl = ?", [imageUrl]);
+      if (galleries.length > 0) {
+        const galleryImage = galleries[0];
+        if (galleryImage.imageApprovalStatus === 'pending') {
+          await connection.query("DELETE FROM galleryImageTags WHERE imageId = ?", [galleryImage.imageId]);
+          for (const tagId of uniqueTagIds) {
+            await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [galleryImage.imageId, tagId]);
+          }
         }
       }
     }

@@ -73,6 +73,7 @@ describe('Gallery Status Architecture', () => {
     const updateCall = pool.query.mock.calls[1];
     expect(updateCall[0]).toContain('imageIsActive = ?');
     expect(updateCall[0]).toContain("imageApprovalStatus = 'approved'");
+    expect(updateCall[0]).not.toContain("imageTitle");
     expect(updateCall[1][0]).toBe(1); // newStatus = 1
   });
 
@@ -96,6 +97,7 @@ describe('Gallery Status Architecture', () => {
     const updateCall = pool.query.mock.calls[1];
     expect(updateCall[0]).toContain('imageIsActive = ?');
     expect(updateCall[0]).toContain("imageApprovalStatus = 'approved'");
+    expect(updateCall[0]).not.toContain("imageTitle");
     expect(updateCall[1][0]).toBe(0); // newStatus = 0
   });
 

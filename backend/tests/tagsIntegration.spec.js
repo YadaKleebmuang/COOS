@@ -26,7 +26,7 @@ describe('System-Wide Hashtag Integration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockConnection = {
       query: jest.fn(),
       beginTransaction: jest.fn(),
@@ -34,7 +34,7 @@ describe('System-Wide Hashtag Integration', () => {
       rollback: jest.fn(),
       release: jest.fn(),
     };
-    
+
     pool.getConnection.mockResolvedValue(mockConnection);
   });
 
@@ -48,13 +48,13 @@ describe('System-Wide Hashtag Integration', () => {
       ]);
 
       const res = await request(app).get('/api/v1/tags');
-      
+
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
         { tagId: 1, tagName: 'Portrait', imageCount: 12 },
         { tagId: 2, tagName: 'UnusedTag', imageCount: 0 }
       ]);
-      
+
       expect(pool.query.mock.calls[0][0]).toContain('COUNT(DISTINCT git.imageId) AS imageCount');
     });
   });
@@ -123,10 +123,10 @@ describe('System-Wide Hashtag Integration', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.message).toBe("One or more tagIds are invalid");
-      
+
       const insertGalleryCall = mockConnection.query.mock.calls.some(call => call[0].includes('INSERT INTO galleryImages'));
       const insertTagCall = mockConnection.query.mock.calls.some(call => call[0].includes('INSERT IGNORE INTO galleryImageTags'));
-      
+
       expect(insertGalleryCall).toBe(false);
       expect(insertTagCall).toBe(false);
     });
@@ -136,7 +136,7 @@ describe('System-Wide Hashtag Integration', () => {
     it('normalizes duplicate tagIds safely', async () => {
       mockConnection.query.mockResolvedValueOnce([[{ tagId: 2 }]]); // Validated length = 1
       mockConnection.query.mockResolvedValueOnce([{ insertId: 102 }]);
-      
+
       const res = await request(app)
         .post('/api/v1/gallery-images')
         .send({
@@ -146,7 +146,7 @@ describe('System-Wide Hashtag Integration', () => {
         });
 
       expect(res.status).toBe(201);
-      
+
       const insertCalls = mockConnection.query.mock.calls.filter(call => call[0].includes('INSERT IGNORE INTO galleryImageTags'));
       expect(insertCalls.length).toBe(1); // Only inserted once
     });
@@ -156,7 +156,7 @@ describe('System-Wide Hashtag Integration', () => {
     it('does not execute INSERT INTO tags on create or update', async () => {
       mockConnection.query.mockResolvedValueOnce([[{ tagId: 3 }]]); // Validated length = 1
       mockConnection.query.mockResolvedValueOnce([{ insertId: 103 }]);
-      
+
       await request(app)
         .post('/api/v1/gallery-images')
         .send({
@@ -167,13 +167,13 @@ describe('System-Wide Hashtag Integration', () => {
 
       expect(mockConnection.query.mock.calls.some(call => call[0].includes('INSERT IGNORE INTO tags'))).toBe(false);
       expect(mockConnection.query.mock.calls.some(call => call[0].includes('INSERT INTO tags'))).toBe(false);
-      
+
       jest.clearAllMocks();
-      
+
       mockConnection.query.mockResolvedValueOnce([[{ imageId: 103 }]]); // check exists
       mockConnection.query.mockResolvedValueOnce([[{ tagId: 4 }]]); // Validate length = 1
       mockConnection.query.mockResolvedValueOnce([{ affectedRows: 1 }]); // Update
-      
+
       await request(app)
         .patch('/api/v1/gallery-images/103')
         .send({
@@ -224,6 +224,151 @@ describe('System-Wide Hashtag Integration', () => {
       expect(executedQuery).toContain('JOIN tags t2 ON git2.tagId = t2.tagId');
       expect(executedQuery).toContain('WHERE t2.tagName = ?');
       expect(queryParams).toContain('TestTag');
+    });
+  });
+
+  describe('TAG-SYNC: Editor Gallery hashtag synchronization', () => {
+    const orderController = require('../src/controllers/orderController');
+    const syncApp = express();
+    syncApp.use(express.json());
+    syncApp.use((req, res, next) => {
+      req.session = { userId: 1, userRole: 'editor' };
+      next();
+    });
+    syncApp.patch('/api/v1/orders/:id/images/:imageId/gallery-metadata', orderController.updateGalleryMetadata);
+
+    it('TAG-SYNC-01: Completed order + Gallery pending -> orderImageTags and galleryImageTags updated', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }, { tagId: 2 }]]); // Valid tags
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[{ imageId: 50, imageApprovalStatus: 'pending' }]]); // SELECT gallery image
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE galleryImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT galleryImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT galleryImageTags
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1, 2] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('DELETE FROM galleryImageTags WHERE imageId = ?'))).toBe(true);
+      expect(mockConnection.query.mock.calls.filter(call => call[0].includes('INSERT IGNORE INTO galleryImageTags')).length).toBe(2);
+    });
+
+    it('TAG-SYNC-02: Pending Gallery: remove one previously selected tag', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }]]); // Valid tag
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[{ imageId: 50, imageApprovalStatus: 'pending' }]]); // SELECT gallery image
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE galleryImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT galleryImageTags
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.filter(call => call[0].includes('INSERT IGNORE INTO galleryImageTags')).length).toBe(1);
+    });
+
+    it('TAG-SYNC-03: Pending Gallery: duplicate tagIds in request', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }]]); // Set removes duplicate, so length 1
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[{ imageId: 50, imageApprovalStatus: 'pending' }]]); // SELECT gallery image
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE galleryImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT galleryImageTags
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1, 1, 1] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.filter(call => call[0].includes('INSERT IGNORE INTO galleryImageTags')).length).toBe(1);
+    });
+
+    it('TAG-SYNC-04: Completed order + Gallery approved/public: galleryImageTags MUST remain unchanged', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }]]); // Valid tags
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[{ imageId: 50, imageApprovalStatus: 'approved' }]]); // SELECT gallery image (APPROVED)
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('DELETE FROM galleryImageTags'))).toBe(false);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('INSERT IGNORE INTO galleryImageTags'))).toBe(false);
+    });
+
+    it('TAG-SYNC-05: Completed order + Gallery approved/private: galleryImageTags MUST remain unchanged', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }]]); // Valid tags
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[{ imageId: 50, imageApprovalStatus: 'approved' }]]); // SELECT gallery image (APPROVED)
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('DELETE FROM galleryImageTags'))).toBe(false);
+    });
+
+    it('TAG-SYNC-06: No Gallery image exists yet: no Gallery error', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[{ tagId: 1 }]]); // Valid tags
+      mockConnection.query.mockResolvedValueOnce([]); // DELETE orderImageTags
+      mockConnection.query.mockResolvedValueOnce([]); // INSERT orderImageTags
+      mockConnection.query.mockResolvedValueOnce([[{ imageUrl: 'img.jpg' }]]); // SELECT imageUrl
+      mockConnection.query.mockResolvedValueOnce([[]]); // No gallery image exists
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [1] });
+
+      expect(res.status).toBe(200);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('DELETE FROM galleryImageTags'))).toBe(false);
+    });
+
+    it('TAG-SYNC-07: Invalid Master Tag ID -> HTTP 400', async () => {
+      pool.query.mockResolvedValueOnce([[{ orderId: 14, editorId: 1 }]]);
+      pool.query.mockResolvedValueOnce([[{ orderImageId: 100, imageType: 'selected_final', imageUrl: 'img.jpg' }]]);
+
+      mockConnection.query.mockResolvedValueOnce([[]]); // tag 999 does not exist
+
+      const res = await request(syncApp)
+        .patch('/api/v1/orders/14/images/100/gallery-metadata')
+        .send({ tagIds: [999] });
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("One or more tagIds are invalid");
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('DELETE FROM orderImageTags'))).toBe(false);
+      expect(mockConnection.query.mock.calls.some(call => call[0].includes('INSERT IGNORE INTO orderImageTags'))).toBe(false);
     });
   });
 });

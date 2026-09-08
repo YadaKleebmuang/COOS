@@ -40,7 +40,7 @@ async function backfill() {
     const tagReports = [];
     const visibilityReports = [];
     const unmatchedReports = [];
-    
+
     for (const oi of orderImages) {
       // Find matching galleryImage
       const [galleryImages] = await connection.query(
@@ -50,10 +50,10 @@ async function backfill() {
 
       if (galleryImages.length > 0) {
         const gi = galleryImages[0];
-        
+
         // Find tags for the order image
         const [orderTags] = await connection.query(
-          `SELECT t.tagName, t.tagId 
+          `SELECT t.tagName, t.tagId
            FROM orderImageTags oit
            JOIN tags t ON oit.tagId = t.tagId
            WHERE oit.orderImageId = ?`,
@@ -62,7 +62,7 @@ async function backfill() {
 
         // Find existing tags for the gallery image
         const [galleryTags] = await connection.query(
-          `SELECT t.tagName, t.tagId 
+          `SELECT t.tagName, t.tagId
            FROM galleryImageTags git
            JOIN tags t ON git.tagId = t.tagId
            WHERE git.imageId = ?`,
@@ -71,7 +71,7 @@ async function backfill() {
 
         const currentOrderTags = orderTags.map(t => t.tagName);
         const currentGalleryTags = galleryTags.map(t => t.tagName);
-        
+
         const tagsToInsert = orderTags.filter(ot => !currentGalleryTags.includes(ot.tagName));
 
         tagReports.push({
@@ -100,7 +100,12 @@ async function backfill() {
         const needsApprovalRepair = gi.imageApprovalStatus !== 'pending';
         const needsVisibilityRepair = gi.imageIsActive !== 0;
 
-        if (gi.imageTitle && gi.imageTitle.includes('(รออนุมัติ)') && (needsApprovalRepair || needsVisibilityRepair)) {
+        const isAutoCreatedTitle = gi.imageTitle && (
+          gi.imageTitle.includes('(รออนุมัติ)') ||
+          gi.imageTitle.trim() === `Order #${oi.orderId}`
+        );
+
+        if (isAutoCreatedTitle && (needsApprovalRepair || needsVisibilityRepair)) {
           const reportItem = {
             orderId: oi.orderId,
             orderImageId: oi.orderImageId,
@@ -127,7 +132,7 @@ async function backfill() {
 
           if (!isDryRun) {
             await connection.query(`
-              UPDATE galleryImages 
+              UPDATE galleryImages
               SET imageIsActive = 0, imageApprovalStatus = 'pending'
               WHERE imageId = ?
             `, [gi.imageId]);
@@ -176,7 +181,7 @@ async function backfill() {
     if (activeTags.length > 5) {
       console.log(`... and ${activeTags.length - 5} other images requiring tag insertion.`);
     }
-    
+
     console.log("\n--- VISIBILITY REPAIR REPORT ---");
     if (visibilityReports.length > 0) {
       console.table(visibilityReports);

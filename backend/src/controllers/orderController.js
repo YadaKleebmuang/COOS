@@ -583,7 +583,14 @@ exports.updateGalleryMetadata = async (req, res, next) => {
     }
 
     // 3. Update Gallery Metadata via Model
-    await OrderModel.updateGalleryMetadata(imageId, tagIds);
+    try {
+      await OrderModel.updateGalleryMetadata(imageId, tagIds);
+    } catch (err) {
+      if (err.code === "INVALID_TAG") {
+        return res.status(400).json({ message: "One or more tagIds are invalid" });
+      }
+      throw err;
+    }
 
     res.status(200).json({ message: "บันทึกข้อมูล Gallery สำเร็จ" });
   } catch (err) {

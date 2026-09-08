@@ -59,7 +59,7 @@ describe('Gallery Auto Publish and Status Logic', () => {
       expect(insertGalleryCall).toBeDefined();
       expect(insertGalleryCall[0]).toContain('imageIsActive');
       expect(insertGalleryCall[0]).toContain('0'); // explicitly 0
-      expect(insertGalleryCall[1][2]).toContain('(รออนุมัติ)');
+      expect(insertGalleryCall[1][2]).toBe('Order #1');
     });
 
     it('2. completed migration copies orderImageTags → galleryImageTags', async () => {
