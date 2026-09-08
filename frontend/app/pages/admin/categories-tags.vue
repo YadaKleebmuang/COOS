@@ -29,29 +29,13 @@ const tagDelete = ref({ open: false, loading: false, id: 0, name: "" })
 const fetchData = async () => {
   loading.value = true
   try {
-    const [tgs, imgs] = await Promise.all([
-      apiFetch<any[]>("/tags").catch(() => []),
-      apiFetch<any[]>("/gallery-images?all=true").catch(() => [])
-    ])
-
-    const tagCountMap = new Map<string, Set<number>>()
-    imgs.forEach(img => {
-      if (img.imageTags) {
-        const tags = img.imageTags.split(",").map((t: string) => t.trim().toLowerCase())
-        tags.forEach((tag: string) => {
-          if (!tagCountMap.has(tag)) tagCountMap.set(tag, new Set())
-          tagCountMap.get(tag)!.add(img.imageId)
-        })
-      }
-    })
+    const tgs = await apiFetch<any[]>("/tags")
 
     hashtags.value = tgs.map(t => {
-      const normalizedTagName = t.tagName.trim().toLowerCase()
-      const imageCount = tagCountMap.has(normalizedTagName) ? tagCountMap.get(normalizedTagName)!.size : 0
       return {
         tagId: t.tagId,
         tagName: t.tagName,
-        imageCount,
+        imageCount: t.imageCount || 0,
         createdAt: t.createdAt || new Date().toISOString()
       }
     })

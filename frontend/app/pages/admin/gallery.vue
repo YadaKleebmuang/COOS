@@ -8,14 +8,18 @@ definePageMeta({
   middleware: ["auth", "admin"]
 })
 
-// ── Types ──────────────────────────────────────────────────────
 interface GalleryImage {
   imageId: number
   title: string
   category: string
   hashtags: string[]
-  isPublic: boolean
+  status: 'pending' | 'public' | 'private'
   createdAt: string
+}
+
+interface Tag {
+  tagId: number
+  tagName: string
 }
 
 interface WorkType {
@@ -43,7 +47,8 @@ watch(
 // Upload Modal State
 const uploadModal = ref(false)
 const workTypes = ref<WorkType[]>([])
-const uploadForm = ref({ workTypeId: "", imageTitle: "", imageTags: "" })
+const allTags = ref<Tag[]>([])
+const uploadForm = ref({ workTypeId: "", imageTitle: "", tagIds: [] as number[] })
 const uploadFile = ref<File | null>(null)
 const uploadLoading = ref(false)
 const uploadError = ref("")
@@ -55,14 +60,24 @@ const fetchGallery = async () => {
     const { apiFetch } = useApi()
     // [Fix] ?all=true ให้ admin เห็นทุกรูปรวมที่ hidden อยู่ด้วย
     const data = await apiFetch<any[]>("/gallery-images?all=true")
-    images.value = data.map(img => ({
-      imageId: img.imageId,
-      title: img.imageTitle || "ไม่มีชื่อภาพ",
-      category: img.workTypeName || "ไม่มีหมวดหมู่",
-      hashtags: img.imageTags ? img.imageTags.split(",").map((t: string) => t.trim()) : [],
-      isPublic: img.imageIsActive === 1,
-      createdAt: img.imageCreatedAt
-    }))
+    images.value = data.map(img => {
+      let currentStatus: 'pending' | 'public' | 'private' = 'private';
+      if (img.imageApprovalStatus === 'pending') {
+        currentStatus = 'pending';
+      } else if (img.imageApprovalStatus === 'approved' && img.imageIsActive === 1) {
+        currentStatus = 'public';
+      } else if (img.imageApprovalStatus === 'approved' && img.imageIsActive === 0) {
+        currentStatus = 'private';
+      }
+      return {
+        imageId: img.imageId,
+        title: img.imageTitle || "ไม่มีชื่อภาพ",
+        category: img.workTypeName || "ไม่มีหมวดหมู่",
+        hashtags: img.imageTags ? img.imageTags.split(",").map((t: string) => t.trim()) : [],
+        status: currentStatus,
+        createdAt: img.imageCreatedAt
+      }
+    })
   } finally {
     loading.value = false
   }
@@ -75,9 +90,17 @@ const fetchWorkTypes = async () => {
   } catch {}
 }
 
+const fetchAllTags = async () => {
+  try {
+    const { apiFetch } = useApi()
+    allTags.value = await apiFetch<Tag[]>("/tags")
+  } catch {}
+}
+
 onMounted(() => {
   fetchGallery()
   fetchWorkTypes()
+  fetchAllTags()
 })
 
 // ── Filters ────────────────────────────────────────────────────
@@ -89,8 +112,7 @@ const categories = computed(() => {
 const filteredImages = computed(() => {
   let result = images.value
   if (categoryFilter.value !== "all") result = result.filter(i => i.category === categoryFilter.value)
-  if (visibilityFilter.value === "public") result = result.filter(i => i.isPublic)
-  if (visibilityFilter.value === "private") result = result.filter(i => !i.isPublic)
+  if (visibilityFilter.value !== "all") result = result.filter(i => i.status === visibilityFilter.value)
   
   const q = searchQuery.value.toLowerCase().trim()
   if (q) result = result.filter(i => i.title.toLowerCase().includes(q) || i.hashtags.some((h: string) => h.toLowerCase().includes(q)))
@@ -103,7 +125,7 @@ const filteredImages = computed(() => {
 
 // ── Upload ─────────────────────────────────────────────────────
 const openUploadModal = () => {
-  uploadForm.value = { workTypeId: "", imageTitle: "", imageTags: "" }
+  uploadForm.value = { workTypeId: "", imageTitle: "", tagIds: [] }
   uploadFile.value = null
   uploadError.value = ""
   uploadModal.value = true
@@ -135,7 +157,7 @@ const submitUpload = async () => {
     const payload = {
       workTypeId: uploadForm.value.workTypeId,
       imageTitle: uploadForm.value.imageTitle,
-      imageTags: uploadForm.value.imageTags,
+      tagIds: uploadForm.value.tagIds,
       imageUrl: uploadRes.url
     }
 
@@ -173,7 +195,11 @@ const toggleVisibility = async (image: GalleryImage) => {
   try {
     const { apiFetch } = useApi()
     await apiFetch(`/gallery-images/${image.imageId}/toggle`, { method: "PATCH" })
-    image.isPublic = !image.isPublic
+    if (image.status === 'public') {
+      image.status = 'private'
+    } else {
+      image.status = 'public' // pending -> public, private -> public
+    }
   } catch (error: any) {
     alert("แจ้งเตือน", "เกิดข้อผิดพลาด: " + error.message, "error")
   }
@@ -241,20 +267,19 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           <div class="flex items-center gap-4 text-[13px] text-[#666666] font-medium shrink-0 bg-white border border-black/[0.06] rounded-xl px-4 py-2 shadow-sm">
             <span>ทั้งหมด: <strong class="text-[#171717] font-semibold">{{ images.length }}</strong></span>
             <span class="text-black/[0.06]">|</span>
-            <span>สาธารณะ: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.isPublic).length }}</strong></span>
+            <span>รออนุมัติ: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'pending').length }}</strong></span>
             <span class="text-black/[0.06]">|</span>
-            <span>ส่วนตัว: <strong class="text-[#171717] font-semibold">{{ images.filter(i => !i.isPublic).length }}</strong></span>
+            <span>สาธารณะ: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'public').length }}</strong></span>
+            <span class="text-black/[0.06]">|</span>
+            <span>ส่วนตัว: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'private').length }}</strong></span>
           </div>
         </div>
 
-        <!-- Row 2: Category Filters -->
+        <!-- Row 2: Category and Visibility Filters -->
         <div class="flex flex-wrap items-center gap-3">
           <AdminFilterBar v-model="categoryFilter" :filters="categories" />
-        </div>
-
-        <!-- Row 3: Visibility Filters -->
-        <div class="flex flex-wrap items-center gap-3">
-          <AdminFilterBar v-model="visibilityFilter" :filters="[{ key: 'all', label: 'ทั้งหมด' }, { key: 'public', label: 'สาธารณะ' }, { key: 'private', label: 'ส่วนตัว' }]" />
+          <div class="w-px h-6 bg-[#E5E5E3] mx-1 hidden sm:block"></div>
+          <AdminFilterBar v-model="visibilityFilter" :filters="[{ key: 'all', label: 'ทั้งหมด' }, { key: 'pending', label: 'รออนุมัติ' }, { key: 'public', label: 'สาธารณะ' }, { key: 'private', label: 'ส่วนตัว' }]" />
         </div>
       </div>
 
@@ -285,24 +310,23 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           </svg>
           
           <!-- Private dim overlay -->
-          <div v-if="!img.isPublic" class="absolute inset-0 bg-[#171717]/10 pointer-events-none transition-all"></div>
+          <div v-if="img.status !== 'public'" class="absolute inset-0 bg-[#171717]/10 pointer-events-none transition-all"></div>
 
           <!-- Visibility badge -->
-          <div class="absolute top-2 right-2 flex gap-2">
-            <span v-if="img.isPublic" class="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-lg border shadow-sm select-none bg-white text-[#171717] border-black/[0.06]">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              สาธารณะ
+          <div class="absolute top-4 left-4 flex gap-2">
+            <span class="px-3 py-1.5 text-xs font-medium bg-white/90 backdrop-blur-md text-[#171717] rounded-full shadow-lg border border-white/20">
+              {{ img.category }}
             </span>
-            <span v-else class="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-lg border shadow-sm select-none bg-[#171717] text-white border-[#171717]">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
-              ส่วนตัว
+            <span class="px-3 py-1.5 text-xs font-medium backdrop-blur-md rounded-full shadow-lg border border-white/20"
+              :class="img.status === 'public' ? 'bg-green-500/90 text-white' : img.status === 'pending' ? 'bg-yellow-500/90 text-white' : 'bg-gray-800/90 text-white'">
+              {{ img.status === 'public' ? 'สาธารณะ' : img.status === 'pending' ? 'รออนุมัติ' : 'ส่วนตัว' }}
             </span>
           </div>
 
           <!-- Hover overlay -->
           <div class="absolute inset-0 bg-[#171717]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-            <button @click="toggleVisibility(img)" aria-label="Toggle visibility" class="p-2 bg-white hover:bg-[#F7F7F5] rounded-xl transition-colors shadow-lg" :title="img.isPublic ? 'ตั้งเป็นส่วนตัว' : 'ตั้งเป็นสาธารณะ'">
-              <svg v-if="img.isPublic" class="w-4 h-4 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="toggleVisibility(img)" aria-label="Toggle visibility" class="p-2 bg-white hover:bg-[#F7F7F5] rounded-xl transition-colors shadow-lg" :title="img.status === 'public' ? 'ตั้งเป็นส่วนตัว' : 'ตั้งเป็นสาธารณะ'">
+              <svg v-if="img.status === 'public'" class="w-4 h-4 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
               <svg v-else class="w-4 h-4 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -419,14 +443,17 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                   <!-- Tags -->
                   <div>
                     <label class="block text-xs font-semibold text-[#171717] mb-1.5">
-                      แฮชแท็ก <span class="text-[#9A9A95] font-medium">(คั่นด้วยจุลภาค)</span>
+                      แฮชแท็ก
                     </label>
-                    <input
-                      v-model="uploadForm.imageTags"
-                      type="text"
-                      placeholder="เช่น prewedding, outdoor, nature"
-                      class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]"
-                    />
+                    <div class="p-3 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl max-h-48 overflow-y-auto">
+                      <div v-if="allTags.length === 0" class="text-[13px] text-[#9A9A95] py-2 text-center">ไม่มีแฮชแท็กในระบบ</div>
+                      <div v-else class="flex flex-wrap gap-2">
+                        <label v-for="tag in allTags" :key="tag.tagId" class="inline-flex items-center gap-1.5 cursor-pointer">
+                          <input type="checkbox" :value="tag.tagId" v-model="uploadForm.tagIds" class="rounded border-black/[0.12] text-black focus:ring-black">
+                          <span class="text-[13px] font-medium text-[#171717]">#{{ tag.tagName }}</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
