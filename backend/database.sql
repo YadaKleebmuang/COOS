@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `galleryImages` (
   `imageTitle`        VARCHAR(150) NULL,
   `imageDescription`  TEXT NULL,
   -- `imageTags`         VARCHAR(255) NULL,  -- เก็บแท็กที่เกี่ยวข้องคั่นด้วยจุลภาค เช่น 'minimal, retro, anime'
+  `imageApprovalStatus` ENUM('pending', 'approved') NOT NULL DEFAULT 'approved',
   `imageIsActive`     TINYINT(1) NOT NULL DEFAULT 1,
   `imageCreatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `imageUpdatedAt`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -133,21 +134,24 @@ CREATE TABLE IF NOT EXISTS `orders` (
 CREATE TABLE IF NOT EXISTS `orderImages` (
   `orderImageId`        INT AUTO_INCREMENT PRIMARY KEY,
   `orderId`             INT NOT NULL,
-  `imageType`           ENUM('source', 'ai_generated', 'selected_final') NOT NULL, 
+  `imageType`           ENUM('source', 'ai_generated', 'selected_final') NOT NULL,
   `imageUrl`            VARCHAR(255) NOT NULL,
   `imageThumbnailUrl`   VARCHAR(255) NULL,
-  
+
   -- ส่วนข้อมูล AI Prompt ที่ยุบรวมเข้ามา (เป็น NULL ได้สำหรับรูป source ของลูกค้า)
   `aiEngine`            VARCHAR(100) NULL,                 -- เครื่องมือที่ใช้ (เช่น Midjourney, Stable Diffusion, Flux)
   `positivePrompt`      TEXT NULL,                         -- Prompt ที่ใช้สร้าง
   `negativePrompt`      TEXT NULL,                         -- Negative Prompt
-  `cfgScale`            FLOAT NULL,
-  `steps`               INT NULL,
-  `seed`                VARCHAR(100) NULL,
-  
+  `cfgScale`            DECIMAL(5,2) NULL,                 -- ความสมจริง/ตรงเป้าของ Prompt
+  `steps`               INT NULL,                          -- จำนวนรอบการสร้าง
+  `seed`                VARCHAR(50) NULL,                  -- Seed ภาพ (เป็น string ได้ในบางโมเดล)
+
   `imageCreatedAt`      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (`orderId`) REFERENCES `orders`(`orderId`) ON DELETE CASCADE
+  CONSTRAINT `fk_orderImage_order`
+    FOREIGN KEY (`orderId`)
+    REFERENCES `orders`(`orderId`)
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 8. Payments Table
@@ -186,12 +190,12 @@ CREATE TABLE IF NOT EXISTS `systemSettings` (
   `settingValue`        TEXT NULL,
   `updatedAt`           TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `updatedByAdminId`    INT NULL,
-  
+
   FOREIGN KEY (`updatedByAdminId`) REFERENCES `users`(`userId`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert default settings
-INSERT IGNORE INTO `systemSettings` (`settingKey`, `settingValue`) VALUES 
+INSERT IGNORE INTO `systemSettings` (`settingKey`, `settingValue`) VALUES
 ('maxUploadSizeMb', '20'),
 ('allowedImageTypes', 'jpg,jpeg,png,webp'),
 ('orderAutoExpireDays', '7'),
