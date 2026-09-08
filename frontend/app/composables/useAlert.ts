@@ -31,6 +31,20 @@ export const useAlert = () => {
           cancelButton: 'rounded-xl px-6 py-2.5 font-bold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
         }
       }).then((result) => result.isConfirmed)
+    },
+    toast: (title: string, icon: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+      return Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        icon,
+        title,
+        customClass: {
+          popup: 'rounded-xl'
+        }
+      })
     }
   }
 }

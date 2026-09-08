@@ -2,6 +2,7 @@
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { orderService } from '~/services/order.service'
 import type { OrderDetail, OrderImage, OrderStatus } from '~/types/order.types'
+import EditGeneratedImageModal from '~/components/editor/job/EditGeneratedImageModal.vue'
 
 definePageMeta({
   layout: 'editor',
@@ -21,6 +22,14 @@ const error = ref('')
 const uploadModalOpen = ref(false)
 const historyDrawerOpen = ref(false)
 const detailImage = ref<OrderImage | null>(null)
+const isEditModalOpen = ref(false)
+const editingImage = ref<OrderImage | null>(null)
+
+const openEditModal = (img: OrderImage) => {
+  editingImage.value = img
+  isEditModalOpen.value = true
+}
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
 const submitting = ref(false)
@@ -109,7 +118,7 @@ const nextAction = computed(() => {
     case 'delivered':
       return { title: 'ส่งมอบผลงานแล้ว', description: 'ผลงานถูกส่งมอบแล้ว ขณะนี้ยังไม่มีขั้นตอนที่ Editor ต้องดำเนินการ', action: null, label: '' }
     case 'completed':
-      return { title: 'งานเสร็จสมบูรณ์', description: 'คำสั่งงานนี้ดำเนินการครบทุกขั้นตอนแล้ว', action: null, label: '' }
+      return { title: 'งานเสร็จสมบูรณ์แล้ว', description: 'ลูกค้ายืนยันการรับผลงานเรียบร้อยแล้ว', action: null, label: '' }
     case 'cancelled':
       return { title: 'คำสั่งงานถูกยกเลิก', description: 'ไม่สามารถดำเนินการกับคำสั่งงานนี้ต่อได้', action: null, label: '' }
     default:
@@ -147,10 +156,19 @@ const handlePrimaryAction = async () => {
 const triggerFileInput = () => fileInput.value?.click()
 
 const uploadImage = async (file: File) => {
-  if (!file.type.startsWith('image/')) {
-    uploadError.value = 'กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น'
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    uploadError.value = 'รองรับไฟล์ JPG, PNG และ WebP เท่านั้น'
     return
   }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    previewUrl.value = typeof reader.result === 'string' ? reader.result : ''
+  }
+  reader.onerror = () => {
+    previewUrl.value = ''
+  }
+  reader.readAsDataURL(file)
 
   uploadError.value = ''
   uploadedFileUrl.value = ''
@@ -158,7 +176,6 @@ const uploadImage = async (file: File) => {
   try {
     const url = await orderService.uploadGeneratedImageFile(file)
     uploadedFileUrl.value = url
-    previewUrl.value = url
   } catch (err: unknown) {
     uploadError.value = err instanceof Error ? err.message : 'อัปโหลดภาพไม่สำเร็จ'
   } finally {
@@ -651,12 +668,14 @@ const breadcrumb = computed(() => [
                     {{ image.aiEngine || 'ไม่ได้ระบุ' }}
                   </p>
                 </div>
-                <button
-                  class="shrink-0 rounded-lg border border-black/[0.06] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#171717] shadow-sm transition-colors hover:bg-[#F7F7F5]"
-                  @click="detailImage = image"
-                >
-                  ดูรายละเอียด
-                </button>
+                <div class="flex gap-2">
+                  <button
+                    class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[11px] font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-100"
+                    @click="openEditModal(image)"
+                  >
+                    แก้ไข
+                  </button>
+                </div>
               </div>
             </article>
           </div>
@@ -1024,6 +1043,13 @@ const breadcrumb = computed(() => [
           </aside>
         </div>
       </Transition>
+      <EditGeneratedImageModal
+        :isOpen="isEditModalOpen"
+        :img="editingImage"
+        :orderId="order?.orderId ?? Number(jobId)"
+        @close="isEditModalOpen = false"
+        @refresh="fetchOrderDetails"
+      />
     </Teleport>
   </div>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, reactive } from "vue"
+import { ref, computed, reactive, onBeforeUnmount } from "vue"
 import { orderService } from "~/services/order.service"
-import type { OrderDetail } from "~/types/order.types"
+import type { OrderDetail, OrderImage } from "~/types/order.types"
+import EditGeneratedImageModal from "./EditGeneratedImageModal.vue"
 
 const props = defineProps<{
   order: OrderDetail
@@ -16,6 +17,15 @@ const dragOver = ref(false)
 const uploadError = ref("")
 const previewUrl = ref("")
 const uploadedFileUrl = ref("")
+
+// Edit Modal State
+const isEditModalOpen = ref(false)
+const editingImage = ref<OrderImage | null>(null)
+
+const openEditModal = (img: OrderImage) => {
+  editingImage.value = img
+  isEditModalOpen.value = true
+}
 
 const paramsForm = reactive({
   aiEngine: "Stable Diffusion XL",
@@ -57,14 +67,21 @@ const uploadImage = async (file: File) => {
   
   uploadError.value = ""
   uploadedFileUrl.value = ""
+
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = URL.createObjectURL(file)
+
   uploading.value = true
   
   try {
     const url = await orderService.uploadGeneratedImageFile(file)
     uploadedFileUrl.value = url
-    previewUrl.value = url
   } catch (err: any) {
     uploadError.value = err?.message || "อัปโหลดภาพไม่สำเร็จ"
+    URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = ""
   } finally {
     uploading.value = false
     if (fileInput.value) fileInput.value.value = ""
@@ -72,13 +89,16 @@ const uploadImage = async (file: File) => {
 }
 
 const handleCancelUpload = () => {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
   uploadedFileUrl.value = ""
   previewUrl.value = ""
   uploadError.value = ""
 }
 
 const handleSubmitImage = async () => {
-  if (!uploadedFileUrl.value || submitting.value) return
+  if (!uploadedFileUrl.value || submitting.value || uploading.value) return
   
   submitting.value = true
   try {
@@ -103,6 +123,12 @@ const handleSubmitImage = async () => {
     submitting.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+})
 </script>
 
 <template>
@@ -118,7 +144,7 @@ const handleSubmitImage = async () => {
       
       <!-- Drag & Drop Zone -->
       <div
-        v-if="!uploadedFileUrl"
+        v-if="!previewUrl"
         @dragover.prevent="dragOver = true"
         @dragleave.prevent="dragOver = false"
         @drop.prevent="handleDrop"
@@ -139,7 +165,7 @@ const handleSubmitImage = async () => {
         <div class="flex flex-col items-center justify-center gap-3">
           <img :src="previewUrl" class="max-h-48 rounded-lg shadow-sm border object-contain bg-gray-50" />
           <button @click="handleCancelUpload" class="text-xs font-bold text-red-600 hover:underline">
-            ❌ ยกเลิกรูปภาพนี้
+            ยกเลิกรูปภาพนี้
           </button>
         </div>
         
@@ -180,17 +206,17 @@ const handleSubmitImage = async () => {
           <div class="flex justify-end pt-2 border-t border-gray-50">
             <button
               @click="handleSubmitImage"
-              :disabled="submitting"
+              :disabled="submitting || uploading || !uploadedFileUrl"
               class="bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white font-bold px-4 py-2 rounded-lg transition"
             >
-              {{ submitting ? "กำลังแนบรูปภาพ..." : "✅ บันทึกรูปภาพเข้าออเดอร์" }}
+              {{ submitting ? "กำลังแนบรูปภาพ..." : "บันทึกรูปภาพเข้าออเดอร์" }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="uploading" class="text-center text-xs text-gray-900 font-bold">
-        ⏳ กำลังประมวลผลไฟล์รูปภาพ...
+        กำลังประมวลผลไฟล์รูปภาพ...
       </div>
       <p v-if="uploadError" class="text-xs text-red-600 font-bold text-center">⚠️ {{ uploadError }}</p>
     </div>
@@ -204,7 +230,16 @@ const handleSubmitImage = async () => {
       </div>
       
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <div v-for="img in generatedImages" :key="img.orderImageId" class="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm flex flex-col group">
+        <div v-for="img in generatedImages" :key="img.orderImageId" class="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm flex flex-col group relative">
+          <!-- Edit Overlay Button -->
+          <div class="absolute inset-0 z-10 bg-gray-900/0 group-hover:bg-gray-900/10 transition-colors pointer-events-none"></div>
+          <button
+            @click="openEditModal(img)"
+            class="absolute top-2 right-2 z-20 bg-white/90 hover:bg-white text-gray-700 hover:text-indigo-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all border border-gray-200"
+          >
+            แก้ไข
+          </button>
+
           <div class="aspect-[4/3] bg-gray-100 overflow-hidden relative">
             <img :src="img.imageUrl" class="w-full h-full object-cover" />
             <span class="absolute top-2 left-2 bg-gray-900 text-white text-[9px] font-black px-2 py-0.5 rounded shadow">
@@ -224,6 +259,13 @@ const handleSubmitImage = async () => {
         </div>
       </div>
     </div>
+    <EditGeneratedImageModal
+      :isOpen="isEditModalOpen"
+      :img="editingImage"
+      :orderId="props.order.orderId"
+      @close="isEditModalOpen = false"
+      @refresh="emit('refresh')"
+    />
   </div>
 </template>
 

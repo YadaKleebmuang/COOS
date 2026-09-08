@@ -679,44 +679,52 @@ const formatDeliveryDate = (dateStr?: string) => {
           </section>
 
           <section
-            v-if="order.orderStatus === 'waiting_selection' && aiGeneratedImages.length > 0"
+            v-if="(order.orderStatus === 'waiting_selection' && aiGeneratedImages.length > 0) || finalImages.length > 0"
             id="selection-section"
             class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)]"
           >
             <div class="mb-5 flex flex-col gap-4 border-b border-black/[0.06] pb-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 class="text-xl font-semibold leading-[1.4] text-[#171717]">
-                  คัดเลือกรูปภาพที่ชื่นชอบ
+                  {{ order.orderStatus === 'waiting_selection' ? 'คัดเลือกรูปภาพที่ชื่นชอบ' : 'รูปภาพที่เลือกแล้ว' }}
                 </h2>
-                <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+                <p v-if="order.orderStatus === 'waiting_selection'" class="mt-1 text-sm leading-[1.6] text-[#666666]">
                   เลือกรูปภาพที่ต้องการรับเป็นไฟล์จริง สูงสุด {{ order.packageImageCount }} ภาพ
+                </p>
+                <p v-else class="mt-1 text-sm font-medium text-emerald-600">
+                  ยืนยันการเลือกรูปภาพแล้ว
                 </p>
               </div>
               <div class="rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3 text-right">
                 <p class="text-xs font-medium text-[#666666]">
-                  เลือกแล้ว
+                  {{ order.orderStatus === 'waiting_selection' ? 'เลือกแล้ว' : 'จำนวนภาพ' }}
                 </p>
                 <p class="text-2xl font-semibold text-[#171717]">
-                  {{ selectedFinalImageIds.length }} / {{ order.packageImageCount }}
+                  {{ order.orderStatus === 'waiting_selection' ? selectedFinalImageIds.length : finalImages.length }} / {{ order.packageImageCount }}
                 </p>
               </div>
             </div>
 
             <div class="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div
-                v-for="img in aiGeneratedImages"
+                v-for="img in (order.orderStatus === 'waiting_selection' ? aiGeneratedImages : finalImages)"
                 :key="img.orderImageId"
-                class="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[16px] border transition duration-200"
-                :class="selectedFinalImageIds.includes(img.orderImageId) ? 'border-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)]' : 'border-black/[0.06] hover:border-black/[0.10]'"
-                @click="toggleImageSelection(img.orderImageId)"
+                class="group relative aspect-[4/3] overflow-hidden rounded-[16px] border transition duration-200"
+                :class="[
+                  order.orderStatus === 'waiting_selection' ? 'cursor-pointer' : '',
+                  (order.orderStatus === 'waiting_selection' && selectedFinalImageIds.includes(img.orderImageId)) || order.orderStatus !== 'waiting_selection'
+                    ? 'border-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)]'
+                    : 'border-black/[0.06] hover:border-black/[0.10]'
+                ]"
+                @click="order.orderStatus === 'waiting_selection' && toggleImageSelection(img.orderImageId)"
               >
                 <img
                   :src="protectedAssetUrl(orderImageEndpoint(img.orderImageId))"
-                  :alt="`ภาพตัวอย่างสำหรับคัดเลือก ${img.orderImageId}`"
+                  :alt="`ภาพตัวอย่าง ${img.orderImageId}`"
                   class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                 >
                 <div
-                  v-if="selectedFinalImageIds.includes(img.orderImageId)"
+                  v-if="(order.orderStatus === 'waiting_selection' && selectedFinalImageIds.includes(img.orderImageId)) || order.orderStatus !== 'waiting_selection'"
                   class="absolute inset-0 flex items-center justify-center bg-black/20"
                 >
                   <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
@@ -745,7 +753,7 @@ const formatDeliveryDate = (dateStr?: string) => {
               </div>
             </div>
 
-            <div class="flex flex-col gap-4 border-t border-black/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div v-if="order.orderStatus === 'waiting_selection'" class="flex flex-col gap-4 border-t border-black/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p
                 v-if="submitSelectionError"
                 class="text-sm font-semibold text-[#B93B3B]"

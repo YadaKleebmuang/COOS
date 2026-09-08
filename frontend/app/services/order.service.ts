@@ -57,7 +57,7 @@ export const orderService = {
    */
   async getOrderById(id: string | number): Promise<OrderDetail> {
     const { apiFetch } = useApi()
-    return await apiFetch<OrderDetail>(`/orders/${id}`)
+    return await apiFetch<OrderDetail>(`/orders/${id}`, { cache: 'no-store' })
   },
 
   /**
@@ -165,6 +165,31 @@ export const orderService = {
     const { apiFetch } = useApi()
     return await apiFetch(`/orders/${orderId}/images`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  },
+
+  /**
+   * แก้ไขรูปภาพ Draft (Editor)
+   */
+  async updateOrderImage(
+    orderId: number,
+    imageId: number,
+    payload: {
+      imageUrl?: string;
+      imageThumbnailUrl?: string;
+      aiEngine?: string;
+      positivePrompt?: string;
+      negativePrompt?: string;
+      cfgScale?: number;
+      steps?: number;
+      seed?: number;
+    }
+  ): Promise<any> {
+    const { apiFetch } = useApi()
+    return await apiFetch(`/orders/${orderId}/images/${imageId}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
