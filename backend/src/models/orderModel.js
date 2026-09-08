@@ -323,6 +323,76 @@ exports.addOrderImage = async (orderId, imageData) => {
   return result.insertId;
 };
 
+// 9.5 Find Image By ID
+exports.findImageById = async (imageId) => {
+  const [rows] = await pool.query(
+    "SELECT * FROM orderImages WHERE orderImageId = ?",
+    [imageId]
+  );
+  return rows[0];
+};
+
+// 9.6 Update Order Image (Draft / Generated)
+exports.updateOrderImage = async (imageId, updateData) => {
+  const {
+    imageUrl,
+    imageThumbnailUrl,
+    aiEngine,
+    positivePrompt,
+    negativePrompt,
+    cfgScale,
+    steps,
+    seed
+  } = updateData;
+
+  const updates = [];
+  const params = [];
+
+  if (imageUrl !== undefined) {
+    updates.push("imageUrl = ?");
+    params.push(imageUrl);
+  }
+  if (imageThumbnailUrl !== undefined) {
+    updates.push("imageThumbnailUrl = ?");
+    params.push(imageThumbnailUrl);
+  }
+  if (aiEngine !== undefined) {
+    updates.push("aiEngine = ?");
+    params.push(aiEngine);
+  }
+  if (positivePrompt !== undefined) {
+    updates.push("positivePrompt = ?");
+    params.push(positivePrompt);
+  }
+  if (negativePrompt !== undefined) {
+    updates.push("negativePrompt = ?");
+    params.push(negativePrompt);
+  }
+  if (cfgScale !== undefined) {
+    updates.push("cfgScale = ?");
+    params.push(cfgScale);
+  }
+  if (steps !== undefined) {
+    updates.push("steps = ?");
+    params.push(steps);
+  }
+  if (seed !== undefined) {
+    updates.push("seed = ?");
+    params.push(seed);
+  }
+
+  if (updates.length === 0) return true;
+
+  params.push(imageId);
+
+  const [result] = await pool.query(
+    `UPDATE orderImages SET ${updates.join(", ")} WHERE orderImageId = ?`,
+    params
+  );
+
+  return result.affectedRows > 0;
+};
+
 // 10. Add Payment Slip
 exports.addPayment = async (paymentData) => {
   const { orderId, paymentType, paymentAmount, paymentSlipUrl } = paymentData;

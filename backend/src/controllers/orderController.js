@@ -344,8 +344,73 @@ exports.uploadImage = async (req, res, next) => {
     const imageId = await OrderModel.addOrderImage(orderId, imagePayload);
 
     res.status(201).json({
-      message: "อัปโหลดรูปภาพเข้าออเดอร์สำเร็จ",
+      message: "อัปโหลดรูปภาพสำเร็จ",
       imageId,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 6.5 PATCH /api/v1/orders/:id/images/:imageId (Update Image for order - Editor only)
+exports.updateImage = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    const orderId = Number(req.params.id);
+    const imageId = Number(req.params.imageId);
+    const {
+      imageUrl,
+      imageThumbnailUrl,
+      aiEngine,
+      positivePrompt,
+      negativePrompt,
+      cfgScale,
+      steps,
+      seed,
+    } = req.body;
+
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
+    }
+
+    if (userRole === "editor") {
+      if (Number(order.editorId) !== Number(userId)) {
+        return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
+      }
+    } else if (userRole === "customer") {
+      return res.status(403).json({ message: "ลูกค้าไม่สามารถแก้ไขรูปภาพได้" });
+    } else if (userRole !== "admin") {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขรูปภาพ" });
+    }
+
+    const image = await OrderModel.findImageById(imageId);
+    if (!image) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพที่ต้องการแก้ไข" });
+    }
+
+    if (Number(image.orderId) !== orderId) {
+      return res.status(400).json({ message: "รูปภาพไม่ได้อยู่ในออเดอร์ที่ระบุ" });
+    }
+
+    if (image.imageType !== "ai_generated") {
+      return res.status(400).json({ message: "แก้ไขได้เฉพาะรูปผลงานประเภท ai_generated เท่านั้น" });
+    }
+
+    const updatePayload = {};
+    if (imageUrl !== undefined) updatePayload.imageUrl = imageUrl;
+    if (imageThumbnailUrl !== undefined) updatePayload.imageThumbnailUrl = imageThumbnailUrl;
+    if (aiEngine !== undefined) updatePayload.aiEngine = aiEngine;
+    if (positivePrompt !== undefined) updatePayload.positivePrompt = positivePrompt;
+    if (negativePrompt !== undefined) updatePayload.negativePrompt = negativePrompt;
+    if (cfgScale !== undefined) updatePayload.cfgScale = cfgScale;
+    if (steps !== undefined) updatePayload.steps = steps;
+    if (seed !== undefined) updatePayload.seed = seed;
+
+    await OrderModel.updateOrderImage(imageId, updatePayload);
+
+    res.status(200).json({
+      message: "แก้ไขข้อมูลรูปภาพสำเร็จ",
     });
   } catch (err) {
     next(err);
