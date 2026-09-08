@@ -180,12 +180,12 @@ const formatDate = (dateStr?: string) => {
           class="grid gap-3"
           :class="sourceImages.length === 1 ? 'max-w-[200px] grid-cols-1' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-5'"
         >
-          <a
+          <button
             v-for="(image, idx) in sourceImages"
             :key="image.previewUrl"
-            :href="image.previewUrl"
-            target="_blank"
-            class="overflow-hidden rounded-[14px] border border-black/5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+            type="button"
+            @click="useImagePreview().openPreview(image.previewUrl)"
+            class="overflow-hidden rounded-[14px] border border-black/5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] block w-full text-left"
             :class="sourceImages.length === 1 ? 'aspect-[4/3]' : 'aspect-square'"
           >
             <img
@@ -193,7 +193,7 @@ const formatDate = (dateStr?: string) => {
               :alt="`รูปต้นฉบับหรือรูปอ้างอิง ${idx + 1}`"
               class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             >
-          </a>
+          </button>
         </div>
         <p
           v-else

@@ -112,18 +112,17 @@ export const useProtectedAsset = () => {
   }
 
   const openProtectedAsset = async (endpoint: string) => {
-    const previewWindow = window.open('', '_blank')
     try {
       const blob = await fetchProtectedBlob(endpoint)
       const objectUrl = URL.createObjectURL(blob)
       transientUrls.add(objectUrl)
-      if (previewWindow) previewWindow.location.href = objectUrl
-      window.setTimeout(() => {
-        URL.revokeObjectURL(objectUrl)
-        transientUrls.delete(objectUrl)
-      }, 60_000)
+
+      const { openPreview } = useImagePreview()
+      openPreview(objectUrl)
+
+      // DO NOT revoke automatically here because the modal stays open on the same page.
+      // We will rely on onBeforeUnmount or the caller to clear transientUrls.
     } catch (error) {
-      previewWindow?.close()
       throw error
     }
   }

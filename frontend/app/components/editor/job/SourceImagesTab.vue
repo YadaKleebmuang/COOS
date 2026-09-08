@@ -47,8 +47,8 @@ const sourceImages = computed(() => {
         <!-- Hover Overlay -->
         <div class="absolute inset-0 bg-gray-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
           <a
-            :href="img.imageUrl"
-            target="_blank"
+            href="#"
+            @click.prevent="useImagePreview().openPreview(img.imageUrl)"
             class="bg-white/95 hover:bg-white text-gray-800 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow flex items-center gap-1.5 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

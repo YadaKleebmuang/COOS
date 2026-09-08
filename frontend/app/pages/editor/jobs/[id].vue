@@ -707,7 +707,6 @@ const breadcrumb = computed(() => [
               >
                 <a
                   href="#"
-                  target="_blank"
                   class="aspect-square w-full block bg-[#F7F7F5]"
                   @click.prevent="openProtectedAsset(orderImageEndpoint(image.orderImageId))"
                 >
