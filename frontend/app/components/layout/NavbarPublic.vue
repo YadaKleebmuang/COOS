@@ -24,6 +24,8 @@ const userRole = useCookie<string | null>('userRole')
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
 const activeSection = ref('home')
+const isScrollingFromClick = ref(false)
+let scrollTimeout: any = null
 
 let observer: IntersectionObserver | null = null
 
@@ -78,8 +80,17 @@ const logout = async () => {
 }
 
 const handleScroll = () => {
+  if (isScrollingFromClick.value) {
+    if (scrollTimeout) clearTimeout(scrollTimeout)
+    scrollTimeout = setTimeout(() => {
+      isScrollingFromClick.value = false
+    }, 150)
+  }
+
   if (route.path === '/' && window.scrollY < 150) {
-    activeSection.value = 'home'
+    if (!isScrollingFromClick.value) {
+      activeSection.value = 'home'
+    }
   }
 }
 
@@ -96,27 +107,32 @@ onMounted(() => {
   // Set up intersection observer for scroll spy
   const options = {
     root: null,
-    rootMargin: '-20% 0px -60% 0px',
+    rootMargin: '-20% 0px -40% 0px',
     threshold: 0
   }
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && !isScrollingFromClick.value) {
         activeSection.value = entry.target.id
       }
     })
   }, options)
 
   const observeElements = () => {
-    const howItWorksEl = document.getElementById('how-it-works')
-    const packagesEl = document.getElementById('packages')
-    if (howItWorksEl) observer?.observe(howItWorksEl)
-    if (packagesEl) observer?.observe(packagesEl)
+    observer?.disconnect()
+    if (route.path !== '/') return
+    
+    setTimeout(() => {
+      const howItWorksEl = document.getElementById('how-it-works')
+      const packagesEl = document.getElementById('packages')
+      if (howItWorksEl) observer?.observe(howItWorksEl)
+      if (packagesEl) observer?.observe(packagesEl)
+    }, 300)
   }
 
-  // Delay slightly to ensure DOM elements are loaded
-  setTimeout(observeElements, 500)
+  // Delay slightly to ensure DOM elements are loaded initially
+  observeElements()
 
   // Watch hash/route changes
   watch(
@@ -125,12 +141,21 @@ onMounted(() => {
       if (path !== '/') {
         activeSection.value = (path as string).replace('/', '')
       } else {
+        observeElements()
         if (!hash) {
           if (window.scrollY < 300) {
-            activeSection.value = 'home'
+            if (!isScrollingFromClick.value) {
+              activeSection.value = 'home'
+            }
           }
         } else {
+          isScrollingFromClick.value = true
           activeSection.value = (hash as string).replace('#', '')
+          
+          if (scrollTimeout) clearTimeout(scrollTimeout)
+          scrollTimeout = setTimeout(() => {
+            isScrollingFromClick.value = false
+          }, 800)
         }
       }
     },

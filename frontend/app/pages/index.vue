@@ -735,7 +735,7 @@ onUnmounted(() => {
          ======================================================== -->
     <section
       id="how-it-works"
-      class="pt-20 sm:pt-28 pb-10 reveal-init"
+      class="scroll-mt-24 pt-20 sm:pt-28 pb-10 reveal-init"
     >
       <div class="coos-shell text-center">
         <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400 mb-3 font-mono">
@@ -874,7 +874,7 @@ onUnmounted(() => {
          ======================================================== -->
     <section
       id="packages"
-      class="pt-20 sm:pt-28 pb-10 reveal-init"
+      class="scroll-mt-24 pt-20 sm:pt-28 pb-10 reveal-init"
     >
       <div class="coos-shell text-center">
         <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400 mb-3 font-mono">
