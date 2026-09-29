@@ -144,7 +144,7 @@ const confirmVerify = async () => {
 }
 
 // ── Helpers ────────────────────────────────────────────────────
-const formatPrice = (n: number) => `฿${n.toLocaleString("th-TH")}`
+const formatPrice = (n: number) => `${n.toLocaleString("th-TH")}`
 const formatDate = (d: string) => new Date(d).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" })
 
 const statusConfig: Record<string, { label: string; classes: string }> = {
