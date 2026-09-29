@@ -193,14 +193,13 @@ const formatPrice = (n: number) =>
             <label for="order-date" class="mb-1.5 block text-[13px] font-bold text-[#171717]">
               วันที่ต้องการรับงาน <span class="text-[#B93B3B]">*</span>
             </label>
-            <input
+            <BaseCalendar
               id="order-date"
               v-model="form.orderRequiredDate"
-              type="date"
               :min="minDate"
-              required
-              class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
-            >
+              placeholder="เลือกวันที่ต้องการรับงาน"
+              hide-today-button
+            />
             <p class="mt-1.5 text-[12px] font-medium text-[#666666]">
               ใช้สำหรับจัดคิวงานและประเมินกำหนดส่งมอบ
             </p>

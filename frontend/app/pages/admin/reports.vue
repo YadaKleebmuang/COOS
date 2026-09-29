@@ -26,95 +26,7 @@ const loading = ref(true)
 const dateFrom = ref(getCurrentYearFirstDay())
 const dateTo = ref(getLocalDateString())
 
-const activeCalendar = ref<"from" | "to" | null>(null);
-const calendarMonth = ref(new Date().getMonth());
-const calendarYear = ref(new Date().getFullYear());
-
-const daysOfWeek = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-
-const toggleCalendar = (type: "from" | "to") => {
-  if (activeCalendar.value === type) {
-    activeCalendar.value = null;
-  } else {
-    activeCalendar.value = type;
-    const dateVal = type === "from" ? dateFrom.value : dateTo.value;
-    if (dateVal) {
-      const [y, m, d] = dateVal.split("-");
-      calendarYear.value = parseInt(y, 10);
-      calendarMonth.value = parseInt(m, 10) - 1;
-    } else {
-      const d = new Date();
-      calendarYear.value = d.getFullYear();
-      calendarMonth.value = d.getMonth();
-    }
-  }
-};
-
-const closeCalendar = () => {
-  activeCalendar.value = null;
-};
-
-const calendarDays = computed(() => {
-  const days = [];
-  const year = calendarYear.value;
-  const month = calendarMonth.value;
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  for (let i = firstDay - 1; i >= 0; i--) {
-    days.push({ day: daysInPrevMonth - i, isCurrentMonth: false, dateStr: `${month === 0 ? year - 1 : year}-${String(month === 0 ? 12 : month).padStart(2, "0")}-${String(daysInPrevMonth - i).padStart(2, "0")}` });
-  }
-  
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push({ day: i, isCurrentMonth: true, dateStr: `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}` });
-  }
-  
-  const remaining = 42 - days.length;
-  for (let i = 1; i <= remaining; i++) {
-    days.push({ day: i, isCurrentMonth: false, dateStr: `${month === 11 ? year + 1 : year}-${String(month === 11 ? 1 : month + 2).padStart(2, "0")}-${String(i).padStart(2, "0")}` });
-  }
-  
-  return days;
-});
-
-const prevMonth = () => {
-  if (calendarMonth.value === 0) {
-    calendarMonth.value = 11;
-    calendarYear.value--;
-  } else {
-    calendarMonth.value--;
-  }
-};
-
-const nextMonth = () => {
-  if (calendarMonth.value === 11) {
-    calendarMonth.value = 0;
-    calendarYear.value++;
-  } else {
-    calendarMonth.value++;
-  }
-};
-
-const selectDate = (dateStr: string) => {
-  if (activeCalendar.value === "from") {
-    dateFrom.value = dateStr;
-  } else if (activeCalendar.value === "to") {
-    dateTo.value = dateStr;
-  }
-  closeCalendar();
-};
-
-const setTodayAction = () => {
-  const todayStr = getLocalDateString();
-  if (activeCalendar.value === "from") {
-    dateFrom.value = todayStr;
-  } else if (activeCalendar.value === "to") {
-    dateTo.value = todayStr;
-  }
-  closeCalendar();
-};
 
 const formatDisplayDate = (dateStr: string) => {
   if (!dateStr) return "เลือกวันที่";
@@ -403,84 +315,11 @@ const statCards = computed(() => [
     <div class="relative z-30 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] px-6 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-wrap items-center gap-4 reports-no-print">
       <p class="text-[13px] font-semibold text-[#171717]">ช่วงเวลา:</p>
 
-      <!-- Click outside overlay -->
-      <div v-if="activeCalendar" @click="closeCalendar" class="fixed inset-0 z-40 cursor-default"></div>
-
       <!-- FROM Field -->
-      <div class="relative z-50">
-        <div @click="toggleCalendar('from')" class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 hover:bg-white hover:border-black/[0.12] transition-all cursor-pointer">
-          <span class="text-xs font-medium text-[#666666]">จาก</span>
-          <div class="text-xs font-medium text-[#171717] min-w-[80px]">{{ formatDisplayDate(dateFrom) }}</div>
-        </div>
-        
-        <!-- FROM Calendar -->
-        <div v-if="activeCalendar === 'from'" class="absolute top-full left-0 mt-2 bg-white border border-black/[0.06] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] p-4 w-[280px]">
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
-            <button @click.stop="prevMonth" class="p-1 hover:bg-[#F7F7F5] rounded-full transition-colors text-[#171717]" aria-label="Previous month">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <div class="text-[13px] font-semibold text-[#171717]">{{ monthNames[calendarMonth] }} {{ calendarYear + 543 }}</div>
-            <button @click.stop="nextMonth" class="p-1 hover:bg-[#F7F7F5] rounded-full transition-colors text-[#171717]" aria-label="Next month">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
-          </div>
-          <!-- Days of Week -->
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            <div v-for="d in daysOfWeek" :key="d" class="text-[11px] font-semibold text-[#666666]">{{ d }}</div>
-          </div>
-          <!-- Days -->
-          <div class="grid grid-cols-7 gap-1">
-            <button v-for="d in calendarDays" :key="d.dateStr" @click.stop="selectDate(d.dateStr)" class="h-8 rounded-full flex items-center justify-center text-[12px] font-medium transition-all" :class="{'bg-[#171717] text-white': dateFrom === d.dateStr, 'text-[#171717] hover:bg-[#F7F7F5]': dateFrom !== d.dateStr && d.isCurrentMonth, 'text-[#9A9A95] hover:bg-[#F7F7F5]': !d.isCurrentMonth, 'border border-black/[0.06]': getLocalDateString() === d.dateStr && dateFrom !== d.dateStr}">
-              {{ d.day }}
-            </button>
-          </div>
-          <!-- Footer Action -->
-          <div class="mt-4 pt-3 border-t border-black/[0.06] text-center">
-            <button @click.stop="setTodayAction" class="text-[12px] font-medium text-[#171717] hover:bg-[#F7F7F5] px-4 py-1.5 rounded-lg transition-colors border border-transparent hover:border-black/[0.06]">
-              วันนี้
-            </button>
-          </div>
-        </div>
-      </div>
+      <BaseCalendar v-model="dateFrom" variant="compact" label="จาก" />
 
       <!-- TO Field -->
-      <div class="relative z-50">
-        <div @click="toggleCalendar('to')" class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 hover:bg-white hover:border-black/[0.12] transition-all cursor-pointer">
-          <span class="text-xs font-medium text-[#666666]">ถึง</span>
-          <div class="text-xs font-medium text-[#171717] min-w-[80px]">{{ formatDisplayDate(dateTo) }}</div>
-        </div>
-        
-        <!-- TO Calendar -->
-        <div v-if="activeCalendar === 'to'" class="absolute top-full left-0 mt-2 bg-white border border-black/[0.06] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] p-4 w-[280px]">
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
-            <button @click.stop="prevMonth" class="p-1 hover:bg-[#F7F7F5] rounded-full transition-colors text-[#171717]" aria-label="Previous month">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <div class="text-[13px] font-semibold text-[#171717]">{{ monthNames[calendarMonth] }} {{ calendarYear + 543 }}</div>
-            <button @click.stop="nextMonth" class="p-1 hover:bg-[#F7F7F5] rounded-full transition-colors text-[#171717]" aria-label="Next month">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
-          </div>
-          <!-- Days of Week -->
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-            <div v-for="d in daysOfWeek" :key="d" class="text-[11px] font-semibold text-[#666666]">{{ d }}</div>
-          </div>
-          <!-- Days -->
-          <div class="grid grid-cols-7 gap-1">
-            <button v-for="d in calendarDays" :key="d.dateStr" @click.stop="selectDate(d.dateStr)" class="h-8 rounded-full flex items-center justify-center text-[12px] font-medium transition-all" :class="{'bg-[#171717] text-white': dateTo === d.dateStr, 'text-[#171717] hover:bg-[#F7F7F5]': dateTo !== d.dateStr && d.isCurrentMonth, 'text-[#9A9A95] hover:bg-[#F7F7F5]': !d.isCurrentMonth, 'border border-black/[0.06]': getLocalDateString() === d.dateStr && dateTo !== d.dateStr}">
-              {{ d.day }}
-            </button>
-          </div>
-          <!-- Footer Action -->
-          <div class="mt-4 pt-3 border-t border-black/[0.06] text-center">
-            <button @click.stop="setTodayAction" class="text-[12px] font-medium text-[#171717] hover:bg-[#F7F7F5] px-4 py-1.5 rounded-lg transition-colors border border-transparent hover:border-black/[0.06]">
-              วันนี้
-            </button>
-          </div>
-        </div>
-      </div>
+      <BaseCalendar v-model="dateTo" variant="compact" label="ถึง" />
       
       <button 
         @click="fetchReport" 
