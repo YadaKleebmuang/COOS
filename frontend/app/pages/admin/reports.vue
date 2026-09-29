@@ -188,7 +188,7 @@ const fetchReport = async () => {
       ...data,
       ordersByStatus: data.ordersByStatus?.map((s: any) => ({
         status: s.status,
-        label: s.status === 'completed' ? 'เสร็จสมบูรณ์' : s.status === 'in_progress' ? 'กำลังดำเนินการ' : s.status === 'cancelled' ? 'ยกเลิก' : s.status === 'waiting_deposit' ? 'รอมัดจำ' : s.status === 'waiting_assignment' ? 'รอมอบหมาย' : s.status === 'final_payment' ? 'รอชำระยอดเหลือ' : s.status,
+        label: getThaiStatus(s.status),
         count: s.count
       })) || []
     }
@@ -350,15 +350,17 @@ const statCards = computed(() => [
           <thead class="bg-[#F7F7F5]" style="display: table-header-group;">
             <tr class="border-b border-black/[0.1]">
               <th class="py-1.5 px-3 text-left border-r border-black/[0.1]" style="color: #171717;">นักออกแบบ</th>
-              <th class="py-1.5 px-3 text-center border-r border-black/[0.1]" style="color: #171717;">งานเสร็จ</th>
-              <th class="py-1.5 px-3 text-center" style="color: #171717;">เฉลี่ย (วัน)</th>
+              <th class="py-1.5 px-3 text-center border-r border-black/[0.1]" style="color: #171717;">งานในมือ</th>
+              <th class="py-1.5 px-3 text-center border-r border-black/[0.1]" style="color: #171717;">รอลูกค้า</th>
+              <th class="py-1.5 px-3 text-center" style="color: #171717;">เสร็จสมบูรณ์</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="e in reportData.editorWorkload" :key="e.name" class="border-b border-black/[0.1]" style="break-inside: avoid;">
               <td class="py-1.5 px-3 border-r border-black/[0.1]" style="color: #171717;">{{ e.name }}</td>
-              <td class="py-1.5 px-3 font-number text-center border-r border-black/[0.1]" style="color: #171717;">{{ e.completedJobs || 0 }}</td>
-              <td class="py-1.5 px-3 font-number text-center" style="color: #171717;">{{ Number(e.avgDays || 0).toFixed(1) }}</td>
+              <td class="py-1.5 px-3 font-number text-center border-r border-black/[0.1]" style="color: #171717;">{{ e.inProgressJobs || 0 }}</td>
+              <td class="py-1.5 px-3 font-number text-center border-r border-black/[0.1]" style="color: #171717;">{{ e.pendingCustomerJobs || 0 }}</td>
+              <td class="py-1.5 px-3 font-number text-center" style="color: #171717;">{{ e.completedJobs || 0 }}</td>
             </tr>
           </tbody>
         </table>
@@ -591,22 +593,30 @@ const statCards = computed(() => [
       <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
         <div class="px-6 py-5 border-b border-black/[0.06]">
           <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ปริมาณงาน Editor</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">สรุปงานที่รับผิดชอบและระยะเวลาเฉลี่ยในการทำงาน</p>
+          <p class="text-[13px] font-medium text-[#666666] mt-0.5">สรุปงานที่รับผิดชอบทั้งหมด</p>
         </div>
         <div class="flex-1 overflow-x-auto bg-[#FDFDFB]/30 orders-table-scope">
           <AdminDataTable
-            :columns="[{ key: 'name', label: 'Editor' }, { key: 'completedJobs', label: 'งานเสร็จ', align: 'center' }, { key: 'avgDays', label: 'เฉลี่ย (วัน)', align: 'center' }]"
+            :columns="[
+              { key: 'name', label: 'Editor' }, 
+              { key: 'inProgressJobs', label: 'งานในมือ', align: 'center' }, 
+              { key: 'pendingCustomerJobs', label: 'รอลูกค้า', align: 'center' }, 
+              { key: 'completedJobs', label: 'เสร็จสมบูรณ์', align: 'center' }
+            ]"
             :rows="reportData.editorWorkload"
             row-key="name"
           >
             <template #cell-name="{ value }">
               <span class="text-[13px] font-medium text-[#171717]">{{ value }}</span>
             </template>
-            <template #cell-completedJobs="{ value }">
+            <template #cell-inProgressJobs="{ value }">
               <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
             </template>
-            <template #cell-avgDays="{ value }">
-              <span class="text-[12px] font-medium text-[#666666]">{{ Number(value || 0).toFixed(1) }}</span>
+            <template #cell-pendingCustomerJobs="{ value }">
+              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
+            </template>
+            <template #cell-completedJobs="{ value }">
+              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
             </template>
           </AdminDataTable>
           <div v-if="!reportData.editorWorkload?.length" class="py-12 px-6 text-center border-t border-black/[0.04]">

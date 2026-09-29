@@ -50,10 +50,11 @@ exports.getDashboardStats = async (req, res, next) => {
     // 5. Editor Workload
     const [editorWorkload] = await pool.query(
       `SELECT u.userFirstName as name, 
-              COUNT(o.orderId) as completedJobs, 
-              COALESCE(AVG(DATEDIFF(o.orderUpdatedAt, o.orderCreatedAt)), 0) as avgDays
+              SUM(CASE WHEN o.orderStatus IN ('waiting_to_start', 'in_progress') THEN 1 ELSE 0 END) as inProgressJobs,
+              SUM(CASE WHEN o.orderStatus IN ('waiting_selection', 'waiting_final_payment', 'delivered') THEN 1 ELSE 0 END) as pendingCustomerJobs,
+              SUM(CASE WHEN o.orderStatus = 'completed' THEN 1 ELSE 0 END) as completedJobs
        FROM users u
-       LEFT JOIN orders o ON u.userId = o.editorId AND o.orderStatus = 'completed' ${dateFilter.replace(/orderCreatedAt/g, 'o.orderCreatedAt')}
+       LEFT JOIN orders o ON u.userId = o.editorId ${dateFilter.replace(/orderCreatedAt/g, 'o.orderCreatedAt')}
        WHERE u.userRole = 'editor'
        GROUP BY u.userId`,
       dateParams
