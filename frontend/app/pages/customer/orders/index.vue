@@ -333,7 +333,7 @@ const clearFilters = () => {
               <div class="flex min-w-0 items-center justify-between gap-4 sm:min-w-[120px] sm:flex-col sm:items-end sm:gap-2">
                 <div class="text-left sm:text-right">
                   <p class="text-[15px] font-semibold text-[#171717]">
-                    ฿{{ formatPrice(order.orderTotalPrice) }}
+                    {{ formatPrice(order.orderTotalPrice) }}
                   </p>
                   <p class="text-[11px] font-medium text-[#929292]">
                     ราคาสุทธิ

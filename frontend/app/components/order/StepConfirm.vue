@@ -211,26 +211,26 @@ const formatDate = (dateStr?: string) => {
         <div class="space-y-2 text-[13px] font-medium">
           <div class="flex justify-between gap-4">
             <span class="text-[#666666]">ราคาแพ็กเกจ ({{ selectedPackage?.packageName }})</span>
-            <span class="font-bold text-[#171717]">฿{{ formatPrice(pricePreview.base) }}</span>
+            <span class="font-bold text-[#171717]">{{ formatPrice(pricePreview.base) }}</span>
           </div>
           <div
             v-if="pricePreview.urgent > 0"
             class="flex justify-between gap-4 text-[#171717]"
           >
             <span>ค่าเร่งด่วน</span>
-            <span class="font-bold">+฿{{ formatPrice(pricePreview.urgent) }}</span>
+            <span class="font-bold">+{{ formatPrice(pricePreview.urgent) }}</span>
           </div>
           <div
             v-if="pricePreview.discount > 0"
             class="flex justify-between gap-4 text-[#267A48]"
           >
             <span>ส่วนลด Gallery ({{ selectedPackage?.packageGalleryDiscount }}%)</span>
-            <span class="font-bold">-฿{{ formatPrice(pricePreview.discount) }}</span>
+            <span class="font-bold">-{{ formatPrice(pricePreview.discount) }}</span>
           </div>
           <hr class="my-3 border-black/5">
           <div class="flex justify-between gap-4 text-[18px] font-bold text-[#171717]">
             <span>รวมทั้งหมด</span>
-            <span>฿{{ formatPrice(pricePreview.total) }}</span>
+            <span>{{ formatPrice(pricePreview.total) }}</span>
           </div>
         </div>
         <p class="mt-3 text-[12px] font-medium text-[#929292]">

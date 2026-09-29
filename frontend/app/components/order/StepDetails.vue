@@ -308,7 +308,7 @@ const formatPrice = (n: number) =>
               v-if="selectedPackage?.packageUrgentPrice"
               class="mt-0.5 text-[12px] font-bold text-[#171717]"
             >
-              +฿{{ formatPrice(selectedPackage.packageUrgentPrice) }}
+              +{{ formatPrice(selectedPackage.packageUrgentPrice) }}
             </p>
             <p
               v-else
@@ -340,7 +340,7 @@ const formatPrice = (n: number) =>
               v-if="selectedPackage"
               class="mt-0.5 text-[12px] font-bold text-[#267A48]"
             >
-              ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด ฿{{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
+              ลด {{ selectedPackage.packageGalleryDiscount }}% (ประหยัด {{ formatPrice(pricePreview.discount || (Number(selectedPackage.packagePrice) * Number(selectedPackage.packageGalleryDiscount)) / 100) }})
             </p>
           </div>
           <button
@@ -368,26 +368,26 @@ const formatPrice = (n: number) =>
       <div class="space-y-2 text-[13px] font-medium">
         <div class="flex justify-between gap-4">
           <span class="text-[#666666]">ราคาแพ็กเกจ ({{ selectedPackage.packageName }})</span>
-          <span class="font-bold text-[#171717]">฿{{ formatPrice(pricePreview.base) }}</span>
+          <span class="font-bold text-[#171717]">{{ formatPrice(pricePreview.base) }}</span>
         </div>
         <div
           v-if="pricePreview.urgent > 0"
           class="flex justify-between gap-4 text-[#171717]"
         >
           <span>ค่าเร่งด่วน</span>
-          <span class="font-bold">+฿{{ formatPrice(pricePreview.urgent) }}</span>
+          <span class="font-bold">+{{ formatPrice(pricePreview.urgent) }}</span>
         </div>
         <div
           v-if="pricePreview.discount > 0"
           class="flex justify-between gap-4 text-[#267A48]"
         >
           <span>ส่วนลด Gallery</span>
-          <span class="font-bold">-฿{{ formatPrice(pricePreview.discount) }}</span>
+          <span class="font-bold">-{{ formatPrice(pricePreview.discount) }}</span>
         </div>
         <hr class="my-3 border-black/5">
         <div class="flex justify-between gap-4 text-[16px] font-bold text-[#171717]">
           <span>รวมโดยประมาณ</span>
-          <span>฿{{ formatPrice(pricePreview.total) }}</span>
+          <span>{{ formatPrice(pricePreview.total) }}</span>
         </div>
       </div>
     </div>

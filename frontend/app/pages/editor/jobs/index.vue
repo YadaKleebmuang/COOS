@@ -89,7 +89,7 @@ const statusLabels: Record<string, string> = {
   cancelled: 'ยกเลิก'
 }
 
-const formatPrice = (value: number) => `฿${Number(value).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`
+const formatPrice = (value: number) => `${Number(value).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`
 const formatDate = (date: string) => date
   ? new Date(date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
   : '—'

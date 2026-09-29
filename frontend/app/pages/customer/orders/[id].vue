@@ -584,7 +584,7 @@ const formatDeliveryDate = (dateStr?: string) => {
                 ยอดรวม
               </p>
               <p class="mt-2 text-[24px] font-semibold leading-none text-[#171717]">
-                ฿{{ formatPrice(order.orderTotalPrice) }}
+                {{ formatPrice(order.orderTotalPrice) }}
               </p>
             </div>
             <div class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
@@ -743,7 +743,7 @@ const formatDeliveryDate = (dateStr?: string) => {
                     ยอดที่ต้องชำระ ({{ paymentInfo.percentage }}%)
                   </p>
                   <p class="text-2xl font-semibold text-[#171717]">
-                    ฿{{ formatPrice(paymentInfo.amount) }}
+                    {{ formatPrice(paymentInfo.amount) }}
                   </p>
                 </div>
               </div>
@@ -844,7 +844,7 @@ const formatDeliveryDate = (dateStr?: string) => {
                         {{ pay.paymentType === 'deposit' ? 'เงินมัดจำ (30%)' : 'เงินส่วนที่เหลือ (70%)' }}
                       </td>
                       <td class="py-4 pr-4 font-semibold text-[#171717]">
-                        ฿{{ formatPrice(pay.paymentAmount) }}
+                        {{ formatPrice(pay.paymentAmount) }}
                       </td>
                       <td class="py-4 pr-4">
                         <button type="button" class="text-xs font-semibold text-[#171717] hover:underline"
@@ -989,18 +989,18 @@ const formatDeliveryDate = (dateStr?: string) => {
                 <div
                   class="flex items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3">
                   <span class="text-sm font-semibold text-[#666666]">ยอดรวม</span><span
-                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(order.orderTotalPrice) }}</span>
+                    class="text-base font-semibold text-[#171717]">{{ formatPrice(order.orderTotalPrice) }}</span>
                 </div>
                 <div
                   class="flex items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3">
                   <span class="text-sm font-semibold text-[#666666]">มัดจำ 30%</span><span
-                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(getDepositAmount(Number(order.orderTotalPrice)))
+                    class="text-base font-semibold text-[#171717]">{{ formatPrice(getDepositAmount(Number(order.orderTotalPrice)))
                     }}</span>
                 </div>
                 <div
                   class="flex items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3">
                   <span class="text-sm font-semibold text-[#666666]">ยอดคงเหลือ 70%</span><span
-                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(getFinalAmount(Number(order.orderTotalPrice)))
+                    class="text-base font-semibold text-[#171717]">{{ formatPrice(getFinalAmount(Number(order.orderTotalPrice)))
                     }}</span>
                 </div>
               </div>

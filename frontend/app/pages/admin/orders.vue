@@ -155,7 +155,7 @@ const confirmVerify = async () => {
 
 // ── Formatters ─────────────────────────────────────────────────
 const formatPrice = (n: number) =>
-  `฿${Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2 })}`
+  `${Number(n).toLocaleString("th-TH", { minimumFractionDigits: 2 })}`
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "—"
