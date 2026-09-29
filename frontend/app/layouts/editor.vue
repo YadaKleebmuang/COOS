@@ -5,16 +5,15 @@ const sidebarOpen = ref(false)
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F7F7F5] font-sans relative overflow-x-hidden text-[#171717]">
+  <div class="min-h-screen bg-gradient-to-br from-[#FFF0F0] via-[#FCFAF8] to-[#FFF4E6] font-sans relative overflow-x-hidden text-[#171717]">
     <Teleport to="body">
       <div class="fixed left-0 right-0 top-0 z-[35] h-[80px] pointer-events-none progressive-blur-layer lg:h-[100px]" />
     </Teleport>
 
     <div class="pointer-events-none fixed inset-0 -z-10">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(255,255,255,0.98),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(255,255,255,0.85),transparent_28%)]" />
-      <div class="absolute left-[-10%] top-[-14%] h-[28rem] w-[28rem] rounded-full bg-[#EDF3FF]/70 blur-[72px]" />
-      <div class="absolute right-[-8%] top-16 h-[28rem] w-[28rem] rounded-full bg-[#F0EEFF]/65 blur-[78px]" />
-      <div class="absolute bottom-[-16%] left-[30%] h-[26rem] w-[32rem] rounded-full bg-white/80 blur-[82px]" />
+      <div class="absolute left-[-10%] top-[-14%] h-[36rem] w-[36rem] rounded-full bg-[#FF9999]/80 blur-[90px]" />
+      <div class="absolute right-[-5%] top-10 h-[36rem] w-[36rem] rounded-full bg-[#FFC233]/70 blur-[100px]" />
+      <div class="absolute bottom-[-20%] left-[20%] h-[40rem] w-[40rem] rounded-full bg-[#FFD699]/40 blur-[100px]" />
     </div>
 
     <LayoutSidebarDashboard
