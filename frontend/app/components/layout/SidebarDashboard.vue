@@ -1,149 +1,77 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed } from 'vue'
 
 const props = defineProps<{
-  role: "customer" | "editor" | "admin"
+  role: 'customer' | 'editor' | 'admin'
+  collapsed?: boolean
 }>()
 
-interface SidebarItem {
-  name: string
-  path: string
-  icon: string
-}
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
 
-const menuItems = computed<SidebarItem[]>(() => {
-  if (props.role === "admin") {
-    return [
-      {
-        name: "แดชบอร์ดภาพรวม",
-        path: "/admin/dashboard",
-        icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-      },
-      {
-        name: "จัดการผู้ใช้",
-        path: "/admin/users",
-        icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-      },
-      {
-        name: "จัดการออเดอร์",
-        path: "/admin/orders",
-        icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-      },
-      {
-        name: "จัดการแพ็กเกจ",
-        path: "/admin/packages",
-        icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-      },
-      {
-        name: "จัดการประเภทงาน",
-        path: "/admin/work-types",
-        icon: "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-      },
-      {
-        name: "จัดการแกลเลอรี",
-        path: "/admin/gallery",
-        icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-      },
-      {
-        name: "จัดการนโยบายร้าน",
-        path: "/admin/policies",
-        icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-      }
-    ]
-  }
+const route = useRoute()
 
-  if (props.role === "editor") {
-    return [
-      {
-        name: "แดชบอร์ด",
-        path: "/editor/dashboard",
-        icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-      },
-      {
-        name: "งานที่ได้รับมอบหมาย",
-        path: "/editor/jobs",
-        icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-      },
-      {
-        name: "บันทึก Prompt",
-        path: "/editor/prompt-notes",
-        icon: "M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-      },
-      {
-        name: "โปรไฟล์",
-        path: "/editor/profile",
-        icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-      }
-    ]
-  }
+const editorMenuItems = [
+  { name: 'แดชบอร์ด', path: '/editor/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+  { name: 'งานที่ได้รับมอบหมาย', path: '/editor/jobs', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+  { name: 'บันทึก Prompt', path: '/editor/prompt-notes', icon: 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' },
+  { name: 'โปรไฟล์', path: '/editor/profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }
+]
 
-  // Default to Customer
-  return [
-    {
-      name: "แดชบอร์ดของฉัน",
-      path: "/customer/dashboard",
-      icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-    },
-    {
-      name: "สั่งแต่งภาพใหม่",
-      path: "/customer/orders/create",
-      icon: "M12 4v16m8-8H4"
-    },
-    {
-      name: "ประวัติออเดอร์",
-      path: "/customer/orders",
-      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-    },
-    {
-      name: "แก้ไขโปรไฟล์",
-      path: "/customer/profile",
-      icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    }
-  ]
-})
+const menuItems = computed(() => props.role === 'editor' ? editorMenuItems : [])
+const isActive = (path: string) => route.path === path || (path !== '/editor/dashboard' && route.path.startsWith(`${path}/`))
 </script>
 
 <template>
-  <aside class="hidden lg:flex w-60 bg-white/84 backdrop-blur-[16px] text-gray-600 min-h-screen flex-col border-r border-[#EFEFEA]/60 flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.015)]">
+  <div
+    v-if="collapsed"
+    class="fixed inset-0 bg-black/40 z-30 lg:hidden"
+    @click="emit('close')"
+  />
 
-    <!-- Brand Logo -->
-    <div class="h-16 flex items-center px-5 border-b border-[#EFEFEA]/60 gap-2.5 flex-shrink-0">
-      <div class="w-7 h-7 rounded-lg bg-[#171717] flex items-center justify-center text-white flex-shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div>
-        <p class="text-sm font-bold text-[#171717] leading-none">COOS Studio</p>
-        <p class="text-[10px] text-[#9A9A95] mt-0.5 uppercase tracking-wider">{{ role === 'editor' ? 'Editor Workspace' : 'Dashboard' }}</p>
-      </div>
+  <aside
+    class="fixed top-0 left-0 h-full w-60 bg-white/70 backdrop-blur-xl border-r border-black/[0.06] flex flex-col z-40 transition-transform duration-300"
+    :class="collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+  >
+    <div class="h-[68px] sm:h-[72px] flex items-center px-6 border-b border-black/[0.06] flex-shrink-0 bg-transparent">
+      <NuxtLink
+        to="/editor/dashboard"
+        class="flex flex-col leading-none text-black"
+        @click="emit('close')"
+      >
+        <span class="text-2xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO <span class="text-[#929292]">EDITOR</span></span>
+      </NuxtLink>
     </div>
 
-    <!-- Navigation List -->
-    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-4">
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-5">
       <div>
-        <p class="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#9A9A95] select-none">
-          เมนูหลัก
+        <p class="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#929292] select-none">
+          พื้นที่ทำงาน
         </p>
-        <div class="space-y-0.5">
+        <div class="space-y-1">
           <NuxtLink
             v-for="item in menuItems"
             :key="item.path"
             :to="item.path"
-            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 border border-transparent"
-            :class="[
-              $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
-                ? 'bg-[#EFEFEA] text-[#171717] font-bold border-[#EFEFEA] shadow-[0_2px_8px_rgba(0,0,0,0.01)] border border-white/50'
-                : 'text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717]'
-            ]"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 border border-transparent"
+            :class="isActive(item.path) ? 'bg-[#171717]/5 text-[#171717] font-semibold' : 'text-[#666666] font-medium hover:bg-[#171717]/[0.03] hover:text-[#171717]'"
+            @click="emit('close')"
           >
-            <!-- Icon -->
             <svg
               class="w-4 h-4 flex-shrink-0"
-              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-[#171717]' : 'text-[#9A9A95]']"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              :class="isActive(item.path) ? 'text-[#171717]' : 'text-[#929292]'"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.75"
+                :d="item.icon"
+              />
             </svg>
             <span>{{ item.name }}</span>
           </NuxtLink>
@@ -151,9 +79,10 @@ const menuItems = computed<SidebarItem[]>(() => {
       </div>
     </nav>
 
-    <!-- Footer -->
     <div class="px-4 py-3 border-t border-[#EFEFEA]/60 flex-shrink-0">
-      <p class="text-[10px] text-[#9A9A95] text-center">COOS © 2025</p>
+      <p class="text-[10px] text-[#9A9A95] text-center">
+        COOS © 2025
+      </p>
     </div>
   </aside>
 </template>

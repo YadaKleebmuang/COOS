@@ -8,9 +8,9 @@ exports.getUsers = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    
+
     const result = await UserModel.findAll({ page, limit });
-    
+
     // เช็คว่ามี data ไหม
     if (!result.data || result.data.length === 0) {
       return res.status(404).json({
@@ -61,7 +61,9 @@ exports.createUser = async (req, res, next) => {
     }
 
     if (!userPhone || !/^[0-9]{10}$/.test(userPhone)) {
-      return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+      return res
+        .status(400)
+        .json({ message: "Phone number must be exactly 10 digits" });
     }
 
     // Hash Password before saving
@@ -97,9 +99,11 @@ exports.updateUser = async (req, res, next) => {
 
     // ถ้ามีการส่ง password มาให้ทำการ hash ก่อนบันทึก
     const updateData = { ...req.body };
-    
+
     if (updateData.userPhone && !/^[0-9]{10}$/.test(updateData.userPhone)) {
-      return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+      return res
+        .status(400)
+        .json({ message: "Phone number must be exactly 10 digits" });
     }
 
     if (updateData.userPassword) {
@@ -132,7 +136,12 @@ exports.deleteUser = async (req, res, next) => {
     const editorOrders = await OrderModel.findAll({ editorId: userId });
 
     if (customerOrders.length > 0 || editorOrders.length > 0) {
-      return res.status(400).json({ message: "ไม่สามารถลบผู้ใช้นี้ได้ เนื่องจากมีประวัติคำสั่งซื้อผูกอยู่" });
+      return res
+        .status(400)
+        .json({
+          message:
+            "ไม่สามารถลบผู้ใช้นี้ได้ เนื่องจากมีประวัติคำสั่งซื้อผูกอยู่",
+        });
     }
 
     // เรียก Model เพื่อลบข้อมูลผู้ใช้
@@ -162,13 +171,26 @@ exports.updateMyProfile = async (req, res, next) => {
     } = req.body;
 
     if (!userFirstName || !userLastName) {
-      return res.status(400).json({ message: "Missing required fields (firstName, lastName)" });
+      return res
+        .status(400)
+        .json({ message: "Missing required fields (firstName, lastName)" });
     }
 
-    // จัดการรูปโปรไฟล์ — ถ้ามีการอัปโหลดไฟล์ใหม่ ใช้ path จาก multer
-    let profileImageUrl = req.body.userProfileImage || null;
+    const currentUser = await UserModel.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // จัดการรูปโปรไฟล์ — ใช้ของเดิมเป็นค่าเริ่มต้น ถ้าอัปโหลดใหม่ถึงใช้ไฟล์ใหม่ (ไม่อนุญาตให้ client ส่ง string มาทับ)
+    let profileImageUrl = currentUser.userProfileImage;
     if (req.file) {
       profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    if (userPhone && !/^[0-9]{10}$/.test(userPhone)) {
+      return res
+        .status(400)
+        .json({ message: "Phone number must be exactly 10 digits" });
     }
 
     // จัดการ contactChannels — multipart form ส่งมาเป็น string
@@ -179,8 +201,19 @@ exports.updateMyProfile = async (req, res, next) => {
           typeof userContactChannels === "string"
             ? JSON.parse(userContactChannels)
             : userContactChannels;
+
+        if (
+          parsedContactChannels.tel &&
+          !/^[0-9]{10}$/.test(parsedContactChannels.tel)
+        ) {
+          return res
+            .status(400)
+            .json({ message: "Contact channel tel must be exactly 10 digits" });
+        }
       } catch {
-        return res.status(400).json({ message: "userContactChannels must be valid JSON" });
+        return res
+          .status(400)
+          .json({ message: "userContactChannels must be valid JSON" });
       }
     }
 
@@ -254,11 +287,15 @@ exports.updateMyPassword = async (req, res, next) => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Missing oldPassword or newPassword" });
+      return res
+        .status(400)
+        .json({ message: "Missing oldPassword or newPassword" });
     }
 
     if (newPassword.length < 8) {
-      return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 8 characters long" });
     }
 
     const user = await UserModel.findById(userId);
@@ -266,9 +303,14 @@ exports.updateMyPassword = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isMatch = await bcrypt.compare(oldPassword, user.userPassword);
+    const userWithPassword = await UserModel.findPasswordById(userId);
+
+    const isMatch = await bcrypt.compare(
+      oldPassword,
+      userWithPassword.userPassword,
+    );
     if (!isMatch) {
-      return res.status(401).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
+      return res.status(400).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);

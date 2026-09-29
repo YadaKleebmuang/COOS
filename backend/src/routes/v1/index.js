@@ -12,12 +12,14 @@ const reportRoutes = require("./reports.route");
 const settingRoutes = require("./settings.route");
 const fileRoutes = require("./files.route");
 const tagRoutes = require("./tag.route");
+const mediaRoutes = require("./media.route");
 const authMiddleware = require("../../middlewares/auth.middleware");
 
 const router = express.Router();
 
 // index คือการรวบรวม route ย่อยทั้งหมดไว้
 router.use("/auth", auth);
+router.use("/media", mediaRoutes);
 
 // Public routes — ไม่ต้อง login สำหรับ GET (admin routes ป้องกันด้วย middleware ที่ route level)
 router.use("/gallery-images", galleryImageRoutes);

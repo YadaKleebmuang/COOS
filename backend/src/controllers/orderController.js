@@ -16,12 +16,12 @@ const isValidTransition = (from, to, role) => {
   const customerTransitions = {
     waiting_deposit: ["cancelled"],
     waiting_selection: ["waiting_final_payment"],
+    delivered: ["completed"],
   };
 
   const editorTransitions = {
     waiting_to_start: ["in_progress"],
     in_progress: ["waiting_selection"],
-    delivered: ["completed"],
   };
 
   if (role === "customer") {
@@ -76,11 +76,19 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ message: "แพ็กเกจนี้ปิดการใช้งานชั่วคราว" });
     }
 
+    // Validate string lengths to prevent DB ER_DATA_TOO_LONG
+    if (orderStyle && orderStyle.length > 255) {
+      return res.status(400).json({ message: "ข้อมูลสไตล์ภาพมีความยาวเกินที่กำหนด กรุณาตรวจสอบข้อมูลอีกครั้ง" });
+    }
+    if (orderColorTone && orderColorTone.length > 255) {
+      return res.status(400).json({ message: "ข้อมูลโทนสีมีความยาวเกินที่กำหนด กรุณาตรวจสอบข้อมูลอีกครั้ง" });
+    }
+
     // Dynamic price calculation on backend
     const orderBasePrice = Number(packageItem.packagePrice);
     const orderUrgentPrice = orderIsUrgent ? Number(packageItem.packageUrgentPrice || 0) : 0.00;
-    const orderDiscount = orderIsGalleryAllowed 
-      ? (orderBasePrice * Number(packageItem.packageGalleryDiscount || 20.00)) / 100 
+    const orderDiscount = orderIsGalleryAllowed
+      ? (orderBasePrice * Number(packageItem.packageGalleryDiscount || 20.00)) / 100
       : 0.00;
     const orderTotalPrice = orderBasePrice + orderUrgentPrice - orderDiscount;
 
@@ -143,6 +151,22 @@ exports.getAll = async (req, res, next) => {
 
     const result = await OrderModel.findAll({ customerId, editorId, status, page, limit });
     res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/v1/orders/prompt-notes (Editor draft prompt library)
+exports.getPromptNotes = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะ Editor เท่านั้นที่สามารถดูบันทึก Prompt ได้" });
+    }
+
+    const promptNotes = await OrderModel.findPromptNotesByEditor(userId);
+    res.status(200).json({ data: promptNotes });
   } catch (err) {
     next(err);
   }
@@ -320,8 +344,73 @@ exports.uploadImage = async (req, res, next) => {
     const imageId = await OrderModel.addOrderImage(orderId, imagePayload);
 
     res.status(201).json({
-      message: "อัปโหลดรูปภาพเข้าออเดอร์สำเร็จ",
+      message: "อัปโหลดรูปภาพสำเร็จ",
       imageId,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 6.5 PATCH /api/v1/orders/:id/images/:imageId (Update Image for order - Editor only)
+exports.updateImage = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    const orderId = Number(req.params.id);
+    const imageId = Number(req.params.imageId);
+    const {
+      imageUrl,
+      imageThumbnailUrl,
+      aiEngine,
+      positivePrompt,
+      negativePrompt,
+      cfgScale,
+      steps,
+      seed,
+    } = req.body;
+
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "ไม่พบออเดอร์นี้" });
+    }
+
+    if (userRole === "editor") {
+      if (Number(order.editorId) !== Number(userId)) {
+        return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงออเดอร์นี้" });
+      }
+    } else if (userRole === "customer") {
+      return res.status(403).json({ message: "ลูกค้าไม่สามารถแก้ไขรูปภาพได้" });
+    } else if (userRole !== "admin") {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขรูปภาพ" });
+    }
+
+    const image = await OrderModel.findImageById(imageId);
+    if (!image) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพที่ต้องการแก้ไข" });
+    }
+
+    if (Number(image.orderId) !== orderId) {
+      return res.status(400).json({ message: "รูปภาพไม่ได้อยู่ในออเดอร์ที่ระบุ" });
+    }
+
+    if (image.imageType !== "ai_generated") {
+      return res.status(400).json({ message: "แก้ไขได้เฉพาะรูปผลงานประเภท ai_generated เท่านั้น" });
+    }
+
+    const updatePayload = {};
+    if (imageUrl !== undefined) updatePayload.imageUrl = imageUrl;
+    if (imageThumbnailUrl !== undefined) updatePayload.imageThumbnailUrl = imageThumbnailUrl;
+    if (aiEngine !== undefined) updatePayload.aiEngine = aiEngine;
+    if (positivePrompt !== undefined) updatePayload.positivePrompt = positivePrompt;
+    if (negativePrompt !== undefined) updatePayload.negativePrompt = negativePrompt;
+    if (cfgScale !== undefined) updatePayload.cfgScale = cfgScale;
+    if (steps !== undefined) updatePayload.steps = steps;
+    if (seed !== undefined) updatePayload.seed = seed;
+
+    await OrderModel.updateOrderImage(imageId, updatePayload);
+
+    res.status(200).json({
+      message: "แก้ไขข้อมูลรูปภาพสำเร็จ",
     });
   } catch (err) {
     next(err);
@@ -357,7 +446,7 @@ exports.submitPayment = async (req, res, next) => {
     const expectedFinal   = Math.round(order.orderTotalPrice * 0.70 * 100) / 100;
     const expected = paymentType === "deposit" ? expectedDeposit : expectedFinal;
     const submitted = Number(paymentAmount);
-    
+
     if (Math.abs(submitted - expected) > 1) { // tolerance 1 บาท
       return res.status(400).json({ message: `ยอดชำระไม่ถูกต้อง ควรเป็น ${expected} บาท` });
     }
@@ -447,7 +536,7 @@ exports.selectImages = async (req, res, next) => {
     }
 
     if (selectedImageIds.length > order.packageImageCount) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `คุณเลือกรูปเกินโควตา แพ็กเกจของคุณเลือกได้สูงสุด ${order.packageImageCount} ภาพ`
       });
     }
@@ -464,3 +553,76 @@ exports.selectImages = async (req, res, next) => {
   }
 };
 
+// 10. PATCH /api/v1/orders/:id/images/:imageId/gallery-metadata
+exports.updateGalleryMetadata = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะผู้แต่งภาพที่สามารถอัปเดตข้อมูล Gallery ได้" });
+    }
+
+    const { id: orderId, imageId } = req.params;
+    const { tagIds } = req.body;
+
+    // 1. Validate Order exists and assigned to Editor
+    const order = await OrderModel.findById(orderId);
+    if (!order) return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+    if (order.editorId !== userId) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์จัดการข้อมูล Gallery ในออเดอร์นี้" });
+    }
+
+    // 2. Validate Image belongs to Order and is 'selected_final'
+    const orderImages = await OrderModel.findImages(orderId);
+    const targetImage = orderImages.find(img => img.orderImageId === parseInt(imageId, 10));
+
+    if (!targetImage) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพในออเดอร์นี้" });
+    }
+    if (targetImage.imageType !== 'selected_final') {
+      return res.status(400).json({ message: "สามารถเพิ่มข้อมูล Gallery ได้เฉพาะรูปภาพที่ลูกค้าเลือก (selected_final) เท่านั้น" });
+    }
+
+    // 3. Update Gallery Metadata via Model
+    try {
+      await OrderModel.updateGalleryMetadata(imageId, tagIds);
+    } catch (err) {
+      if (err.code === "INVALID_TAG") {
+        return res.status(400).json({ message: "One or more tagIds are invalid" });
+      }
+      throw err;
+    }
+
+    res.status(200).json({ message: "บันทึกข้อมูล Gallery สำเร็จ" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// 11. GET /api/v1/orders/:id/images/:imageId/gallery-metadata
+exports.getGalleryMetadata = async (req, res, next) => {
+  try {
+    const { userId, userRole } = req.session;
+    if (userRole !== "editor") {
+      return res.status(403).json({ message: "เฉพาะผู้แต่งภาพที่สามารถดูข้อมูล Gallery ได้" });
+    }
+
+    const { id: orderId, imageId } = req.params;
+
+    // 1. Validate Order
+    const order = await OrderModel.findById(orderId);
+    if (!order) return res.status(404).json({ message: "ไม่พบคำสั่งซื้อ" });
+    if (order.editorId !== userId) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์จัดการข้อมูล Gallery ในออเดอร์นี้" });
+    }
+
+    // 2. Fetch metadata
+    const metadata = await OrderModel.getGalleryMetadata(imageId);
+    if (!metadata) {
+      return res.status(404).json({ message: "ไม่พบรูปภาพนี้" });
+    }
+
+    res.status(200).json(metadata);
+  } catch (err) {
+    next(err);
+  }
+};

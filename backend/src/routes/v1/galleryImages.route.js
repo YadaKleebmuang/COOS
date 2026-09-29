@@ -7,10 +7,15 @@ const { validateMagicBytes } = require("../../middlewares/upload.middleware");
 
 const router = express.Router();
 
+const optionalAuth = (req, res, next) => {
+  if (!req.headers.authorization) return next();
+  return authMiddleware(req, res, next);
+};
+
 // Public routes — ไม่ต้อง login
-router.get("/", controller.getGalleryImages);
+router.get("/", optionalAuth, controller.getGalleryImages);
 router.get("/tags", controller.getTags);
-router.get("/:id", controller.getGalleryImageById);
+router.get("/:id", optionalAuth, controller.getGalleryImageById);
 
 // Admin only routes — ต้อง login + ต้องเป็น admin
 router.post("/", authMiddleware, adminOnly, uploadGallery.single("image"), validateMagicBytes, controller.createGalleryImage);

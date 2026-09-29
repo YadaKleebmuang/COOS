@@ -1,112 +1,56 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue"
-import { useRoute, useRouter } from "vue-router"
-import { useApi } from "~/composables/useApi"
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useApi } from '~/composables/useApi'
 
+const props = defineProps<{ role: 'admin' | 'editor' }>()
+const emit = defineEmits<{ (e: 'toggle-sidebar'): void }>()
 
-const props = defineProps<{
-  role: "admin" | "editor"
-}>()
-
-const token = useCookie<string | null>("token")
 const route = useRoute()
 const router = useRouter()
 const { apiFetch } = useApi()
+const token = useCookie<string | null>('token')
 
-const currentUser = ref<any>(null)
+interface CurrentUser {
+  userFirstName?: string
+  userLastName?: string
+  userEmail?: string
+}
+
+const currentUser = ref<CurrentUser | null>(null)
 const dropdownOpen = ref(false)
-const mobileMenuOpen = ref(false)
 
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value
-}
-
-// ── Mobile Menu Items (Same as SidebarDashboard) ───────────────────────────
-interface SidebarItem {
-  name: string
-  path: string
-  icon: string
-}
-
-const menuItems = computed<SidebarItem[]>(() => {
-  if (props.role === "admin") {
-    return [
-      { name: "แดชบอร์ดภาพรวม", path: "/admin/dashboard", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-      { name: "จัดการผู้ใช้", path: "/admin/users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
-      { name: "จัดการออเดอร์", path: "/admin/orders", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
-      { name: "จัดการแพ็กเกจ", path: "/admin/packages", icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" },
-      { name: "จัดการประเภทงาน", path: "/admin/work-types", icon: "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" },
-      { name: "จัดการแกลเลอรี", path: "/admin/gallery", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
-      { name: "จัดการนโยบายร้าน", path: "/admin/policies", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" }
-    ]
-  }
-  return [
-    { name: "แดชบอร์ด", path: "/editor/dashboard", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-    { name: "งานที่ได้รับมอบหมาย", path: "/editor/jobs", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-    { name: "บันทึก Prompt", path: "/editor/prompt-notes", icon: "M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" },
-    { name: "โปรไฟล์", path: "/editor/profile", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" }
-  ]
-})
-
-// ── Title Logic ──────────────────────────────────────────────────────────────
 const editorPageTitles: Record<string, string> = {
-  "/editor/dashboard": "แดชบอร์ด",
-  "/editor/jobs": "งานที่ได้รับมอบหมาย",
-  "/editor/profile": "แก้ไขโปรไฟล์"
+  '/editor/dashboard': 'แดชบอร์ด',
+  '/editor/jobs': 'งานที่ได้รับมอบหมาย',
+  '/editor/prompt-notes': 'บันทึก Prompt',
+  '/editor/profile': 'แก้ไขโปรไฟล์'
 }
-const currentPageTitle = computed(() => {
-  if (props.role === "editor") {
-    if (route.path.startsWith("/editor/jobs/") && route.path !== "/editor/jobs") {
-      return "ห้องทำงาน (Workspace)"
-    }
-    return editorPageTitles[route.path] ?? "บันทึก Prompt"
-  }
-  return "Admin Panel"
-})
 
-// ── Dropdown Config ──────────────────────────────────────────────────────────
-const roleConfig = computed(() => {
-  if (props.role === "admin") {
-    return {
-      subLabel: "ผู้ดูแลระบบ",
-      dropdownLinks: [
-        { label: "Dashboard", to: "/admin/dashboard", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-        { label: "จัดการผู้ใช้", to: "/admin/users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" }
-      ]
-    }
-  }
-  return {
-    subLabel: "ช่างแต่งภาพ (Editor)",
-    dropdownLinks: [
-      { label: "แก้ไขโปรไฟล์", to: "/editor/profile", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
-      { label: "งานที่ได้รับมอบหมาย", to: "/editor/jobs", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-      { label: "แดชบอร์ด", to: "/editor/dashboard", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" }
-    ]
-  }
+const currentPageTitle = computed(() => {
+  if (props.role !== 'editor') return 'Admin Panel'
+  if (route.path.startsWith('/editor/jobs/')) return 'ห้องทำงาน (Workspace)'
+  return editorPageTitles[route.path] ?? 'Editor Workspace'
 })
 
 const initials = computed(() => {
-  if (!currentUser.value) return "A"
-  const f = currentUser.value.userFirstName?.[0] ?? ""
-  const l = currentUser.value.userLastName?.[0] ?? ""
-  return (f + l).toUpperCase() || "A"
+  if (!currentUser.value) return 'ED'
+  const first = currentUser.value.userFirstName?.[0] ?? ''
+  const last = currentUser.value.userLastName?.[0] ?? ''
+  return (first + last).toUpperCase() || 'ED'
 })
 
-const checkAuth = async () => {
-  if (token.value) {
-    try {
-      const data = await apiFetch<any>("/users/me")
-      currentUser.value = data
-    }
-    catch (err) {
-      token.value = null
-      currentUser.value = null
-    }
+const fetchUser = async () => {
+  if (!token.value) return
+  try {
+    currentUser.value = await apiFetch<CurrentUser>('/users/me')
+  } catch {
+    token.value = null
+    currentUser.value = null
   }
 }
 
-const toggleDropdown = (e: Event) => {
-  e.stopPropagation()
+const toggleDropdown = (event: Event) => {
+  event.stopPropagation()
   dropdownOpen.value = !dropdownOpen.value
 }
 
@@ -118,83 +62,66 @@ const logout = async () => {
   await useAuth().logout()
   currentUser.value = null
   dropdownOpen.value = false
-  router.push("/")
+  router.push('/')
 }
 
 onMounted(() => {
-  checkAuth()
-  window.addEventListener("click", closeDropdown)
-
-  window.addEventListener("resize", () => {
-    if (window.innerWidth >= 1024) mobileMenuOpen.value = false // lg breakpoint
-  })
+  fetchUser()
+  window.addEventListener('click', closeDropdown)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener("click", closeDropdown)
+  window.removeEventListener('click', closeDropdown)
 })
 </script>
 
 <template>
-  <header class="h-16 bg-white/80 backdrop-blur-[15px] border-b border-[#EFEFEA]/60 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
-    <!-- Left: Hamburger + Title -->
-    <div class="flex items-center gap-3">
-      <!-- Mobile hamburger -->
-      <button aria-label="Toggle mobile menu" @click="toggleMobileMenu" class="lg:hidden p-1.5 rounded-lg text-[#666660] hover:bg-[#EFEFEA]/40 transition-colors">
-        <svg v-if="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+  <div class="h-[68px] sm:h-[72px] shrink-0 sticky top-0 z-30 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-[1440px] mx-auto">
+    <header class="liquid-glass-nav h-16 flex items-center justify-between px-4 sm:px-5 lg:px-6 w-full">
+      <div class="flex items-center gap-3 min-w-0">
+        <button
+          aria-label="เปิดเมนู"
+          class="lg:hidden p-1.5 rounded-lg text-[#666666] hover:bg-[#F3F3F1] transition-colors focus:outline-none"
+          @click="emit('toggle-sidebar')"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          /></svg>
+        </button>
+        <h1 class="text-[13px] font-semibold text-[#171717] tracking-wide truncate">
+          {{ currentPageTitle }}
+        </h1>
+      </div>
 
-      <!-- Page title -->
-      <h1 class="text-sm font-bold text-[#171717]">
-        {{ currentPageTitle }}
-      </h1>
-    </div>
-
-    <!-- Right: Actions + User -->
-    <div class="flex items-center gap-2">
-      <!-- Search shortcut -->
-      <button aria-label="Search" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#EFEFEA]/80 bg-[#F7F7F5]/50 text-[#9A9A95] text-xs hover:border-[#EFEFEA] hover:bg-[#F7F7F5] transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <span>ค้นหางาน...</span>
-        <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 rounded border border-[#EFEFEA] bg-white text-[10px] font-mono text-[#9A9A95]">⌘K</kbd>
-      </button>
-
-      <!-- Notification -->
-      <button aria-label="Notifications" class="p-2 rounded-lg text-[#9A9A95] hover:bg-[#EFEFEA]/40 hover:text-[#171717] transition-colors relative">
-        <svg class="w-4.5 h-4.5 w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </button>
-
-      <!-- Divider -->
-      <div class="w-px h-5 bg-[#EFEFEA]" />
-
-      <!-- User avatar + dropdown -->
-      <div v-if="currentUser" class="flex items-center gap-2.5">
-        <!-- Name -->
+      <div
+        v-if="currentUser"
+        class="flex items-center gap-2.5"
+      >
         <div class="hidden md:block text-right">
-          <p class="text-xs font-bold text-[#171717] leading-tight">
+          <p class="text-[12px] font-semibold text-[#171717] leading-tight">
             {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
           </p>
-          <p class="text-[10px] text-[#9A9A95]">{{ roleConfig.subLabel }}</p>
+          <p class="text-[10px] text-[#929292] mt-0.5">
+            ช่างแต่งภาพ (Editor)
+          </p>
         </div>
 
-        <!-- Avatar + Dropdown -->
         <div class="relative">
           <button
+            aria-label="เปิดเมนูบัญชี"
+            class="w-9 h-9 rounded-full bg-[#171717] text-white text-[11px] font-semibold flex items-center justify-center border border-black/[0.06] shadow-sm hover:bg-black transition-colors"
             @click="toggleDropdown"
-            class="w-8 h-8 rounded-full bg-[#EFEFEA] text-[#171717] text-xs font-bold flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:bg-[#EFEFEA]/80 transition-colors"
           >
             {{ initials }}
           </button>
-
           <Transition
             enter-active-class="transition duration-150 ease-out"
             enter-from-class="opacity-0 scale-95 -translate-y-1"
@@ -205,44 +132,53 @@ onBeforeUnmount(() => {
           >
             <div
               v-if="dropdownOpen"
-              class="absolute right-0 mt-2 w-52 bg-white/90 backdrop-blur-[15px] border border-[#EFEFEA]/80 rounded-[20px] shadow-lg py-1.5 z-50"
+              class="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl border border-black/[0.06] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.10)] py-1.5 z-50"
               @click.stop
             >
-              <!-- User info -->
-              <div class="px-4 py-3 border-b border-[#EFEFEA]/60">
+              <div class="px-4 py-3 border-b border-black/[0.06]">
                 <p class="text-sm font-semibold text-[#171717] truncate">
                   {{ currentUser.userFirstName }} {{ currentUser.userLastName }}
                 </p>
-                <p class="text-[11px] text-[#9A9A95] truncate mt-0.5">
+                <p class="text-[11px] text-[#929292] truncate mt-0.5">
                   {{ currentUser.userEmail }}
                 </p>
               </div>
-
-              <!-- Links -->
               <div class="py-1 px-1.5">
                 <NuxtLink
-                  v-for="link in roleConfig.dropdownLinks"
-                  :key="link.to"
-                  :to="link.to"
+                  to="/editor/profile"
+                  class="flex items-center gap-2.5 px-3 py-2 text-[13px] text-[#666666] hover:bg-[#171717]/[0.03] hover:text-[#171717] rounded-lg transition-colors"
                   @click="closeDropdown"
-                  class="flex items-center gap-2.5 px-3 py-2 text-sm text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717] rounded-lg transition-colors"
                 >
-                  <svg class="w-4 h-4 text-[#9A9A95]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="link.icon" />
-                  </svg>
-                  {{ link.label }}
+                  <svg
+                    class="w-4 h-4 text-[#929292]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  /></svg>
+                  แก้ไขโปรไฟล์
                 </NuxtLink>
               </div>
-
-              <!-- Logout -->
-              <div class="border-t border-[#EFEFEA]/60 pt-1.5 px-1.5">
+              <div class="border-t border-black/[0.06] pt-1.5 px-1.5">
                 <button
+                  class="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50/60 rounded-lg transition-colors"
                   @click="logout"
-                  class="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  /></svg>
                   ออกจากระบบ
                 </button>
               </div>
@@ -250,48 +186,21 @@ onBeforeUnmount(() => {
           </Transition>
         </div>
       </div>
-
-      <!-- Fallback loading skeleton -->
-      <div v-else class="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-    </div>
-
-    <!-- Mobile Menu Slide-down -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-in-out"
-      enter-from-class="max-h-0 opacity-0"
-      enter-to-class="max-h-[500px] opacity-100"
-      leave-active-class="transition-all duration-200 ease-in-out"
-      leave-from-class="max-h-[500px] opacity-100"
-      leave-to-class="max-h-0 opacity-0"
-    >
-      <div v-show="mobileMenuOpen" class="lg:hidden absolute top-16 left-0 w-full overflow-y-auto bg-white/90 backdrop-blur-[15px] border-b border-[#EFEFEA]/60 shadow-lg z-40">
-        <nav class="flex flex-col px-4 py-3 space-y-1 max-h-[80vh]">
-          <p class="px-2 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9A9A95] select-none">
-            เมนูหลัก
-          </p>
-          <NuxtLink
-            v-for="item in menuItems"
-            :key="item.path"
-            :to="item.path"
-            @click="mobileMenuOpen = false"
-            class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 border border-transparent"
-            :class="[
-              $route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0)
-                ? 'bg-[#EFEFEA] text-[#171717] font-bold border-white/50'
-                : 'text-[#666660] hover:bg-[#EFEFEA]/40 hover:text-[#171717]'
-            ]"
-          >
-            <svg
-              class="w-4 h-4 flex-shrink-0"
-              :class="[$route.fullPath === item.path || ($route.path.startsWith(item.path) && item.path !== '/' && item.path.indexOf('?') === -1 && Object.keys($route.query).length === 0) ? 'text-[#171717]' : 'text-[#9A9A95]']"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="item.icon" />
-            </svg>
-            <span>{{ item.name }}</span>
-          </NuxtLink>
-        </nav>
-      </div>
-    </Transition>
-  </header>
+      <div
+        v-else
+        class="w-9 h-9 rounded-full bg-[#EFEFEA] animate-pulse"
+      />
+    </header>
+  </div>
 </template>
+
+<style scoped>
+.liquid-glass-nav {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 9999px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+}
+</style>

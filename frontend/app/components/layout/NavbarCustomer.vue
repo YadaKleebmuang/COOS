@@ -7,6 +7,7 @@ const router = useRouter()
 const { apiFetch } = useApi()
 
 type CustomerUser = {
+  userId?: number
   userFirstName?: string
   userLastName?: string
   userEmail?: string
@@ -14,6 +15,8 @@ type CustomerUser = {
 }
 
 const currentUser = ref<CustomerUser | null>(null)
+const { protectedAssetUrl, syncProtectedAssets } = useProtectedAsset()
+const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 const dropdownOpen = ref(false)
 const mobileMenuOpen = ref(false)
 
@@ -28,6 +31,7 @@ const checkAuth = async () => {
     try {
       const data = await apiFetch<CustomerUser>('/users/me')
       currentUser.value = data
+      await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
     } catch (err) {
       console.error('Auth check failed in NavbarCustomer:', err)
       token.value = null
@@ -74,17 +78,21 @@ onMounted(() => {
   checkAuth()
   window.addEventListener('click', closeDropdown)
   window.addEventListener('resize', closeMobileMenuOnDesktop)
+  window.addEventListener('profile-updated', checkAuth)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', closeDropdown)
   window.removeEventListener('resize', closeMobileMenuOnDesktop)
+  window.removeEventListener('profile-updated', checkAuth)
 })
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 pt-1 sm:pt-2">
-    <div class="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between rounded-[24px] border border-white/65 bg-white/[0.78] px-4 shadow-[0_16px_48px_rgba(0,0,0,0.08)] backdrop-blur-[18px] sm:px-5 lg:px-6">
+  <div class="h-[68px] w-full shrink-0 sm:h-[72px]">
+    <header class="pointer-events-none fixed inset-x-0 top-0 z-[100]">
+      <div class="mx-auto w-full max-w-[1280px] px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+        <div class="liquid-glass-nav pointer-events-auto flex h-16 w-full items-center justify-between px-4 sm:px-5 lg:px-6">
       <!-- Left: Logo -->
       <NuxtLink
         to="/"
@@ -96,14 +104,14 @@ onBeforeUnmount(() => {
       </NuxtLink>
 
       <!-- Center: Nav Links -->
-      <nav class="hidden items-center gap-1 rounded-full border border-black/[0.06] bg-white/70 p-1 shadow-[0_4px_14px_rgba(0,0,0,0.04)] md:flex">
+      <nav class="hidden items-center gap-1 rounded-[22px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] md:flex">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-full px-4 py-2 text-[13px] font-medium text-[#666666] transition-all duration-200 hover:bg-white hover:text-[#171717] lg:px-5"
-          exact-active-class="!bg-[#171717] !text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:!bg-[#171717] hover:!text-white"
-          active-class="!bg-[#171717] !text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] hover:!bg-[#171717] hover:!text-white"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium text-[#666666] transition-all duration-200 hover:bg-white/40 hover:text-[#171717] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/10 lg:px-5"
+          exact-active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
+          active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
         >
           {{ link.label }}
         </NuxtLink>
@@ -134,7 +142,7 @@ onBeforeUnmount(() => {
             <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
               <img
                 v-if="currentUser.userProfileImage"
-                :src="currentUser.userProfileImage"
+                :src="currentUser.userId != null ? protectedAssetUrl(profileEndpoint(currentUser.userId)) : ''"
                 class="h-full w-full object-cover"
                 alt=""
               >
@@ -298,7 +306,7 @@ onBeforeUnmount(() => {
     >
       <div
         v-show="mobileMenuOpen"
-        class="mx-auto mt-3 max-w-[1280px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)] md:hidden"
+        class="liquid-glass-nav pointer-events-auto mx-auto mt-3 max-w-[1280px] overflow-hidden md:hidden"
       >
         <nav class="flex flex-col space-y-1 px-4 pb-4 pt-3">
           <NuxtLink
@@ -315,5 +323,18 @@ onBeforeUnmount(() => {
         </nav>
       </div>
     </Transition>
-  </header>
+      </div>
+    </header>
+  </div>
 </template>
+
+<style scoped>
+.liquid-glass-nav {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border-radius: 29px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+</style>

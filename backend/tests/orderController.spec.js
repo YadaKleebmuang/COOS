@@ -1,6 +1,7 @@
-const { isValidTransition, create } = require('../src/controllers/orderController');
+const { isValidTransition, create, updateStatus } = require('../src/controllers/orderController');
 const PackageModel = require('../src/models/packageModel');
 const OrderModel = require('../src/models/orderModel');
+const { getNextStatusAfterPayment } = jest.requireActual('../src/models/orderModel');
 
 // Mock Models
 jest.mock('../src/models/packageModel');
@@ -19,17 +20,88 @@ describe('Order Controller - Unit Tests', () => {
       expect(isValidTransition('completed', 'waiting_deposit', 'admin')).toBe(false);
     });
 
-    it('should allow customer to cancel before deposit or pay final', () => {
+    it('should allow customer-owned workflow transitions', () => {
       expect(isValidTransition('waiting_deposit', 'cancelled', 'customer')).toBe(true);
       expect(isValidTransition('waiting_selection', 'waiting_final_payment', 'customer')).toBe(true);
+      expect(isValidTransition('delivered', 'completed', 'customer')).toBe(true);
+      expect(isValidTransition('waiting_final_payment', 'completed', 'customer')).toBe(false);
       expect(isValidTransition('in_progress', 'cancelled', 'customer')).toBe(false); // Customer can't cancel if in progress
     });
 
     it('should allow editor to progress workflow', () => {
       expect(isValidTransition('waiting_to_start', 'in_progress', 'editor')).toBe(true);
       expect(isValidTransition('in_progress', 'waiting_selection', 'editor')).toBe(true);
-      expect(isValidTransition('delivered', 'completed', 'editor')).toBe(true);
+      expect(isValidTransition('delivered', 'completed', 'editor')).toBe(false);
       expect(isValidTransition('waiting_deposit', 'in_progress', 'editor')).toBe(false);
+    });
+  });
+
+  describe('getNextStatusAfterPayment()', () => {
+    it('moves an approved final payment to delivered, never completed', () => {
+      expect(getNextStatusAfterPayment('approved', 'final', 'waiting_final_payment', 1102)).toBe('delivered');
+      expect(getNextStatusAfterPayment('approved', 'deposit', 'waiting_deposit', 1102)).toBe('waiting_to_start');
+      expect(getNextStatusAfterPayment('approved', 'deposit', 'waiting_deposit', null)).toBe('waiting_assignment');
+    });
+  });
+
+  describe('updateStatus() - Customer confirms receipt', () => {
+    const createResponse = () => ({
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    });
+
+    it('allows the owning customer and records the authenticated customer as actor', async () => {
+      const req = {
+        session: { userId: 1201, userRole: 'customer' },
+        params: { id: '-6007' },
+        body: { orderStatus: 'completed', logNote: 'ลูกค้ายืนยันรับผลงาน' }
+      };
+      const res = createResponse();
+      const next = jest.fn();
+      OrderModel.findById.mockResolvedValue({ orderId: -6007, customerId: 1201, orderStatus: 'delivered' });
+      OrderModel.updateStatus.mockResolvedValue(true);
+
+      await updateStatus(req, res, next);
+
+      expect(OrderModel.updateStatus).toHaveBeenCalledWith(
+        '-6007',
+        'delivered',
+        'completed',
+        1201,
+        'ลูกค้ายืนยันรับผลงาน'
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('rejects a different customer before writing a workflow log', async () => {
+      const req = {
+        session: { userId: 1202, userRole: 'customer' },
+        params: { id: '-6007' },
+        body: { orderStatus: 'completed' }
+      };
+      const res = createResponse();
+      OrderModel.findById.mockResolvedValue({ orderId: -6007, customerId: 1201, orderStatus: 'delivered' });
+
+      await updateStatus(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(OrderModel.updateStatus).not.toHaveBeenCalled();
+    });
+
+    it('rejects an editor before writing a workflow log', async () => {
+      const req = {
+        session: { userId: 1102, userRole: 'editor' },
+        params: { id: '-6007' },
+        body: { orderStatus: 'completed' }
+      };
+      const res = createResponse();
+      OrderModel.findById.mockResolvedValue({ orderId: -6007, editorId: 1102, orderStatus: 'delivered' });
+
+      await updateStatus(req, res, jest.fn());
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(OrderModel.updateStatus).not.toHaveBeenCalled();
     });
   });
 

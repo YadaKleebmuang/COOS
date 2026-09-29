@@ -4,15 +4,20 @@ const GalleryImageModel = require("../models/galleryImage.model");
 exports.getGalleryImages = async (req, res, next) => {
   try {
     const { workTypeId, tag, all } = req.query;
+    const isAdmin = req.session?.userRole === "admin";
 
     const filters = {
       workTypeId: workTypeId || null,
       tag: tag || null,
-      activeOnly: all !== "true", // ถ้าส่ง ?all=true จะดึงทั้ง active/inactive
+      activeOnly: !(isAdmin && all === "true"),
     };
 
     const images = await GalleryImageModel.findAll(filters);
-    res.status(200).json(images);
+    const mappedImages = images.map(img => ({
+      ...img,
+      tagIds: img.tagIds ? img.tagIds.split(',').map(Number) : []
+    }));
+    res.status(200).json(mappedImages);
   } catch (err) {
     next(err);
   }
@@ -40,13 +45,17 @@ exports.getTags = async (req, res, next) => {
 // GET /gallery-images/:id — ดึงรูปภาพตาม id
 exports.getGalleryImageById = async (req, res, next) => {
   try {
-    const image = await GalleryImageModel.findById(req.params.id);
+    const isAdmin = req.session?.userRole === "admin";
+    const image = await GalleryImageModel.findById(req.params.id, { activeOnly: !isAdmin });
 
     if (!image) {
       return res.status(404).json({ message: "Gallery image not found" });
     }
 
-    res.status(200).json(image);
+    res.status(200).json({
+      ...image,
+      tagIds: image.tagIds ? image.tagIds.split(',').map(Number) : []
+    });
   } catch (err) {
     next(err);
   }
@@ -55,10 +64,16 @@ exports.getGalleryImageById = async (req, res, next) => {
 // POST /gallery-images — สร้างรูปภาพใหม่ (รองรับ file upload)
 exports.createGalleryImage = async (req, res, next) => {
   try {
-    const { workTypeId, imageTitle, imageDescription, imageTags } = req.body;
+    const { workTypeId, imageTitle, imageDescription, tagIds } = req.body;
 
     if (!workTypeId) {
       return res.status(400).json({ message: "workTypeId is required" });
+    }
+
+    if (tagIds !== undefined) {
+      if (!Array.isArray(tagIds) || !tagIds.every(id => typeof id === 'number' && Number.isInteger(id))) {
+        return res.status(400).json({ message: "tagIds must be an array of numeric IDs" });
+      }
     }
 
     // รับ URL จาก multer file upload หรือจาก body
@@ -76,7 +91,7 @@ exports.createGalleryImage = async (req, res, next) => {
       workTypeId,
       imageTitle,
       imageDescription,
-      imageTags,
+      tagIds,
     });
 
     res.status(201).json({
@@ -85,6 +100,9 @@ exports.createGalleryImage = async (req, res, next) => {
       imageUrl,
     });
   } catch (err) {
+    if (err.message === "INVALID_TAG_ID") {
+      return res.status(400).json({ message: "One or more tagIds are invalid" });
+    }
     next(err);
   }
 };
@@ -93,6 +111,12 @@ exports.createGalleryImage = async (req, res, next) => {
 exports.updateGalleryImage = async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    if (req.body.tagIds !== undefined) {
+      if (!Array.isArray(req.body.tagIds) || !req.body.tagIds.every(tid => typeof tid === 'number' && Number.isInteger(tid))) {
+        return res.status(400).json({ message: "tagIds must be an array of numeric IDs" });
+      }
+    }
 
     // ถ้ามีไฟล์ใหม่ ใช้ path จาก multer
     if (req.file) {
@@ -107,6 +131,9 @@ exports.updateGalleryImage = async (req, res, next) => {
 
     res.status(200).json({ message: "Gallery image updated" });
   } catch (err) {
+    if (err.message === "INVALID_TAG_ID") {
+      return res.status(400).json({ message: "One or more tagIds are invalid" });
+    }
     next(err);
   }
 };

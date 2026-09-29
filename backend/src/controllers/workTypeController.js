@@ -1,10 +1,29 @@
 const WorkTypeModel = require("../models/workTypeModel");
 
+const jwt = require("jsonwebtoken");
+const { getJwtSecret } = require("../config/env");
+
 // GET /api/v1/work-types
 exports.getAll = async (req, res, next) => {
   try {
-    const includeInactive =
-      req.query.all === "true" && req.session?.userRole === "admin";
+    let isAdmin = false;
+
+    // ตรวจสอบ JWT token แบบ optional (เนื่องจาก route นี้เป็น public)
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, getJwtSecret());
+
+        if (decoded && decoded.userRole === "admin") {
+          isAdmin = true;
+        }
+      } catch (err) {
+        // ปล่อยผ่านถ้า token ไม่ถูกต้อง (ให้ทำงานเหมือน public)
+      }
+    }
+
+    const includeInactive = req.query.all === "true" && isAdmin;
     const [rows] = await WorkTypeModel.findAll(includeInactive);
 
     if (!rows || rows.length === 0) {
@@ -70,8 +89,13 @@ exports.remove = async (req, res, next) => {
       return res.status(404).json({ message: "ไม่พบประเภทงานนี้" });
     }
 
-    res.status(200).json({ message: "ปิดการใช้งานประเภทงานสำเร็จ" });
+    res.status(200).json({ message: "ลบประเภทงานสำเร็จ" });
   } catch (err) {
+    if (err.code === "ER_ROW_IS_REFERENCED_2" || err.errno === 1451) {
+      return res.status(409).json({
+        message: "ไม่สามารถลบประเภทงานนี้ได้ เนื่องจากมีคำสั่งซื้อหรือข้อมูลแกลเลอรีที่ใช้งานอยู่"
+      });
+    }
     next(err);
   }
 };

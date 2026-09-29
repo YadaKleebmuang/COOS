@@ -34,7 +34,8 @@ exports.findAll = async (filters = {}) => {
 };
 
 // ดึง policy ตาม id
-exports.findById = async (id) => {
+exports.findById = async (id, { activeOnly = true } = {}) => {
+  const activeClause = activeOnly ? " AND policyIsActive = 1" : "";
   const [rows] = await pool.query(
     `SELECT
       policyId,
@@ -45,7 +46,7 @@ exports.findById = async (id) => {
       policyCreatedAt,
       policyUpdatedAt
     FROM policies
-    WHERE policyId = ?`,
+    WHERE policyId = ?${activeClause}`,
     [id]
   );
   return rows[0];

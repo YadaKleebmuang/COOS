@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { useApi } from '~/composables/useApi'
 
 definePageMeta({
@@ -17,6 +17,7 @@ interface ContactChannels {
 }
 
 interface ProfileResponse {
+  userId?: number
   userFirstName?: string
   userLastName?: string
   userEmail?: string
@@ -49,8 +50,25 @@ const profileForm = reactive({
   tel: ''
 })
 
+const persistedProfile = reactive({
+  userFirstName: '',
+  userLastName: '',
+  userPhone: '',
+  userAddress: '',
+  facebook: '',
+  line: '',
+  tel: ''
+})
+
 const profileImageFile = ref<File | null>(null)
 const previewImageUrl = ref('')
+const profileUserId = ref<number | null>(null)
+const isUploadingAvatar = ref(false)
+const avatarSuccessMessage = ref('')
+const avatarErrorMessage = ref('')
+let avatarSuccessTimer: ReturnType<typeof setTimeout> | null = null
+const { protectedAssetUrl, refreshProtectedAsset, syncProtectedAssets } = useProtectedAsset()
+const profileEndpoint = (userId: number) => `/media/users/${userId}/profile`
 
 const getErrorMessage = (err: unknown, fallback: string) =>
   err instanceof Error && err.message ? err.message : fallback
@@ -61,12 +79,20 @@ const fetchProfile = async () => {
   errorMessage.value = ''
   try {
     const data = await apiFetch<ProfileResponse>('/users/me')
+    profileUserId.value = data.userId ?? null
     profileForm.userFirstName = data.userFirstName || ''
     profileForm.userLastName = data.userLastName || ''
     profileForm.userEmail = data.userEmail || ''
     profileForm.userPhone = data.userPhone || ''
     profileForm.userAddress = data.userAddress || ''
     profileForm.userProfileImage = data.userProfileImage || ''
+
+    // Keep persistedProfile in sync with the latest confirmed backend state
+    persistedProfile.userFirstName = data.userFirstName || ''
+    persistedProfile.userLastName = data.userLastName || ''
+    persistedProfile.userPhone = data.userPhone || ''
+    persistedProfile.userAddress = data.userAddress || ''
+    await syncProtectedAssets(data.userProfileImage && data.userId != null ? [profileEndpoint(data.userId)] : [])
 
     // Parse contact channels
     const channels = data.userContactChannels || {}
@@ -84,16 +110,81 @@ onMounted(() => {
   fetchProfile()
 })
 
-const handleImageChange = (event: Event) => {
+const handleImageChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
     if (!file.type.startsWith('image/')) {
-      errorMessage.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
+      avatarErrorMessage.value = 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น'
       return
     }
     profileImageFile.value = file
+    if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
     previewImageUrl.value = URL.createObjectURL(file)
+
+    avatarSuccessMessage.value = ''
+    avatarErrorMessage.value = ''
+    isUploadingAvatar.value = true
+
+    if (avatarSuccessTimer) {
+      clearTimeout(avatarSuccessTimer)
+      avatarSuccessTimer = null
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append('userFirstName', persistedProfile.userFirstName)
+      formData.append('userLastName', persistedProfile.userLastName)
+      formData.append('userPhone', persistedProfile.userPhone)
+      formData.append('userAddress', persistedProfile.userAddress)
+
+      const channels = {
+        facebook: persistedProfile.facebook,
+        line: persistedProfile.line,
+        tel: persistedProfile.tel
+      }
+      formData.append('userContactChannels', JSON.stringify(channels))
+      formData.append('profileImage', profileImageFile.value)
+
+      const config = useRuntimeConfig()
+      const headers = new Headers()
+      if (token.value) {
+        headers.set('Authorization', 'Bearer ' + token.value)
+      }
+
+      const response = await fetch(`${config.public.apiBase}/users/me`, {
+        method: 'PATCH',
+        headers,
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errRes = await response.json().catch((): { message?: string } => ({}))
+        throw new Error(errRes.message || 'บันทึกรูปโปรไฟล์ไม่สำเร็จ')
+      }
+
+      const resData = await response.json() as ProfileSaveResponse
+      if (resData.user) {
+        profileForm.userProfileImage = resData.user.userProfileImage || ''
+      }
+
+      if (profileForm.userProfileImage && profileUserId.value != null) {
+        await refreshProtectedAsset(profileEndpoint(profileUserId.value))
+      }
+
+      avatarSuccessMessage.value = 'เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว'
+
+      avatarSuccessTimer = setTimeout(() => {
+        avatarSuccessMessage.value = ''
+      }, 5000)
+
+      // Update Navbar custom event instead of full page reload for better UX
+      window.dispatchEvent(new Event('profile-updated'))
+    } catch (err: unknown) {
+      avatarErrorMessage.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ')
+    } finally {
+      isUploadingAvatar.value = false
+    }
   }
 }
 
@@ -103,6 +194,18 @@ const saveProfile = async () => {
   errorMessage.value = ''
 
   try {
+    const phoneRegex = /^[0-9]{10}$/
+    if (profileForm.userPhone && !phoneRegex.test(profileForm.userPhone)) {
+      errorMessage.value = 'กรุณากรอกเบอร์โทรศัพท์เป็นตัวเลข 10 หลัก'
+      saving.value = false
+      return
+    }
+    if (profileForm.tel && !phoneRegex.test(profileForm.tel)) {
+      errorMessage.value = 'กรุณากรอกเบอร์ติดต่อเป็นตัวเลข 10 หลัก'
+      saving.value = false
+      return
+    }
+
     const formData = new FormData()
     formData.append('userFirstName', profileForm.userFirstName)
     formData.append('userLastName', profileForm.userLastName)
@@ -146,8 +249,12 @@ const saveProfile = async () => {
     if (resData.user) {
       profileForm.userProfileImage = resData.user.userProfileImage || ''
     }
+    if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
     profileImageFile.value = null
     previewImageUrl.value = ''
+    if (profileForm.userProfileImage && profileUserId.value != null) {
+      await refreshProtectedAsset(profileEndpoint(profileUserId.value))
+    }
 
     // Reload window helper to refresh layout navbar states
     setTimeout(() => {
@@ -160,6 +267,13 @@ const saveProfile = async () => {
   }
 }
 
+onBeforeUnmount(() => {
+  if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+  if (avatarSuccessTimer) {
+    clearTimeout(avatarSuccessTimer)
+  }
+})
+
 // ── Change Password State ──
 const passwordForm = reactive({
   oldPassword: '',
@@ -170,12 +284,24 @@ const passwordSaving = ref(false)
 const passwordSuccess = ref('')
 const passwordError = ref('')
 
+const showOldPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
 
-  if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-    passwordError.value = 'กรุณากรอกข้อมูลให้ครบถ้วน'
+  if (!passwordForm.oldPassword) {
+    passwordError.value = 'กรุณากรอกรหัสผ่านเดิม'
+    return
+  }
+  if (!passwordForm.newPassword) {
+    passwordError.value = 'กรุณากรอกรหัสผ่านใหม่'
+    return
+  }
+  if (!passwordForm.confirmPassword) {
+    passwordError.value = 'กรุณายืนยันรหัสผ่านใหม่'
     return
   }
 
@@ -204,7 +330,7 @@ const changePassword = async () => {
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
   } catch (err: unknown) {
-    passwordError.value = getErrorMessage(err, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน')
+    passwordError.value = getErrorMessage(err, 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง')
   } finally {
     passwordSaving.value = false
   }
@@ -213,26 +339,24 @@ const changePassword = async () => {
 
 <template>
   <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <section class="relative overflow-hidden rounded-[24px] border border-black/[0.06] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] sm:p-8">
-      <div class="pointer-events-none absolute -right-20 -top-24 h-64 w-80 rounded-full bg-[#EDF3FF]/70 blur-[56px]" />
-      <div class="pointer-events-none absolute right-28 top-8 hidden h-44 w-44 rounded-full bg-[#F0EEFF]/70 blur-[54px] lg:block" />
-
-      <div class="relative z-10">
-        <p class="mb-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#666666]">
+    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+    <div class="relative z-10">
+      <!-- Header -->
+      <div class="mb-6 text-center">
+        <p class="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#929292]">
           CUSTOMER PROFILE
         </p>
-        <h1 class="text-[26px] font-semibold leading-[1.3] text-[#171717] sm:text-[30px]">
+        <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
           แก้ไขข้อมูลโปรไฟล์
         </h1>
-        <p class="mt-2 max-w-2xl text-sm font-normal leading-[1.6] text-[#666666]">
+        <p class="mt-1.5 text-[14px] font-medium text-[#666666]">
           อัปเดตข้อมูลส่วนตัว ช่องทางการติดต่อ และรูปโปรไฟล์ของคุณ
         </p>
       </div>
-    </section>
 
     <div
       v-if="loading"
-      class="mt-6 rounded-[24px] border border-black/[0.06] bg-white p-12 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+      class="mt-6 rounded-[24px] border border-black/5 bg-white/60 p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
     >
       <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
       <p class="text-sm font-medium text-[#666666]">
@@ -244,14 +368,14 @@ const changePassword = async () => {
       v-else
       class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]"
     >
-      <aside class="self-start rounded-[20px] border border-black/[0.06] bg-white p-6 text-center shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
+      <aside class="self-start rounded-[24px] border border-black/5 bg-white/60 p-6 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md">
         <p class="mb-5 text-xs font-medium uppercase tracking-[0.22em] text-[#929292]">
           รูปโปรไฟล์
         </p>
 
         <div class="mx-auto w-fit">
           <div class="relative">
-            <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-black/[0.08] bg-[#F3F3F1] shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
+            <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-black/5 bg-white/60 shadow-[0_4px_14px_rgba(0,0,0,0.04)] backdrop-blur-md">
               <img
                 v-if="previewImageUrl"
                 :src="previewImageUrl"
@@ -259,8 +383,8 @@ const changePassword = async () => {
                 class="h-full w-full object-cover"
               >
               <img
-                v-else-if="profileForm.userProfileImage"
-                :src="profileForm.userProfileImage.startsWith('/') ? profileForm.userProfileImage : profileForm.userProfileImage"
+                v-else-if="profileForm.userProfileImage && profileUserId != null"
+                :src="protectedAssetUrl(profileEndpoint(profileUserId))"
                 alt="รูปโปรไฟล์"
                 class="h-full w-full object-cover"
               >
@@ -271,7 +395,7 @@ const changePassword = async () => {
                 {{ profileForm.userFirstName[0] || 'C' }}
               </div>
             </div>
-            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25">
+            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25" :class="{ 'opacity-50 cursor-not-allowed': isUploadingAvatar }">
               <svg
                 class="h-4 w-4"
                 fill="none"
@@ -292,9 +416,16 @@ const changePassword = async () => {
                 type="file"
                 accept="image/*"
                 class="sr-only"
+                :disabled="isUploadingAvatar"
                 @change="handleImageChange"
               >
             </label>
+          </div>
+          <div v-if="avatarSuccessMessage" class="absolute -bottom-8 left-0 right-0 whitespace-nowrap text-center text-xs font-semibold text-[#267A48] bg-[#EDF8F1] px-2 py-1 rounded-md">
+            {{ avatarSuccessMessage }}
+          </div>
+          <div v-if="avatarErrorMessage" class="absolute -bottom-8 left-0 right-0 whitespace-nowrap text-center text-xs font-semibold text-[#B93B3B] bg-[#FDEEEE] px-2 py-1 rounded-md">
+            {{ avatarErrorMessage }}
           </div>
         </div>
 
@@ -323,7 +454,7 @@ const changePassword = async () => {
 
       <div class="space-y-6">
         <form
-          class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:p-6"
+          class="rounded-[24px] border border-black/5 bg-white/60 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
           @submit.prevent="saveProfile"
         >
           <div class="mb-5 border-b border-black/[0.06] pb-4">
@@ -346,7 +477,7 @@ const changePassword = async () => {
                 v-model="profileForm.userFirstName"
                 required
                 type="text"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
             <div>
@@ -359,7 +490,7 @@ const changePassword = async () => {
                 v-model="profileForm.userLastName"
                 required
                 type="text"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
 
@@ -373,7 +504,7 @@ const changePassword = async () => {
                 :value="profileForm.userEmail"
                 disabled
                 type="email"
-                class="h-12 w-full cursor-not-allowed rounded-xl border border-black/[0.06] bg-[#F3F3F1] px-4 text-sm text-[#666666] outline-none disabled:opacity-100"
+                class="h-11 w-full cursor-not-allowed rounded-xl border border-black/5 bg-black/[0.03] px-4 text-[14px] font-medium text-[#666666] outline-none disabled:opacity-100"
               >
               <p class="mt-2 text-xs leading-[1.5] text-[#929292]">
                 อีเมลเป็นข้อมูลสำหรับเข้าสู่ระบบ จึงไม่สามารถแก้ไขได้จากหน้านี้
@@ -384,24 +515,30 @@ const changePassword = async () => {
               <label
                 for="userPhone"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์โทรศัพท์</label>
+              >เบอร์โทรศัพท์ <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="userPhone"
                 v-model="profileForm.userPhone"
-                type="text"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                @input="profileForm.userPhone = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
             <div>
               <label
                 for="tel"
                 class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์ติดต่อช่องทางด่วน</label>
+              >เบอร์ติดต่อช่องทางด่วน <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="tel"
                 v-model="profileForm.tel"
-                type="text"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                @input="profileForm.tel = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
 
@@ -414,7 +551,7 @@ const changePassword = async () => {
                 id="userAddress"
                 v-model="profileForm.userAddress"
                 rows="3"
-                class="w-full resize-none rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="w-full resize-none rounded-xl border border-black/10 bg-white/80 px-4 py-3 text-[14px] font-medium leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               />
             </div>
           </div>
@@ -434,7 +571,7 @@ const changePassword = async () => {
                   v-model="profileForm.facebook"
                   type="text"
                   placeholder="ชื่อ Facebook"
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
                 >
               </div>
               <div>
@@ -447,7 +584,7 @@ const changePassword = async () => {
                   v-model="profileForm.line"
                   type="text"
                   placeholder="ไลน์ไอดี"
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
                 >
               </div>
             </div>
@@ -474,7 +611,7 @@ const changePassword = async () => {
             <button
               :disabled="saving"
               type="submit"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed disabled:opacity-60"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span
                 v-if="saving"
@@ -486,7 +623,7 @@ const changePassword = async () => {
         </form>
 
         <form
-          class="rounded-[20px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:p-6"
+          class="rounded-[24px] border border-black/5 bg-white/60 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
           @submit.prevent="changePassword"
         >
           <div class="mb-5 border-b border-black/[0.06] pb-4">
@@ -510,7 +647,7 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="รหัสผ่านเดิม"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
             <div>
@@ -524,7 +661,7 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="รหัสผ่านใหม่"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
             <div>
@@ -538,7 +675,7 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="ยืนยันรหัสผ่านใหม่"
-                class="h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.12] focus:border-[#756CE8] focus:ring-2 focus:ring-[#756CE8]/20"
+                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
               >
             </div>
           </div>
@@ -564,7 +701,7 @@ const changePassword = async () => {
             <button
               :disabled="passwordSaving"
               type="submit"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.12)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 disabled:cursor-not-allowed disabled:opacity-60"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span
                 v-if="passwordSaving"
@@ -576,5 +713,14 @@ const changePassword = async () => {
         </form>
       </div>
     </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.dashboard-grid {
+  background-size: 48px 48px;
+  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
+}
+</style>

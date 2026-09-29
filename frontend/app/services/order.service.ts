@@ -5,6 +5,7 @@ import type {
   OrderCreateResponse,
   OrderSummary,
   OrderDetail,
+  OrderImage,
   OrderStatus,
 } from "../types/order.types"
 import type { PaginatedResponse } from "../types/pagination.types"
@@ -56,7 +57,15 @@ export const orderService = {
    */
   async getOrderById(id: string | number): Promise<OrderDetail> {
     const { apiFetch } = useApi()
-    return await apiFetch<OrderDetail>(`/orders/${id}`)
+    return await apiFetch<OrderDetail>(`/orders/${id}`, { cache: 'no-store' })
+  },
+
+  /**
+   * ดึงคลังบันทึก Prompt จากผลงานดราฟต์ของ Editor ที่เข้าสู่ระบบ
+   */
+  async getPromptNotes(): Promise<{ data: OrderImage[] }> {
+    const { apiFetch } = useApi()
+    return await apiFetch<{ data: OrderImage[] }>('/orders/prompt-notes')
   },
 
   /**
@@ -162,6 +171,31 @@ export const orderService = {
   },
 
   /**
+   * แก้ไขรูปภาพ Draft (Editor)
+   */
+  async updateOrderImage(
+    orderId: number,
+    imageId: number,
+    payload: {
+      imageUrl?: string;
+      imageThumbnailUrl?: string;
+      aiEngine?: string;
+      positivePrompt?: string;
+      negativePrompt?: string;
+      cfgScale?: number;
+      steps?: number;
+      seed?: number;
+    }
+  ): Promise<any> {
+    const { apiFetch } = useApi()
+    return await apiFetch(`/orders/${orderId}/images/${imageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  },
+
+  /**
    * ยืนยันการเลือกรูปภาพที่แต่งเสร็จแล้ว (Customer)
    */
   async selectFinalImages(orderId: number, selectedImageIds: number[]): Promise<any> {
@@ -173,4 +207,3 @@ export const orderService = {
     })
   }
 }
-

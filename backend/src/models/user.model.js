@@ -189,3 +189,12 @@ exports.updatePassword = async (userId, hashedPassword) => {
   );
   return result.affectedRows;
 };
+
+
+exports.findPasswordById = async (id) => {
+  const [rows] = await pool.query(
+    `SELECT userPassword FROM users WHERE userId = ?`,
+    [id]
+  );
+  return rows[0];
+};

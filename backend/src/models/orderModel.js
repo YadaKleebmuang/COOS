@@ -113,7 +113,7 @@ exports.findAll = async ({ customerId, editorId, status, page = 1, limit = 10 })
   // Fetch paginated data
   const offset = (page - 1) * limit;
   const sql = `
-    SELECT o.*, 
+    SELECT o.*,
            u.userFirstName AS customerFirstName, u.userLastName AS customerLastName,
            e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
            p.packageName, wt.workTypeName
@@ -135,7 +135,7 @@ exports.findAll = async ({ customerId, editorId, status, page = 1, limit = 10 })
 // 3. Find single order details
 exports.findById = async (id) => {
   const [rows] = await pool.query(
-    `SELECT o.*, 
+    `SELECT o.*,
             u.userFirstName AS customerFirstName, u.userLastName AS customerLastName, u.userEmail AS customerEmail, u.userPhone AS customerPhone,
             e.userFirstName AS editorFirstName, e.userLastName AS editorLastName,
             p.packageName, p.packageResolution, p.packageImageCount, wt.workTypeName
@@ -155,6 +155,31 @@ exports.findImages = async (orderId) => {
   const [rows] = await pool.query(
     "SELECT * FROM orderImages WHERE orderId = ? ORDER BY imageCreatedAt ASC",
     [orderId]
+  );
+  return rows;
+};
+
+// Fetch AI-generated draft metadata owned by one Editor
+exports.findPromptNotesByEditor = async (editorId) => {
+  const [rows] = await pool.query(
+    `SELECT
+       oi.orderImageId,
+       oi.orderId,
+       oi.imageUrl,
+       oi.imageThumbnailUrl,
+       oi.aiEngine,
+       oi.positivePrompt,
+       oi.negativePrompt,
+       oi.cfgScale,
+       oi.steps,
+       oi.seed,
+       oi.imageCreatedAt
+     FROM orderImages oi
+     JOIN orders o ON o.orderId = oi.orderId
+     WHERE o.editorId = ?
+       AND oi.imageType = 'ai_generated'
+     ORDER BY oi.imageCreatedAt DESC, oi.orderImageId DESC`,
+    [editorId]
   );
   return rows;
 };
@@ -243,8 +268,8 @@ exports.assignEditor = async (orderId, editorId, changedById) => {
       );
     }
 
-    const editorLogNote = editorId 
-      ? `มอบหมายงานให้ Editor ID: ${editorId}` 
+    const editorLogNote = editorId
+      ? `มอบหมายงานให้ Editor ID: ${editorId}`
       : "ยกเลิกการมอบหมายงาน";
 
     await connection.query(
@@ -298,6 +323,76 @@ exports.addOrderImage = async (orderId, imageData) => {
   return result.insertId;
 };
 
+// 9.5 Find Image By ID
+exports.findImageById = async (imageId) => {
+  const [rows] = await pool.query(
+    "SELECT * FROM orderImages WHERE orderImageId = ?",
+    [imageId]
+  );
+  return rows[0];
+};
+
+// 9.6 Update Order Image (Draft / Generated)
+exports.updateOrderImage = async (imageId, updateData) => {
+  const {
+    imageUrl,
+    imageThumbnailUrl,
+    aiEngine,
+    positivePrompt,
+    negativePrompt,
+    cfgScale,
+    steps,
+    seed
+  } = updateData;
+
+  const updates = [];
+  const params = [];
+
+  if (imageUrl !== undefined) {
+    updates.push("imageUrl = ?");
+    params.push(imageUrl);
+  }
+  if (imageThumbnailUrl !== undefined) {
+    updates.push("imageThumbnailUrl = ?");
+    params.push(imageThumbnailUrl);
+  }
+  if (aiEngine !== undefined) {
+    updates.push("aiEngine = ?");
+    params.push(aiEngine);
+  }
+  if (positivePrompt !== undefined) {
+    updates.push("positivePrompt = ?");
+    params.push(positivePrompt);
+  }
+  if (negativePrompt !== undefined) {
+    updates.push("negativePrompt = ?");
+    params.push(negativePrompt);
+  }
+  if (cfgScale !== undefined) {
+    updates.push("cfgScale = ?");
+    params.push(cfgScale);
+  }
+  if (steps !== undefined) {
+    updates.push("steps = ?");
+    params.push(steps);
+  }
+  if (seed !== undefined) {
+    updates.push("seed = ?");
+    params.push(seed);
+  }
+
+  if (updates.length === 0) return true;
+
+  params.push(imageId);
+
+  const [result] = await pool.query(
+    `UPDATE orderImages SET ${updates.join(", ")} WHERE orderImageId = ?`,
+    params
+  );
+
+  return result.affectedRows > 0;
+};
+
 // 10. Add Payment Slip
 exports.addPayment = async (paymentData) => {
   const { orderId, paymentType, paymentAmount, paymentSlipUrl } = paymentData;
@@ -318,6 +413,19 @@ exports.findPaymentById = async (paymentId) => {
   return rows[0];
 };
 
+const getNextStatusAfterPayment = (paymentStatus, paymentType, currentStatus, editorId) => {
+  if (paymentStatus !== "approved") return currentStatus;
+  if (paymentType === "deposit" && currentStatus === "waiting_deposit") {
+    return editorId ? "waiting_to_start" : "waiting_assignment";
+  }
+  if (paymentType === "final" && currentStatus === "waiting_final_payment") {
+    return "delivered";
+  }
+  return currentStatus;
+};
+
+exports.getNextStatusAfterPayment = getNextStatusAfterPayment;
+
 // 12. Verify Payment (Approve / Reject)
 exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logNote) => {
   const connection = await pool.getConnection();
@@ -326,7 +434,7 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
 
     // 1. Update Payment Status
     await connection.query(
-      `UPDATE payments 
+      `UPDATE payments
        SET paymentStatus = ?, paymentVerifiedAt = CURRENT_TIMESTAMP, verifiedByAdminId = ?
        WHERE paymentId = ?`,
       [paymentStatus, verifiedByAdminId, paymentId]
@@ -349,15 +457,14 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
     if (orders.length === 0) throw new Error("Order not found");
     const order = orders[0];
     const currentStatus = order.orderStatus;
-    let nextStatus = currentStatus;
+    const nextStatus = getNextStatusAfterPayment(
+      paymentStatus,
+      payment.paymentType,
+      currentStatus,
+      order.editorId
+    );
 
     if (paymentStatus === "approved") {
-      if (payment.paymentType === "deposit" && currentStatus === "waiting_deposit") {
-        nextStatus = order.editorId ? "waiting_to_start" : "waiting_assignment";
-      } else if (payment.paymentType === "final" && currentStatus === "waiting_final_payment") {
-        nextStatus = "completed";
-      }
-
       if (nextStatus !== currentStatus) {
         await connection.query(
           "UPDATE orders SET orderStatus = ? WHERE orderId = ?",
@@ -373,10 +480,6 @@ exports.verifyPayment = async (paymentId, paymentStatus, verifiedByAdminId, logN
        VALUES (?, ?, ?, ?, ?)`,
       [orderId, currentStatus, nextStatus, verifiedByAdminId, fullLogNote]
     );
-
-    if (nextStatus === 'completed' && currentStatus !== 'completed') {
-      await _autoPublishToGallery(connection, orderId);
-    }
 
     await connection.commit();
     return { orderId, nextStatus };
@@ -399,8 +502,8 @@ exports.selectFinalImages = async (orderId, selectedImageIds, customerId) => {
       // Create placeholders e.g., "?, ?, ?"
       const placeholders = selectedImageIds.map(() => '?').join(',');
       await connection.query(
-        `UPDATE orderImages 
-         SET imageType = 'selected_final' 
+        `UPDATE orderImages
+         SET imageType = 'selected_final'
          WHERE orderId = ? AND orderImageId IN (${placeholders})`,
         [orderId, ...selectedImageIds]
       );
@@ -439,30 +542,125 @@ const _autoPublishToGallery = async (connection, orderId) => {
     [orderId]
   );
   if (!orders.length || orders[0].orderIsGalleryAllowed !== 1) return;
-  
-  const workTypeId = orders[0].workTypeId;
-  
+
+  const orderWorkTypeId = orders[0].workTypeId;
+
   // 2. Fetch all selected_final images
   const [images] = await connection.query(
-    "SELECT imageUrl FROM orderImages WHERE orderId = ? AND imageType = 'selected_final'",
+    "SELECT orderImageId, imageUrl FROM orderImages WHERE orderId = ? AND imageType = 'selected_final'",
     [orderId]
   );
-  
+
   if (!images.length) return;
-  
+
   // 3. Insert into galleryImages with imageIsActive = 0 (Pending Approval)
   for (const img of images) {
     const [existing] = await connection.query(
-      "SELECT imageId FROM galleryImages WHERE imageUrl = ?", 
+      "SELECT imageId FROM galleryImages WHERE imageUrl = ?",
       [img.imageUrl]
     );
+
+    let newGalleryImageId = null;
     if (!existing.length) {
-      await connection.query(
-        `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageIsActive)
-         VALUES (?, ?, ?, 0)`,
-        [img.imageUrl, workTypeId, `Order #${orderId} (รออนุมัติ)`]
+      const [result] = await connection.query(
+        `INSERT INTO galleryImages (imageUrl, workTypeId, imageTitle, imageApprovalStatus, imageIsActive)
+         VALUES (?, ?, ?, 'pending', 0)`,
+        [img.imageUrl, orderWorkTypeId, `Order #${orderId}`]
       );
+      newGalleryImageId = result.insertId;
+    } else {
+      newGalleryImageId = existing[0].imageId;
+    }
+
+    // 4. Migrate tags from orderImageTags to galleryImageTags
+    if (newGalleryImageId) {
+      const [tags] = await connection.query(
+        "SELECT tagId FROM orderImageTags WHERE orderImageId = ?",
+        [img.orderImageId]
+      );
+      for (const tag of tags) {
+        await connection.query(
+          "INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)",
+          [newGalleryImageId, tag.tagId]
+        );
+      }
     }
   }
 };
 
+exports.getGalleryMetadata = async (orderImageId) => {
+  const [images] = await pool.query(
+    "SELECT orderImageId FROM orderImages WHERE orderImageId = ?",
+    [orderImageId]
+  );
+  if (!images.length) return null;
+
+  const [tags] = await pool.query(
+    `SELECT t.tagId, t.tagName
+     FROM tags t
+     JOIN orderImageTags oit ON t.tagId = oit.tagId
+     WHERE oit.orderImageId = ?`,
+    [orderImageId]
+  );
+
+  return {
+    tags
+  };
+};
+
+exports.updateGalleryMetadata = async (orderImageId, tagIds) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    let uniqueTagIds = [];
+    if (tagIds && Array.isArray(tagIds)) {
+      uniqueTagIds = [...new Set(tagIds)];
+
+      // Validate ALL tags first to ensure atomic failure (TAG-SYNC-07)
+      if (uniqueTagIds.length > 0) {
+        const [existingTags] = await connection.query(
+          "SELECT tagId FROM tags WHERE tagId IN (?)",
+          [uniqueTagIds]
+        );
+        if (existingTags.length !== uniqueTagIds.length) {
+          const err = new Error("INVALID_TAG");
+          err.code = "INVALID_TAG";
+          throw err;
+        }
+      }
+    }
+
+    // 1. Sync orderImageTags
+    await connection.query("DELETE FROM orderImageTags WHERE orderImageId = ?", [orderImageId]);
+    for (const tagId of uniqueTagIds) {
+      await connection.query(
+        "INSERT IGNORE INTO orderImageTags (orderImageId, tagId) VALUES (?, ?)",
+        [orderImageId, tagId]
+      );
+    }
+
+    // 2. Synchronize to pending gallery image if exists
+    const [images] = await connection.query("SELECT imageUrl FROM orderImages WHERE orderImageId = ?", [orderImageId]);
+    if (images.length > 0) {
+      const imageUrl = images[0].imageUrl;
+      const [galleries] = await connection.query("SELECT imageId, imageApprovalStatus FROM galleryImages WHERE imageUrl = ?", [imageUrl]);
+      if (galleries.length > 0) {
+        const galleryImage = galleries[0];
+        if (galleryImage.imageApprovalStatus === 'pending') {
+          await connection.query("DELETE FROM galleryImageTags WHERE imageId = ?", [galleryImage.imageId]);
+          for (const tagId of uniqueTagIds) {
+            await connection.query("INSERT IGNORE INTO galleryImageTags (imageId, tagId) VALUES (?, ?)", [galleryImage.imageId, tagId]);
+          }
+        }
+      }
+    }
+
+    await connection.commit();
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+};

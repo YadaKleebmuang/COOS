@@ -22,7 +22,7 @@ npm install
 # สร้างไฟล์ .env
 # DB_HOST=localhost
 # DB_USER=root
-# DB_PASSWORD=yourpassword
+# DB_PASSWORD=<set-your-local-password>
 # DB_NAME=coosdb
 
 npm run dev        # รันที่ http://localhost:3000
