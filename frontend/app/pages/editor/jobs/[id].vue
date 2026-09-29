@@ -717,25 +717,57 @@ const breadcrumb = computed(() => [
         >
           คำสั่งงานนี้ถูกยกเลิก
         </div>
-        <div
-          v-else
-          class="grid grid-cols-1 gap-3"
-        >
-          <div
-            v-for="(step, index) in workflowSteps"
-            :key="step.status"
-            class="relative rounded-xl border px-3 py-3"
-            :class="index === currentStepIndex ? 'border-[#171717] bg-[#171717] text-white' : index < currentStepIndex || order.orderStatus === 'completed' ? 'border-black/[0.08] bg-[#F7F7F5] text-[#171717]' : 'border-black/[0.06] bg-white text-[#929292]'"
-          >
-            <p
-              class="text-[10px] font-semibold tracking-wider"
-              :class="index === currentStepIndex ? 'text-white/60' : 'text-[#929292]'"
+        <div v-else class="relative ml-4 mt-6">
+          <div class="absolute left-[7px] top-2 bottom-4 w-px bg-black/[0.08]" />
+          <div class="flex flex-col gap-6 relative">
+            <div
+              v-for="(step, index) in workflowSteps"
+              :key="step.status"
+              class="relative flex items-start gap-4"
             >
-              ขั้นตอน {{ index + 1 }}
-            </p>
-            <p class="mt-1 text-xs font-semibold">
-              {{ step.label }}
-            </p>
+              <!-- Indicator Circle -->
+              <div 
+                class="relative z-10 flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border-[1.5px] bg-white mt-1"
+                :class="
+                  index === currentStepIndex 
+                    ? 'border-[#171717] ring-4 ring-[#171717]/10' 
+                    : index < currentStepIndex || order.orderStatus === 'completed'
+                      ? 'border-[#171717] bg-[#171717]' 
+                      : 'border-black/[0.15]'
+                "
+              >
+                <!-- Inner dot for active state -->
+                <div v-if="index === currentStepIndex" class="h-1.5 w-1.5 rounded-full bg-[#171717]"></div>
+              </div>
+
+              <!-- Text Content -->
+              <div class="-mt-0.5">
+                <p
+                  class="text-[10px] font-semibold tracking-wider uppercase"
+                  :class="
+                    index === currentStepIndex 
+                      ? 'text-[#171717]' 
+                      : index < currentStepIndex || order.orderStatus === 'completed'
+                        ? 'text-[#171717]/60' 
+                        : 'text-[#929292]'
+                  "
+                >
+                  ขั้นตอน {{ index + 1 }}
+                </p>
+                <p 
+                  class="mt-0.5 text-[13px] font-semibold"
+                  :class="
+                    index === currentStepIndex 
+                      ? 'text-[#171717]' 
+                      : index < currentStepIndex || order.orderStatus === 'completed'
+                        ? 'text-[#171717]' 
+                        : 'text-[#929292]'
+                  "
+                >
+                  {{ step.label }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
