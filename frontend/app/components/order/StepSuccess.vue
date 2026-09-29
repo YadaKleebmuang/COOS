@@ -34,26 +34,26 @@ const formatPrice = (n: number) =>
     <div class="mx-auto mb-8 max-w-[340px] space-y-2.5 rounded-[20px] border border-black/5 bg-white/80 p-6 text-left shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
       <div class="flex justify-between text-[13px] font-medium text-[#666666]">
         <span>ราคาแพ็กเกจ</span>
-        <span class="font-bold text-[#171717]">฿{{ formatPrice(createdOrder.orderBasePrice) }}</span>
+        <span class="font-bold text-[#171717]">{{ formatPrice(createdOrder.orderBasePrice) }}</span>
       </div>
       <div
         v-if="createdOrder.orderUrgentPrice > 0"
         class="flex justify-between text-[13px] font-medium text-[#171717]"
       >
         <span>ค่าเร่งด่วน</span>
-        <span class="font-bold">+฿{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
+        <span class="font-bold">+{{ formatPrice(createdOrder.orderUrgentPrice) }}</span>
       </div>
       <div
         v-if="createdOrder.orderDiscount > 0"
         class="flex justify-between text-[13px] font-medium text-[#267A48]"
       >
         <span>ส่วนลด Gallery</span>
-        <span class="font-bold">-฿{{ formatPrice(createdOrder.orderDiscount) }}</span>
+        <span class="font-bold">-{{ formatPrice(createdOrder.orderDiscount) }}</span>
       </div>
       <hr class="my-3 border-black/5">
       <div class="flex justify-between text-[16px] font-bold text-[#171717]">
         <span>รวมทั้งหมด</span>
-        <span>฿{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
+        <span>{{ formatPrice(createdOrder.orderTotalPrice) }}</span>
       </div>
     </div>
 

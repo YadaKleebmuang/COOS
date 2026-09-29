@@ -113,7 +113,7 @@ const fetchReport = async () => {
 
 onMounted(() => fetchReport())
 
-const formatCurrency = (n: number) => `฿${Number(n).toLocaleString("th-TH")}`
+const formatCurrency = (n: number) => `${Number(n).toLocaleString("th-TH")}`
 const maxRevenue = computed(() => {
   if (!reportData.value.revenueByMonth || reportData.value.revenueByMonth.length === 0) return 1
   return Math.max(...reportData.value.revenueByMonth.map(r => Number(r.revenue)))

@@ -55,8 +55,8 @@ const columns = [
   { key: "packageImageCount", label: "จำนวนภาพ", align: "center" as const },
   { key: "packageResolution", label: "ความละเอียด", align: "center" as const },
   { key: "packageDeliveryDays", label: "ระยะเวลาส่ง", align: "center" as const },
-  { key: "packagePrice", label: "ราคา (฿)", align: "right" as const },
-  { key: "packageUrgentPrice", label: "ค่าเร่งด่วน (฿)", align: "right" as const },
+  { key: "packagePrice", label: "ราคา (บาท)", align: "right" as const },
+  { key: "packageUrgentPrice", label: "ค่าเร่งด่วน (บาท)", align: "right" as const },
   { key: "packageIsActive", label: "สถานะ", align: "center" as const },
   { key: "action", label: "การจัดการ", align: "center" as const }
 ]
@@ -138,7 +138,7 @@ const confirmDelete = async () => {
   }
 }
 
-const formatPrice = (n: number | null) => n != null ? `฿${Number(n).toLocaleString("th-TH")}` : "—"
+const formatPrice = (n: number | null) => n != null ? `${Number(n).toLocaleString("th-TH")}` : "—"
 
 const breadcrumb = [
   { label: "หน้าแรก", to: "/admin/dashboard" },
@@ -296,7 +296,7 @@ const breadcrumb = [
                 <!-- Row 2 -->
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">ราคา (฿) *</label>
+                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">ราคา (บาท) *</label>
                     <input v-model.number="form.packagePrice" required type="number" min="0" class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717]" />
                   </div>
                   <div>
@@ -307,7 +307,7 @@ const breadcrumb = [
                 <!-- Row 3 -->
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">ค่าบริการเร่งด่วน (฿)</label>
+                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">ค่าบริการเร่งด่วน (บาท)</label>
                     <input v-model.number="form.packageUrgentPrice" type="number" min="0" class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717]" />
                   </div>
                   <div>

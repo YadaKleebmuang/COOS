@@ -234,7 +234,7 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
                   <p class="text-[13px] text-[#666666]">
                     {{ job.packageName }}
                   </p><p class="mt-0.5 text-[11px] text-[#929292]">
-                    ฿{{ formatPrice(job.orderTotalPrice) }}
+                    {{ formatPrice(job.orderTotalPrice) }}
                   </p>
                 </td>
                 <td class="px-6 py-4 text-xs text-[#666666] whitespace-nowrap">

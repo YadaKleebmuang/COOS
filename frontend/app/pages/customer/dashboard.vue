@@ -424,7 +424,7 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
 
             <div class="flex min-w-0 items-center justify-between gap-3 sm:min-w-[120px] sm:flex-col sm:items-end">
               <p class="text-[15px] font-bold text-[#171717]">
-                ฿{{ formatPrice(order.orderTotalPrice) }}
+                {{ formatPrice(order.orderTotalPrice) }}
               </p>
               <span class="inline-flex items-center justify-center rounded-xl bg-[#F3F3F1] px-4 py-2 text-[12px] font-semibold text-[#171717] transition group-hover:bg-[#171717] group-hover:text-white">
                 ดูรายละเอียด
