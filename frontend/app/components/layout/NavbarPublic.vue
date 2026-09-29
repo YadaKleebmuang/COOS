@@ -225,24 +225,24 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-3">
         <template v-if="currentUser">
           <!-- Logged in Customer -->
-          <div v-if="isCustomer" class="flex items-center gap-2 sm:gap-3">
+          <div v-if="isCustomer" class="flex items-center gap-1 rounded-[20px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)]">
             <NuxtLink to="/customer/orders"
-              class="hidden h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 sm:inline-flex">
+              class="hidden h-8 items-center justify-center rounded-full bg-black/70 px-3.5 text-[12px] font-semibold tracking-wide text-white/95 backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.15)] ring-1 ring-white/10 transition-all duration-200 hover:bg-black/90 hover:ring-white/20 focus:outline-none focus:ring-2 focus:ring-[#756CE8]/30 sm:inline-flex">
               งานของฉัน
             </NuxtLink>
 
             <div class="relative">
               <button
-                class="flex h-11 items-center gap-2 rounded-full border border-black/[0.06] bg-white px-1.5 pr-3 text-sm font-semibold text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+                class="flex h-8 items-center gap-1.5 rounded-full bg-white/80 px-1 pr-2.5 text-[12px] font-medium text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] transition-all duration-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
                 aria-label="เปิดเมนูบัญชีลูกค้า" @click="toggleDropdown">
                 <span
-                  class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
+                  class="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-[10px] font-medium text-white ring-1 ring-white/80">
                   <img v-if="currentUser.userProfileImage"
                     :src="currentUser.userId != null ? protectedAssetUrl(profileEndpoint(currentUser.userId)) : ''"
                     class="h-full w-full object-cover" alt="">
                   <span v-else>{{ userInitial }}</span>
                 </span>
-                <span class="hidden max-w-[118px] truncate sm:inline">{{ currentUser.userFirstName || 'Customer'
+                <span class="hidden max-w-[110px] truncate sm:inline">{{ currentUser.userFirstName || 'Customer'
                   }}</span>
                 <svg class="h-3.5 w-3.5 text-[#666666]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
