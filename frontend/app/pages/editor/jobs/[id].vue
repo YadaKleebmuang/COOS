@@ -373,6 +373,7 @@ const breadcrumb = computed(() => [
     </div>
 
     <template v-else>
+
       <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
         <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
           <div>
@@ -457,48 +458,14 @@ const breadcrumb = computed(() => [
         </div>
       </section>
 
-      <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
-        <div class="mb-5">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
-            ขั้นตอนการดำเนินงาน
-          </h2>
-          <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
-            ลำดับงานตั้งแต่เริ่มผลิตจนเสร็จสมบูรณ์
-          </p>
-        </div>
-
-        <div
-          v-if="order.orderStatus === 'cancelled'"
-          class="rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-sm font-medium text-red-700"
-        >
-          คำสั่งงานนี้ถูกยกเลิก
-        </div>
-        <div
-          v-else
-          class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3"
-        >
-          <div
-            v-for="(step, index) in workflowSteps"
-            :key="step.status"
-            class="relative rounded-xl border px-3 py-3"
-            :class="index === currentStepIndex ? 'border-[#171717] bg-[#171717] text-white' : index < currentStepIndex || order.orderStatus === 'completed' ? 'border-black/[0.08] bg-[#F7F7F5] text-[#171717]' : 'border-black/[0.06] bg-white text-[#929292]'"
-          >
-            <p
-              class="text-[10px] font-semibold tracking-wider"
-              :class="index === currentStepIndex ? 'text-white/60' : 'text-[#929292]'"
-            >
-              ขั้นตอน {{ index + 1 }}
-            </p>
-            <p class="mt-1 text-xs font-semibold">
-              {{ step.label }}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
-          <div class="mb-5">
+      <div class="flex flex-col lg:flex-row gap-6 lg:gap-[2%] items-start">
+        <!-- Left Column 69% -->
+        <div class="w-full lg:w-[69%] space-y-6">
+          
+          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+            <div class="flex flex-col gap-8 lg:gap-10">
+              <div>
+                <div class="mb-5">
             <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
               รายละเอียดคำสั่งงาน
             </h2>
@@ -552,10 +519,10 @@ const breadcrumb = computed(() => [
               </p>
             </div>
           </div>
-        </section>
-
-        <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
-          <div class="mb-5 flex items-start justify-between gap-4">
+              </div>
+              
+              <div class="pt-8 border-t border-black/[0.06]">
+                <div class="mb-5 flex items-start justify-between gap-4">
             <div>
               <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
                 ข้อมูลสำหรับการทำงาน
@@ -619,10 +586,11 @@ const breadcrumb = computed(() => [
           >
             ลูกค้าไม่ได้อัปโหลดรูปอ้างอิงเพิ่มเติม
           </div>
-        </section>
-      </div>
+              </div>
+            </div>
+          </section>
 
-      <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
         <div class="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-black/[0.06]">
           <div>
             <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
@@ -729,6 +697,51 @@ const breadcrumb = computed(() => [
           </div>
         </div>
       </section>
+        </div>
+
+        <!-- Right Column 29% -->
+        <div class="w-full lg:w-[29%] space-y-6">
+          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+        <div class="mb-5">
+          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+            ขั้นตอนการดำเนินงาน
+          </h2>
+          <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+            ลำดับงานตั้งแต่เริ่มผลิตจนเสร็จสมบูรณ์
+          </p>
+        </div>
+
+        <div
+          v-if="order.orderStatus === 'cancelled'"
+          class="rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-sm font-medium text-red-700"
+        >
+          คำสั่งงานนี้ถูกยกเลิก
+        </div>
+        <div
+          v-else
+          class="grid grid-cols-1 gap-3"
+        >
+          <div
+            v-for="(step, index) in workflowSteps"
+            :key="step.status"
+            class="relative rounded-xl border px-3 py-3"
+            :class="index === currentStepIndex ? 'border-[#171717] bg-[#171717] text-white' : index < currentStepIndex || order.orderStatus === 'completed' ? 'border-black/[0.08] bg-[#F7F7F5] text-[#171717]' : 'border-black/[0.06] bg-white text-[#929292]'"
+          >
+            <p
+              class="text-[10px] font-semibold tracking-wider"
+              :class="index === currentStepIndex ? 'text-white/60' : 'text-[#929292]'"
+            >
+              ขั้นตอน {{ index + 1 }}
+            </p>
+            <p class="mt-1 text-xs font-semibold">
+              {{ step.label }}
+            </p>
+          </div>
+        </div>
+      </section>
+        </div>
+      </div>
+
     </template>
 
     <!-- Gallery Metadata Modal -->
