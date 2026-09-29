@@ -441,9 +441,9 @@ exports.submitPayment = async (req, res, next) => {
       return res.status(403).json({ message: "คุณไม่มีสิทธิ์ทำรายการในออเดอร์นี้" });
     }
 
-    // Validate payment amount (BUG-03 Fix)
-    const expectedDeposit = Math.round(order.orderTotalPrice * 0.30 * 100) / 100;
-    const expectedFinal   = Math.round(order.orderTotalPrice * 0.70 * 100) / 100;
+    // Validate payment amount (BUG-03 Fix) - Integer payments
+    const expectedDeposit = Math.round(order.orderTotalPrice * 0.30);
+    const expectedFinal   = order.orderTotalPrice - expectedDeposit;
     const expected = paymentType === "deposit" ? expectedDeposit : expectedFinal;
     const submitted = Number(paymentAmount);
 

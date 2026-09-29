@@ -96,13 +96,16 @@ const currentStepIndex = computed(() => {
 })
 
 // ── Payment Calculations ──
+const getDepositAmount = (total: number) => Math.round(total * 0.3)
+const getFinalAmount = (total: number) => total - getDepositAmount(total)
+
 const paymentInfo = computed(() => {
   if (!order.value) return { type: 'deposit' as const, amount: 0, percentage: 30 }
   const total = Number(order.value.orderTotalPrice)
   if (order.value.orderStatus === 'waiting_deposit') {
-    return { type: 'deposit' as const, amount: total * 0.3, percentage: 30 }
+    return { type: 'deposit' as const, amount: getDepositAmount(total), percentage: 30 }
   }
-  return { type: 'final' as const, amount: total * 0.7, percentage: 70 }
+  return { type: 'final' as const, amount: getFinalAmount(total), percentage: 70 }
 })
 
 // ── Image Categorization ──
@@ -991,13 +994,13 @@ const formatDeliveryDate = (dateStr?: string) => {
                 <div
                   class="flex items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3">
                   <span class="text-sm font-semibold text-[#666666]">มัดจำ 30%</span><span
-                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(Number(order.orderTotalPrice) * 0.3)
+                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(getDepositAmount(Number(order.orderTotalPrice)))
                     }}</span>
                 </div>
                 <div
                   class="flex items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#F3F3F1] px-4 py-3">
                   <span class="text-sm font-semibold text-[#666666]">ยอดคงเหลือ 70%</span><span
-                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(Number(order.orderTotalPrice) * 0.7)
+                    class="text-base font-semibold text-[#171717]">฿{{ formatPrice(getFinalAmount(Number(order.orderTotalPrice)))
                     }}</span>
                 </div>
               </div>
