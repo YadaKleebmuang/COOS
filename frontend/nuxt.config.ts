@@ -41,7 +41,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:3000/api/v1"
+      apiBase: "https://k4sxjzcv-3000.asse.devtunnels.ms/api/v1"
     }
   },
 
@@ -56,4 +56,4 @@ export default defineNuxtConfig({
       }
     }
   }
-})
+})

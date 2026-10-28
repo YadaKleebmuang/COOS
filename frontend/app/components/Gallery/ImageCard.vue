@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+
 type GalleryImage = {
   imageId?: number | string
   imageUrl?: string
@@ -8,65 +10,179 @@ type GalleryImage = {
   workTypeId?: number
   workTypeName?: string
 }
-
-const props = defineProps<{
-  img: GalleryImage
-}>()
-
+const props = defineProps<{ img: GalleryImage }>()
 const { publicGalleryUrl } = useProtectedAsset()
-
-defineEmits<{
-  (e: 'view-details', img: GalleryImage): void
-}>()
-
-const getOrderParams = (img: GalleryImage) => {
-  if (!img) return ''
-  const params: Record<string, string> = {
-    workTypeId: String(img.workTypeId)
+const imageFailed = ref(false)
+watch(
+  () => props.img.imageId,
+  () => {
+    imageFailed.value = false
   }
-  if (img.imageTags) {
-    const tags = img.imageTags.split(',').map((t: string) => t.trim().toLowerCase())
-    if (tags.includes('minimal')) params.style = 'Minimal'
-    else if (tags.includes('romantic')) params.style = 'Romantic'
-    else if (tags.includes('classic')) params.style = 'Classic'
-    else if (tags.includes('moody')) params.style = 'Moody'
-    else if (tags.includes('natural')) params.style = 'Natural'
-    else if (tags.includes('modern')) params.style = 'Modern'
-
-    if (tags.includes('warm')) params.colorTone = 'Warm Tone'
-    else if (tags.includes('blackwhite') || tags.includes('black tone') || tags.includes('blacktone')) params.colorTone = 'Black & White'
-    else if (tags.includes('softtone') || tags.includes('soft')) params.colorTone = 'Soft Tone'
-  }
-  return Object.entries(params)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join('&')
-}
+)
+defineEmits<{ (e: 'view-details', img: GalleryImage): void }>()
 </script>
 
 <template>
-  <div 
-    class="relative group w-full aspect-[4/5] rounded-[24px] overflow-hidden bg-neutral-100 shadow-sm border border-black/[0.04] cursor-pointer transition-all duration-500 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] hover:border-black/10 hover:-translate-y-0.5"
-    @click="$emit('view-details', img)"
-  >
-    <!-- Artwork Image -->
-    <img
-      :src="props.img.imageId != null ? publicGalleryUrl(props.img.imageId) : ''"
-      class="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-105"
-      alt=""
+  <article class="gallery-art-card">
+    <button
+      class="artwork"
+      :aria-label="`ดูรายละเอียด ${img.imageTitle || img.workTypeName || 'ผลงาน'}`"
+      @click="$emit('view-details', img)"
     >
-    
-    <!-- Gradient Overlays for Readability -->
-    <!-- Hover enhancement overlay -->
-    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-    
-    <!-- Delicate inset highlight to give glass/premium feel -->
-    <div class="absolute inset-0 rounded-[24px] pointer-events-none z-20 mix-blend-overlay shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] border border-black/[0.03]" />
-
-    <!-- Category Pill (Top Left) -->
-    <div class="absolute top-4 left-4 z-30">
-      <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-[11px] font-semibold text-white tracking-wide shadow-sm">
-        {{ img.workTypeName || 'ทั่วไป' }}
-      </span>
+      <img
+        v-if="img.imageId != null && !imageFailed"
+        :src="publicGalleryUrl(img.imageId)"
+        :alt="img.imageTitle || img.workTypeName || 'ผลงานจาก COOS Studio'"
+        width="600"
+        height="750"
+        loading="lazy"
+        @error="imageFailed = true"
+      />
+      <span v-else class="image-unavailable"
+        >ยังแสดงภาพนี้ไม่ได้<br /><small>เปิดดูรายละเอียดผลงาน</small></span
+      >
+      <span class="art-category">{{
+        img.workTypeName || 'ผลงานสร้างสรรค์'
+      }}</span>
+      <span class="art-arrow" aria-hidden="true">↗</span>
+    </button>
+    <div class="art-info">
+      <p>COOS COLLECTION</p>
+      <button class="art-title" @click="$emit('view-details', img)">
+        {{ img.imageTitle || img.workTypeName || 'ผลงานจากสตูดิโอ' }}</button
+      ><NuxtLink
+        v-if="img.imageId != null"
+        :to="`/customer/orders/create?galleryImageId=${img.imageId}`"
+        class="art-order"
+        >สั่งทำภาพแนวนี้ <span aria-hidden="true">↗</span></NuxtLink
+      >
     </div>
-  </div>
+  </article>
 </template>
+
+<style scoped>
+.gallery-art-card {
+  min-width: 0;
+  color: #172c3b;
+}
+.gallery-art-card :is(button, a):focus-visible {
+  outline: 3px solid #d7642c;
+  outline-offset: 4px;
+}
+.artwork {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e4ddd2;
+  text-align: left;
+}
+.artwork img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s;
+}
+.artwork:hover img {
+  transform: scale(1.04);
+}
+.art-category {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  border-radius: 20px;
+  background: #fcf9f3f2;
+  color: #172c3b;
+  font-size: 10px;
+  padding: 6px 11px;
+}
+.art-arrow {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f5f0e7;
+  font-size: 20px;
+}
+.art-info {
+  padding-top: 15px;
+}
+.art-info > p {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #68757c;
+  margin-bottom: 7px;
+}
+.art-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.art-order {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid #172c3b24;
+  color: #8a492d;
+  font-size: 11px;
+  font-weight: 600;
+}
+.art-order:hover {
+  color: #172c3b;
+}
+.image-unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 50px 14px;
+  font-size: 13px;
+  text-align: center;
+  color: #52616a;
+}
+.image-unavailable small {
+  font-size: 10px;
+}
+@media (max-width: 639px) {
+  .art-category {
+    left: 8px;
+    top: 8px;
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+  .art-arrow {
+    width: 28px;
+    height: 28px;
+    bottom: 8px;
+    right: 8px;
+  }
+  .art-title {
+    font-size: 12px;
+  }
+  .art-info > p {
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .artwork img {
+    transition: none;
+  }
+}
+</style>

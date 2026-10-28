@@ -36,7 +36,7 @@ const getOrderParams = (img: GalleryImage) => {
     <div
       v-if="isOpen && img"
       class="fixed inset-0 z-[999] flex items-center justify-center"
-      :class="variant === 'gallery' ? 'p-4 sm:p-6' : 'p-4'"
+      :class="variant === 'gallery' ? 'gallery-dialog p-4 sm:p-6' : 'p-4'"
     >
       <!-- Backdrop overlay -->
       <div
@@ -192,3 +192,11 @@ const getOrderParams = (img: GalleryImage) => {
     </div>
   </Teleport>
 </template>
+
+<style scoped>
+.gallery-dialog .relative.z-10 { background: #f5f0e7; color: #172c3b; border-color: #f5f0e7; }
+.gallery-dialog h3 { color: #172c3b; }
+.gallery-dialog .coos-button-dark { background: #ff955e; color: #172c3b; box-shadow: none; }
+.gallery-dialog .coos-button-dark:hover { background: #ffae84; }
+.gallery-dialog :is(button, a):focus-visible { outline: 3px solid #d7642c; outline-offset: 3px; }
+</style>

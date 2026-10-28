@@ -102,7 +102,7 @@ onMounted(() => {
 
   // Close mobile menu on window resize if crossing md breakpoint
   window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) mobileMenuOpen.value = false
+    if (window.innerWidth >= 1280) mobileMenuOpen.value = false
   })
 
   // Set up intersection observer for scroll spy
@@ -185,16 +185,16 @@ onBeforeUnmount(() => {
 <template>
   <header class="fixed inset-x-0 top-4 z-[200] px-4 sm:px-5 lg:px-8 pointer-events-none">
     <div
-      class="liquid-glass-nav pointer-events-auto mx-auto relative flex h-[58px] w-full items-center justify-between gap-4 px-3 sm:px-4 md:w-fit md:max-w-[calc(100vw-3rem)] lg:px-5">
+      class="liquid-glass-nav pointer-events-auto mx-auto relative flex h-[58px] w-full items-center justify-between gap-4 px-3 sm:px-4 md:w-full md:max-w-[1280px] lg:px-5">
       <!-- Logo -->
       <NuxtLink to="/" class="flex flex-col leading-none text-black min-w-[90px]">
-        <span class="text-xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="text-xl font-extrabold tracking-[0.24em]">COOS</span>
         <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO</span>
       </NuxtLink>
 
       <!-- Navigation Links (Capsule shape matching Liquid Glass style) -->
       <nav
-        class="hidden items-center gap-1 rounded-[22px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] md:flex">
+        class="hidden items-center gap-1 rounded-[22px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] xl:flex">
         <NuxtLink to="/" class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
           :class="[activeSection === 'home' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']">
           หน้าแรก
@@ -212,12 +212,12 @@ onBeforeUnmount(() => {
         <NuxtLink to="/#packages"
           class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
           :class="[activeSection === 'packages' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']">
-          บริการ
+          แพ็กเกจ
         </NuxtLink>
         <NuxtLink to="/policy"
           class="rounded-[18px] px-4 py-2 text-[13px] font-medium transition-all duration-200 lg:px-5"
           :class="[activeSection === 'policy' ? 'bg-white/70 text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold' : 'text-[#666666] hover:bg-white/40 hover:text-[#171717]']">
-          เกี่ยวกับเรา
+          เงื่อนไขบริการ
         </NuxtLink>
       </nav>
 
@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
               เข้าสู่ระบบ
             </NuxtLink>
             <NuxtLink to="/register"
-              class="inline-flex h-[42px] items-center justify-center rounded-[18px] border border-white/80 bg-white/60 px-5 text-[13px] lg:text-sm font-semibold text-[#171717] shadow-[0_4px_12px_rgba(180,190,255,0.25),inset_0_2px_4px_rgba(255,255,255,1)] transition-all hover:scale-[1.02] hover:bg-white/80 hover:shadow-[0_6px_16px_rgba(180,190,255,0.35)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25">
+              class="inline-flex h-[42px] shrink-0 items-center justify-center rounded-lg bg-[#ff955e] px-4 text-[13px] font-semibold text-[#172c3b] transition-colors hover:bg-[#ffae84] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#172c3b]">
               สมัครสมาชิก
             </NuxtLink>
           </div>
@@ -382,8 +382,8 @@ onBeforeUnmount(() => {
 
       <!-- Hamburger Button -->
       <button
-        class="ml-1 flex h-11 w-11 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[#666666] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 md:hidden"
-        @click="toggleMobileMenu">
+        class="ml-1 flex h-11 w-11 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[#666666] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 xl:hidden"
+        aria-label="เปิดหรือปิดเมนู" :aria-expanded="mobileMenuOpen" aria-controls="public-mobile-menu" @click="toggleMobileMenu">
         <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -397,8 +397,8 @@ onBeforeUnmount(() => {
     <Transition enter-active-class="transition-all duration-300 ease-in-out" enter-from-class="max-h-0 opacity-0"
       enter-to-class="max-h-[400px] opacity-100" leave-active-class="transition-all duration-200 ease-in-out"
       leave-from-class="max-h-[400px] opacity-100" leave-to-class="max-h-0 opacity-0">
-      <div v-show="mobileMenuOpen"
-        class="mx-auto mt-3 max-w-[1280px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)] md:hidden">
+      <div id="public-mobile-menu" v-show="mobileMenuOpen"
+        class="pointer-events-auto mx-auto mt-3 max-w-[1280px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)] xl:hidden">
         <nav class="flex flex-col space-y-1 px-4 pb-4 pt-3">
           <NuxtLink to="/"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
@@ -416,7 +416,7 @@ onBeforeUnmount(() => {
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
             :class="[activeSection === 'packages' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false">
-            บริการ
+            แพ็กเกจ
           </NuxtLink>
           <NuxtLink to="/#how-it-works"
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
             class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
             :class="[activeSection === 'policy' ? '!bg-black/[0.07] !text-[#171717] !font-semibold' : '']"
             @click="mobileMenuOpen = false">
-            เกี่ยวกับเรา
+            เงื่อนไขบริการ
           </NuxtLink>
           <div class="pt-4 mt-2 border-t border-black/[0.06] flex flex-col gap-2">
             <template v-if="currentUser">
@@ -464,35 +464,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .liquid-glass-nav {
-  background: rgba(255, 255, 255, 0.70);
-  backdrop-filter: blur(20px) saturate(1.15);
-  -webkit-backdrop-filter: blur(20px) saturate(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 28px;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.06),
-    0 8px 16px rgba(0, 0, 0, 0.03),
-    inset 0 2px 4px rgba(255, 255, 255, 0.9),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.02);
-}
-
-.liquid-glass-nav::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.7);
-  pointer-events: none;
-}
-
-.liquid-glass-nav::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 29px;
-  background: linear-gradient(135deg, rgba(230, 220, 255, 0.3), rgba(255, 255, 255, 0) 60%, rgba(200, 230, 255, 0.2));
-  z-index: -1;
-  filter: blur(6px);
-  pointer-events: none;
+  background: rgba(250, 246, 238, .96);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(23, 44, 59, .12);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(9, 23, 34, .12);
 }
 </style>
