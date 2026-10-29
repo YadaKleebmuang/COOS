@@ -32,7 +32,7 @@ const isActive = (path: string) => route.path === path || (path !== '/editor/das
 
   <aside
     class="fixed top-0 left-0 h-full w-60 bg-white/70 backdrop-blur-xl border-r border-black/[0.06] flex flex-col z-40 transition-transform duration-300"
-    :class="collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    :class="[collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0', { 'editor-sidebar': role === 'editor' }]"
   >
     <div class="h-[68px] sm:h-[72px] flex items-center px-6 border-b border-black/[0.06] flex-shrink-0 bg-transparent">
       <NuxtLink
@@ -55,6 +55,7 @@ const isActive = (path: string) => route.path === path || (path !== '/editor/das
             v-for="item in menuItems"
             :key="item.path"
             :to="item.path"
+            :aria-current="isActive(item.path) ? 'page' : undefined"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 border border-transparent"
             :class="isActive(item.path) ? 'bg-[#171717]/5 text-[#171717] font-semibold' : 'text-[#666666] font-medium hover:bg-[#171717]/[0.03] hover:text-[#171717]'"
             @click="emit('close')"

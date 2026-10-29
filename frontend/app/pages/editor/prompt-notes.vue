@@ -124,29 +124,29 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl space-y-6">
-    <AdminBreadcrumb :items="breadcrumb" />
-
-    <section class="flex flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.02)] backdrop-blur-md">
-      <header class="flex flex-col gap-4 border-b border-black/[0.06] px-6 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
+  <div class="editor-page mx-auto max-w-7xl space-y-6">
+    <section class="flex flex-col overflow-hidden rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+      <header class="editor-page-heading editor-heading-integrated flex flex-col gap-4 border-b border-[#172c3b]/10 px-6 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-lg font-semibold tracking-tight text-[#171717]">
+          <AdminBreadcrumb :items="breadcrumb" />
+          <p class="editor-eyebrow">PROMPT LIBRARY</p>
+          <h1 class="text-lg font-semibold tracking-tight text-[#172c3b]">
             บันทึก Prompt
           </h1>
-          <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+          <p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
             รวบรวมข้อมูลการสร้างภาพจากผลงานดราฟต์ที่บันทึกไว้
           </p>
         </div>
-        <span class="w-fit rounded-full border border-black/[0.06] bg-[#F7F7F5] px-3 py-1.5 text-xs font-semibold text-[#666666]">
+        <span class="w-fit rounded-full border border-[#172c3b]/10 bg-[#eee7db] px-3 py-1.5 text-xs font-semibold text-[#52616a]">
           {{ filteredPromptNotes.length }} รายการ
         </span>
       </header>
 
-      <div class="flex flex-col gap-3 border-b border-black/[0.06] bg-[#FDFDFB]/30 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div class="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white px-3 py-2 shadow-sm transition-all focus-within:border-black/[0.12]">
+      <div class="flex flex-col gap-3 border-b border-[#172c3b]/10 bg-[#e5e9e1] px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center">
+          <div class="flex min-w-0 items-center gap-2 rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-3 py-2 shadow-sm transition-all focus-within:border-[#172c3b]/20">
             <svg
-              class="h-4 w-4 shrink-0 text-[#929292]"
+              class="h-4 w-4 shrink-0 text-[#69777f]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -160,16 +160,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
             <input
               v-model="searchQuery"
               type="search"
+              aria-label="ค้นหาบันทึก Prompt"
               placeholder="ค้นหาชื่อไฟล์ เครื่องมือ หรือเลขที่งาน..."
-              class="w-full bg-transparent text-[13px] font-medium text-[#171717] outline-none placeholder:text-[#9A9A95] sm:w-96"
+              class="w-full bg-transparent text-[13px] font-medium text-[#172c3b] outline-none placeholder:text-[#69777f] sm:w-full lg:w-72"
             >
           </div>
 
-          <label class="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white px-3 py-2 shadow-sm">
-            <span class="whitespace-nowrap text-[12px] font-semibold text-[#666666]">วันที่บันทึก</span>
+          <label class="flex items-center gap-2 rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-3 py-2 shadow-sm">
+            <span class="whitespace-nowrap text-[12px] font-semibold text-[#52616a]">วันที่บันทึก</span>
             <select
               v-model="dateFilter"
-              class="bg-transparent text-[13px] font-medium text-[#171717] outline-none"
+              class="bg-transparent text-[13px] font-medium text-[#172c3b] outline-none"
             >
               <option value="all">ทุกวันที่</option>
               <option value="today">วันนี้</option>
@@ -181,14 +182,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 
         <button
           v-if="filtersActive"
-          class="w-fit text-[12px] font-semibold text-[#666666] underline transition-colors hover:text-[#171717]"
+          class="w-fit text-[12px] font-semibold text-[#52616a] underline transition-colors hover:text-[#172c3b]"
           @click="clearFilters"
         >
           ล้างตัวกรอง
         </button>
       </div>
 
-      <div class="flex-1 bg-[#FDFDFB]/50 p-6">
+      <div class="flex-1 bg-[#e5e9e1] p-6">
         <div
           v-if="loading"
           class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -196,26 +197,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
           <article
             v-for="index in 8"
             :key="index"
-            class="overflow-hidden rounded-2xl border border-[#EFEFEA]/60 bg-white animate-pulse"
+            class="overflow-hidden rounded-2xl border border-[#ded7cb]/60 bg-[#fcf9f3] animate-pulse"
           >
-            <div class="aspect-[4/3] bg-[#F7F7F5]" />
+            <div class="aspect-[4/3] bg-[#eee7db]" />
             <div class="space-y-3 p-4">
-              <div class="h-3 w-20 rounded bg-[#F7F7F5]" />
-              <div class="h-3 w-3/4 rounded bg-[#F7F7F5]" />
-              <div class="h-8 rounded-lg bg-[#F7F7F5]" />
+              <div class="h-3 w-20 rounded bg-[#eee7db]" />
+              <div class="h-3 w-3/4 rounded bg-[#eee7db]" />
+              <div class="h-8 rounded-lg bg-[#eee7db]" />
             </div>
           </article>
         </div>
 
         <div
           v-else-if="error"
-          class="rounded-2xl border border-red-100 bg-white p-10 text-center"
+          class="rounded-2xl border border-red-100 bg-[#fcf9f3] p-10 text-center"
         >
           <p class="text-sm font-medium text-red-600">
             {{ error }}
           </p>
           <button
-            class="mt-3 text-xs font-medium text-[#666666] underline hover:text-[#171717]"
+            class="mt-3 text-xs font-medium text-[#52616a] underline hover:text-[#172c3b]"
             @click="fetchPromptNotes"
           >
             ลองโหลดใหม่
@@ -243,10 +244,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
           <article
             v-for="image in filteredPromptNotes"
             :key="image.orderImageId"
-            class="group flex flex-col overflow-hidden rounded-2xl border border-[#EFEFEA]/60 bg-white transition-all hover:border-[#171717]/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
+            class="group flex flex-col overflow-hidden rounded-2xl border border-[#ded7cb]/60 bg-[#fcf9f3] transition-all hover:border-[#172c3b]/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
           >
             <button
-              class="block aspect-[4/3] w-full overflow-hidden border-b border-[#EFEFEA]/40 bg-[#F7F7F5]/50"
+              class="block aspect-[4/3] w-full overflow-hidden border-b border-[#ded7cb]/40 bg-[#eee7db]"
               :aria-label="`ดูรายละเอียดงาน #${image.orderId}`"
               @click="detailImage = image"
             >
@@ -257,27 +258,27 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
               >
             </button>
             <div class="flex flex-1 flex-col p-4">
-              <p class="font-mono text-[12px] font-semibold text-[#666666]">
+              <p class="font-mono text-[12px] font-semibold text-[#52616a]">
                 งาน #{{ image.orderId }}
               </p>
               <div class="mt-3">
-                <p class="text-[10px] font-semibold text-[#9A9A95]">
+                <p class="text-[10px] font-semibold text-[#69777f]">
                   เครื่องมือที่ใช้
                 </p>
-                <p class="mt-1 truncate text-[13px] font-semibold text-[#171717]">
+                <p class="mt-1 truncate text-[13px] font-semibold text-[#172c3b]">
                   {{ displayValue(image.aiEngine) }}
                 </p>
               </div>
               <div class="mt-3">
-                <p class="text-[10px] font-semibold text-[#9A9A95]">
+                <p class="text-[10px] font-semibold text-[#69777f]">
                   วันที่บันทึก
                 </p>
-                <p class="mt-1 text-xs text-[#666666]">
+                <p class="mt-1 text-xs text-[#52616a]">
                   {{ formatDateTime(image.imageCreatedAt) }}
                 </p>
               </div>
               <button
-                class="mt-4 w-full rounded-lg border border-black/[0.06] bg-white px-3 py-2 text-[11px] font-semibold text-[#171717] shadow-sm transition-colors hover:bg-[#F7F7F5]"
+                class="mt-4 w-full rounded-lg border border-[#172c3b]/10 bg-[#fcf9f3] px-3 py-2 text-[11px] font-semibold text-[#172c3b] shadow-sm transition-colors hover:bg-[#eee7db]"
                 @click="detailImage = image"
               >
                 ดูรายละเอียด
@@ -297,25 +298,25 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
       >
         <div
           v-if="detailImage"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4"
+          class="editor-theme editor-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           <button
             class="absolute inset-0 bg-black/40 backdrop-blur-sm"
             aria-label="ปิดรายละเอียด"
             @click="detailImage = null"
           />
-          <section class="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[24px] border border-black/[0.06] bg-white/95 shadow-2xl backdrop-blur-[15px]">
-            <header class="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-black/[0.06] bg-white/95 p-6 backdrop-blur-md">
+          <section class="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-2xl">
+            <header class="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#172c3b]/10 bg-[#fcf9f3] p-6">
               <div>
-                <h2 class="text-lg font-semibold text-[#171717]">
+                <h2 class="text-lg font-semibold text-[#172c3b]">
                   รายละเอียดผลงาน
                 </h2>
-                <p class="mt-0.5 text-xs text-[#666666]">
+                <p class="mt-0.5 text-xs text-[#52616a]">
                   ข้อมูลการสร้างภาพและพารามิเตอร์ของผลงานนี้
                 </p>
               </div>
               <button
-                class="rounded-lg p-2 text-[#666666] transition-colors hover:bg-[#F7F7F5]"
+                class="rounded-lg p-2 text-[#52616a] transition-colors hover:bg-[#eee7db]"
                 aria-label="ปิด"
                 @click="detailImage = null"
               >
@@ -338,23 +339,23 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
               <img
                 :src="protectedAssetUrl(orderImageEndpoint(detailImage.orderImageId))"
                 :alt="`ผลงานดราฟต์ งาน #${detailImage.orderId}`"
-                class="max-h-80 w-full rounded-xl bg-[#F7F7F5] object-contain"
+                class="max-h-80 w-full rounded-xl bg-[#eee7db] object-contain"
               >
 
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-4">
-                  <p class="text-[11px] font-semibold text-[#929292]">
+                <div class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-4">
+                  <p class="text-[11px] font-semibold text-[#69777f]">
                     งาน
                   </p>
-                  <p class="mt-1 font-mono text-sm font-semibold text-[#171717]">
+                  <p class="mt-1 font-mono text-sm font-semibold text-[#172c3b]">
                     #{{ detailImage.orderId }}
                   </p>
                 </div>
-                <div class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-4">
-                  <p class="text-[11px] font-semibold text-[#929292]">
+                <div class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-4">
+                  <p class="text-[11px] font-semibold text-[#69777f]">
                     เครื่องมือที่ใช้
                   </p>
-                  <p class="mt-1 text-sm font-semibold text-[#171717]">
+                  <p class="mt-1 text-sm font-semibold text-[#172c3b]">
                     {{ displayValue(detailImage.aiEngine) }}
                   </p>
                 </div>
@@ -368,18 +369,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
                 :key="prompt.key"
               >
                 <div class="mb-1.5 flex items-center justify-between">
-                  <p class="text-xs font-semibold text-[#666666]">
+                  <p class="text-xs font-semibold text-[#52616a]">
                     {{ prompt.label }}
                   </p>
                   <button
                     v-if="prompt.value"
-                    class="rounded-lg border border-black/[0.06] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#666666] shadow-sm transition-colors hover:bg-[#F7F7F5] hover:text-black"
+                    class="rounded-lg border border-[#172c3b]/10 bg-[#fcf9f3] px-2.5 py-1 text-[11px] font-semibold text-[#52616a] shadow-sm transition-colors hover:bg-[#eee7db] hover:text-black"
                     @click="copyPrompt(prompt.value, prompt.key)"
                   >
                     {{ copiedKey === prompt.key ? 'คัดลอกแล้ว' : 'คัดลอก' }}
                   </button>
                 </div>
-                <p class="min-h-12 whitespace-pre-wrap break-words rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-3 text-xs leading-relaxed text-[#4A4A4A]">
+                <p class="min-h-12 whitespace-pre-wrap break-words rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-3 text-xs leading-relaxed text-[#52616a]">
                   {{ displayValue(prompt.value) }}
                 </p>
               </div>
@@ -392,30 +393,30 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
                     { label: 'Steps', value: detailImage.steps }
                   ]"
                   :key="item.label"
-                  class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-3"
+                  class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-3"
                 >
-                  <p class="text-[11px] font-semibold text-[#929292]">
+                  <p class="text-[11px] font-semibold text-[#69777f]">
                     {{ item.label }}
                   </p>
-                  <p class="mt-1 break-words text-sm font-semibold text-[#171717]">
+                  <p class="mt-1 break-words text-sm font-semibold text-[#172c3b]">
                     {{ displayValue(item.value) }}
                   </p>
                 </div>
               </div>
 
-              <div class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-4">
-                <p class="text-[11px] font-semibold text-[#929292]">
+              <div class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-4">
+                <p class="text-[11px] font-semibold text-[#69777f]">
                   วันที่บันทึก
                 </p>
-                <p class="mt-1 text-sm font-medium text-[#171717]">
+                <p class="mt-1 text-sm font-medium text-[#172c3b]">
                   {{ formatDateTime(detailImage.imageCreatedAt) }}
                 </p>
               </div>
             </div>
 
-            <footer class="flex justify-end border-t border-black/[0.06] bg-white px-6 py-4">
+            <footer class="flex justify-end border-t border-[#172c3b]/10 bg-[#fcf9f3] px-6 py-4">
               <button
-                class="rounded-xl border border-black/[0.06] bg-white px-4 py-2 text-[13px] font-semibold text-[#171717] shadow-sm transition-colors hover:bg-[#F7F7F5]"
+                class="rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-4 py-2 text-[13px] font-semibold text-[#172c3b] shadow-sm transition-colors hover:bg-[#eee7db]"
                 @click="detailImage = null"
               >
                 ปิด

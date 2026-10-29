@@ -336,27 +336,27 @@ const breadcrumb = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="editor-page space-y-6 max-w-7xl mx-auto">
     <AdminBreadcrumb :items="breadcrumb" />
 
     <div
       v-if="loading"
       class="space-y-6"
     >
-      <div class="bg-white/90 border border-black/[0.06] rounded-[24px] h-44 animate-pulse" />
-      <div class="bg-white/90 border border-black/[0.06] rounded-[24px] h-32 animate-pulse" />
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] h-44 animate-pulse" />
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] h-32 animate-pulse" />
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div
           v-for="index in 2"
           :key="index"
-          class="bg-white/90 border border-black/[0.06] rounded-[24px] h-72 animate-pulse"
+          class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] h-72 animate-pulse"
         />
       </div>
     </div>
 
     <div
       v-else-if="error || !order"
-      class="bg-white/90 border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)]"
+      class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)]"
     >
       <AdminEmptyState
         title="เกิดข้อผิดพลาด"
@@ -365,7 +365,7 @@ const breadcrumb = computed(() => [
       >
         <NuxtLink
           to="/editor/jobs"
-          class="inline-flex items-center px-4 py-2 rounded-lg bg-[#171717] text-white text-sm font-medium hover:bg-black transition-colors"
+          class="editor-primary inline-flex items-center px-4 py-2 rounded-lg bg-[#172c3b] text-white text-sm font-medium hover:bg-black transition-colors"
         >
           กลับไปยังรายการงาน
         </NuxtLink>
@@ -374,42 +374,36 @@ const breadcrumb = computed(() => [
 
     <template v-else>
 
-      <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+      <section class="editor-page-heading bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
         <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
           <div>
             <div class="flex flex-wrap items-center gap-3">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#929292]">
+              <p class="editor-eyebrow text-[11px] font-semibold uppercase tracking-[0.16em] text-[#69777f]">
                 ห้องทำงานช่างแต่งภาพ
               </p>
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
-                :class="order.orderStatus === 'cancelled' ? 'bg-[#FFF5F5] text-[#C53030] border-[#FEB2B2]' : ['delivered', 'completed'].includes(order.orderStatus) ? 'bg-[#171717] text-white border-[#171717]' : 'bg-[#F7F7F5] text-[#666666] border-black/[0.06]'"
-              >
-                {{ statusLabels[order.orderStatus] }}
-              </span>
             </div>
-            <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#171717] tracking-tight">
+            <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#172c3b] tracking-tight">
               งาน #{{ order.orderId }}
             </h1>
             <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-[13px]">
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#929292]">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#69777f]">
                   ประเภทงาน
-                </p><p class="mt-1 font-medium text-[#171717]">
+                </p><p class="mt-1 font-medium text-[#172c3b]">
                   {{ order.workTypeName }}
                 </p>
               </div>
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#929292]">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#69777f]">
                   แพ็กเกจ
-                </p><p class="mt-1 font-medium text-[#171717]">
+                </p><p class="mt-1 font-medium text-[#172c3b]">
                   {{ order.packageName }}
                 </p>
               </div>
               <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#929292]">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-[#69777f]">
                   กำหนดส่ง
-                </p><p class="mt-1 font-medium text-[#171717]">
+                </p><p class="mt-1 font-medium text-[#172c3b]">
                   {{ formatDate(order.orderRequiredDate) }}
                 </p>
               </div>
@@ -417,15 +411,15 @@ const breadcrumb = computed(() => [
           </div>
 
           <div class="xl:max-w-md xl:text-right">
-            <h2 class="text-base font-semibold text-[#171717]">
+            <h2 class="text-base font-semibold text-[#172c3b]">
               {{ nextAction.title }}
             </h2>
-            <p class="mt-1 text-[13px] leading-relaxed text-[#666666]">
+            <p class="mt-1 text-[13px] leading-relaxed text-[#52616a]">
               {{ nextAction.description }}
             </p>
             <div class="mt-4 flex flex-wrap items-center gap-2 xl:justify-end">
               <button
-                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-black/[0.08] bg-white text-[#4A4A4A] text-sm font-medium hover:bg-[#F7F7F5] transition-colors"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-black/[0.08] bg-[#fcf9f3] text-[#52616a] text-sm font-medium hover:bg-[#eee7db] transition-colors"
                 @click="historyDrawerOpen = true"
               >
                 <svg
@@ -443,7 +437,7 @@ const breadcrumb = computed(() => [
               </button>
               <button
                 v-if="nextAction.action"
-                class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#171717] text-white text-sm font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-50"
+                class="editor-primary inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#172c3b] text-white text-sm font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-50"
                 :disabled="updating"
                 @click="handlePrimaryAction"
               >
@@ -461,89 +455,89 @@ const breadcrumb = computed(() => [
       <div class="flex flex-col lg:flex-row gap-6 lg:gap-[2%] items-start">
         <!-- Left Column 69% -->
         <div class="w-full lg:w-[69%] space-y-6">
-          
-          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+
+          <section class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
             <div class="flex flex-col gap-8 lg:gap-10">
               <div>
                 <div class="mb-5">
-            <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+            <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
               รายละเอียดคำสั่งงาน
             </h2>
-            <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+            <p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
               ข้อมูลแพ็กเกจและเงื่อนไขการส่งมอบ
             </p>
           </div>
           <dl class="grid grid-cols-2 gap-x-6 gap-y-5 text-[13px]">
             <div>
-              <dt class="text-[#929292]">
+              <dt class="text-[#69777f]">
                 จำนวนภาพ
-              </dt><dd class="mt-1 font-semibold text-[#171717]">
+              </dt><dd class="mt-1 font-semibold text-[#172c3b]">
                 {{ order.packageImageCount }} ภาพ
               </dd>
             </div>
             <div>
-              <dt class="text-[#929292]">
+              <dt class="text-[#69777f]">
                 ความละเอียด
-              </dt><dd class="mt-1 font-semibold text-[#171717]">
+              </dt><dd class="mt-1 font-semibold text-[#172c3b]">
                 {{ order.packageResolution }}
               </dd>
             </div>
             <div>
-              <dt class="text-[#929292]">
+              <dt class="text-[#69777f]">
                 ประเภทงาน
-              </dt><dd class="mt-1 font-semibold text-[#171717]">
+              </dt><dd class="mt-1 font-semibold text-[#172c3b]">
                 {{ order.workTypeName }}
               </dd>
             </div>
             <div>
-              <dt class="text-[#929292]">
+              <dt class="text-[#69777f]">
                 แพ็กเกจ
-              </dt><dd class="mt-1 font-semibold text-[#171717]">
+              </dt><dd class="mt-1 font-semibold text-[#172c3b]">
                 {{ order.packageName }}
               </dd>
             </div>
           </dl>
-          <div class="mt-6 pt-5 border-t border-black/[0.06] space-y-4 text-[13px]">
+          <div class="mt-6 pt-5 border-t border-[#172c3b]/10 space-y-4 text-[13px]">
             <div>
-              <p class="text-[#929292]">
+              <p class="text-[#69777f]">
                 องค์ประกอบภาพ / รายละเอียดฉาก
-              </p><p class="mt-1.5 leading-relaxed text-[#171717] whitespace-pre-wrap">
+              </p><p class="mt-1.5 leading-relaxed text-[#172c3b] whitespace-pre-wrap">
                 {{ order.orderComposition || 'ไม่ได้ระบุองค์ประกอบเพิ่มเติม' }}
               </p>
             </div>
             <div>
-              <p class="text-[#929292]">
+              <p class="text-[#69777f]">
                 หมายเหตุเพิ่มเติม
-              </p><p class="mt-1.5 leading-relaxed text-[#171717] whitespace-pre-wrap">
+              </p><p class="mt-1.5 leading-relaxed text-[#172c3b] whitespace-pre-wrap">
                 {{ order.orderNote || 'ไม่ได้ระบุหมายเหตุเพิ่มเติม' }}
               </p>
             </div>
           </div>
               </div>
-              
-              <div class="pt-8 border-t border-black/[0.06]">
+
+              <div class="pt-8 border-t border-[#172c3b]/10">
                 <div class="mb-5 flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+              <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
                 ข้อมูลสำหรับการทำงาน
-              </h2><p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+              </h2><p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
                 ความต้องการและรูปอ้างอิงจากลูกค้า
               </p>
             </div>
-            <span class="px-2.5 py-1 rounded-full border border-black/[0.06] bg-[#F7F7F5] text-[11px] font-semibold text-[#666666]">{{ sourceImages.length }} รูป</span>
+            <span class="px-2.5 py-1 rounded-full border border-[#172c3b]/10 bg-[#eee7db] text-[11px] font-semibold text-[#52616a]">{{ sourceImages.length }} รูป</span>
           </div>
           <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13px]">
-            <div class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-4">
-              <dt class="text-[#929292]">
+            <div class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-4">
+              <dt class="text-[#69777f]">
                 สไตล์ภาพ
-              </dt><dd class="mt-1.5 font-medium text-[#171717]">
+              </dt><dd class="mt-1.5 font-medium text-[#172c3b]">
                 {{ order.orderStyle || 'ไม่ได้ระบุ' }}
               </dd>
             </div>
-            <div class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-4">
-              <dt class="text-[#929292]">
+            <div class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-4">
+              <dt class="text-[#69777f]">
                 โทนสี
-              </dt><dd class="mt-1.5 font-medium text-[#171717]">
+              </dt><dd class="mt-1.5 font-medium text-[#172c3b]">
                 {{ order.orderColorTone || 'ไม่ได้ระบุ' }}
               </dd>
             </div>
@@ -555,25 +549,25 @@ const breadcrumb = computed(() => [
             <div
               v-for="image in sourceImages"
               :key="image.orderImageId"
-              class="overflow-hidden rounded-xl border border-black/[0.06] bg-white"
+              class="overflow-hidden rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3]"
             >
-              <div class="aspect-square overflow-hidden bg-[#F7F7F5]">
+              <div class="aspect-square overflow-hidden bg-[#eee7db]">
                 <img
                   :src="protectedAssetUrl(orderImageEndpoint(image.orderImageId))"
                   alt="รูปอ้างอิงจากลูกค้า"
                   class="h-full w-full object-cover"
                 >
               </div>
-              <div class="border-t border-black/[0.06] p-2">
+              <div class="border-t border-[#172c3b]/10 p-2">
                 <button
                   type="button"
-                  class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-black/[0.06] bg-white px-2.5 py-2 text-[11px] font-semibold text-[#4A4A4A] transition-colors hover:bg-[#F7F7F5] disabled:cursor-not-allowed disabled:opacity-60"
+                  class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#172c3b]/10 bg-[#fcf9f3] px-2.5 py-2 text-[11px] font-semibold text-[#52616a] transition-colors hover:bg-[#eee7db] disabled:cursor-not-allowed disabled:opacity-60"
                   :disabled="downloadingReferenceIds.has(image.orderImageId)"
                   @click="downloadReferenceImage(image)"
                 >
                   <span
                     v-if="downloadingReferenceIds.has(image.orderImageId)"
-                    class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#929292]/30 border-t-[#4A4A4A]"
+                    class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#69777f]/30 border-t-[#52616a]"
                   />
                   {{ downloadingReferenceIds.has(image.orderImageId) ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลดรูปภาพ' }}
                 </button>
@@ -582,7 +576,7 @@ const breadcrumb = computed(() => [
           </div>
           <div
             v-else
-            class="mt-5 rounded-xl border border-dashed border-black/[0.08] px-4 py-8 text-center text-xs text-[#929292]"
+            class="mt-5 rounded-xl border border-dashed border-black/[0.08] px-4 py-8 text-center text-xs text-[#69777f]"
           >
             ลูกค้าไม่ได้อัปโหลดรูปอ้างอิงเพิ่มเติม
           </div>
@@ -590,19 +584,19 @@ const breadcrumb = computed(() => [
             </div>
           </section>
 
-          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
-        <div class="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-black/[0.06]">
+          <section class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+        <div class="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#172c3b]/10">
           <div>
-            <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+            <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
               พื้นที่ผลงาน
-            </h2><p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+            </h2><p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
               อัปโหลดและจัดการผลงานสำหรับส่งให้ลูกค้าเลือก
             </p>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-medium text-[#666666]">ผลงาน {{ generatedImages.length }} รูป</span>
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="text-xs font-medium text-[#52616a]">ผลงาน {{ generatedImages.length }} รูป</span>
             <button
-              class="inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] transition-colors rounded-xl shadow-sm border border-black/[0.06] whitespace-nowrap"
+              class="editor-primary inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] transition-colors rounded-xl shadow-sm border border-[#172c3b]/10 whitespace-nowrap"
               @click="uploadModalOpen = true"
             >
               + อัปโหลดผลงานดราฟต์
@@ -612,21 +606,21 @@ const breadcrumb = computed(() => [
         <div class="p-6">
           <div
             v-if="!generatedImages.length"
-            class="rounded-xl border border-dashed border-black/[0.08] py-10 text-center text-sm text-[#929292]"
+            class="rounded-xl border border-dashed border-black/[0.08] py-10 text-center text-sm text-[#69777f]"
           >
             ยังไม่มีผลงานดราฟต์ในออเดอร์นี้
           </div>
           <div
             v-else
-            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3"
           >
             <article
               v-for="image in generatedImages"
               :key="image.orderImageId"
-              class="group overflow-hidden rounded-2xl border border-[#EFEFEA]/60 bg-white transition-all hover:border-[#171717]/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
+              class="group overflow-hidden rounded-2xl border border-[#ded7cb]/60 bg-[#fcf9f3] transition-all hover:border-[#172c3b]/10 hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
             >
               <button
-                class="relative block aspect-[4/3] w-full overflow-hidden border-b border-[#EFEFEA]/40 bg-[#F7F7F5]/50"
+                class="relative block aspect-[4/3] w-full overflow-hidden border-b border-[#ded7cb]/40 bg-[#eee7db]"
                 @click="detailImage = image"
               >
                 <img
@@ -634,20 +628,20 @@ const breadcrumb = computed(() => [
                   alt="ผลงานดราฟต์"
                   class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 >
-                <span class="absolute left-3 top-3 rounded-lg border border-[#171717] bg-[#171717] px-2 py-1 text-[9px] font-semibold text-white shadow-sm">ดราฟต์</span>
+                <span class="absolute left-3 top-3 rounded-lg border border-[#172c3b] bg-[#172c3b] px-2 py-1 text-[9px] font-semibold text-white shadow-sm">ดราฟต์</span>
               </button>
               <div class="flex items-end justify-between gap-4 p-4">
                 <div class="min-w-0">
-                  <p class="text-[10px] font-semibold text-[#9A9A95]">
+                  <p class="text-[10px] font-semibold text-[#69777f]">
                     เครื่องมือที่ใช้
                   </p>
-                  <p class="mt-1 truncate text-[13px] font-semibold text-[#171717]">
+                  <p class="mt-1 truncate text-[13px] font-semibold text-[#172c3b]">
                     {{ image.aiEngine || 'ไม่ได้ระบุ' }}
                   </p>
                 </div>
                 <div class="flex gap-2">
                   <button
-                    class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[11px] font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-100"
+                    class="shrink-0 rounded-lg border border-[#d4a88e] bg-[#f4e2d1] px-3 py-1.5 text-[11px] font-semibold text-[#733b20] shadow-sm transition-colors hover:bg-[#edd1bb]"
                     @click="openEditModal(image)"
                   >
                     แก้ไข
@@ -659,23 +653,23 @@ const breadcrumb = computed(() => [
 
           <div
             v-if="selectedImages.length"
-            class="mt-6 border-t border-black/[0.06] pt-6"
+            class="mt-6 border-t border-[#172c3b]/10 pt-6"
           >
             <div class="mb-3 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-[#171717]">
+              <h3 class="text-sm font-semibold text-[#172c3b]">
                 ผลงานที่ลูกค้าเลือก
               </h3>
-              <span class="text-xs text-[#666666]">{{ selectedImages.length }} รูป</span>
+              <span class="text-xs text-[#52616a]">{{ selectedImages.length }} รูป</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div
                 v-for="image in selectedImages"
                 :key="image.orderImageId"
-                class="flex flex-col rounded-xl border border-black/[0.06] bg-white overflow-hidden shadow-sm"
+                class="flex flex-col rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] overflow-hidden shadow-sm"
               >
                 <a
                   href="#"
-                  class="aspect-square w-full block bg-[#F7F7F5]"
+                  class="aspect-square w-full block bg-[#eee7db]"
                   @click.prevent="openProtectedAsset(orderImageEndpoint(image.orderImageId))"
                 >
                   <img
@@ -684,9 +678,9 @@ const breadcrumb = computed(() => [
                     class="h-full w-full object-cover"
                   >
                 </a>
-                <div class="p-3 border-t border-black/[0.06] flex justify-center">
+                <div class="p-3 border-t border-[#172c3b]/10 flex justify-center">
                   <button
-                    class="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[11px] font-semibold text-indigo-700 shadow-sm transition-colors hover:bg-indigo-100 w-full"
+                    class="rounded-lg border border-[#d4a88e] bg-[#f4e2d1] px-3 py-1.5 text-[11px] font-semibold text-[#733b20] shadow-sm transition-colors hover:bg-[#edd1bb] w-full"
                     @click="metadataImage = image"
                   >
                     ข้อมูล Gallery
@@ -701,12 +695,12 @@ const breadcrumb = computed(() => [
 
         <!-- Right Column 29% -->
         <div class="w-full lg:w-[29%] space-y-6">
-          <section class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+          <section class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
         <div class="mb-5">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
             ขั้นตอนการดำเนินงาน
           </h2>
-          <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+          <p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
             ลำดับงานตั้งแต่เริ่มผลิตจนเสร็จสมบูรณ์
           </p>
         </div>
@@ -726,18 +720,18 @@ const breadcrumb = computed(() => [
               class="relative flex items-start gap-4"
             >
               <!-- Indicator Circle -->
-              <div 
-                class="relative z-10 flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border-[1.5px] bg-white mt-1"
+              <div
+                class="relative z-10 flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border-[1.5px] bg-[#fcf9f3] mt-1"
                 :class="
-                  index === currentStepIndex 
-                    ? 'border-[#171717] ring-4 ring-[#171717]/10' 
+                  index === currentStepIndex
+                    ? 'border-[#172c3b] ring-4 ring-[#172c3b]/10'
                     : index < currentStepIndex || order.orderStatus === 'completed'
-                      ? 'border-[#171717] bg-[#171717]' 
+                      ? 'border-[#172c3b] bg-[#172c3b]'
                       : 'border-black/[0.15]'
                 "
               >
                 <!-- Inner dot for active state -->
-                <div v-if="index === currentStepIndex" class="h-1.5 w-1.5 rounded-full bg-[#171717]"></div>
+                <div v-if="index === currentStepIndex" class="h-1.5 w-1.5 rounded-full bg-[#172c3b]"></div>
               </div>
 
               <!-- Text Content -->
@@ -745,23 +739,23 @@ const breadcrumb = computed(() => [
                 <p
                   class="text-[10px] font-semibold tracking-wider uppercase"
                   :class="
-                    index === currentStepIndex 
-                      ? 'text-[#171717]' 
+                    index === currentStepIndex
+                      ? 'text-[#172c3b]'
                       : index < currentStepIndex || order.orderStatus === 'completed'
-                        ? 'text-[#171717]/60' 
-                        : 'text-[#929292]'
+                        ? 'text-[#172c3b]/60'
+                        : 'text-[#69777f]'
                   "
                 >
                   ขั้นตอน {{ index + 1 }}
                 </p>
-                <p 
+                <p
                   class="mt-0.5 text-[13px] font-semibold"
                   :class="
-                    index === currentStepIndex 
-                      ? 'text-[#171717]' 
+                    index === currentStepIndex
+                      ? 'text-[#172c3b]'
                       : index < currentStepIndex || order.orderStatus === 'completed'
-                        ? 'text-[#171717]' 
-                        : 'text-[#929292]'
+                        ? 'text-[#172c3b]'
+                        : 'text-[#69777f]'
                   "
                 >
                   {{ step.label }}
@@ -795,24 +789,24 @@ const breadcrumb = computed(() => [
       >
         <div
           v-if="uploadModalOpen"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4"
+          class="editor-theme editor-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           <button
             class="absolute inset-0 bg-black/40 backdrop-blur-sm"
             aria-label="ปิดหน้าต่าง"
             @click="closeUploadModal"
           />
-          <section class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/95 shadow-2xl backdrop-blur-[15px]">
-            <header class="flex items-start justify-between gap-4 border-b border-black/[0.06] p-6 pb-4">
+          <section class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-2xl">
+            <header class="flex items-start justify-between gap-4 border-b border-[#172c3b]/10 p-6 pb-4">
               <div>
-                <h2 class="text-lg font-semibold text-[#171717]">
+                <h2 class="text-lg font-semibold text-[#172c3b]">
                   อัปโหลดผลงานดราฟต์
-                </h2><p class="mt-1 text-[13px] text-[#666666]">
+                </h2><p class="mt-1 text-[13px] text-[#52616a]">
                   เพิ่มผลงานพร้อมข้อมูลที่ใช้ในการสร้างภาพ
                 </p>
               </div>
               <button
-                class="rounded-lg p-2 text-[#666666] hover:bg-[#F7F7F5]"
+                class="rounded-lg p-2 text-[#52616a] hover:bg-[#eee7db]"
                 aria-label="ปิด"
                 @click="closeUploadModal"
               >
@@ -828,14 +822,14 @@ const breadcrumb = computed(() => [
                 /></svg>
               </button>
             </header>
-            <div class="overflow-y-auto bg-[#FDFDFB]/50 p-6">
+            <div class="overflow-y-auto bg-[#e5e9e1] p-6">
               <div
                 v-if="!uploadedFileUrl"
                 class="space-y-3"
               >
                 <div
                   class="cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-colors"
-                  :class="dragOver ? 'border-[#171717] bg-[#F7F7F5]' : 'border-black/[0.10] bg-white hover:border-black/30'"
+                  :class="dragOver ? 'border-[#172c3b] bg-[#eee7db]' : 'border-black/[0.10] bg-[#fcf9f3] hover:border-black/30'"
                   @dragover.prevent="dragOver = true"
                   @dragleave.prevent="dragOver = false"
                   @drop.prevent="handleDrop"
@@ -849,7 +843,7 @@ const breadcrumb = computed(() => [
                     @change="handleFileSelect"
                   >
                   <svg
-                    class="mx-auto mb-3 h-8 w-8 text-[#929292]"
+                    class="mx-auto mb-3 h-8 w-8 text-[#69777f]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -859,16 +853,16 @@ const breadcrumb = computed(() => [
                     stroke-width="1.5"
                     d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2 1.6-1.6a2 2 0 012.8 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   /></svg>
-                  <p class="text-sm font-semibold text-[#171717]">
+                  <p class="text-sm font-semibold text-[#172c3b]">
                     ลากไฟล์มาวาง หรือคลิกเพื่อเลือกภาพ
                   </p>
-                  <p class="mt-1 text-xs text-[#929292]">
+                  <p class="mt-1 text-xs text-[#69777f]">
                     รองรับไฟล์รูปภาพ
                   </p>
                 </div>
                 <p
                   v-if="uploading"
-                  class="text-center text-xs font-medium text-[#666666]"
+                  class="text-center text-xs font-medium text-[#52616a]"
                 >
                   กำลังอัปโหลดรูปภาพ...
                 </p>
@@ -881,7 +875,7 @@ const breadcrumb = computed(() => [
                   <img
                     :src="previewUrl"
                     alt="ตัวอย่างผลงาน"
-                    class="aspect-square w-full rounded-xl border border-black/[0.06] bg-white object-contain"
+                    class="aspect-square w-full rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] object-contain"
                   ><button
                     class="mt-3 w-full text-xs font-semibold text-red-600 hover:underline"
                     @click="handleCancelUpload"
@@ -891,38 +885,38 @@ const breadcrumb = computed(() => [
                 </div>
                 <div class="space-y-4 text-xs md:col-span-2">
                   <div class="grid grid-cols-2 gap-3">
-                    <label class="block"><span class="mb-1 block font-semibold text-[#666666]">AI Engine</span><input
+                    <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">AI Engine</span><input
                       v-model="paramsForm.aiEngine"
                       type="text"
-                      class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                      class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                     ></label>
-                    <label class="block"><span class="mb-1 block font-semibold text-[#666666]">Seed</span><input
+                    <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">Seed</span><input
                       v-model="paramsForm.seed"
                       type="number"
-                      class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                      class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                     ></label>
                   </div>
-                  <label class="block"><span class="mb-1 block font-semibold text-[#666666]">Positive Prompt</span><textarea
+                  <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">Positive Prompt</span><textarea
                     v-model="paramsForm.positivePrompt"
                     rows="3"
-                    class="w-full resize-none rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                    class="w-full resize-none rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                   /></label>
-                  <label class="block"><span class="mb-1 block font-semibold text-[#666666]">Negative Prompt</span><textarea
+                  <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">Negative Prompt</span><textarea
                     v-model="paramsForm.negativePrompt"
                     rows="3"
-                    class="w-full resize-none rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                    class="w-full resize-none rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                   /></label>
                   <div class="grid grid-cols-2 gap-3">
-                    <label class="block"><span class="mb-1 block font-semibold text-[#666666]">CFG Scale</span><input
+                    <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">CFG Scale</span><input
                       v-model="paramsForm.cfgScale"
                       type="number"
                       step="0.1"
-                      class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                      class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                     ></label>
-                    <label class="block"><span class="mb-1 block font-semibold text-[#666666]">Inference Steps</span><input
+                    <label class="block"><span class="mb-1 block font-semibold text-[#52616a]">Inference Steps</span><input
                       v-model="paramsForm.steps"
                       type="number"
-                      class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white"
+                      class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]"
                     ></label>
                   </div>
                 </div>
@@ -934,15 +928,15 @@ const breadcrumb = computed(() => [
                 {{ uploadError }}
               </p>
             </div>
-            <footer class="flex justify-end gap-3 border-t border-black/[0.06] bg-white p-6 pt-4">
+            <footer class="flex justify-end gap-3 border-t border-[#172c3b]/10 bg-[#fcf9f3] p-6 pt-4">
               <button
-                class="px-4 py-2 text-sm font-medium text-[#666666]"
+                class="px-4 py-2 text-sm font-medium text-[#52616a]"
                 @click="closeUploadModal"
               >
                 ยกเลิก
               </button>
               <button
-                class="rounded-xl border border-transparent bg-[#171717] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-40"
+                class="editor-primary rounded-xl border border-transparent bg-[#172c3b] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[#294655] disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="!uploadedFileUrl || uploading || submitting"
                 @click="handleSubmitImage"
               >
@@ -961,23 +955,23 @@ const breadcrumb = computed(() => [
       >
         <div
           v-if="detailImage"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4"
+          class="editor-theme editor-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           <button
             class="absolute inset-0 bg-black/40 backdrop-blur-sm"
             aria-label="ปิดรายละเอียด"
             @click="detailImage = null"
           />
-          <section class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[24px] border border-black/[0.06] bg-white shadow-2xl">
-            <header class="sticky top-0 z-10 flex items-center justify-between border-b border-black/[0.06] bg-white/95 p-6 backdrop-blur-md">
+          <section class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-2xl">
+            <header class="sticky top-0 z-10 flex items-center justify-between border-b border-[#172c3b]/10 bg-[#fcf9f3] p-6">
               <div>
-                <h2 class="text-lg font-semibold text-[#171717]">
+                <h2 class="text-lg font-semibold text-[#172c3b]">
                   รายละเอียดผลงาน
-                </h2><p class="mt-0.5 text-xs text-[#666666]">
+                </h2><p class="mt-0.5 text-xs text-[#52616a]">
                   ข้อมูลการสร้างภาพและพารามิเตอร์ของผลงานนี้
                 </p>
               </div><button
-                class="rounded-lg p-2 text-[#666666] hover:bg-[#F7F7F5]"
+                class="rounded-lg p-2 text-[#52616a] hover:bg-[#eee7db]"
                 aria-label="ปิด"
                 @click="detailImage = null"
               >
@@ -997,17 +991,17 @@ const breadcrumb = computed(() => [
               <img
                 :src="protectedAssetUrl(orderImageEndpoint(detailImage.orderImageId))"
                 alt="ผลงานดราฟต์"
-                class="max-h-72 w-full rounded-xl bg-[#F7F7F5] object-contain"
+                class="max-h-72 w-full rounded-xl bg-[#eee7db] object-contain"
               >
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                 <div
                   v-for="item in [{ label: 'Engine', value: detailImage.aiEngine }, { label: 'Seed', value: detailImage.seed }, { label: 'CFG', value: detailImage.cfgScale }, { label: 'Steps', value: detailImage.steps }]"
                   :key="item.label"
-                  class="rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-3"
+                  class="rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-3"
                 >
-                  <p class="text-[#929292]">
+                  <p class="text-[#69777f]">
                     {{ item.label }}
-                  </p><p class="mt-1 break-words font-semibold text-[#171717]">
+                  </p><p class="mt-1 break-words font-semibold text-[#172c3b]">
                     {{ item.value ?? '—' }}
                   </p>
                 </div>
@@ -1017,17 +1011,17 @@ const breadcrumb = computed(() => [
                 :key="prompt.key"
               >
                 <div class="mb-1.5 flex items-center justify-between">
-                  <p class="text-xs font-semibold text-[#666666]">
+                  <p class="text-xs font-semibold text-[#52616a]">
                     {{ prompt.label }}
                   </p><button
                     v-if="prompt.value"
-                    class="rounded-lg border border-black/[0.06] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#666666] shadow-sm transition-colors hover:bg-[#F7F7F5] hover:text-black"
+                    class="rounded-lg border border-[#172c3b]/10 bg-[#fcf9f3] px-2.5 py-1 text-[11px] font-semibold text-[#52616a] shadow-sm transition-colors hover:bg-[#eee7db] hover:text-black"
                     @click="copyPrompt(prompt.value, prompt.key)"
                   >
                     {{ copiedKey === prompt.key ? 'คัดลอกแล้ว' : 'คัดลอก' }}
                   </button>
                 </div>
-                <p class="min-h-12 whitespace-pre-wrap break-words rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 p-3 text-xs leading-relaxed text-[#4A4A4A]">
+                <p class="min-h-12 whitespace-pre-wrap break-words rounded-xl border border-[#172c3b]/10 bg-[#eee7db] p-3 text-xs leading-relaxed text-[#52616a]">
                   {{ prompt.value || '—' }}
                 </p>
               </div>
@@ -1039,27 +1033,27 @@ const breadcrumb = computed(() => [
       <Transition name="history-drawer">
         <div
           v-if="historyDrawerOpen"
-          class="fixed inset-0 z-50 overflow-hidden"
+          class="editor-theme editor-overlay fixed inset-0 z-50 overflow-hidden"
         >
           <button
             class="history-drawer-backdrop absolute inset-0 bg-black/[0.12]"
             aria-label="ปิดประวัติการทำงาน"
             @click="historyDrawerOpen = false"
           />
-          <aside class="history-drawer-panel absolute inset-y-0 right-0 flex h-dvh w-[90vw] flex-col border-l border-black/[0.07] bg-white shadow-[-10px_0_28px_rgba(0,0,0,0.07)] sm:w-[76vw] lg:w-[460px]">
-            <header class="sticky top-0 z-10 flex shrink-0 items-start justify-between gap-4 border-b border-black/[0.06] bg-white/95 px-6 py-5 backdrop-blur-md">
+          <aside class="history-drawer-panel absolute inset-y-0 right-0 flex h-dvh w-[90vw] flex-col border-l border-black/[0.07] bg-[#fcf9f3] shadow-[-10px_0_28px_rgba(0,0,0,0.07)] sm:w-[76vw] lg:w-[460px]">
+            <header class="sticky top-0 z-10 flex shrink-0 items-start justify-between gap-4 border-b border-[#172c3b]/10 bg-[#fcf9f3] px-6 py-5">
               <div>
-                <h2 class="text-lg font-semibold leading-6 text-[#171717]">
+                <h2 class="text-lg font-semibold leading-6 text-[#172c3b]">
                   ประวัติการทำงาน
                 </h2>
-                <p class="mt-1 text-[13px] font-medium text-[#4A4A4A]">
+                <p class="mt-1 text-[13px] font-medium text-[#52616a]">
                   งาน #{{ order?.orderId ?? jobId }}
                 </p>
-                <p class="mt-0.5 text-xs text-[#929292]">
+                <p class="mt-0.5 text-xs text-[#69777f]">
                   {{ order?.workflowLogs?.length ?? 0 }} รายการกิจกรรม
                 </p>
               </div><button
-                class="-mr-2 mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[#666666] transition-colors hover:border-black/[0.06] hover:bg-[#F7F7F5] hover:text-[#171717]"
+                class="-mr-2 mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[#52616a] transition-colors hover:border-[#172c3b]/10 hover:bg-[#eee7db] hover:text-[#172c3b]"
                 aria-label="ปิด"
                 @click="historyDrawerOpen = false"
               >
@@ -1078,7 +1072,7 @@ const breadcrumb = computed(() => [
             <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
               <p
                 v-if="!order?.workflowLogs?.length"
-                class="py-12 text-center text-sm text-[#929292]"
+                class="py-12 text-center text-sm text-[#69777f]"
               >
                 ไม่มีข้อมูลบันทึกประวัติการเปลี่ยนสถานะ
               </p>
@@ -1092,23 +1086,23 @@ const breadcrumb = computed(() => [
                   class="grid grid-cols-[20px_minmax(0,1fr)] gap-x-3 pb-6 text-xs last:pb-0"
                 >
                   <div class="relative flex justify-center">
-                    <span class="relative z-[1] mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#343434]" />
+                    <span class="relative z-[1] mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#294655]" />
                     <span
                       v-if="index < order.workflowLogs.length - 1"
                       class="absolute bottom-[-24px] top-3.5 left-1/2 w-px -translate-x-1/2 bg-black/[0.09]"
                     />
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm font-semibold leading-5 text-[#242424]">
+                    <p class="text-sm font-semibold leading-5 text-[#172c3b]">
                       {{ getStatusLabel(log.toStatus) }}
                     </p>
                     <p
                       v-if="log.logNote"
-                      class="mt-1 text-[13px] leading-5 text-[#4A4A4A]"
+                      class="mt-1 text-[13px] leading-5 text-[#52616a]"
                     >
                       {{ log.logNote }}
                     </p>
-                    <p class="mt-1.5 text-[11px] leading-4 text-[#929292]">
+                    <p class="mt-1.5 text-[11px] leading-4 text-[#69777f]">
                       {{ log.userFirstName ? `${log.userFirstName} ${log.userLastName || ''}`.trim() : 'ระบบอัตโนมัติ' }} ({{ getActorRoleLabel(log.userRole) }}) · {{ formatDateTime(log.changedAt) }}
                     </p>
                   </div>

@@ -166,15 +166,15 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto pb-12 space-y-6">
-    <AdminBreadcrumb :items="breadcrumb" />
-
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
-      <div class="px-6 py-5 border-b border-black/[0.06]">
-        <h1 class="text-lg font-semibold text-[#171717] tracking-tight">
+  <div class="editor-page max-w-4xl mx-auto pb-12 space-y-6">
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
+      <div class="editor-page-heading editor-heading-integrated px-6 py-5 border-b border-[#172c3b]/10">
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="editor-eyebrow">EDITOR PROFILE</p>
+        <h1 class="text-lg font-semibold text-[#172c3b] tracking-tight">
           โปรไฟล์
         </h1>
-        <p class="mt-0.5 text-[13px] font-medium text-[#666666]">
+        <p class="mt-0.5 text-[13px] font-medium text-[#52616a]">
           จัดการข้อมูลส่วนตัวของบัญชีนักออกแบบ
         </p>
       </div>
@@ -223,7 +223,7 @@ const breadcrumb = [
             </p>
             <button
               type="button"
-              class="mt-2 text-[12px] font-semibold text-[#171717] underline underline-offset-2"
+              class="mt-2 text-[12px] font-semibold text-[#172c3b] underline underline-offset-2"
               @click="fetchProfile"
             >
               ลองอีกครั้ง
@@ -236,10 +236,10 @@ const breadcrumb = [
         v-else
         @submit.prevent="saveProfile"
       >
-        <div class="p-6 border-b border-black/[0.06]">
+        <div class="editor-callout p-6 border-b border-[#172c3b]/10">
           <div class="flex flex-col sm:flex-row sm:items-center gap-5">
             <div class="relative flex-shrink-0 self-start">
-              <div class="w-24 h-24 rounded-full overflow-hidden border border-black/[0.08] bg-[#F7F7F5] flex items-center justify-center">
+              <div class="w-24 h-24 rounded-full overflow-hidden border border-black/[0.08] bg-[#eee7db] flex items-center justify-center">
                 <img
                   v-if="previewImageUrl || profileForm.userProfileImage"
                   :src="previewImageUrl || (profileUserId != null ? protectedAssetUrl(profileEndpoint(profileUserId)) : '')"
@@ -248,11 +248,11 @@ const breadcrumb = [
                 >
                 <span
                   v-else
-                  class="text-2xl font-semibold text-[#666666]"
+                  class="text-2xl font-semibold text-[#52616a]"
                 >{{ profileForm.userFirstName.charAt(0).toUpperCase() || "E" }}</span>
               </div>
               <label
-                class="absolute right-0 bottom-0 w-9 h-9 rounded-full bg-[#171717] text-white border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:bg-black transition-colors"
+                class="absolute right-0 bottom-0 w-9 h-9 rounded-full bg-[#172c3b] text-white border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:bg-black transition-colors"
                 title="เปลี่ยนรูปโปรไฟล์"
               >
                 <svg
@@ -283,19 +283,19 @@ const breadcrumb = [
 
             <div class="min-w-0 w-full sm:w-[28rem] sm:max-w-[calc(100%-7.25rem)]">
               <div class="flex flex-wrap items-center gap-2">
-                <h2 class="text-xl font-semibold text-[#171717] tracking-tight break-words">
+                <h2 class="text-xl font-semibold text-[#172c3b] tracking-tight break-words">
                   {{ profileForm.userFirstName }} {{ profileForm.userLastName }}
                 </h2>
-                <span class="px-2.5 py-1 rounded-full bg-[#171717] text-white text-[11px] font-semibold">{{ profileForm.userRole === 'editor' ? 'นักออกแบบ' : profileForm.userRole }}</span>
+                <span class="px-2.5 py-1 rounded-full bg-[#172c3b] text-white text-[11px] font-semibold">{{ profileForm.userRole === 'editor' ? 'นักออกแบบ' : profileForm.userRole }}</span>
               </div>
-              <div class="mt-3 max-w-sm rounded-xl border border-black/[0.06] bg-[#F7F7F5] px-4 py-3">
-                <p class="text-[11px] font-semibold text-[#888888]">
+              <div class="mt-3 max-w-sm rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-4 py-3">
+                <p class="text-[11px] font-semibold text-[#69777f]">
                   อีเมลบัญชี
                 </p>
-                <p class="mt-0.5 text-[13px] font-medium text-[#333333] break-all">
+                <p class="mt-0.5 text-[13px] font-medium text-[#294655] break-all">
                   {{ profileForm.userEmail || "—" }}
                 </p>
-                <p class="mt-1 text-[11px] text-[#888888]">
+                <p class="mt-1 text-[11px] text-[#69777f]">
                   ข้อมูลนี้ไม่สามารถแก้ไขได้
                 </p>
               </div>
@@ -306,10 +306,10 @@ const breadcrumb = [
         <div class="p-6 space-y-8">
           <section>
             <div class="mb-5">
-              <h2 class="text-sm font-semibold text-[#171717]">
+              <h2 class="text-sm font-semibold text-[#172c3b]">
                 ข้อมูลส่วนตัว
               </h2>
-              <p class="mt-0.5 text-[12px] text-[#777777]">
+              <p class="mt-0.5 text-[12px] text-[#52616a]">
                 ข้อมูลที่ใช้สำหรับบัญชีและการติดต่อเกี่ยวกับงาน
               </p>
             </div>
@@ -318,7 +318,7 @@ const breadcrumb = [
               <div>
                 <label
                   for="userFirstName"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >ชื่อ</label>
                 <input
                   id="userFirstName"
@@ -326,13 +326,13 @@ const breadcrumb = [
                   required
                   type="text"
                   autocomplete="given-name"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
               <div>
                 <label
                   for="userLastName"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >นามสกุล</label>
                 <input
                   id="userLastName"
@@ -340,13 +340,13 @@ const breadcrumb = [
                   required
                   type="text"
                   autocomplete="family-name"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
               <div>
                 <label
                   for="userPhone"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >เบอร์โทรศัพท์</label>
                 <input
                   id="userPhone"
@@ -356,30 +356,30 @@ const breadcrumb = [
                   maxlength="10"
                   @input="profileForm.userPhone = ($event.target as HTMLInputElement).value.replace(/\\D/g, '').slice(0, 10)"
                   autocomplete="tel"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
               <div class="sm:col-span-2">
                 <label
                   for="userAddress"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >ที่อยู่ติดต่อ</label>
                 <textarea
                   id="userAddress"
                   v-model="profileForm.userAddress"
                   rows="3"
-                  class="w-full px-3 py-2.5 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow resize-y"
+                  class="w-full px-3 py-2.5 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow resize-y"
                 />
               </div>
             </div>
           </section>
 
-          <section class="pt-6 border-t border-black/[0.06]">
+          <section class="pt-6 border-t border-[#172c3b]/10">
             <div class="mb-5">
-              <h2 class="text-sm font-semibold text-[#171717]">
+              <h2 class="text-sm font-semibold text-[#172c3b]">
                 ช่องทางการติดต่อ
               </h2>
-              <p class="mt-0.5 text-[12px] text-[#777777]">
+              <p class="mt-0.5 text-[12px] text-[#52616a]">
                 ช่องทางที่บันทึกไว้สำหรับประสานงานและส่งมอบผลงาน
               </p>
             </div>
@@ -388,33 +388,33 @@ const breadcrumb = [
               <div>
                 <label
                   for="facebook"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >Facebook</label>
                 <input
                   id="facebook"
                   v-model="profileForm.facebook"
                   type="text"
                   placeholder="ชื่อ Facebook"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] placeholder:text-[#AAAAAA] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] placeholder:text-[#69777f] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
               <div>
                 <label
                   for="line"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >LINE ID</label>
                 <input
                   id="line"
                   v-model="profileForm.line"
                   type="text"
                   placeholder="ไลน์ไอดี"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] placeholder:text-[#AAAAAA] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] placeholder:text-[#69777f] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
               <div>
                 <label
                   for="tel"
-                  class="block text-[13px] font-semibold text-[#171717] mb-1.5"
+                  class="block text-[13px] font-semibold text-[#172c3b] mb-1.5"
                 >เบอร์ติดต่อด่วน</label>
                 <input
                   id="tel"
@@ -423,7 +423,7 @@ const breadcrumb = [
                   inputmode="numeric"
                   maxlength="10"
                   @input="profileForm.tel = ($event.target as HTMLInputElement).value.replace(/\\D/g, '').slice(0, 10)"
-                  class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"
+                  class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"
                 >
               </div>
             </div>
@@ -451,7 +451,7 @@ const breadcrumb = [
             </p>
           </div>
 
-          <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-5 border-t border-black/[0.06]">
+          <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-5 border-t border-[#172c3b]/10">
             <p
               v-if="successMessage"
               class="text-[12px] font-semibold text-green-700 sm:mr-auto"
@@ -462,7 +462,7 @@ const breadcrumb = [
             <button
               type="submit"
               :disabled="saving"
-              class="self-start sm:self-auto px-5 py-2 rounded-lg bg-[#171717] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="editor-primary self-start sm:self-auto px-5 py-2 rounded-lg bg-[#172c3b] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <svg
                 v-if="saving"

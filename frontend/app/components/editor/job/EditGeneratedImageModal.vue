@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <div
       v-if="isOpen && img"
-      class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
+      class="editor-theme editor-overlay fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
     >
       <button
         class="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -170,21 +170,21 @@ onBeforeUnmount(() => {
         @click="handleClose"
       ></button>
 
-      <div class="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/95 shadow-2xl backdrop-blur-[15px]">
+      <div class="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-2xl">
 
         <!-- Header -->
-        <header class="flex items-start justify-between gap-4 border-b border-black/[0.06] p-6 pb-4">
+        <header class="flex items-start justify-between gap-4 border-b border-[#172c3b]/10 p-6 pb-4">
           <div>
-            <h2 class="text-lg font-semibold text-[#171717]">
+            <h2 class="text-lg font-semibold text-[#172c3b]">
               แก้ไขผลงานดราฟต์
-            </h2><p class="mt-1 text-[13px] text-[#666666]">
+            </h2><p class="mt-1 text-[13px] text-[#52616a]">
               แก้ไขรูปภาพและข้อมูลที่ใช้ในการสร้างผลงาน
             </p>
           </div>
           <button
             @click="handleClose"
             :disabled="submitting || uploading"
-            class="rounded-lg p-2 text-[#666666] hover:bg-[#F7F7F5]"
+            class="rounded-lg p-2 text-[#52616a] hover:bg-[#eee7db]"
             aria-label="ปิด"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="1.8" d="M6 6l12 12M18 6L6 18"/></svg>
@@ -192,21 +192,21 @@ onBeforeUnmount(() => {
         </header>
 
         <!-- Body -->
-        <div class="p-6 overflow-y-auto bg-[#FDFDFB]/50">
+        <div class="p-6 overflow-y-auto bg-[#e5e9e1]">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Image Area -->
             <div class="space-y-4">
-              <div class="aspect-[4/3] bg-[#F7F7F5] rounded-xl overflow-hidden relative border border-black/[0.06] flex items-center justify-center">
+              <div class="aspect-[4/3] bg-[#eee7db] rounded-xl overflow-hidden relative border border-[#172c3b]/10 flex items-center justify-center">
                 <template v-if="previewUrl">
                   <img :src="previewUrl" class="w-full h-full object-contain" />
-                  <span class="absolute top-3 left-3 bg-[#171717] text-white text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm border border-[#171717]">
+                  <span class="absolute top-3 left-3 bg-[#172c3b] text-white text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm border border-[#172c3b]">
                     รูปภาพใหม่ที่เลือก
                   </span>
                 </template>
                 <template v-else>
                   <img :src="protectedAssetUrl(orderImageEndpoint(img.orderImageId))" class="w-full h-full object-contain" />
-                  <span class="absolute top-3 left-3 bg-white text-[#171717] text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm border border-black/[0.06]">
+                  <span class="absolute top-3 left-3 bg-[#fcf9f3] text-[#172c3b] text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm border border-[#172c3b]/10">
                     รูปภาพปัจจุบัน
                   </span>
                 </template>
@@ -218,7 +218,7 @@ onBeforeUnmount(() => {
                 <template v-if="!previewUrl">
                   <button
                     @click="triggerFileInput"
-                    class="text-[13px] font-semibold text-[#171717] hover:bg-[#F7F7F5] border border-black/[0.06] rounded-xl px-4 py-2 w-full transition-colors bg-white shadow-sm"
+                    class="text-[13px] font-semibold text-[#172c3b] hover:bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-4 py-2 w-full transition-colors bg-[#fcf9f3] shadow-sm"
                   >
                     เลือกรูปภาพใหม่
                   </button>
@@ -226,14 +226,14 @@ onBeforeUnmount(() => {
                 <template v-else>
                   <button
                     @click="handleCancelNewImage"
-                    class="text-[13px] font-semibold text-red-600 hover:bg-red-50 border border-red-100 rounded-xl px-4 py-2 w-full transition-colors bg-white shadow-sm"
+                    class="text-[13px] font-semibold text-red-600 hover:bg-red-50 border border-red-100 rounded-xl px-4 py-2 w-full transition-colors bg-[#fcf9f3] shadow-sm"
                   >
                     ยกเลิกรูปภาพใหม่ (ใช้รูปเดิม)
                   </button>
                 </template>
               </div>
 
-              <div v-if="uploading" class="text-center text-xs font-medium text-[#666666]">
+              <div v-if="uploading" class="text-center text-xs font-medium text-[#52616a]">
                 กำลังประมวลผลไฟล์รูปภาพ...
               </div>
               <p v-if="uploadError" class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-medium text-red-600">
@@ -245,33 +245,33 @@ onBeforeUnmount(() => {
             <div class="space-y-4 text-xs">
               <div class="grid grid-cols-2 gap-3">
                 <label class="block">
-                  <span class="mb-1 block font-semibold text-[#666666]">AI Engine</span>
-                  <input v-model="paramsForm.aiEngine" type="text" class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                  <span class="mb-1 block font-semibold text-[#52616a]">AI Engine</span>
+                  <input v-model="paramsForm.aiEngine" type="text" class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
                 </label>
                 <label class="block">
-                  <span class="mb-1 block font-semibold text-[#666666]">Seed</span>
-                  <input v-model="paramsForm.seed" type="number" class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                  <span class="mb-1 block font-semibold text-[#52616a]">Seed</span>
+                  <input v-model="paramsForm.seed" type="number" class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
                 </label>
               </div>
 
               <label class="block">
-                <span class="mb-1 block font-semibold text-[#666666]">Positive Prompt</span>
-                <textarea v-model="paramsForm.positivePrompt" rows="3" class="w-full resize-none rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                <span class="mb-1 block font-semibold text-[#52616a]">Positive Prompt</span>
+                <textarea v-model="paramsForm.positivePrompt" rows="3" class="w-full resize-none rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
               </label>
 
               <label class="block">
-                <span class="mb-1 block font-semibold text-[#666666]">Negative Prompt</span>
-                <textarea v-model="paramsForm.negativePrompt" rows="3" class="w-full resize-none rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                <span class="mb-1 block font-semibold text-[#52616a]">Negative Prompt</span>
+                <textarea v-model="paramsForm.negativePrompt" rows="3" class="w-full resize-none rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
               </label>
 
               <div class="grid grid-cols-2 gap-3">
                 <label class="block">
-                  <span class="mb-1 block font-semibold text-[#666666]">CFG Scale</span>
-                  <input v-model="paramsForm.cfgScale" type="number" step="0.1" class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                  <span class="mb-1 block font-semibold text-[#52616a]">CFG Scale</span>
+                  <input v-model="paramsForm.cfgScale" type="number" step="0.1" class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
                 </label>
                 <label class="block">
-                  <span class="mb-1 block font-semibold text-[#666666]">Inference Steps</span>
-                  <input v-model="paramsForm.steps" type="number" class="w-full rounded-xl border border-black/[0.06] bg-[#F7F7F5]/50 px-3 py-2.5 text-[#171717] outline-none transition-all focus:border-black/[0.12] focus:bg-white" />
+                  <span class="mb-1 block font-semibold text-[#52616a]">Inference Steps</span>
+                  <input v-model="paramsForm.steps" type="number" class="w-full rounded-xl border border-[#172c3b]/10 bg-[#eee7db] px-3 py-2.5 text-[#172c3b] outline-none transition-all focus:border-[#172c3b]/20 focus:bg-[#fcf9f3]" />
                 </label>
               </div>
             </div>
@@ -280,18 +280,18 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Footer -->
-        <footer class="flex items-center justify-end gap-3 border-t border-black/[0.06] bg-white p-6 pt-4">
+        <footer class="flex items-center justify-end gap-3 border-t border-[#172c3b]/10 bg-[#fcf9f3] p-6 pt-4">
           <button
             @click="handleClose"
             :disabled="submitting || uploading"
-            class="px-4 py-2 text-sm font-medium text-[#666666]"
+            class="px-4 py-2 text-sm font-medium text-[#52616a]"
           >
             ยกเลิก
           </button>
           <button
             @click="handleSave"
             :disabled="submitting || uploading"
-            class="rounded-xl border border-transparent bg-[#171717] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-40"
+            class="editor-primary rounded-xl border border-transparent bg-[#172c3b] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[#294655] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {{ submitting ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข' }}
           </button>

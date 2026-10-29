@@ -76,19 +76,20 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <div class="editor-page space-y-6 max-w-7xl mx-auto">
+    <div class="editor-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#171717] tracking-tight">
+        <p class="editor-eyebrow">EDITOR WORKSPACE</p>
+        <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#172c3b] tracking-tight">
           แดชบอร์ด
         </h1>
-        <p class="mt-1 text-sm font-medium text-[#666666]">
+        <p class="mt-1 text-sm font-medium text-[#52616a]">
           ภาพรวมงานที่ได้รับมอบหมายและงานที่กำลังดำเนินการ
         </p>
       </div>
       <button
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
         :disabled="loading"
         @click="fetchJobs"
       >
@@ -113,21 +114,21 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
         <div
           v-for="index in 3"
           :key="index"
-          class="bg-white border border-[#EFEFEA]/60 rounded-2xl p-5 h-[120px] animate-pulse"
+          class="bg-[#fcf9f3] border border-[#ded7cb]/60 rounded-2xl p-5 h-[120px] animate-pulse"
         />
       </div>
-      <div class="bg-white border border-[#EFEFEA]/60 rounded-[24px] h-80 animate-pulse" />
+      <div class="bg-[#fcf9f3] border border-[#ded7cb]/60 rounded-[14px] h-80 animate-pulse" />
     </template>
 
     <div
       v-else-if="error"
-      class="bg-white border border-red-100 rounded-2xl p-6 text-center"
+      class="bg-[#fcf9f3] border border-red-100 rounded-2xl p-6 text-center"
     >
       <p class="text-sm text-red-600 font-medium">
         {{ error }}
       </p>
       <button
-        class="mt-3 text-xs text-[#929292] hover:text-[#171717] underline"
+        class="mt-3 text-xs text-[#69777f] hover:text-[#172c3b] underline"
         @click="fetchJobs"
       >
         ลองโหลดใหม่
@@ -139,11 +140,11 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
         <div
           v-for="card in statCards"
           :key="card.label"
-          class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col justify-between h-[120px] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:border-black/10 transition-all duration-300"
+          class="editor-metric bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col justify-between h-[120px] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:border-black/10 transition-all duration-300"
         >
           <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-semibold text-[#666666] tracking-wide">{{ card.label }}</span>
-            <div class="w-8 h-8 rounded-full bg-[#F7F7F5] flex items-center justify-center text-[#171717] flex-shrink-0 border border-black/[0.03]">
+            <span class="text-xs font-semibold text-[#52616a] tracking-wide">{{ card.label }}</span>
+            <div class="w-8 h-8 rounded-full bg-[#eee7db] flex items-center justify-center text-[#172c3b] flex-shrink-0 border border-black/[0.03]">
               <svg
                 class="w-4 h-4"
                 fill="none"
@@ -157,28 +158,29 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
               /></svg>
             </div>
           </div>
-          <span class="text-3xl font-bold text-[#171717] tracking-tight">{{ card.value }}</span>
+          <span class="text-3xl font-bold text-[#172c3b] tracking-tight">{{ card.value }}</span>
         </div>
       </div>
 
-      <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
-        <div class="px-6 py-5 border-b border-black/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
+        <div class="px-6 py-5 border-b border-[#172c3b]/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+            <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
               รายการงานของฉัน
             </h2>
-            <p class="text-[13px] font-medium text-[#666666] mt-0.5">
+            <p class="text-[13px] font-medium text-[#52616a] mt-0.5">
               ติดตามสถานะและเข้าสู่ห้องทำงานของงานที่ได้รับมอบหมาย
             </p>
           </div>
           <NuxtLink
             to="/editor/jobs"
-            class="px-4 py-2 rounded-lg border border-black/[0.06] bg-white text-[12px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm"
+            class="px-4 py-2 rounded-lg border border-[#172c3b]/10 bg-[#fcf9f3] text-[12px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm"
           >ดูงานทั้งหมด</NuxtLink>
         </div>
 
-        <div class="px-6 py-3 border-b border-black/[0.06] overflow-x-auto bg-[#FDFDFB]/50">
+        <div class="px-6 py-3 border-b border-[#172c3b]/10 overflow-x-auto bg-[#e5e9e1]">
           <AdminFilterBar
+            class="editor-filters"
             v-model="statusFilter"
             :filters="filterOptions"
           />
@@ -197,23 +199,23 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
         >
           <table class="w-full text-left border-collapse min-w-[780px]">
             <thead>
-              <tr class="bg-[#F7F7F5]/80 border-b border-black/[0.06]">
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+              <tr class="bg-[#eee7db] border-b border-[#172c3b]/10">
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   เลขที่งาน
                 </th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   ประเภทงาน
                 </th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   แพ็กเกจ
                 </th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   กำหนดส่ง
                 </th>
-                <th class="px-6 py-3 text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+                <th class="px-6 py-3 text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   สถานะ
                 </th>
-                <th class="px-6 py-3 text-right text-[11px] font-semibold text-[#666666] tracking-wider whitespace-nowrap">
+                <th class="px-6 py-3 text-right text-[11px] font-semibold text-[#52616a] tracking-wider whitespace-nowrap">
                   ดำเนินการ
                 </th>
               </tr>
@@ -222,22 +224,22 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
               <tr
                 v-for="job in filteredJobs"
                 :key="job.orderId"
-                class="border-b border-black/[0.04] last:border-0 hover:bg-[#FDFDFB] transition-colors"
+                class="border-b border-[#172c3b]/10 last:border-0 hover:bg-[#f5f0e7] transition-colors"
               >
-                <td class="px-6 py-4 font-mono text-[13px] font-semibold text-[#171717]">
+                <td class="px-6 py-4 font-mono text-[13px] font-semibold text-[#172c3b]">
                   #{{ job.orderId }}
                 </td>
-                <td class="px-6 py-4 text-[13px] font-medium text-[#171717]">
+                <td class="px-6 py-4 text-[13px] font-medium text-[#172c3b]">
                   {{ job.workTypeName }}
                 </td>
                 <td class="px-6 py-4">
-                  <p class="text-[13px] text-[#666666]">
+                  <p class="text-[13px] text-[#52616a]">
                     {{ job.packageName }}
-                  </p><p class="mt-0.5 text-[11px] text-[#929292]">
+                  </p><p class="mt-0.5 text-[11px] text-[#69777f]">
                     {{ formatPrice(job.orderTotalPrice) }}
                   </p>
                 </td>
-                <td class="px-6 py-4 text-xs text-[#666666] whitespace-nowrap">
+                <td class="px-6 py-4 text-xs text-[#52616a] whitespace-nowrap">
                   {{ formatDate(job.orderRequiredDate) }}
                 </td>
                 <td class="px-6 py-4">
@@ -249,7 +251,7 @@ const breadcrumb = [{ label: 'หน้าแรก', to: '/editor/dashboard' },
                 <td class="px-6 py-4 text-right">
                   <NuxtLink
                     :to="`/editor/jobs/${job.orderId}`"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#171717] text-white text-xs font-medium hover:bg-black transition-colors shadow-sm"
+                    class="editor-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#172c3b] text-white text-xs font-medium hover:bg-black transition-colors shadow-sm"
                   >เข้าทำงาน <svg
                     class="w-3.5 h-3.5"
                     fill="none"

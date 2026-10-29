@@ -101,11 +101,16 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+  <div class="editor-page space-y-6 max-w-7xl mx-auto">
+    <div class="editor-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="editor-eyebrow">MY ASSIGNMENTS</p>
+        <h1>งานที่ได้รับมอบหมาย</h1>
+        <p class="mt-2">จัดลำดับงาน ติดตามกำหนดส่ง และสร้างผลงานที่ใช่ให้ลูกค้า</p>
+      </div>
       <button
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
         :disabled="loading"
         @click="fetchJobs()"
       >
@@ -125,20 +130,21 @@ const breadcrumb = [
       </button>
     </div>
 
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
       <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">
             งานที่ได้รับมอบหมายทั้งหมด
           </h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">
             ติดตามและจัดการคำสั่งงานที่ได้รับมอบหมาย
           </p>
         </div>
       </div>
 
-      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
+      <div class="px-4 sm:px-6 pb-4 border-b border-[#172c3b]/10 overflow-x-auto">
         <AdminFilterBar
+          class="editor-filters"
           v-model="selectedStatusFilter"
           :filters="filterOptions"
         />
@@ -152,7 +158,7 @@ const breadcrumb = [
           {{ error }}
         </p>
         <button
-          class="mt-2 text-xs text-[#929292] underline hover:text-[#171717]"
+          class="mt-2 text-xs text-[#69777f] underline hover:text-[#172c3b]"
           @click="fetchJobs()"
         >
           ลองใหม่
@@ -163,7 +169,7 @@ const breadcrumb = [
         v-else
         class="flex flex-col flex-1"
       >
-        <div class="overflow-x-auto bg-[#FDFDFB]/30 editor-jobs-table-scope">
+        <div class="overflow-x-auto bg-[#e5e9e1] editor-jobs-table-scope">
           <AdminDataTable
             :columns="tableColumns"
             :rows="tableRows"
@@ -171,32 +177,32 @@ const breadcrumb = [
             row-key="orderId"
           >
             <template #cell-orderId="{ value }">
-              <span class="font-mono text-xs font-semibold text-[#171717]">#{{ value }}</span>
+              <span class="font-mono text-xs font-semibold text-[#172c3b]">#{{ value }}</span>
             </template>
 
             <template #cell-workTypeName="{ value }">
-              <span class="text-[13px] font-medium text-[#171717]">{{ value ?? '—' }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">{{ value ?? '—' }}</span>
             </template>
 
             <template #cell-packageName="{ value }">
-              <span class="text-xs text-[#666666]">{{ value ?? '—' }}</span>
+              <span class="text-xs text-[#52616a]">{{ value ?? '—' }}</span>
             </template>
 
             <template #cell-orderRequiredDate="{ value }">
-              <span class="text-xs text-[#929292] whitespace-nowrap">{{ formatDate(value) }}</span>
+              <span class="text-xs text-[#69777f] whitespace-nowrap">{{ formatDate(value) }}</span>
             </template>
 
             <template #cell-orderTotalPrice="{ value }">
-              <span class="text-[13px] font-bold text-[#171717] font-number whitespace-nowrap">{{ formatPrice(value) }}</span>
+              <span class="text-[13px] font-bold text-[#172c3b] font-number whitespace-nowrap">{{ formatPrice(value) }}</span>
             </template>
 
             <template #cell-orderStatus="{ value }">
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
                 :class="{
-                  'bg-[#171717] text-white border-[#171717] shadow-sm': value === 'completed' || value === 'delivered',
+                  'bg-[#172c3b] text-white border-[#172c3b] shadow-sm': value === 'completed' || value === 'delivered',
                   'bg-[#FFF5F5] text-[#C53030] border-[#FEB2B2]': value === 'cancelled',
-                  'bg-[#F7F7F5] text-[#666666] border-black/[0.06]': value !== 'completed' && value !== 'delivered' && value !== 'cancelled'
+                  'bg-[#eee7db] text-[#52616a] border-[#172c3b]/10': value !== 'completed' && value !== 'delivered' && value !== 'cancelled'
                 }"
               >
                 {{ statusLabels[value] ?? value }}
@@ -206,7 +212,7 @@ const breadcrumb = [
             <template #cell-action="{ row }">
               <NuxtLink
                 :to="`/editor/jobs/${row.orderId}`"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#171717] text-white text-xs font-medium hover:bg-black transition-colors shadow-sm whitespace-nowrap"
+                class="editor-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#172c3b] text-white text-xs font-medium hover:bg-black transition-colors shadow-sm whitespace-nowrap"
               >
                 เข้าทำงาน
                 <svg
@@ -234,10 +240,10 @@ const breadcrumb = [
 
         <div
           v-if="!loading && tableRows.length > 0"
-          class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-between bg-[#FDFDFB]/50"
+          class="px-6 py-4 border-t border-[#172c3b]/10 flex items-center justify-between bg-[#e5e9e1]"
         >
-          <div class="hidden sm:block text-xs text-[#666666]">
-            <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+          <div class="hidden sm:block text-xs text-[#52616a]">
+            <span class="font-bold text-[#172c3b]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#172c3b]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#172c3b]">{{ totalRecords }}</span> รายการ
           </div>
           <Pagination
             class="!border-0 !shadow-none !mt-0 !rounded-none !p-0 !bg-transparent flex-1 sm:flex-initial"
@@ -264,12 +270,12 @@ const breadcrumb = [
 }
 
 .editor-jobs-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important;
+  background-color: #e5e9e1 !important;
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .editor-jobs-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important;
+  background-color: #eee7db !important;
 }
 
 .editor-jobs-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {
