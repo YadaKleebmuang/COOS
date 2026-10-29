@@ -28,7 +28,7 @@ const emit = defineEmits<{
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="admin-confirm-dialog fixed inset-0 z-50 flex items-center justify-center p-4"
       >
         <!-- Backdrop -->
         <div

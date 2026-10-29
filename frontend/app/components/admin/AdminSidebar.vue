@@ -126,7 +126,7 @@ const isActive = (path: string) => route.path === path
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-0 left-0 h-full w-60 bg-white/70 backdrop-blur-xl border-r border-black/[0.06] flex flex-col z-40 transition-transform duration-300"
+    class="admin-sidebar fixed top-0 left-0 h-full w-60 bg-white/70 backdrop-blur-xl border-r border-black/[0.06] flex flex-col z-40 transition-transform duration-300"
     :class="collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
   >
     <!-- Logo -->

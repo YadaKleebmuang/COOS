@@ -124,13 +124,18 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">ASSIGNMENTS</p>
+        <h1>มอบหมายงาน</h1>
+        <p class="admin-intro mt-2">จัดสรรงานให้ทีมและติดตามภาระงานของนักออกแบบ</p>
+      </div>
       <button
         @click="() => fetchData()"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -140,53 +145,53 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     </div>
 
     <!-- Assignments Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header & Search -->
       <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">มอบหมายงาน</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">เลือกผู้รับผิดชอบให้กับคำสั่งงานที่รอมอบหมาย</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">มอบหมายงาน</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">เลือกผู้รับผิดชอบให้กับคำสั่งงานที่รอมอบหมาย</p>
         </div>
-        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
-          <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="coos-search-field flex items-center gap-2 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-3 py-2 focus-within:bg-[#fcf9f3] focus-within:border-[#172c3b]/20 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+          <svg class="w-4 h-4 text-[#69777f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="ค้นหาออเดอร์, ลูกค้า..."
-            class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"
-          />
+            class="text-xs text-[#172c3b] bg-transparent outline-none min-w-0 w-full sm:w-48 placeholder:text-[#69777f]"
+           aria-label="ค้นหาออเดอร์, ลูกค้า..."/>
         </div>
       </div>
 
       <!-- Filter Row -->
-      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
-        <AdminFilterBar v-model="workTypeFilter" :filters="workTypeOptions" />
+      <div class="px-4 sm:px-6 pb-4 border-b border-[#172c3b]/10 overflow-x-auto">
+        <AdminFilterBar class="admin-filters" v-model="workTypeFilter" :filters="workTypeOptions" />
       </div>
 
       <!-- Content Grid -->
       <div class="grid grid-cols-1 xl:grid-cols-3 divide-y xl:divide-y-0 xl:divide-x divide-black/[0.06]">
-        
+
         <!-- Left: Compact Orders List (65%) -->
-        <div class="xl:col-span-2 flex flex-col bg-white">
-          <div class="px-6 py-4 border-b border-black/[0.06] bg-[#FDFDFB]/50 flex items-center justify-between">
+        <div class="xl:col-span-2 flex flex-col bg-[#fcf9f3]">
+          <div class="px-6 py-4 border-b border-[#172c3b]/10 bg-[#e5e9e1] flex items-center justify-between">
             <div>
-              <p class="text-sm font-semibold text-[#171717]">คำสั่งงานรอมอบหมาย</p>
-              <p class="text-[13px] text-[#666666] mt-0.5">{{ filteredOrders.length }} รายการ</p>
+              <p class="text-sm font-semibold text-[#172c3b]">คำสั่งงานรอมอบหมาย</p>
+              <p class="text-[13px] text-[#52616a] mt-0.5">{{ filteredOrders.length }} รายการ</p>
             </div>
-            <button 
-              v-if="filteredOrders.length > 5" 
+            <button
+              v-if="filteredOrders.length > 5"
               @click="showAllOrders = !showAllOrders"
-              class="text-[13px] font-medium text-[#171717] underline hover:text-[#666666] transition-colors"
+              class="text-[13px] font-medium text-[#172c3b] underline hover:text-[#52616a] transition-colors"
             >
               {{ showAllOrders ? 'แสดงแบบย่อ' : 'ดูทั้งหมด' }}
             </button>
           </div>
-          
-          <div class="flex-1 bg-white">
-            <div v-if="loading" class="p-6 text-center text-xs text-[#666666]">กำลังโหลด...</div>
+
+          <div class="flex-1 bg-[#fcf9f3]">
+            <div v-if="loading" class="p-6 text-center text-xs text-[#52616a]">กำลังโหลด...</div>
             <AdminEmptyState
               v-else-if="filteredOrders.length === 0"
               title="ไม่มีคำสั่งงานรอมอบหมาย"
@@ -194,33 +199,33 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
               icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
             />
             <div v-else class="divide-y divide-black/[0.04]">
-              <div v-for="order in displayedOrders" :key="order.orderId" class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-[#FDFDFB] transition-colors group">
+              <div v-for="order in displayedOrders" :key="order.orderId" class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-[#f5f0e7] transition-colors group">
                 <div class="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
                   <!-- ID & Customer -->
                   <div class="w-full sm:w-48 flex-shrink-0">
                     <div class="flex items-center gap-2">
-                      <span class="font-mono text-[13px] font-bold text-[#171717]">#{{ order.orderId }}</span>
+                      <span class="font-mono text-[13px] font-bold text-[#172c3b]">#{{ order.orderId }}</span>
                       <span v-if="order.orderIsUrgent" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-600 border border-red-200 rounded-[4px]">ด่วน</span>
                     </div>
-                    <p class="text-[13px] text-[#666666] truncate mt-0.5">{{ order.customerFirstName }} {{ order.customerLastName }}</p>
+                    <p class="text-[13px] text-[#52616a] truncate mt-0.5">{{ order.customerFirstName }} {{ order.customerLastName }}</p>
                   </div>
-                  
+
                   <!-- Details -->
                   <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-medium text-[#171717] truncate">{{ order.workTypeName }}</p>
+                    <p class="text-[13px] font-medium text-[#172c3b] truncate">{{ order.workTypeName }}</p>
                     <div class="flex items-center gap-3 mt-0.5">
-                      <p class="text-[11px] text-[#666666] truncate">{{ order.packageName }}</p>
-                      <span class="w-1 h-1 rounded-full bg-[#EFEFEA]"></span>
-                      <p class="text-[11px] text-[#666666] flex-shrink-0">ส่ง: {{ formatDate(order.orderRequiredDate) }}</p>
+                      <p class="text-[11px] text-[#52616a] truncate">{{ order.packageName }}</p>
+                      <span class="w-1 h-1 rounded-full bg-[#ded7cb]"></span>
+                      <p class="text-[11px] text-[#52616a] flex-shrink-0">ส่ง: {{ formatDate(order.orderRequiredDate) }}</p>
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Action -->
                 <div class="mt-4 sm:mt-0 sm:pl-4 flex-shrink-0">
                   <button
                     @click="openAssign(order as any)"
-                    class="w-full sm:w-auto px-4 py-2 text-[11px] font-semibold text-white bg-black hover:bg-[#171717] transition-colors rounded-[8px] shadow-sm border border-black/[0.06] whitespace-nowrap"
+                    class="admin-primary w-full sm:w-auto px-4 py-2 text-[11px] font-semibold text-white bg-black hover:bg-[#172c3b] transition-colors rounded-[8px] shadow-sm border border-[#172c3b]/10 whitespace-nowrap"
                   >
                     มอบหมายงาน
                   </button>
@@ -228,33 +233,33 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
               </div>
             </div>
             <!-- Show more row (if limit applied) -->
-            <div v-if="filteredOrders.length > 5 && !showAllOrders" class="p-3 text-center border-t border-black/[0.04] bg-[#FDFDFB]/50">
-              <span class="text-xs text-[#9A9A95]">มีอีก {{ filteredOrders.length - 5 }} รายการที่ซ่อนอยู่</span>
+            <div v-if="filteredOrders.length > 5 && !showAllOrders" class="p-3 text-center border-t border-[#172c3b]/10 bg-[#e5e9e1]">
+              <span class="text-xs text-[#69777f]">มีอีก {{ filteredOrders.length - 5 }} รายการที่ซ่อนอยู่</span>
             </div>
           </div>
         </div>
 
         <!-- Right: Editor Workload (35%) -->
-        <div class="flex flex-col bg-white">
-          <div class="px-6 py-4 border-b border-black/[0.06] bg-[#FDFDFB]/50">
-            <p class="text-sm font-semibold text-[#171717]">ภาระงาน Editor</p>
-            <p class="text-[13px] text-[#666666] mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
+        <div class="flex flex-col bg-[#fcf9f3]">
+          <div class="px-6 py-4 border-b border-[#172c3b]/10 bg-[#e5e9e1]">
+            <p class="text-sm font-semibold text-[#172c3b]">ภาระงาน Editor</p>
+            <p class="text-[13px] text-[#52616a] mt-0.5">ภาพรวมงานทั้งหมดที่ได้รับมอบหมาย</p>
           </div>
           <div class="p-4 space-y-1 h-[500px] overflow-y-auto">
-            <div v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#FDFDFB] transition-colors border border-transparent">
-              <div class="w-9 h-9 rounded-full bg-[#F7F7F5] text-[#171717] border border-black/[0.06] text-xs font-semibold flex items-center justify-center flex-shrink-0">{{ ed.initials }}</div>
+            <div v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#f5f0e7] transition-colors border border-transparent">
+              <div class="w-9 h-9 rounded-full bg-[#eee7db] text-[#172c3b] border border-[#172c3b]/10 text-xs font-semibold flex items-center justify-center flex-shrink-0">{{ ed.initials }}</div>
               <div class="flex-1 min-w-0">
-                <p class="text-[13px] font-semibold text-[#171717] truncate">{{ ed.name }}</p>
-                <p class="text-[11px] text-[#666666] truncate mt-0.5">{{ ed.email }}</p>
+                <p class="text-[13px] font-semibold text-[#172c3b] truncate">{{ ed.name }}</p>
+                <p class="text-[11px] text-[#52616a] truncate mt-0.5">{{ ed.email }}</p>
               </div>
               <div class="text-right flex-shrink-0 flex items-center gap-3">
                 <div class="text-center min-w-[36px]">
-                  <p class="text-[13px] font-semibold text-[#171717] font-mono">{{ ed.activeJobs }}</p>
-                  <p class="text-[10px] font-medium text-[#666666]">กำลังทำ</p>
+                  <p class="text-[13px] font-semibold text-[#172c3b] font-mono">{{ ed.activeJobs }}</p>
+                  <p class="text-[10px] font-medium text-[#52616a]">กำลังทำ</p>
                 </div>
-                <div class="text-center pl-3 border-l border-black/[0.06] min-w-[48px]">
-                  <p class="text-[13px] font-semibold text-[#171717] font-mono">{{ ed.completedJobs }}</p>
-                  <p class="text-[10px] font-medium text-[#666666]">เสร็จแล้ว</p>
+                <div class="text-center pl-3 border-l border-[#172c3b]/10 min-w-[48px]">
+                  <p class="text-[13px] font-semibold text-[#172c3b] font-mono">{{ ed.completedJobs }}</p>
+                  <p class="text-[10px] font-medium text-[#52616a]">เสร็จแล้ว</p>
                 </div>
               </div>
             </div>
@@ -266,59 +271,59 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <!-- Assign Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="assignModal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="assignModal.open" class="admin-theme admin-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="assignModal.open = false" />
-          <div class="relative bg-white/95 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-black/[0.06] w-full max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh]">
-            
+          <div class="relative bg-[#fcf9f3] rounded-[14px] shadow-2xl border border-[#172c3b]/10 w-full max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh]">
+
             <!-- Modal Header -->
-            <div class="p-6 pb-4 border-b border-black/[0.06] bg-white">
-              <h3 class="text-[17px] font-semibold text-[#171717] tracking-tight mb-2">มอบหมายคำสั่งงาน #{{ assignModal.order?.orderId }}</h3>
-              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[13px] text-[#666666]">
-                <p class="font-medium text-[#171717]">{{ assignModal.order?.customerFirstName }} {{ assignModal.order?.customerLastName }}</p>
-                <span class="hidden sm:inline w-1 h-1 rounded-full bg-[#EFEFEA]"></span>
+            <div class="p-6 pb-4 border-b border-[#172c3b]/10 bg-[#fcf9f3]">
+              <h3 class="text-[17px] font-semibold text-[#172c3b] tracking-tight mb-2">มอบหมายคำสั่งงาน #{{ assignModal.order?.orderId }}</h3>
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[13px] text-[#52616a]">
+                <p class="font-medium text-[#172c3b]">{{ assignModal.order?.customerFirstName }} {{ assignModal.order?.customerLastName }}</p>
+                <span class="hidden sm:inline w-1 h-1 rounded-full bg-[#ded7cb]"></span>
                 <p>{{ assignModal.order?.packageName }}</p>
-                <span class="hidden sm:inline w-1 h-1 rounded-full bg-[#EFEFEA]"></span>
+                <span class="hidden sm:inline w-1 h-1 rounded-full bg-[#ded7cb]"></span>
                 <p>ส่ง: {{ formatDate(assignModal.order?.orderRequiredDate || '') }}</p>
                 <span v-if="assignModal.order?.orderIsUrgent" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-600 border border-red-200 rounded-[4px] ml-auto sm:ml-0">ด่วน</span>
               </div>
             </div>
-            
+
             <!-- Modal Body (Editors List) -->
-            <div class="p-6 overflow-y-auto flex-1 bg-[#FDFDFB]/50">
-              <label class="block text-xs font-semibold text-[#171717] mb-3">เลือก Editor ที่ต้องการมอบหมาย</label>
+            <div class="p-6 overflow-y-auto flex-1 bg-[#e5e9e1]">
+              <label class="block text-xs font-semibold text-[#172c3b] mb-3">เลือก Editor ที่ต้องการมอบหมาย</label>
               <div class="space-y-2">
-                <label v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all" :class="assignModal.selectedEditorId === ed.userId ? 'bg-white border-black/[0.12] shadow-sm' : 'bg-transparent border-transparent hover:bg-white hover:border-black/[0.04]'">
-                  <div class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full border" :class="assignModal.selectedEditorId === ed.userId ? 'border-[#171717] bg-[#171717]' : 'border-[#D4D4D4] bg-white'">
+                <label v-for="ed in editors" :key="ed.userId" class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all" :class="assignModal.selectedEditorId === ed.userId ? 'bg-[#fcf9f3] border-[#172c3b]/20 shadow-sm' : 'bg-transparent border-transparent hover:bg-[#fcf9f3] hover:border-[#172c3b]/10'">
+                  <div class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full border" :class="assignModal.selectedEditorId === ed.userId ? 'border-[#172c3b] bg-[#172c3b]' : 'border-[#D4D4D4] bg-[#fcf9f3]'">
                     <svg v-if="assignModal.selectedEditorId === ed.userId" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                   </div>
                   <input type="radio" :value="ed.userId" v-model="assignModal.selectedEditorId" class="hidden" />
                   <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-semibold text-[#171717] truncate">{{ ed.name }}</p>
-                    <p class="text-[11px] text-[#666666] truncate mt-0.5">{{ ed.email }}</p>
+                    <p class="text-[13px] font-semibold text-[#172c3b] truncate">{{ ed.name }}</p>
+                    <p class="text-[11px] text-[#52616a] truncate mt-0.5">{{ ed.email }}</p>
                   </div>
                   <div class="text-right flex-shrink-0 flex items-center gap-3">
                     <div class="text-center min-w-[36px]">
-                      <p class="text-[13px] font-semibold text-[#171717] font-mono">{{ ed.activeJobs }}</p>
-                      <p class="text-[10px] font-medium text-[#666666]">กำลังทำ</p>
+                      <p class="text-[13px] font-semibold text-[#172c3b] font-mono">{{ ed.activeJobs }}</p>
+                      <p class="text-[10px] font-medium text-[#52616a]">กำลังทำ</p>
                     </div>
-                    <div class="text-center pl-3 border-l border-black/[0.06] min-w-[48px]">
-                      <p class="text-[13px] font-semibold text-[#171717] font-mono">{{ ed.completedJobs }}</p>
-                      <p class="text-[10px] font-medium text-[#666666]">เสร็จแล้ว</p>
+                    <div class="text-center pl-3 border-l border-[#172c3b]/10 min-w-[48px]">
+                      <p class="text-[13px] font-semibold text-[#172c3b] font-mono">{{ ed.completedJobs }}</p>
+                      <p class="text-[10px] font-medium text-[#52616a]">เสร็จแล้ว</p>
                     </div>
                   </div>
                 </label>
               </div>
             </div>
-            
+
             <!-- Modal Footer -->
-            <div class="p-6 pt-4 border-t border-black/[0.06] bg-white flex gap-2 justify-end">
-              <button @click="assignModal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded-xl">
+            <div class="p-6 pt-4 border-t border-[#172c3b]/10 bg-[#fcf9f3] flex gap-2 justify-end">
+              <button @click="assignModal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#52616a] hover:text-[#172c3b] hover:bg-black/[0.04] transition-colors rounded-xl">
                 ยกเลิก
               </button>
               <button
                 :disabled="!assignModal.selectedEditorId || assignModal.loading"
                 @click="handleAssign"
-                class="inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-[#171717] hover:bg-[#333333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-transparent"
+                class="admin-primary inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-[#172c3b] hover:bg-[#294655] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-transparent"
               >
                 <svg v-if="assignModal.loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -327,7 +332,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                 ยืนยันมอบหมาย
               </button>
             </div>
-            
+
           </div>
         </div>
       </Transition>
@@ -347,12 +352,12 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 }
 
 .assignments-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important;
+  background-color: #e5e9e1 !important;
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .assignments-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important;
+  background-color: #eee7db !important;
 }
 
 .assignments-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {

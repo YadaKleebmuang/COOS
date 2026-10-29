@@ -144,7 +144,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 
       <div class="flex flex-col gap-3 border-b border-[#172c3b]/10 bg-[#e5e9e1] px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center">
-          <div class="flex min-w-0 items-center gap-2 rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-3 py-2 shadow-sm transition-all focus-within:border-[#172c3b]/20">
+          <div class="coos-search-field flex min-w-0 items-center gap-2 rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-3 py-2 shadow-sm transition-all focus-within:border-[#172c3b]/20">
             <svg
               class="h-4 w-4 shrink-0 text-[#69777f]"
               fill="none"

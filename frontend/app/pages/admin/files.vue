@@ -135,11 +135,12 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-5 max-w-7xl mx-auto">
+  <div class="admin-page space-y-5 max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">SYSTEM FILES</p>
         <h1 class="mt-2 text-xl font-bold text-gray-900">จัดการไฟล์ในระบบ</h1>
         <p class="mt-0.5 text-sm text-gray-500">ไฟล์ต้นฉบับ, สลิปชำระเงิน, และไฟล์ผลลัพธ์จาก Editor</p>
       </div>
@@ -147,16 +148,16 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-[#fcf9f3] border border-gray-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-gray-900 font-number">{{ files.length }}</p>
         <p class="text-xs text-gray-400 mt-1">ไฟล์ทั้งหมด</p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+      <div class="bg-[#fcf9f3] border border-gray-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-gray-900 font-number">{{ files.filter(f => f.status === 'active').length }}</p>
         <p class="text-xs text-gray-400 mt-1">ใช้งานอยู่</p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+      <div class="bg-[#fcf9f3] border border-gray-200 rounded-xl p-4 text-center">
         <p class="text-2xl font-bold text-gray-900 font-number">{{ formatSize(totalSize) }}</p>
         <p class="text-xs text-gray-400 mt-1">ขนาดรวม</p>
       </div>
@@ -164,17 +165,17 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 
     <!-- Search + Filters -->
     <div class="flex flex-wrap gap-3 items-center">
-      <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+      <div class="coos-search-field flex items-center gap-2 bg-[#fcf9f3] border border-gray-200 rounded-lg px-3 py-2">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อไฟล์..." class="text-sm text-gray-700 bg-transparent outline-none w-44 placeholder:text-gray-400"/>
+        <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อไฟล์..." class="text-sm text-gray-700 bg-transparent outline-none min-w-0 w-full sm:w-44 placeholder:text-gray-400" aria-label="ค้นหาชื่อไฟล์..."/>
       </div>
-      <AdminFilterBar v-model="typeFilter" :filters="typeOptions"/>
-      <AdminFilterBar v-model="statusFilter" :filters="statusOptions"/>
+      <AdminFilterBar class="admin-filters" v-model="typeFilter" :filters="typeOptions"/>
+      <AdminFilterBar class="admin-filters" v-model="statusFilter" :filters="statusOptions"/>
     </div>
 
     <!-- Table -->
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <AdminDataTable :columns="columns" :rows="filteredFiles" :loading="loading" row-key="fileId">
+    <div class="bg-[#fcf9f3] border border-gray-200 rounded-xl overflow-hidden">
+      <AdminDataTable class="admin-table" :columns="columns" :rows="filteredFiles" :loading="loading" row-key="fileId">
         <!-- File name -->
         <template #cell-fileName="{ row }">
           <div class="flex items-center gap-2.5">
@@ -208,7 +209,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         </template>
         <!-- Status -->
         <template #cell-status="{ value }">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="value === 'active' ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-200'">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" :class="value === 'active' ? 'bg-black text-white border-black' : 'bg-[#fcf9f3] text-gray-400 border-gray-200'">
             {{ value === "active" ? "ใช้งาน" : "เก็บถาวร" }}
           </span>
         </template>

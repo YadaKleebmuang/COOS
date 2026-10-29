@@ -129,13 +129,18 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-5 max-w-7xl mx-auto">
+  <div class="admin-page space-y-5 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">CATEGORIES & TAGS</p>
+        <h1>หมวดหมู่และแฮชแท็ก</h1>
+        <p class="admin-intro mt-2">จัดหมวดหมู่ผลงานให้ค้นหาและเลือกชมได้สะดวก</p>
+      </div>
       <button
         @click="fetchData"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -149,22 +154,22 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     </div>
 
     <!-- Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header & Search -->
-      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-black/[0.06]">
+      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#172c3b]/10">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">แฮชแท็กทั้งหมด</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">จัดการแฮชแท็กสำหรับจัดหมวดหมู่และค้นหารูปภาพใน Gallery</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">แฮชแท็กทั้งหมด</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">จัดการแฮชแท็กสำหรับจัดหมวดหมู่และค้นหารูปภาพใน Gallery</p>
         </div>
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
-            <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="coos-search-field flex items-center gap-2 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-3 py-2 focus-within:bg-[#fcf9f3] focus-within:border-[#172c3b]/20 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+            <svg class="w-4 h-4 text-[#69777f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="ค้นหาแฮชแท็ก..." class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]" />
+            <input v-model="searchQuery" type="text" placeholder="ค้นหาแฮชแท็ก..." class="text-xs text-[#172c3b] bg-transparent outline-none min-w-0 w-full sm:w-48 placeholder:text-[#69777f]"  aria-label="ค้นหาแฮชแท็ก..."/>
           </div>
-          <button @click="tagModal = { open: true, mode: 'add', loading: false, id: 0, name: '' }" class="px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] transition-colors rounded-xl shadow-sm border border-black/[0.06] whitespace-nowrap">
+          <button @click="tagModal = { open: true, mode: 'add', loading: false, id: 0, name: '' }" class="admin-primary px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] transition-colors rounded-xl shadow-sm border border-[#172c3b]/10 whitespace-nowrap">
             เพิ่มแฮชแท็ก
           </button>
         </div>
@@ -172,19 +177,19 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 
       <!-- Table -->
       <div class="flex flex-col flex-1">
-        <div class="overflow-x-auto bg-[#FDFDFB]/30 worktypes-table-scope">
-          <AdminDataTable :columns="tagColumns" :rows="paginatedHashtags" :loading="loading" row-key="tagId">
+        <div class="overflow-x-auto bg-[#e5e9e1] worktypes-table-scope">
+          <AdminDataTable class="admin-table" :columns="tagColumns" :rows="paginatedHashtags" :loading="loading" row-key="tagId">
             <template #cell-tagName="{ value }">
-              <span class="text-[13px] font-medium text-[#171717]">#{{ value }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">#{{ value }}</span>
             </template>
             <template #cell-imageCount="{ value }">
-              <span class="text-[13px] font-medium text-[#666666]">{{ value }}</span>
+              <span class="text-[13px] font-medium text-[#52616a]">{{ value }}</span>
             </template>
             <template #cell-action="{ row }">
               <div class="flex items-center justify-center gap-1.5">
                 <button
                   @click="tagModal = { open: true, mode: 'edit', loading: false, id: row.tagId, name: row.tagName }"
-                  class="px-2 py-1 text-[11px] font-semibold text-[#171717] bg-white hover:bg-[#F7F7F5] transition-colors rounded shadow-sm border border-black/[0.06]"
+                  class="px-2 py-1 text-[11px] font-semibold text-[#172c3b] bg-[#fcf9f3] hover:bg-[#eee7db] transition-colors rounded shadow-sm border border-[#172c3b]/10"
                 >
                   แก้ไข
                 </button>
@@ -201,11 +206,11 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 
         <AdminEmptyState v-if="!loading && hashtags.length === 0" title="ยังไม่มีแฮชแท็ก" description="กดเพิ่มแท็กเพื่อเริ่มต้น" icon="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
         <AdminEmptyState v-else-if="!loading && filteredHashtags.length === 0" title="ไม่พบแฮชแท็ก" description="ไม่มีแฮชแท็กที่ตรงกับคำค้นหา" icon="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-      
+
         <!-- Pagination wrapper (Moved inside Card) -->
-        <div v-if="totalPages > 1" class="px-6 py-4 flex items-center justify-between border-t border-black/[0.06] bg-white">
+        <div v-if="totalPages > 1" class="px-6 py-4 flex items-center justify-between border-t border-[#172c3b]/10 bg-[#fcf9f3]">
           <div class="hidden sm:block text-[13px] text-[#666660]">
-            <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * pageSize, filteredHashtags.length) }}</span> จาก <span class="font-bold text-[#171717]">{{ filteredHashtags.length }}</span> รายการ
+            <span class="font-bold text-[#172c3b]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#172c3b]">{{ Math.min(currentPage * pageSize, filteredHashtags.length) }}</span> จาก <span class="font-bold text-[#172c3b]">{{ filteredHashtags.length }}</span> รายการ
           </div>
           <Pagination
             :current-page="currentPage"
@@ -222,36 +227,36 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <!-- Tag Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="tagModal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="tagModal.open" class="admin-theme admin-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="tagModal.open = false" />
-          <div class="relative bg-white/95 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-black/[0.06] w-full max-w-sm p-0 overflow-hidden flex flex-col max-h-[90vh]">
-            
+          <div class="relative bg-[#fcf9f3] rounded-[14px] shadow-2xl border border-[#172c3b]/10 w-full max-w-sm p-0 overflow-hidden flex flex-col max-h-[90vh]">
+
             <!-- Modal Header -->
-            <div class="p-6 pb-4 border-b border-black/[0.06] bg-white">
-              <h3 class="text-[17px] font-semibold text-[#171717] tracking-tight mb-2">{{ tagModal.mode === "edit" ? "แก้ไขแฮชแท็ก" : "เพิ่มแฮชแท็ก" }}</h3>
-              <p class="text-[13px] text-[#666666]">{{ tagModal.mode === "edit" ? "แก้ไขชื่อแฮชแท็กในระบบ" : "เพิ่มแฮชแท็กใหม่สำหรับจัดระเบียบรูปภาพ" }}</p>
+            <div class="p-6 pb-4 border-b border-[#172c3b]/10 bg-[#fcf9f3]">
+              <h3 class="text-[17px] font-semibold text-[#172c3b] tracking-tight mb-2">{{ tagModal.mode === "edit" ? "แก้ไขแฮชแท็ก" : "เพิ่มแฮชแท็ก" }}</h3>
+              <p class="text-[13px] text-[#52616a]">{{ tagModal.mode === "edit" ? "แก้ไขชื่อแฮชแท็กในระบบ" : "เพิ่มแฮชแท็กใหม่สำหรับจัดระเบียบรูปภาพ" }}</p>
             </div>
-            
+
             <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto flex-1 bg-[#FDFDFB]/50">
+            <div class="p-6 overflow-y-auto flex-1 bg-[#e5e9e1]">
               <div class="space-y-4">
                 <div>
-                  <label class="block text-xs font-semibold text-[#171717] mb-1.5">ชื่อแฮชแท็ก (ไม่ต้องใส่ #) *</label>
-                  <input v-model="tagModal.name" type="text" placeholder="เช่น portrait, anime..." class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" />
+                  <label class="block text-xs font-semibold text-[#172c3b] mb-1.5">ชื่อแฮชแท็ก (ไม่ต้องใส่ #) *</label>
+                  <input v-model="tagModal.name" type="text" placeholder="เช่น portrait, anime..." class="w-full text-[13px] px-3 py-2.5 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl focus:outline-none focus:bg-[#fcf9f3] focus:border-[#172c3b]/20 transition-all font-medium text-[#172c3b] placeholder:text-[#69777f]"  aria-label="เช่น portrait, anime..."/>
                 </div>
               </div>
             </div>
-            
+
             <!-- Modal Footer -->
-            <div class="p-6 pt-4 border-t border-black/[0.06] bg-white flex gap-2 justify-end">
-              <button type="button" @click="tagModal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded-xl">
+            <div class="p-6 pt-4 border-t border-[#172c3b]/10 bg-[#fcf9f3] flex gap-2 justify-end">
+              <button type="button" @click="tagModal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#52616a] hover:text-[#172c3b] hover:bg-black/[0.04] transition-colors rounded-xl">
                 ยกเลิก
               </button>
               <button
                 type="button"
                 :disabled="tagModal.loading || !tagModal.name.trim()"
                 @click="saveTag"
-                class="inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-black/[0.06]"
+                class="admin-primary inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-[#172c3b]/10"
               >
                 <svg v-if="tagModal.loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -282,12 +287,12 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 }
 
 .worktypes-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important;
+  background-color: #e5e9e1 !important;
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .worktypes-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important;
+  background-color: #eee7db !important;
 }
 
 .worktypes-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {

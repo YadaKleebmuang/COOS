@@ -76,7 +76,6 @@ const getThaiMonth = (month: string) => {
 }
 
 const exportPdf = () => {
-  closeCalendar();
   const originalTitle = document.title;
   document.title = `COOS_Report_${dateFrom.value}_to_${dateTo.value}`;
   document.body.classList.add('reports-printing');
@@ -146,12 +145,12 @@ const statCards = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto reports-print-area">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto reports-print-area">
     <!-- Print Only Header -->
     <div class="reports-print-only mb-8">
       <h1 class="text-2xl font-bold text-[#171717] mb-2">รายงานสรุปการดำเนินงานระบบ COOS</h1>
       <p class="text-[13px] text-[#666666] mb-6">เว็บแอปพลิเคชันบริหารจัดการคำสั่งงานสร้างภาพสำหรับสตูดิโอออนไลน์</p>
-      
+
       <div class="flex items-center justify-between text-[13px] text-[#171717]">
         <div>
           <span class="font-semibold">ช่วงข้อมูล:</span> {{ formatDisplayDate(dateFrom) }} – {{ formatDisplayDate(dateTo) }}
@@ -161,7 +160,7 @@ const statCards = computed(() => [
         </div>
       </div>
     </div>
-    
+
     <!-- Empty Report Warning for Print -->
     <div class="reports-print-only text-center py-20" v-if="reportData.totalOrders === 0">
       <p class="text-lg font-medium text-[#171717]">ไม่พบข้อมูลในช่วงเวลาที่เลือก</p>
@@ -169,7 +168,7 @@ const statCards = computed(() => [
 
     <!-- Print Only Report Content -->
     <div class="reports-print-only space-y-8" v-if="reportData.totalOrders > 0">
-      
+
       <!-- Section 2: Summary -->
       <div>
         <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1" style="break-after: avoid;">สรุปข้อมูลหลัก</h2>
@@ -217,7 +216,7 @@ const statCards = computed(() => [
       <!-- Section 4: Monthly Financial -->
       <div class="break-inside-avoid" v-if="reportData.revenueByMonth?.length">
         <h2 class="text-[15px] font-bold text-[#171717] mb-3 border-b border-black/[0.1] pb-1">สรุปรายได้รายเดือน</h2>
-        
+
         <table class="w-full text-[12px] border-collapse border border-black/[0.1] text-[#171717]">
           <thead class="bg-[#F7F7F5]">
             <tr class="border-b border-black/[0.1]">
@@ -281,24 +280,25 @@ const statCards = computed(() => [
     </div>
 
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 reports-no-print">
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 reports-no-print">
       <div>
         <AdminBreadcrumb :items="breadcrumb" />
-        <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#171717] tracking-tight">รายงาน</h1>
-        <p class="mt-1 text-sm font-medium text-[#666666]">สรุปและติดตามข้อมูลการดำเนินงานของระบบ</p>
+        <p class="admin-eyebrow">REPORTS & INSIGHTS</p>
+        <h1 class="mt-2 text-2xl sm:text-3xl font-semibold text-[#172c3b] tracking-tight">รายงาน</h1>
+        <p class="mt-1 text-sm font-medium text-[#52616a]">สรุปและติดตามข้อมูลการดำเนินงานของระบบ</p>
       </div>
       <div class="flex items-center gap-2 mt-1 sm:mt-0">
-        <button 
-          @click="exportPdf" 
+        <button
+          @click="exportPdf"
           :disabled="loading"
-          class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm disabled:opacity-50"
+          class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm disabled:opacity-50"
         >
           ส่งออก PDF
         </button>
         <button
           @click="fetchReport"
           :disabled="loading"
-          class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+          class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
         >
           <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -312,19 +312,19 @@ const statCards = computed(() => [
     </div>
 
     <!-- Date range filter -->
-    <div class="relative z-30 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] px-6 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-wrap items-center gap-4 reports-no-print">
-      <p class="text-[13px] font-semibold text-[#171717]">ช่วงเวลา:</p>
+    <div class="relative z-30 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] px-6 py-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-wrap items-center gap-4 reports-no-print">
+      <p class="text-[13px] font-semibold text-[#172c3b]">ช่วงเวลา:</p>
 
       <!-- FROM Field -->
       <BaseCalendar v-model="dateFrom" variant="compact" label="จาก" />
 
       <!-- TO Field -->
       <BaseCalendar v-model="dateTo" variant="compact" label="ถึง" />
-      
-      <button 
-        @click="fetchReport" 
+
+      <button
+        @click="fetchReport"
         :disabled="loading"
-        class="px-4 py-2 rounded-xl bg-[#171717] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-50"
+        class="admin-primary px-4 py-2 rounded-xl bg-[#172c3b] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-50"
       >
         กรองข้อมูล
       </button>
@@ -335,18 +335,18 @@ const statCards = computed(() => [
       <div
         v-for="card in statCards"
         :key="card.label"
-        class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col justify-between h-[120px] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:border-black/10 transition-all duration-300"
+        class="admin-metric bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col justify-between h-[120px] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:border-black/10 transition-all duration-300"
       >
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-semibold text-[#666666] tracking-wide">{{ card.label }}</span>
-          <div class="w-8 h-8 rounded-full bg-[#F7F7F5] flex items-center justify-center text-[#171717] flex-shrink-0 border border-black/[0.03]">
+          <span class="text-xs font-semibold text-[#52616a] tracking-wide">{{ card.label }}</span>
+          <div class="w-8 h-8 rounded-full bg-[#eee7db] flex items-center justify-center text-[#172c3b] flex-shrink-0 border border-black/[0.03]">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="card.icon" />
             </svg>
           </div>
         </div>
         <div class="mt-2 flex items-baseline">
-          <span class="text-3xl font-bold text-[#171717] tracking-tight">{{ card.value }}</span>
+          <span class="text-3xl font-bold text-[#172c3b] tracking-tight">{{ card.value }}</span>
         </div>
       </div>
     </div>
@@ -355,42 +355,42 @@ const statCards = computed(() => [
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 reports-no-print">
 
       <!-- Revenue bar chart (CSS-based) -->
-      <div class="xl:col-span-2 bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col">
+      <div class="xl:col-span-2 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col">
         <div class="mb-5">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">รายได้รายเดือน</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">แนวโน้มรายได้จากคำสั่งงานในช่วงเวลาที่เลือก</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">รายได้รายเดือน</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">แนวโน้มรายได้จากคำสั่งงานในช่วงเวลาที่เลือก</p>
         </div>
         <div class="flex-1 flex items-end gap-3 min-h-[160px] pt-4">
           <div v-for="item in reportData.revenueByMonth" :key="item.month" class="flex-1 flex flex-col items-center gap-2 group">
-            <span class="text-[10px] text-[#666666] opacity-0 group-hover:opacity-100 transition-opacity font-number whitespace-nowrap">{{ formatCurrency(item.revenue) }}</span>
-            <div class="w-full bg-[#171717] rounded-t-sm transition-all hover:bg-[#666666] border border-black/[0.06]" :style="{ height: `${Math.round((Number(item.revenue) / maxRevenue) * 120)}px` }"/>
-            <span class="text-[10px] font-semibold text-[#9A9A95]">{{ item.month }}</span>
+            <span class="text-[10px] text-[#52616a] opacity-0 group-hover:opacity-100 transition-opacity font-number whitespace-nowrap">{{ formatCurrency(item.revenue) }}</span>
+            <div class="w-full bg-[#172c3b] rounded-t-sm transition-all hover:bg-[#52616a] border border-[#172c3b]/10" :style="{ height: `${Math.round((Number(item.revenue) / maxRevenue) * 120)}px` }"/>
+            <span class="text-[10px] font-semibold text-[#69777f]">{{ item.month }}</span>
           </div>
-          <div v-if="!reportData.revenueByMonth?.length" class="w-full h-full flex items-center justify-center text-[13px] text-[#9A9A95]">
+          <div v-if="!reportData.revenueByMonth?.length" class="w-full h-full flex items-center justify-center text-[13px] text-[#69777f]">
             ไม่มีข้อมูลในระบบ
           </div>
         </div>
       </div>
 
       <!-- Order status donut (text-based) -->
-      <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
         <div class="mb-5">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">สรุปสถานะออเดอร์</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">สัดส่วนของงานแต่ละสถานะ</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">สรุปสถานะออเดอร์</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">สัดส่วนของงานแต่ละสถานะ</p>
         </div>
         <div class="space-y-4">
           <div v-for="s in reportData.ordersByStatus" :key="s.status" class="flex items-center gap-3">
             <div class="flex-1">
               <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[12px] font-medium text-[#171717]">{{ s.label }}</span>
-                <span class="text-[12px] font-bold text-[#171717] font-number">{{ s.count }}</span>
+                <span class="text-[12px] font-medium text-[#172c3b]">{{ s.label }}</span>
+                <span class="text-[12px] font-bold text-[#172c3b] font-number">{{ s.count }}</span>
               </div>
-              <div class="h-1.5 bg-[#F7F7F5] rounded-full overflow-hidden border border-black/[0.03]">
-                <div class="h-full bg-[#171717] rounded-full transition-all" :style="{ width: reportData.totalOrders ? `${Math.round((s.count / reportData.totalOrders) * 100)}%` : '0%' }"/>
+              <div class="h-1.5 bg-[#eee7db] rounded-full overflow-hidden border border-black/[0.03]">
+                <div class="h-full bg-[#172c3b] rounded-full transition-all" :style="{ width: reportData.totalOrders ? `${Math.round((s.count / reportData.totalOrders) * 100)}%` : '0%' }"/>
               </div>
             </div>
           </div>
-          <div v-if="!reportData.ordersByStatus?.length" class="text-[13px] text-[#9A9A95] text-center py-4">
+          <div v-if="!reportData.ordersByStatus?.length" class="text-[13px] text-[#69777f] text-center py-4">
             ไม่มีข้อมูลในระบบ
           </div>
         </div>
@@ -401,65 +401,65 @@ const statCards = computed(() => [
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 reports-no-print">
 
       <!-- Popular packages -->
-      <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-        <div class="px-6 py-5 border-b border-black/[0.06]">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">แพ็กเกจยอดนิยม</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">แพ็กเกจที่ลูกค้าเลือกใช้งานมากที่สุด</p>
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+        <div class="px-6 py-5 border-b border-[#172c3b]/10">
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">แพ็กเกจยอดนิยม</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">แพ็กเกจที่ลูกค้าเลือกใช้งานมากที่สุด</p>
         </div>
-        <div class="flex-1 overflow-x-auto bg-[#FDFDFB]/30 orders-table-scope">
-          <AdminDataTable
+        <div class="flex-1 overflow-x-auto bg-[#e5e9e1] orders-table-scope">
+          <AdminDataTable class="admin-table"
             :columns="[{ key: 'name', label: 'แพ็กเกจ' }, { key: 'count', label: 'คำสั่งงาน', align: 'center' }, { key: 'revenue', label: 'รายได้', align: 'right' }]"
             :rows="reportData.popularPackages"
             row-key="name"
           >
             <template #cell-name="{ value }">
-              <span class="text-[13px] font-medium text-[#171717]">{{ value }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">{{ value }}</span>
             </template>
             <template #cell-count="{ value }">
-              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value }}</span>
+              <span class="text-[13px] font-number font-semibold text-[#172c3b] bg-[#eee7db] border border-[#172c3b]/10 rounded-md px-2 py-0.5 shadow-sm">{{ value }}</span>
             </template>
             <template #cell-revenue="{ value }">
-              <span class="text-[13px] font-bold font-number text-[#171717]">{{ formatCurrency(value) }}</span>
+              <span class="text-[13px] font-bold font-number text-[#172c3b]">{{ formatCurrency(value) }}</span>
             </template>
           </AdminDataTable>
-          <div v-if="!reportData.popularPackages?.length" class="py-12 px-6 text-center border-t border-black/[0.04]">
-            <p class="text-[14px] font-medium text-[#171717]">ไม่พบข้อมูล</p>
+          <div v-if="!reportData.popularPackages?.length" class="py-12 px-6 text-center border-t border-[#172c3b]/10">
+            <p class="text-[14px] font-medium text-[#172c3b]">ไม่พบข้อมูล</p>
           </div>
         </div>
       </div>
 
       <!-- Editor performance -->
-      <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-        <div class="px-6 py-5 border-b border-black/[0.06]">
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ปริมาณงาน Editor</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">สรุปงานที่รับผิดชอบทั้งหมด</p>
+      <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+        <div class="px-6 py-5 border-b border-[#172c3b]/10">
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">ปริมาณงาน Editor</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">สรุปงานที่รับผิดชอบทั้งหมด</p>
         </div>
-        <div class="flex-1 overflow-x-auto bg-[#FDFDFB]/30 orders-table-scope">
-          <AdminDataTable
+        <div class="flex-1 overflow-x-auto bg-[#e5e9e1] orders-table-scope">
+          <AdminDataTable class="admin-table"
             :columns="[
-              { key: 'name', label: 'Editor' }, 
-              { key: 'inProgressJobs', label: 'งานในมือ', align: 'center' }, 
-              { key: 'pendingCustomerJobs', label: 'รอลูกค้า', align: 'center' }, 
+              { key: 'name', label: 'Editor' },
+              { key: 'inProgressJobs', label: 'งานในมือ', align: 'center' },
+              { key: 'pendingCustomerJobs', label: 'รอลูกค้า', align: 'center' },
               { key: 'completedJobs', label: 'เสร็จสมบูรณ์', align: 'center' }
             ]"
             :rows="reportData.editorWorkload"
             row-key="name"
           >
             <template #cell-name="{ value }">
-              <span class="text-[13px] font-medium text-[#171717]">{{ value }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">{{ value }}</span>
             </template>
             <template #cell-inProgressJobs="{ value }">
-              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
+              <span class="text-[13px] font-number font-semibold text-[#172c3b] bg-[#eee7db] border border-[#172c3b]/10 rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
             </template>
             <template #cell-pendingCustomerJobs="{ value }">
-              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
+              <span class="text-[13px] font-number font-semibold text-[#172c3b] bg-[#eee7db] border border-[#172c3b]/10 rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
             </template>
             <template #cell-completedJobs="{ value }">
-              <span class="text-[13px] font-number font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
+              <span class="text-[13px] font-number font-semibold text-[#172c3b] bg-[#eee7db] border border-[#172c3b]/10 rounded-md px-2 py-0.5 shadow-sm">{{ value || 0 }}</span>
             </template>
           </AdminDataTable>
-          <div v-if="!reportData.editorWorkload?.length" class="py-12 px-6 text-center border-t border-black/[0.04]">
-            <p class="text-[14px] font-medium text-[#171717]">ไม่พบข้อมูล</p>
+          <div v-if="!reportData.editorWorkload?.length" class="py-12 px-6 text-center border-t border-[#172c3b]/10">
+            <p class="text-[14px] font-medium text-[#172c3b]">ไม่พบข้อมูล</p>
           </div>
         </div>
       </div>
@@ -526,7 +526,7 @@ const statCards = computed(() => [
 }
 
 .orders-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important;
+  background-color: #e5e9e1 !important;
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -543,7 +543,7 @@ const statCards = computed(() => [
 }
 
 .orders-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important;
+  background-color: #eee7db !important;
 }
 
 .orders-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {

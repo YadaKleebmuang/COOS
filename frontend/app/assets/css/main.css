@@ -19,6 +19,17 @@ body {
   font-family: inherit;
 }
 
+/* Focus the complete search control, including its icon, in every layout. */
+.coos-search-field:focus-within {
+  outline: 2px solid #69777f;
+  outline-offset: 2px;
+}
+
+/* Override layout focus outlines only inside explicitly marked search fields. */
+.coos-search-field:focus-within > input:focus-visible {
+  outline: none;
+}
+
 @layer components {
   .coos-page {
     @apply bg-[#f7f7f5] text-neutral-950;

@@ -209,13 +209,18 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">GALLERY</p>
+        <h1>คลังรูปภาพ</h1>
+        <p class="admin-intro mt-2">ดูแลผลงานและข้อมูลภาพที่แสดงใน Gallery สาธารณะ</p>
+      </div>
       <button
         @click="fetchGallery"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -229,69 +234,69 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     </div>
 
     <!-- Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header -->
-      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-black/[0.06]">
+      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#172c3b]/10">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">คลังรูปภาพ</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">ภาพที่ลูกค้าอนุญาตให้นำขึ้นแสดงใน Gallery สาธารณะ</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">คลังรูปภาพ</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">ภาพที่ลูกค้าอนุญาตให้นำขึ้นแสดงใน Gallery สาธารณะ</p>
         </div>
         <div class="flex items-center gap-3">
-          <button @click="openUploadModal" class="px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] transition-colors rounded-xl shadow-sm border border-black/[0.06] whitespace-nowrap">
+          <button @click="openUploadModal" class="admin-primary px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] transition-colors rounded-xl shadow-sm border border-[#172c3b]/10 whitespace-nowrap">
             เพิ่มรูปภาพ
           </button>
         </div>
       </div>
 
       <!-- Filters & Stats Toolbar -->
-      <div class="px-6 py-4 border-b border-black/[0.06] bg-[#FDFDFB]/30 flex flex-col gap-4">
-        
+      <div class="px-6 py-4 border-b border-[#172c3b]/10 bg-[#e5e9e1] flex flex-col gap-4">
+
         <!-- Top Row: Search/Hashtag (Left) and Stats (Right) -->
         <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <!-- Search & Hashtag (Left) -->
           <div class="flex flex-wrap items-center gap-3">
             <!-- Search -->
-            <div class="flex items-center gap-2 bg-white border border-black/[0.06] rounded-xl px-3 py-2 shadow-sm focus-within:border-black/[0.12] transition-all">
-              <svg class="w-4 h-4 text-[#9A9A95]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อภาพ..." class="text-[13px] text-[#171717] bg-transparent outline-none w-40 placeholder:text-[#9A9A95] font-medium"/>
+            <div class="coos-search-field flex items-center gap-2 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-xl px-3 py-2 shadow-sm focus-within:border-[#172c3b]/20 transition-all">
+              <svg class="w-4 h-4 text-[#69777f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input v-model="searchQuery" type="text" placeholder="ค้นหาชื่อภาพ..." class="text-[13px] text-[#172c3b] bg-transparent outline-none w-40 placeholder:text-[#69777f] font-medium" aria-label="ค้นหาชื่อภาพ..."/>
             </div>
             <!-- Hashtag -->
-            <div class="flex items-center gap-2 bg-white border border-black/[0.06] rounded-xl px-3 py-2 shadow-sm focus-within:border-black/[0.12] transition-all">
-              <span class="text-[#9A9A95] text-[13px] font-semibold">#</span>
-              <input v-model="hashtagFilter" type="text" placeholder="แฮชแท็ก..." class="text-[13px] text-[#171717] bg-transparent outline-none w-28 placeholder:text-[#9A9A95] font-medium"/>
+            <div class="coos-search-field flex items-center gap-2 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-xl px-3 py-2 shadow-sm focus-within:border-[#172c3b]/20 transition-all">
+              <span class="text-[#69777f] text-[13px] font-semibold">#</span>
+              <input v-model="hashtagFilter" type="text" placeholder="แฮชแท็ก..." class="text-[13px] text-[#172c3b] bg-transparent outline-none w-28 placeholder:text-[#69777f] font-medium" aria-label="แฮชแท็ก..."/>
             </div>
           </div>
-          
+
           <!-- Stats (Right) -->
-          <div class="flex items-center gap-4 text-[13px] text-[#666666] font-medium shrink-0 bg-white border border-black/[0.06] rounded-xl px-4 py-2 shadow-sm">
-            <span>ทั้งหมด: <strong class="text-[#171717] font-semibold">{{ images.length }}</strong></span>
+          <div class="flex items-center gap-4 text-[13px] text-[#52616a] font-medium shrink-0 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-xl px-4 py-2 shadow-sm">
+            <span>ทั้งหมด: <strong class="text-[#172c3b] font-semibold">{{ images.length }}</strong></span>
             <span class="text-black/[0.06]">|</span>
-            <span>รออนุมัติ: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'pending').length }}</strong></span>
+            <span>รออนุมัติ: <strong class="text-[#172c3b] font-semibold">{{ images.filter(i => i.status === 'pending').length }}</strong></span>
             <span class="text-black/[0.06]">|</span>
-            <span>สาธารณะ: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'public').length }}</strong></span>
+            <span>สาธารณะ: <strong class="text-[#172c3b] font-semibold">{{ images.filter(i => i.status === 'public').length }}</strong></span>
             <span class="text-black/[0.06]">|</span>
-            <span>ส่วนตัว: <strong class="text-[#171717] font-semibold">{{ images.filter(i => i.status === 'private').length }}</strong></span>
+            <span>ส่วนตัว: <strong class="text-[#172c3b] font-semibold">{{ images.filter(i => i.status === 'private').length }}</strong></span>
           </div>
         </div>
 
         <!-- Row 2: Category and Visibility Filters -->
         <div class="flex flex-wrap items-center gap-3">
-          <AdminFilterBar v-model="categoryFilter" :filters="categories" />
+          <AdminFilterBar class="admin-filters" v-model="categoryFilter" :filters="categories" />
           <div class="w-px h-6 bg-[#E5E5E3] mx-1 hidden sm:block"></div>
-          <AdminFilterBar v-model="visibilityFilter" :filters="[{ key: 'all', label: 'ทั้งหมด' }, { key: 'pending', label: 'รออนุมัติ' }, { key: 'public', label: 'สาธารณะ' }, { key: 'private', label: 'ส่วนตัว' }]" />
+          <AdminFilterBar class="admin-filters" v-model="visibilityFilter" :filters="[{ key: 'all', label: 'ทั้งหมด' }, { key: 'pending', label: 'รออนุมัติ' }, { key: 'public', label: 'สาธารณะ' }, { key: 'private', label: 'ส่วนตัว' }]" />
         </div>
       </div>
 
       <!-- Main Gallery Area -->
-      <div class="p-6 bg-[#FDFDFB]/50 flex-1">
+      <div class="p-6 bg-[#e5e9e1] flex-1">
 
     <!-- Loading skeletons -->
     <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-      <div v-for="i in 12" :key="i" class="bg-white border border-[#EFEFEA] rounded-2xl p-2.5 space-y-3 shadow-[0_4px_12px_rgba(0,0,0,0.005)] animate-pulse">
-        <div class="aspect-square bg-[#F7F7F5] rounded-xl w-full" />
-        <div class="h-3 bg-[#F7F7F5] rounded w-3/4" />
-        <div class="h-2.5 bg-[#F7F7F5] rounded w-1/2" />
+      <div v-for="i in 12" :key="i" class="bg-[#fcf9f3] border border-[#ded7cb] rounded-2xl p-2.5 space-y-3 shadow-[0_4px_12px_rgba(0,0,0,0.005)] animate-pulse">
+        <div class="aspect-square bg-[#eee7db] rounded-xl w-full" />
+        <div class="h-3 bg-[#eee7db] rounded w-3/4" />
+        <div class="h-2.5 bg-[#eee7db] rounded w-1/2" />
       </div>
     </div>
 
@@ -300,36 +305,38 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
       <div
         v-for="img in filteredImages"
         :key="img.imageId"
-        class="bg-white border border-[#EFEFEA]/60 rounded-2xl overflow-hidden group hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)] hover:border-[#171717]/10 transition-all flex flex-col"
+        class="bg-[#fcf9f3] border border-[#ded7cb]/60 rounded-2xl overflow-hidden group hover:shadow-[0_8px_24px_rgba(0,0,0,0.02)] hover:border-[#172c3b]/10 transition-all flex flex-col"
       >
         <!-- Thumbnail -->
-        <div class="aspect-square bg-[#F7F7F5]/50 flex items-center justify-center border-b border-[#EFEFEA]/40 relative overflow-hidden">
-          <img v-if="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" :src="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" class="w-full h-full object-cover select-none" />
+        <div class="aspect-square bg-[#eee7db] flex items-center justify-center border-b border-[#ded7cb]/40 relative overflow-hidden">
+          <img v-if="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" :src="protectedAssetUrl(galleryMediaEndpoint(img.imageId))" :alt="img.title" class="w-full h-full object-cover select-none" />
           <svg v-else class="w-10 h-10 text-[#D4D4D0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
-          
+
           <!-- Private dim overlay -->
-          <div v-if="img.status !== 'public'" class="absolute inset-0 bg-[#171717]/10 pointer-events-none transition-all"></div>
+          <div v-if="img.status !== 'public'" class="absolute inset-0 bg-[#172c3b]/10 pointer-events-none transition-all"></div>
 
           <!-- Visibility badge -->
-          <div class="absolute top-2 left-2 flex flex-nowrap items-center gap-1 max-w-[calc(100%-16px)]">
-            <span class="inline-flex items-center justify-center h-[26px] px-2.5 text-[11px] leading-none font-medium bg-white/90 backdrop-blur-sm text-[#171717] rounded-full shadow-sm border border-white/20 whitespace-nowrap flex-none">
-              {{ img.category }}
-            </span>
-            <span class="inline-flex items-center justify-center h-[26px] px-2.5 text-[11px] leading-none font-medium backdrop-blur-sm rounded-full shadow-sm border border-white/20 whitespace-nowrap flex-none"
-              :class="img.status === 'public' ? 'bg-green-500/90 text-white' : img.status === 'pending' ? 'bg-yellow-500/90 text-white' : 'bg-gray-800/90 text-white'">
-              {{ img.status === 'public' ? 'สาธารณะ' : img.status === 'pending' ? 'รออนุมัติ' : 'ส่วนตัว' }}
-            </span>
+          <div
+            class="gallery-visibility-badge absolute top-2 right-2 inline-flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] leading-4 font-semibold shadow-sm pointer-events-none"
+            :class="img.status === 'public'
+              ? 'bg-[#edf5e9] text-[#355d3d] border-[#cfdfc9]'
+              : img.status === 'pending'
+                ? 'bg-[#fff3dd] text-[#855b20] border-[#ead6ae]'
+                : 'bg-[#eef0f2] text-[#52616a] border-[#d5dce0]'"
+          >
+            <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
+            <span class="truncate">{{ img.status === 'public' ? 'สาธารณะ' : img.status === 'pending' ? 'รออนุมัติ' : 'ส่วนตัว' }}</span>
           </div>
 
           <!-- Hover overlay -->
-          <div class="absolute inset-0 bg-[#171717]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-            <button @click="toggleVisibility(img)" aria-label="Toggle visibility" class="p-2 bg-white hover:bg-[#F7F7F5] rounded-xl transition-colors shadow-lg" :title="img.status === 'public' ? 'ตั้งเป็นส่วนตัว' : 'ตั้งเป็นสาธารณะ'">
-              <svg v-if="img.status === 'public'" class="w-4 h-4 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="absolute inset-0 bg-[#172c3b]/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
+            <button @click="toggleVisibility(img)" aria-label="Toggle visibility" class="p-2 bg-[#fcf9f3] hover:bg-[#eee7db] rounded-xl transition-colors shadow-lg" :title="img.status === 'public' ? 'ตั้งเป็นส่วนตัว' : 'ตั้งเป็นสาธารณะ'">
+              <svg v-if="img.status === 'public'" class="w-4 h-4 text-[#172c3b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
-              <svg v-else class="w-4 h-4 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else class="w-4 h-4 text-[#172c3b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
               </svg>
             </button>
@@ -343,11 +350,11 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         <!-- Info -->
         <div class="p-3 flex-1 flex flex-col justify-between space-y-2">
           <div>
-            <p class="text-xs font-bold text-[#171717] truncate" :title="img.title">{{ img.title }}</p>
-            <p class="text-[10px] font-semibold text-[#9A9A95] mt-0.5">{{ img.category }}</p>
+            <p class="text-xs font-bold text-[#172c3b] truncate" :title="img.title">{{ img.title }}</p>
+            <p class="text-[10px] font-semibold text-[#69777f] mt-0.5">{{ img.category }}</p>
           </div>
           <div v-if="img.hashtags.length" class="flex flex-wrap gap-1">
-            <span v-for="tag in img.hashtags.slice(0, 3)" :key="tag" class="text-[9px] font-semibold bg-[#F7F7F5] text-[#666660] border border-[#EFEFEA] px-1.5 py-0.5 rounded-md">#{{ tag }}</span>
+            <span v-for="tag in img.hashtags.slice(0, 3)" :key="tag" class="text-[9px] font-semibold bg-[#eee7db] text-[#666660] border border-[#ded7cb] px-1.5 py-0.5 rounded-md">#{{ tag }}</span>
           </div>
         </div>
       </div>
@@ -372,40 +379,40 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     <!-- ── Upload Modal ─────────────────────────────────────────── -->
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="uploadModal" class="admin-theme admin-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
           <!-- Backdrop -->
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="uploadModal = false" />
 
           <!-- Modal Card -->
-          <div class="relative bg-white/95 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-black/[0.06] w-full max-w-md p-0 overflow-hidden flex flex-col max-h-[90vh]">
-            
+          <div class="relative bg-[#fcf9f3] rounded-[14px] shadow-2xl border border-[#172c3b]/10 w-full max-w-md p-0 overflow-hidden flex flex-col max-h-[90vh]">
+
             <!-- Modal Header -->
-            <div class="p-6 pb-4 border-b border-black/[0.06] bg-white">
-              <h3 class="text-[17px] font-semibold text-[#171717] tracking-tight mb-2">เพิ่มรูปภาพใหม่ในแกลเลอรี</h3>
-              <p class="text-[13px] text-[#666666]">อัปโหลดผลงานและข้อมูลประกอบเพื่อนำเสนอในแกลเลอรีสาธารณะ</p>
+            <div class="p-6 pb-4 border-b border-[#172c3b]/10 bg-[#fcf9f3]">
+              <h3 class="text-[17px] font-semibold text-[#172c3b] tracking-tight mb-2">เพิ่มรูปภาพใหม่ในแกลเลอรี</h3>
+              <p class="text-[13px] text-[#52616a]">อัปโหลดผลงานและข้อมูลประกอบเพื่อนำเสนอในแกลเลอรีสาธารณะ</p>
             </div>
 
             <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto flex-1 bg-[#FDFDFB]/50">
+            <div class="p-6 overflow-y-auto flex-1 bg-[#e5e9e1]">
               <form id="uploadForm" @submit.prevent="submitUpload" class="space-y-5">
                 <!-- File Upload Zone -->
                 <div class="border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer"
-                     :class="uploadFile ? 'border-black/[0.12] bg-[#FDFDFB]' : 'border-black/[0.06] hover:border-black/[0.12] bg-white'">
+                     :class="uploadFile ? 'border-[#172c3b]/20 bg-[#f5f0e7]' : 'border-[#172c3b]/10 hover:border-[#172c3b]/20 bg-[#fcf9f3]'">
                   <input id="gallery-upload-input" type="file" accept="image/*" class="hidden" @change="onFileChange" />
                   <label for="gallery-upload-input" class="cursor-pointer block">
                     <template v-if="uploadFile">
-                      <svg class="w-8 h-8 text-[#171717] mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-8 h-8 text-[#172c3b] mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                       </svg>
-                      <p class="text-[13px] font-semibold text-[#171717] truncate max-w-[280px] mx-auto">{{ uploadFile.name }}</p>
-                      <p class="text-xs text-[#666666] mt-1 font-medium">คลิกเพื่อเปลี่ยนไฟล์</p>
+                      <p class="text-[13px] font-semibold text-[#172c3b] truncate max-w-[280px] mx-auto">{{ uploadFile.name }}</p>
+                      <p class="text-xs text-[#52616a] mt-1 font-medium">คลิกเพื่อเปลี่ยนไฟล์</p>
                     </template>
                     <template v-else>
-                      <svg class="w-8 h-8 text-[#9A9A95] mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-8 h-8 text-[#69777f] mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                       </svg>
-                      <p class="text-[13px] font-semibold text-[#171717]">คลิกเพื่อเลือกรูปภาพ</p>
-                      <p class="text-xs text-[#9A9A95] mt-1 font-medium">PNG, JPG ขนาดไม่เกิน 10MB</p>
+                      <p class="text-[13px] font-semibold text-[#172c3b]">คลิกเพื่อเลือกรูปภาพ</p>
+                      <p class="text-xs text-[#69777f] mt-1 font-medium">PNG, JPG ขนาดไม่เกิน 10MB</p>
                     </template>
                   </label>
                 </div>
@@ -414,13 +421,13 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                 <div class="space-y-4">
                   <!-- WorkType (required) -->
                   <div>
-                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">
+                    <label class="block text-xs font-semibold text-[#172c3b] mb-1.5">
                       ประเภทงาน *
                     </label>
                     <select
                       v-model="uploadForm.workTypeId"
                       required
-                      class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717]"
+                      class="w-full text-[13px] px-3 py-2.5 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl focus:outline-none focus:bg-[#fcf9f3] focus:border-[#172c3b]/20 transition-all font-medium text-[#172c3b]"
                     >
                       <option value="">-- เลือกประเภทงาน --</option>
                       <option v-for="wt in workTypes" :key="wt.workTypeId" :value="String(wt.workTypeId)">
@@ -431,26 +438,26 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 
                   <!-- Title -->
                   <div>
-                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">ชื่อภาพ</label>
+                    <label class="block text-xs font-semibold text-[#172c3b] mb-1.5">ชื่อภาพ</label>
                     <input
                       v-model="uploadForm.imageTitle"
                       type="text"
                       placeholder="เช่น Pre-wedding Lookbook 2025"
-                      class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]"
-                    />
+                      class="w-full text-[13px] px-3 py-2.5 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl focus:outline-none focus:bg-[#fcf9f3] focus:border-[#172c3b]/20 transition-all font-medium text-[#172c3b] placeholder:text-[#69777f]"
+                     aria-label="เช่น Pre-wedding Lookbook 2025"/>
                   </div>
 
                   <!-- Tags -->
                   <div>
-                    <label class="block text-xs font-semibold text-[#171717] mb-1.5">
+                    <label class="block text-xs font-semibold text-[#172c3b] mb-1.5">
                       แฮชแท็ก
                     </label>
-                    <div class="p-3 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl max-h-48 overflow-y-auto">
-                      <div v-if="allTags.length === 0" class="text-[13px] text-[#9A9A95] py-2 text-center">ไม่มีแฮชแท็กในระบบ</div>
+                    <div class="p-3 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl max-h-48 overflow-y-auto">
+                      <div v-if="allTags.length === 0" class="text-[13px] text-[#69777f] py-2 text-center">ไม่มีแฮชแท็กในระบบ</div>
                       <div v-else class="flex flex-wrap gap-2">
                         <label v-for="tag in allTags" :key="tag.tagId" class="inline-flex items-center gap-1.5 cursor-pointer">
-                          <input type="checkbox" :value="tag.tagId" v-model="uploadForm.tagIds" class="rounded border-black/[0.12] text-black focus:ring-black">
-                          <span class="text-[13px] font-medium text-[#171717]">#{{ tag.tagName }}</span>
+                          <input type="checkbox" :value="tag.tagId" v-model="uploadForm.tagIds" class="rounded border-[#172c3b]/20 text-black focus:ring-black">
+                          <span class="text-[13px] font-medium text-[#172c3b]">#{{ tag.tagName }}</span>
                         </label>
                       </div>
                     </div>
@@ -463,17 +470,17 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                 </p>
               </form>
             </div>
-            
+
             <!-- Modal Footer -->
-            <div class="p-6 pt-4 border-t border-black/[0.06] bg-white flex gap-2 justify-end">
-              <button type="button" @click="uploadModal = false" class="px-4 py-2 text-[13px] font-medium text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded-xl">
+            <div class="p-6 pt-4 border-t border-[#172c3b]/10 bg-[#fcf9f3] flex gap-2 justify-end">
+              <button type="button" @click="uploadModal = false" class="px-4 py-2 text-[13px] font-medium text-[#52616a] hover:text-[#172c3b] hover:bg-black/[0.04] transition-colors rounded-xl">
                 ยกเลิก
               </button>
               <button
                 type="submit"
                 form="uploadForm"
                 :disabled="uploadLoading"
-                class="inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-black/[0.06]"
+                class="admin-primary inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-[#172c3b]/10"
               >
                 <svg v-if="uploadLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />

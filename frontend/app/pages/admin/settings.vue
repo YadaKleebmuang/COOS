@@ -82,16 +82,17 @@ const savePassword = async () => {
 </script>
 
 <template>
-  <div class="space-y-6 max-w-4xl mx-auto pb-12">
+  <div class="admin-page space-y-6 max-w-4xl mx-auto pb-12">
     <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center gap-2 text-[13px] font-medium text-[#666666] mb-3">
-        <NuxtLink to="/admin/dashboard" class="hover:text-[#171717] transition-colors">หน้าแรก</NuxtLink>
+    <div class="admin-page-heading mb-8">
+      <div class="admin-breadcrumb flex items-center gap-2 text-[13px] font-medium text-[#52616a] mb-3">
+        <NuxtLink to="/admin/dashboard" class="hover:text-[#172c3b] transition-colors">หน้าแรก</NuxtLink>
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-[#171717]">ตั้งค่า</span>
+        <span class="text-[#172c3b]">ตั้งค่า</span>
       </div>
-      <h1 class="text-2xl sm:text-3xl font-semibold text-[#171717] tracking-tight">ตั้งค่า</h1>
-      <p class="mt-1 text-sm font-medium text-[#666666]">จัดการความปลอดภัยของบัญชีผู้ดูแลระบบ</p>
+      <p class="admin-eyebrow">ACCOUNT SETTINGS</p>
+      <h1 class="text-2xl sm:text-3xl font-semibold text-[#172c3b] tracking-tight">ตั้งค่า</h1>
+      <p class="mt-1 text-sm font-medium text-[#52616a]">จัดการความปลอดภัยของบัญชีผู้ดูแลระบบ</p>
     </div>
 
     <!-- Global Error -->
@@ -101,35 +102,35 @@ const savePassword = async () => {
     </div>
 
     <!-- ── Admin Account ── -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
-      <div class="px-6 py-5 border-b border-black/[0.06]">
-        <h2 class="text-lg font-semibold text-[#171717] tracking-tight">บัญชีผู้ดูแลระบบ</h2>
-        <p class="text-[13px] font-medium text-[#666666] mt-0.5">เปลี่ยนรหัสผ่านสำหรับบัญชีผู้ดูแลระบบที่กำลังเข้าสู่ระบบ</p>
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
+      <div class="px-6 py-5 border-b border-[#172c3b]/10">
+        <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">บัญชีผู้ดูแลระบบ</h2>
+        <p class="text-[13px] font-medium text-[#52616a] mt-0.5">เปลี่ยนรหัสผ่านสำหรับบัญชีผู้ดูแลระบบที่กำลังเข้าสู่ระบบ</p>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div class="sm:col-span-1 lg:col-span-1">
-            <label class="block text-[13px] font-semibold text-[#171717] mb-1.5">รหัสผ่านปัจจุบัน</label>
-            <input v-model="adminAccount.currentPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"/>
+            <label class="block text-[13px] font-semibold text-[#172c3b] mb-1.5">รหัสผ่านปัจจุบัน</label>
+            <input v-model="adminAccount.currentPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"/>
           </div>
           <div class="sm:col-span-1 lg:col-span-1">
-            <label class="block text-[13px] font-semibold text-[#171717] mb-1.5">รหัสผ่านใหม่</label>
-            <input v-model="adminAccount.newPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"/>
+            <label class="block text-[13px] font-semibold text-[#172c3b] mb-1.5">รหัสผ่านใหม่</label>
+            <input v-model="adminAccount.newPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"/>
           </div>
           <div class="sm:col-span-1 lg:col-span-1">
-            <label class="block text-[13px] font-semibold text-[#171717] mb-1.5">ยืนยันรหัสผ่านใหม่</label>
-            <input v-model="adminAccount.confirmPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#171717] bg-white border border-black/[0.12] rounded-lg focus:outline-none focus:border-[#171717] focus:ring-1 focus:ring-[#171717] transition-shadow"/>
+            <label class="block text-[13px] font-semibold text-[#172c3b] mb-1.5">ยืนยันรหัสผ่านใหม่</label>
+            <input v-model="adminAccount.confirmPassword" type="password" class="w-full h-10 px-3 text-[13px] text-[#172c3b] bg-[#fcf9f3] border border-[#172c3b]/20 rounded-lg focus:outline-none focus:border-[#172c3b] focus:ring-1 focus:ring-[#172c3b] transition-shadow"/>
           </div>
         </div>
 
-        <div class="mt-6 flex items-center justify-end gap-3 pt-5 border-t border-black/[0.06]">
+        <div class="mt-6 flex items-center justify-end gap-3 pt-5 border-t border-[#172c3b]/10">
           <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-y-1" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-1">
-            <div v-if="saved" class="flex items-center gap-1.5 text-[12px] font-semibold text-[#171717]">
+            <div v-if="saved" class="flex items-center gap-1.5 text-[12px] font-semibold text-[#172c3b]">
               <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               บันทึกแล้ว
             </div>
           </transition>
-          <button @click="savePassword" :disabled="saving" class="px-5 py-2 rounded-lg bg-[#171717] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2">
+          <button @click="savePassword" :disabled="saving" class="admin-primary px-5 py-2 rounded-lg bg-[#172c3b] text-white text-[13px] font-medium hover:bg-black transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2">
             <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             บันทึกรหัสผ่าน
           </button>

@@ -335,7 +335,7 @@ const heroImages = computed(() => {
       </div>
       <div class="filter-panel">
         <div class="search-row">
-          <label class="search-field"
+          <label class="coos-search-field rounded-lg search-field"
             ><span class="sr-only">ค้นหาผลงาน</span
             ><svg
               aria-hidden="true"
@@ -517,7 +517,7 @@ const heroImages = computed(() => {
   color: #172c3b;
   min-height: 100vh;
 }
-.gallery-page :is(button, a, input, select, summary):focus-visible {
+.gallery-page :is(button, a, select, summary):focus-visible {
   outline: 3px solid #d7642c;
   outline-offset: 4px;
 }

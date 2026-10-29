@@ -179,13 +179,18 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">ORDERS</p>
+        <h1>คำสั่งงาน</h1>
+        <p class="admin-intro mt-2">ติดตามรายการคำสั่งงานและดูแลทุกขั้นตอนของบริการ</p>
+      </div>
       <button
         @click="() => fetchAdminData()"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -195,42 +200,42 @@ const breadcrumb = [
     </div>
 
     <!-- Orders Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header & Search -->
       <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">คำสั่งงานทั้งหมด</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">ดูแลรายการคำสั่งงานและติดตามสถานะ</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">คำสั่งงานทั้งหมด</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">ดูแลรายการคำสั่งงานและติดตามสถานะ</p>
         </div>
-        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
-          <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="coos-search-field flex items-center gap-2 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-3 py-2 focus-within:bg-[#fcf9f3] focus-within:border-[#172c3b]/20 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+          <svg class="w-4 h-4 text-[#69777f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="ค้นหาเลขที่, แพ็กเกจ..."
-            class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"
-          />
+            class="text-xs text-[#172c3b] bg-transparent outline-none min-w-0 w-full sm:w-48 placeholder:text-[#69777f]"
+           aria-label="ค้นหาเลขที่, แพ็กเกจ..."/>
         </div>
       </div>
 
       <!-- Filter Row -->
-      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
-        <AdminFilterBar v-model="selectedFilter" :filters="filterOptions" />
+      <div class="px-4 sm:px-6 pb-4 border-b border-[#172c3b]/10 overflow-x-auto">
+        <AdminFilterBar class="admin-filters" v-model="selectedFilter" :filters="filterOptions" />
       </div>
 
       <!-- Error State -->
       <div v-if="error" class="p-12 text-center">
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button @click="() => fetchAdminData()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
+        <button @click="() => fetchAdminData()" class="mt-2 text-xs text-[#69777f] underline">ลองใหม่</button>
       </div>
 
       <!-- Table -->
       <div v-else class="flex flex-col flex-1">
-        <div class="overflow-x-auto bg-[#FDFDFB]/30 orders-table-scope">
-        <AdminDataTable
+        <div class="overflow-x-auto bg-[#e5e9e1] orders-table-scope">
+        <AdminDataTable class="admin-table"
           :columns="columns"
           :rows="filteredOrders"
           :loading="loading"
@@ -238,32 +243,32 @@ const breadcrumb = [
         >
           <!-- Order ID -->
           <template #cell-orderId="{ value }">
-            <span class="font-mono text-xs font-semibold text-[#171717]">#{{ value }}</span>
+            <span class="font-mono text-xs font-semibold text-[#172c3b]">#{{ value }}</span>
           </template>
 
           <!-- Work type -->
           <template #cell-workTypeName="{ value }">
-            <span class="text-[13px] font-medium text-[#171717]">{{ value ?? "—" }}</span>
+            <span class="text-[13px] font-medium text-[#172c3b]">{{ value ?? "—" }}</span>
           </template>
 
           <!-- Package -->
           <template #cell-packageName="{ value }">
-            <span class="text-xs text-[#666666]">{{ value ?? "—" }}</span>
+            <span class="text-xs text-[#52616a]">{{ value ?? "—" }}</span>
           </template>
 
           <!-- Price -->
           <template #cell-orderTotalPrice="{ value }">
-            <span class="text-[13px] font-bold text-[#171717] font-number">{{ formatPrice(value) }}</span>
+            <span class="text-[13px] font-bold text-[#172c3b] font-number">{{ formatPrice(value) }}</span>
           </template>
 
           <!-- Status -->
           <template #cell-orderStatus="{ value }">
-            <span 
+            <span
               class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
               :class="{
-                'bg-[#171717] text-white border-[#171717] shadow-sm': value === 'completed' || value === 'delivered',
+                'bg-[#172c3b] text-white border-[#172c3b] shadow-sm': value === 'completed' || value === 'delivered',
                 'bg-[#FFF5F5] text-[#C53030] border-[#FEB2B2]': value === 'cancelled',
-                'bg-[#F7F7F5] text-[#666666] border-black/[0.06]': value !== 'completed' && value !== 'delivered' && value !== 'cancelled'
+                'bg-[#eee7db] text-[#52616a] border-[#172c3b]/10': value !== 'completed' && value !== 'delivered' && value !== 'cancelled'
               }"
             >
               {{ getStatusLabel(value) }}
@@ -272,15 +277,15 @@ const breadcrumb = [
 
           <!-- Required date -->
           <template #cell-orderRequiredDate="{ value }">
-            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
+            <span class="text-xs text-[#69777f]">{{ formatDate(value) }}</span>
           </template>
 
           <!-- Editor Assign dropdown -->
           <template #cell-editorAssign="{ row }">
-            <span v-if="row.editorId" class="inline-flex items-center px-2 py-1 text-[11px] font-semibold text-[#171717] bg-[#F7F7F5] border border-black/[0.06] rounded-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+            <span v-if="row.editorId" class="inline-flex items-center px-2 py-1 text-[11px] font-semibold text-[#172c3b] bg-[#eee7db] border border-[#172c3b]/10 rounded-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
               {{ getEditorName(row.editorId) }}
             </span>
-            <span v-else class="text-xs text-[#9A9A95]">— ยังไม่มอบหมาย —</span>
+            <span v-else class="text-xs text-[#69777f]">— ยังไม่มอบหมาย —</span>
           </template>
 
           <!-- Payment slip -->
@@ -289,13 +294,13 @@ const breadcrumb = [
               <button
                 type="button"
                 @click="openProtectedAsset(paymentSlipEndpoint(pendingPayment(row).paymentId))"
-                class="px-2 py-1 text-[11px] font-semibold text-[#171717] bg-white hover:bg-[#F7F7F5] transition-colors rounded shadow-sm border border-black/[0.06]"
+                class="px-2 py-1 text-[11px] font-semibold text-[#172c3b] bg-[#fcf9f3] hover:bg-[#eee7db] transition-colors rounded shadow-sm border border-[#172c3b]/10"
               >
                 ดูสลิป
               </button>
               <button
                 @click="openVerifyDialog(row.orderId, pendingPayment(row).paymentId, 'approved')"
-                class="px-2 py-1 text-[11px] font-semibold text-white bg-[#171717] hover:bg-black transition-colors rounded shadow-sm border border-transparent"
+                class="admin-primary px-2 py-1 text-[11px] font-semibold text-white bg-[#172c3b] hover:bg-black transition-colors rounded shadow-sm border border-transparent"
               >
                 อนุมัติ
               </button>
@@ -306,12 +311,12 @@ const breadcrumb = [
                 ปฏิเสธ
               </button>
             </div>
-            <span v-else class="text-xs text-[#EFEFEA] block text-center">—</span>
+            <span v-else class="text-xs text-[#ded7cb] block text-center">—</span>
           </template>
 
           <!-- Created at -->
           <template #cell-orderCreatedAt="{ value }">
-            <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
+            <span class="text-xs text-[#69777f]">{{ formatDate(value) }}</span>
           </template>
         </AdminDataTable>
       </div>
@@ -325,10 +330,10 @@ const breadcrumb = [
       />
 
       <!-- Pagination wrapper -->
-      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-between bg-[#FDFDFB]/50">
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-[#172c3b]/10 flex items-center justify-between bg-[#e5e9e1]">
         <!-- Thai Pagination Summary -->
-        <div class="hidden sm:block text-xs text-[#666666]">
-          <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+        <div class="hidden sm:block text-xs text-[#52616a]">
+          <span class="font-bold text-[#172c3b]">{{ ((currentPage - 1) * limit) + 1 }}</span>–<span class="font-bold text-[#172c3b]">{{ Math.min(currentPage * limit, totalRecords) }}</span> จาก <span class="font-bold text-[#172c3b]">{{ totalRecords }}</span> รายการ
         </div>
         <Pagination
           :current-page="currentPage"
@@ -373,12 +378,12 @@ const breadcrumb = [
 }
 
 .orders-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important; /* bg-[#F7F7F5]/80 */
+  background-color: #e5e9e1 !important; /* bg-[#F7F7F5]/80 */
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .orders-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important; /* hover:bg-[#FDFDFB] */
+  background-color: #eee7db !important; /* hover:bg-[#FDFDFB] */
 }
 
 .orders-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {

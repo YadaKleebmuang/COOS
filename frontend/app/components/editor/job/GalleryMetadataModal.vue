@@ -129,7 +129,7 @@ const saveMetadata = async () => {
             </div>
 
             <!-- Search -->
-            <div class="relative mb-3">
+            <div class="coos-search-field rounded-xl relative mb-3">
               <input 
                 v-model="searchQuery" 
                 type="text" 

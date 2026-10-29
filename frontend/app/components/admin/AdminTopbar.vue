@@ -196,13 +196,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-[68px] sm:h-[72px] shrink-0 sticky top-0 z-30 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-[1440px] mx-auto">
+  <div class="admin-topbar h-[68px] sm:h-[72px] shrink-0 sticky top-0 z-30 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 w-full max-w-[1440px] mx-auto">
     <header class="liquid-glass-nav h-16 flex items-center justify-between px-4 sm:px-5 lg:px-6 w-full">
       <!-- Left: Hamburger + Title -->
-      <div class="flex items-center gap-3">
+      <div class="flex min-w-0 items-center gap-3">
         <!-- Mobile hamburger -->
         <button
           class="lg:hidden p-1.5 rounded-lg text-[#666666] hover:bg-[#F3F3F1] transition-colors focus:outline-none"
+          aria-label="เปิดเมนูแอดมิน"
           @click="emit('toggle-sidebar')"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,19 +212,19 @@ onBeforeUnmount(() => {
         </button>
 
         <!-- Page title -->
-        <h1 class="text-[13px] font-semibold text-[#171717] tracking-wide">
+        <h1 class="min-w-0 truncate text-[13px] font-semibold text-[#171717] tracking-wide">
           {{ pageTitle || 'Admin Panel' }}
         </h1>
       </div>
 
       <!-- Right: Actions + User -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <!-- Search shortcut (Clickable) -->
         <div class="relative search-container">
           <button 
             v-if="!searchOpen"
             @click.stop="openSearch"
-            class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/[0.06] bg-white text-[#929292] text-xs hover:bg-[#F3F3F1] transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)]"
+            class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/[0.06] bg-white text-[#929292] text-xs hover:bg-[#F3F3F1] transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)]"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -235,7 +236,7 @@ onBeforeUnmount(() => {
           <!-- Active Search Input -->
           <div 
             v-else
-            class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/[0.12] bg-white text-[#171717] text-[13px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] min-w-[280px]"
+            class="coos-search-field hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/[0.12] bg-white text-[#171717] text-[13px] shadow-[0_4px_12px_rgba(0,0,0,0.05)] min-w-[280px]"
             @click.stop
           >
             <svg class="w-4 h-4 text-[#929292]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,6 +320,8 @@ onBeforeUnmount(() => {
           <!-- Avatar + Dropdown -->
           <div class="relative">
             <button
+              aria-label="เปิดเมนูบัญชีแอดมิน"
+              :aria-expanded="dropdownOpen"
               @click="toggleDropdown"
               class="w-9 h-9 rounded-full bg-[#171717] text-white text-xs font-semibold flex items-center justify-center ring-2 ring-white/80 shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-transform hover:scale-105 focus:outline-none"
             >

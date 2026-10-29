@@ -157,13 +157,18 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">PAYMENTS</p>
+        <h1>ตรวจสอบการชำระเงิน</h1>
+        <p class="admin-intro mt-2">ตรวจหลักฐานการชำระเงินและติดตามยอดของแต่ละคำสั่งงาน</p>
+      </div>
       <button
         @click="() => fetchPayments()"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -173,42 +178,42 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
     </div>
 
     <!-- Payments Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header & Search -->
       <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ตรวจสอบการชำระเงิน</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">ตรวจสอบหลักฐานและสถานะการชำระเงินของลูกค้า</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">ตรวจสอบการชำระเงิน</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">ตรวจสอบหลักฐานและสถานะการชำระเงินของลูกค้า</p>
         </div>
-        <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
-          <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="coos-search-field flex items-center gap-2 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-3 py-2 focus-within:bg-[#fcf9f3] focus-within:border-[#172c3b]/20 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+          <svg class="w-4 h-4 text-[#69777f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="ค้นหาเลขออเดอร์, ลูกค้า..."
-            class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]"
-          />
+            class="text-xs text-[#172c3b] bg-transparent outline-none min-w-0 w-full sm:w-48 placeholder:text-[#69777f]"
+           aria-label="ค้นหาเลขออเดอร์, ลูกค้า..."/>
         </div>
       </div>
 
       <!-- Filter Row -->
-      <div class="px-4 sm:px-6 pb-4 border-b border-black/[0.06] overflow-x-auto">
-        <AdminFilterBar v-model="activeTab" :filters="tabs" />
+      <div class="px-4 sm:px-6 pb-4 border-b border-[#172c3b]/10 overflow-x-auto">
+        <AdminFilterBar class="admin-filters" v-model="activeTab" :filters="tabs" />
       </div>
 
       <!-- Error State -->
       <div v-if="error" class="p-12 text-center">
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button @click="() => fetchPayments()" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
+        <button @click="() => fetchPayments()" class="mt-2 text-xs text-[#69777f] underline">ลองใหม่</button>
       </div>
 
       <!-- Table -->
       <div v-else class="flex flex-col flex-1">
-        <div class="overflow-x-auto bg-[#FDFDFB]/30 payments-table-scope">
-          <AdminDataTable
+        <div class="overflow-x-auto bg-[#e5e9e1] payments-table-scope">
+          <AdminDataTable class="admin-table"
             :columns="columns"
             :rows="paginatedPayments"
             :loading="loading"
@@ -216,48 +221,48 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
           >
             <!-- Order ID -->
             <template #cell-orderId="{ value }">
-              <span class="font-mono text-xs font-semibold text-[#171717]">#{{ value }}</span>
+              <span class="font-mono text-xs font-semibold text-[#172c3b]">#{{ value }}</span>
             </template>
-            
+
             <!-- Customer -->
             <template #cell-customerName="{ row }">
-              <span class="text-[13px] font-medium text-[#171717]">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">{{ row.customerFirstName }} {{ row.customerLastName }}</span>
             </template>
-            
+
             <!-- Payment Type -->
             <template #cell-paymentType="{ value }">
-              <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-[6px] border border-transparent" :class="value === 'deposit' ? 'bg-[#EFEFEA] text-[#171717] border-black/[0.06]' : 'bg-[#171717] text-white'">
+              <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-[6px] border border-transparent" :class="value === 'deposit' ? 'bg-[#ded7cb] text-[#172c3b] border-[#172c3b]/10' : 'bg-[#172c3b] text-white'">
                 {{ value === "deposit" ? "ค่ามัดจำ" : "ยอดคงเหลือ" }}
               </span>
             </template>
-            
+
             <!-- Amount -->
             <template #cell-paymentAmount="{ value }">
-              <span class="text-[13px] font-semibold font-mono text-[#171717]">{{ formatPrice(value) }}</span>
+              <span class="text-[13px] font-semibold font-mono text-[#172c3b]">{{ formatPrice(value) }}</span>
             </template>
-            
+
             <!-- Created At -->
             <template #cell-paymentCreatedAt="{ value }">
-              <span class="text-xs text-[#666666]">{{ formatDate(value) }}</span>
+              <span class="text-xs text-[#52616a]">{{ formatDate(value) }}</span>
             </template>
-            
+
             <!-- Status -->
             <template #cell-paymentStatus="{ value }">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-medium border" :class="statusConfig[value]?.classes">
                 {{ statusConfig[value]?.label ?? value }}
               </span>
             </template>
-            
+
             <!-- Action -->
             <template #cell-action="{ row }">
               <div class="flex items-center justify-center gap-2">
-                <button type="button" class="px-2 py-1 text-[11px] font-semibold text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded shadow-sm border border-black/[0.06] bg-white whitespace-nowrap" @click="openProtectedAsset(paymentSlipEndpoint(row.paymentId))">
+                <button type="button" class="px-2 py-1 text-[11px] font-semibold text-[#52616a] hover:text-[#172c3b] hover:bg-black/[0.04] transition-colors rounded shadow-sm border border-[#172c3b]/10 bg-[#fcf9f3] whitespace-nowrap" @click="openProtectedAsset(paymentSlipEndpoint(row.paymentId))">
                   ดูสลิป
                 </button>
                 <template v-if="row.paymentStatus === 'pending'">
                   <button
                     @click="openConfirm(row as any, 'approved')"
-                    class="px-2 py-1 text-[11px] font-semibold text-white bg-[#171717] hover:bg-[#333333] transition-colors rounded shadow-sm border border-transparent"
+                    class="admin-primary px-2 py-1 text-[11px] font-semibold text-white bg-[#172c3b] hover:bg-[#294655] transition-colors rounded shadow-sm border border-transparent"
                   >
                     อนุมัติ
                   </button>
@@ -268,7 +273,7 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
                     ปฏิเสธ
                   </button>
                 </template>
-                <span v-else class="text-xs text-[#EFEFEA] block text-center">—</span>
+                <span v-else class="text-xs text-[#ded7cb] block text-center">—</span>
               </div>
             </template>
           </AdminDataTable>
@@ -283,10 +288,10 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
         />
 
         <!-- Pagination wrapper -->
-        <div v-if="totalPages > 1" class="px-6 py-4 border-t border-black/[0.06] flex items-center justify-between bg-[#FDFDFB]/50">
+        <div v-if="totalPages > 1" class="px-6 py-4 border-t border-[#172c3b]/10 flex items-center justify-between bg-[#e5e9e1]">
           <!-- Thai Pagination Summary -->
-          <div class="hidden sm:block text-xs text-[#666666]">
-            <span class="font-bold text-[#171717]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#171717]">{{ Math.min(currentPage * pageSize, totalRecords) }}</span> จาก <span class="font-bold text-[#171717]">{{ totalRecords }}</span> รายการ
+          <div class="hidden sm:block text-xs text-[#52616a]">
+            <span class="font-bold text-[#172c3b]">{{ ((currentPage - 1) * pageSize) + 1 }}</span>–<span class="font-bold text-[#172c3b]">{{ Math.min(currentPage * pageSize, totalRecords) }}</span> จาก <span class="font-bold text-[#172c3b]">{{ totalRecords }}</span> รายการ
           </div>
           <Pagination
             :current-page="currentPage"
@@ -330,12 +335,12 @@ const breadcrumb = [{ label: "หน้าแรก", to: "/admin/dashboard" }, 
 }
 
 .payments-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important; /* bg-[#F7F7F5]/80 */
+  background-color: #e5e9e1 !important; /* bg-[#F7F7F5]/80 */
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .payments-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important; /* hover:bg-[#FDFDFB] */
+  background-color: #eee7db !important; /* hover:bg-[#FDFDFB] */
 }
 
 .payments-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {

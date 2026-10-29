@@ -131,13 +131,18 @@ const breadcrumb = [
 </script>
 
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="admin-page space-y-6 max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <AdminBreadcrumb :items="breadcrumb" />
+    <div class="admin-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <AdminBreadcrumb :items="breadcrumb" />
+        <p class="admin-eyebrow">WORK TYPES</p>
+        <h1>ประเภทงาน</h1>
+        <p class="admin-intro mt-2">จัดการประเภทภาพและบริการที่ลูกค้าเลือกสั่งทำ</p>
+      </div>
       <button
         @click="fetchWorkTypes"
-        class="px-4 py-2 rounded-full border border-black/[0.06] bg-white text-[13px] font-medium text-[#171717] hover:bg-[#F7F7F5] transition-colors shadow-sm flex items-center gap-2"
+        class="px-4 py-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[13px] font-medium text-[#172c3b] hover:bg-[#eee7db] transition-colors shadow-sm flex items-center gap-2"
       >
         <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -151,22 +156,22 @@ const breadcrumb = [
     </div>
 
     <!-- Workspace Card -->
-    <div class="bg-white/90 backdrop-blur-md border border-black/[0.06] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
-      
+    <div class="bg-[#fcf9f3] border border-[#172c3b]/10 rounded-[14px] shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+
       <!-- Header & Search -->
-      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-black/[0.06]">
+      <div class="px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#172c3b]/10">
         <div>
-          <h2 class="text-lg font-semibold text-[#171717] tracking-tight">ประเภทงานทั้งหมด</h2>
-          <p class="text-[13px] font-medium text-[#666666] mt-0.5">จัดการประเภทงานและบริการที่ลูกค้าสามารถเลือกใช้</p>
+          <h2 class="text-lg font-semibold text-[#172c3b] tracking-tight">ประเภทงานทั้งหมด</h2>
+          <p class="text-[13px] font-medium text-[#52616a] mt-0.5">จัดการประเภทงานและบริการที่ลูกค้าสามารถเลือกใช้</p>
         </div>
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div class="flex items-center gap-2 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl px-3 py-2 focus-within:bg-white focus-within:border-black/[0.12] focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
-            <svg class="w-4 h-4 text-[#929292] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="coos-search-field flex items-center gap-2 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl px-3 py-2 focus-within:bg-[#fcf9f3] focus-within:border-[#172c3b]/20 focus-within:shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all">
+            <svg class="w-4 h-4 text-[#69777f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="ค้นหาประเภทงาน..." class="text-xs text-[#171717] bg-transparent outline-none w-48 placeholder:text-[#9A9A95]" />
+            <input v-model="searchQuery" type="text" placeholder="ค้นหาประเภทงาน..." class="text-xs text-[#172c3b] bg-transparent outline-none min-w-0 w-full sm:w-48 placeholder:text-[#69777f]"  aria-label="ค้นหาประเภทงาน..."/>
           </div>
-          <button @click="openAdd" class="px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] transition-colors rounded-xl shadow-sm border border-black/[0.06] whitespace-nowrap">
+          <button @click="openAdd" class="admin-primary px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] transition-colors rounded-xl shadow-sm border border-[#172c3b]/10 whitespace-nowrap">
             เพิ่มประเภทงาน
           </button>
         </div>
@@ -175,40 +180,40 @@ const breadcrumb = [
       <!-- Error -->
       <div v-if="error" class="p-12 text-center">
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button @click="fetchWorkTypes" class="mt-2 text-xs text-[#9A9A95] underline">ลองใหม่</button>
+        <button @click="fetchWorkTypes" class="mt-2 text-xs text-[#69777f] underline">ลองใหม่</button>
       </div>
 
       <!-- Table -->
       <div v-else class="flex flex-col flex-1">
-        <div class="overflow-x-auto bg-[#FDFDFB]/30 worktypes-table-scope">
-          <AdminDataTable :columns="columns" :rows="filteredWorkTypes" :loading="loading" row-key="workTypeId">
+        <div class="overflow-x-auto bg-[#e5e9e1] worktypes-table-scope">
+          <AdminDataTable class="admin-table" :columns="columns" :rows="filteredWorkTypes" :loading="loading" row-key="workTypeId">
             <!-- Name -->
             <template #cell-workTypeName="{ value }">
-              <span class="text-[13px] font-medium text-[#171717]">{{ value }}</span>
+              <span class="text-[13px] font-medium text-[#172c3b]">{{ value }}</span>
             </template>
             <!-- Description -->
             <template #cell-workTypeDescription="{ value }">
-              <span class="text-xs text-[#666666] max-w-md block truncate">{{ value || "—" }}</span>
+              <span class="text-xs text-[#52616a] max-w-md block truncate">{{ value || "—" }}</span>
             </template>
             <!-- Status -->
             <template #cell-workTypeIsActive="{ value }">
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap"
-                :class="value ? 'bg-[#F7F7F5] text-[#171717] border-black/[0.06] shadow-sm' : 'bg-[#FDFDFB] text-[#666666] border-black/[0.04]'"
+                :class="value ? 'bg-[#eee7db] text-[#172c3b] border-[#172c3b]/10 shadow-sm' : 'bg-[#f5f0e7] text-[#52616a] border-[#172c3b]/10'"
               >
                 {{ value ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
               </span>
             </template>
             <!-- Date -->
             <template #cell-workTypeCreatedAt="{ value }">
-              <span class="text-xs text-[#9A9A95]">{{ formatDate(value) }}</span>
+              <span class="text-xs text-[#69777f]">{{ formatDate(value) }}</span>
             </template>
             <!-- Actions -->
             <template #cell-action="{ row }">
               <div class="flex items-center justify-center gap-1.5">
                 <button
                   @click="openEdit(row as any)"
-                  class="px-2 py-1 text-[11px] font-semibold text-[#171717] bg-white hover:bg-[#F7F7F5] transition-colors rounded shadow-sm border border-black/[0.06]"
+                  class="px-2 py-1 text-[11px] font-semibold text-[#172c3b] bg-[#fcf9f3] hover:bg-[#eee7db] transition-colors rounded shadow-sm border border-[#172c3b]/10"
                 >
                   แก้ไข
                 </button>
@@ -230,44 +235,44 @@ const breadcrumb = [
     <!-- Add/Edit Modal -->
     <Teleport to="body">
       <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="modal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="modal.open" class="admin-theme admin-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="modal.open = false" />
-          <div class="relative bg-white/95 backdrop-blur-[15px] rounded-[24px] shadow-2xl border border-black/[0.06] w-full max-w-md p-0 overflow-hidden flex flex-col max-h-[90vh]">
-            
+          <div class="relative bg-[#fcf9f3] rounded-[14px] shadow-2xl border border-[#172c3b]/10 w-full max-w-md p-0 overflow-hidden flex flex-col max-h-[90vh]">
+
             <!-- Modal Header -->
-            <div class="p-6 pb-4 border-b border-black/[0.06] bg-white">
-              <h3 class="text-[17px] font-semibold text-[#171717] tracking-tight mb-2">{{ modal.mode === "edit" ? "แก้ไขประเภทงาน" : "เพิ่มประเภทงานใหม่" }}</h3>
-              <p class="text-[13px] text-[#666666]">{{ modal.mode === "edit" ? "แก้ไขข้อมูลรายละเอียดของประเภทงานในระบบ" : "สร้างประเภทงานใหม่สำหรับให้บริการบนระบบ" }}</p>
+            <div class="p-6 pb-4 border-b border-[#172c3b]/10 bg-[#fcf9f3]">
+              <h3 class="text-[17px] font-semibold text-[#172c3b] tracking-tight mb-2">{{ modal.mode === "edit" ? "แก้ไขประเภทงาน" : "เพิ่มประเภทงานใหม่" }}</h3>
+              <p class="text-[13px] text-[#52616a]">{{ modal.mode === "edit" ? "แก้ไขข้อมูลรายละเอียดของประเภทงานในระบบ" : "สร้างประเภทงานใหม่สำหรับให้บริการบนระบบ" }}</p>
             </div>
-            
+
             <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto flex-1 bg-[#FDFDFB]/50">
+            <div class="p-6 overflow-y-auto flex-1 bg-[#e5e9e1]">
               <form id="workTypeForm" @submit.prevent="handleSubmit" class="space-y-4">
                 <div>
-                  <label for="workTypeName" class="block text-xs font-semibold text-[#171717] mb-1.5">ชื่อประเภทงาน *</label>
-                  <input id="workTypeName" v-model="form.workTypeName" required type="text" placeholder="เช่น Realistic, Anime, Watercolor" class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95]" />
+                  <label for="workTypeName" class="block text-xs font-semibold text-[#172c3b] mb-1.5">ชื่อประเภทงาน *</label>
+                  <input id="workTypeName" v-model="form.workTypeName" required type="text" placeholder="เช่น Realistic, Anime, Watercolor" class="w-full text-[13px] px-3 py-2.5 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl focus:outline-none focus:bg-[#fcf9f3] focus:border-[#172c3b]/20 transition-all font-medium text-[#172c3b] placeholder:text-[#69777f]"  aria-label="เช่น Realistic, Anime, Watercolor"/>
                 </div>
                 <div>
-                  <label for="workTypeDescription" class="block text-xs font-semibold text-[#171717] mb-1.5">คำอธิบาย</label>
-                  <textarea id="workTypeDescription" v-model="form.workTypeDescription" rows="3" placeholder="คำอธิบายสั้นๆ สำหรับแสดงให้ลูกค้าเห็น..." class="w-full text-[13px] px-3 py-2.5 bg-[#F7F7F5]/50 border border-black/[0.06] rounded-xl focus:outline-none focus:bg-white focus:border-black/[0.12] transition-all font-medium text-[#171717] placeholder:text-[#9A9A95] resize-none" />
+                  <label for="workTypeDescription" class="block text-xs font-semibold text-[#172c3b] mb-1.5">คำอธิบาย</label>
+                  <textarea id="workTypeDescription" v-model="form.workTypeDescription" rows="3" placeholder="คำอธิบายสั้นๆ สำหรับแสดงให้ลูกค้าเห็น..." class="w-full text-[13px] px-3 py-2.5 bg-[#eee7db] border border-[#172c3b]/10 rounded-xl focus:outline-none focus:bg-[#fcf9f3] focus:border-[#172c3b]/20 transition-all font-medium text-[#172c3b] placeholder:text-[#69777f] resize-none" />
                 </div>
-                <div class="flex items-center gap-3 bg-white border border-black/[0.06] rounded-xl p-3.5 shadow-sm">
+                <div class="flex items-center gap-3 bg-[#fcf9f3] border border-[#172c3b]/10 rounded-xl p-3.5 shadow-sm">
                   <input v-model="form.workTypeIsActive" type="checkbox" :true-value="1" :false-value="0" id="wt-active" class="w-4 h-4 rounded border-gray-300 text-black focus:ring-0 focus:ring-offset-0 transition-colors" />
-                  <label for="wt-active" class="text-[13px] font-medium text-[#171717] select-none cursor-pointer flex-1">เปิดใช้งานประเภทงานนี้</label>
+                  <label for="wt-active" class="text-[13px] font-medium text-[#172c3b] select-none cursor-pointer flex-1">เปิดใช้งานประเภทงานนี้</label>
                 </div>
               </form>
             </div>
-            
+
             <!-- Modal Footer -->
-            <div class="p-6 pt-4 border-t border-black/[0.06] bg-white flex gap-2 justify-end">
-              <button type="button" @click="modal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#666666] hover:text-[#171717] hover:bg-black/[0.04] transition-colors rounded-xl">
+            <div class="p-6 pt-4 border-t border-[#172c3b]/10 bg-[#fcf9f3] flex gap-2 justify-end">
+              <button type="button" @click="modal.open = false" class="px-4 py-2 text-[13px] font-medium text-[#52616a] hover:text-[#172c3b] hover:bg-black/[0.04] transition-colors rounded-xl">
                 ยกเลิก
               </button>
               <button
                 type="submit"
                 form="workTypeForm"
                 :disabled="saving"
-                class="inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#171717] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-black/[0.06]"
+                class="admin-primary inline-flex items-center justify-center px-4 py-2 text-[13px] font-semibold text-white bg-black hover:bg-[#172c3b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-xl shadow-sm border border-[#172c3b]/10"
               >
                 <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -307,12 +312,12 @@ const breadcrumb = [
 }
 
 .worktypes-table-scope :deep(thead.bg-gray-50) {
-  background-color: rgba(247, 247, 245, 0.8) !important;
+  background-color: #e5e9e1 !important;
   border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 .worktypes-table-scope :deep(tbody.bg-white tr:hover) {
-  background-color: #FDFDFB !important;
+  background-color: #eee7db !important;
 }
 
 .worktypes-table-scope :deep(tbody.bg-white.divide-gray-100 > tr) {
