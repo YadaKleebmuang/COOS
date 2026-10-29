@@ -23,7 +23,8 @@ const mobileMenuOpen = ref(false)
 const navLinks = [
   { label: 'แดชบอร์ด', to: '/customer/dashboard' },
   { label: 'งานของฉัน', to: '/customer/orders' },
-  { label: 'สั่งงานใหม่', to: '/customer/orders/create' }
+  { label: 'สั่งงานใหม่', to: '/customer/orders/create' },
+  { label: 'โปรไฟล์', to: '/customer/profile' }
 ]
 
 const checkAuth = async () => {
@@ -54,7 +55,7 @@ const closeDropdown = () => {
 }
 
 const closeMobileMenuOnDesktop = () => {
-  if (window.innerWidth >= 768) mobileMenuOpen.value = false
+  if (window.innerWidth >= 1024) mobileMenuOpen.value = false
 }
 
 const userInitial = computed(() => {
@@ -91,27 +92,27 @@ onBeforeUnmount(() => {
 <template>
   <div class="h-[68px] w-full shrink-0 sm:h-[72px]">
     <header class="pointer-events-none fixed inset-x-0 top-0 z-[100]">
-      <div class="mx-auto w-full max-w-[1280px] px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
-        <div class="liquid-glass-nav pointer-events-auto flex h-16 w-full items-center justify-between px-4 sm:px-5 lg:px-6">
+      <div class="mx-auto w-full max-w-[1280px] px-4 pt-4 sm:px-6 sm:pt-4 lg:px-8">
+        <div class="liquid-glass-nav pointer-events-auto flex h-[58px] w-full items-center justify-between px-4 sm:px-5 lg:px-6">
       <!-- Left: Logo -->
       <NuxtLink
         to="/"
         aria-label="กลับไปหน้าแรก COOS Studio"
-        class="flex min-w-[108px] flex-col leading-none text-black"
+        class="flex min-w-[80px] flex-col leading-none text-[#172c3b]"
       >
-        <span class="text-2xl font-semibold tracking-[0.24em]">COOS</span>
+        <span class="text-xl font-extrabold tracking-[0.24em]">COOS</span>
         <span class="mt-1 text-[7px] font-medium tracking-[0.48em]">STUDIO</span>
       </NuxtLink>
 
       <!-- Center: Nav Links -->
-      <nav class="hidden items-center gap-1 rounded-[22px] bg-[#f8f8f8]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] md:flex">
+      <nav class="hidden items-center gap-1 rounded-[22px] bg-[#e5e9e1]/40 p-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03),0_1px_0_rgba(255,255,255,0.5)] lg:flex">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
-          class="rounded-[18px] px-4 py-2 text-[13px] font-medium text-[#666666] transition-all duration-200 hover:bg-white/40 hover:text-[#171717] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/10 lg:px-5"
-          exact-active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
-          active-class="bg-white/70 !text-[#171717] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
+          class="rounded-[18px] px-4 py-2 text-[13px] font-medium text-[#52616a] transition-all duration-200 hover:bg-[#fcf9f3] hover:text-[#172c3b] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/10 lg:px-5"
+          exact-active-class="bg-[#fcf9f3] !text-[#172c3b] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
+          active-class="bg-[#fcf9f3] !text-[#172c3b] shadow-[0_1px_4px_rgba(0,0,0,0.03),inset_0_1px_2px_rgba(255,255,255,0.9)] font-semibold"
         >
           {{ link.label }}
         </NuxtLink>
@@ -124,10 +125,10 @@ onBeforeUnmount(() => {
       >
         <!-- Name -->
         <div class="hidden text-right xl:block">
-          <p class="max-w-[180px] truncate text-sm font-semibold text-[#171717]">
+          <p class="max-w-[180px] truncate text-sm font-semibold text-[#172c3b]">
             {{ displayName }}
           </p>
-          <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-[#929292]">
+          <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-[#69777f]">
             Customer
           </p>
         </div>
@@ -135,11 +136,12 @@ onBeforeUnmount(() => {
         <!-- Avatar Dropdown -->
         <div class="relative">
           <button
-            class="flex h-11 items-center gap-2 rounded-full border border-black/[0.06] bg-white px-1.5 pr-3 text-sm font-semibold text-[#171717] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25"
+            class="flex h-11 items-center gap-2 rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] px-1.5 pr-3 text-sm font-semibold text-[#172c3b] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-[#eee7db] focus:outline-none focus:ring-2 focus:ring-[#d97945]/25"
             aria-label="เปิดเมนูบัญชีลูกค้า"
+            :aria-expanded="dropdownOpen"
             @click="toggleDropdown"
           >
-            <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#171717] text-xs font-semibold text-white ring-2 ring-white/80">
+            <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#172c3b] text-xs font-semibold text-white ring-2 ring-white/80">
               <img
                 v-if="currentUser.userProfileImage"
                 :src="currentUser.userId != null ? protectedAssetUrl(profileEndpoint(currentUser.userId)) : ''"
@@ -150,7 +152,7 @@ onBeforeUnmount(() => {
             </span>
             <span class="hidden max-w-[118px] truncate sm:inline">{{ currentUser.userFirstName || 'Customer' }}</span>
             <svg
-              class="h-3.5 w-3.5 text-[#666666]"
+              class="h-3.5 w-3.5 text-[#52616a]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -175,15 +177,15 @@ onBeforeUnmount(() => {
           >
             <div
               v-if="dropdownOpen"
-              class="fixed left-1/2 top-20 z-50 w-[calc(100vw-32px)] max-w-[320px] -translate-x-1/2 rounded-[14px] border border-black/[0.06] bg-white py-2 shadow-[0_16px_48px_rgba(0,0,0,0.08)] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-64 sm:max-w-none sm:translate-x-0 sm:origin-top-right"
+              class="fixed left-1/2 top-20 z-50 w-[calc(100vw-32px)] max-w-[320px] -translate-x-1/2 rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] py-2 shadow-[0_16px_48px_rgba(0,0,0,0.08)] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-64 sm:max-w-none sm:translate-x-0 sm:origin-top-right"
               @click.stop
             >
               <!-- User Info Header -->
-              <div class="border-b border-black/5 px-4 py-3">
-                <p class="truncate text-sm font-semibold text-[#171717]">
+              <div class="border-b border-[#172c3b]/10 px-4 py-3">
+                <p class="truncate text-sm font-semibold text-[#172c3b]">
                   {{ displayName }}
                 </p>
-                <p class="truncate text-[11px] text-[#929292]">
+                <p class="truncate text-[11px] text-[#69777f]">
                   {{ currentUser.userEmail }}
                 </p>
               </div>
@@ -192,11 +194,11 @@ onBeforeUnmount(() => {
               <div class="py-1">
                 <NuxtLink
                   to="/customer/dashboard"
-                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F3F3F1] hover:text-[#171717] focus:bg-[#F3F3F1] focus:text-[#171717] focus:outline-none"
+                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#52616a] transition-colors hover:bg-[#eee7db] hover:text-[#172c3b] focus:bg-[#eee7db] focus:text-[#172c3b] focus:outline-none"
                   @click="closeDropdown"
                 >
                   <svg
-                    class="h-4 w-4 text-[#929292]"
+                    class="h-4 w-4 text-[#69777f]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -212,11 +214,11 @@ onBeforeUnmount(() => {
                 </NuxtLink>
                 <NuxtLink
                   to="/customer/profile"
-                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F3F3F1] hover:text-[#171717] focus:bg-[#F3F3F1] focus:text-[#171717] focus:outline-none"
+                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#52616a] transition-colors hover:bg-[#eee7db] hover:text-[#172c3b] focus:bg-[#eee7db] focus:text-[#172c3b] focus:outline-none"
                   @click="closeDropdown"
                 >
                   <svg
-                    class="h-4 w-4 text-[#929292]"
+                    class="h-4 w-4 text-[#69777f]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -233,9 +235,9 @@ onBeforeUnmount(() => {
               </div>
 
               <!-- Logout -->
-              <div class="border-t border-black/[0.06] pt-1">
+              <div class="border-t border-[#172c3b]/10 pt-1">
                 <button
-                  class="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#FDEEEE] hover:text-[#B93B3B] focus:bg-[#FDEEEE] focus:text-[#B93B3B] focus:outline-none"
+                  class="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#52616a] transition-colors hover:bg-[#FDEEEE] hover:text-[#B93B3B] focus:bg-[#FDEEEE] focus:text-[#B93B3B] focus:outline-none"
                   @click="logout"
                 >
                   <svg
@@ -261,7 +263,10 @@ onBeforeUnmount(() => {
 
       <!-- Hamburger Button -->
       <button
-        class="ml-1 flex h-11 w-11 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[#666666] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#F3F3F1] focus:outline-none focus:ring-2 focus:ring-[#756CE8]/25 md:hidden"
+        class="ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#172c3b]/10 bg-[#fcf9f3] text-[#52616a] shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#eee7db] focus:outline-none focus:ring-2 focus:ring-[#d97945]/25 lg:hidden"
+        aria-label="เปิดหรือปิดเมนูลูกค้า"
+        aria-controls="customer-mobile-menu"
+        :aria-expanded="mobileMenuOpen"
         @click="toggleMobileMenu"
       >
         <svg
@@ -305,17 +310,18 @@ onBeforeUnmount(() => {
       leave-to-class="max-h-0 opacity-0"
     >
       <div
+        id="customer-mobile-menu"
         v-show="mobileMenuOpen"
-        class="liquid-glass-nav pointer-events-auto mx-auto mt-3 max-w-[1280px] overflow-hidden md:hidden"
+        class="liquid-glass-nav pointer-events-auto mx-auto mt-3 max-w-[1280px] overflow-hidden lg:hidden"
       >
         <nav class="flex flex-col space-y-1 px-4 pb-4 pt-3">
           <NuxtLink
             v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
-            class="rounded-xl px-3 py-3 text-sm font-medium text-[#666666] transition-colors duration-200 hover:bg-[#F3F3F1] hover:text-[#171717]"
-            exact-active-class="!bg-[#171717] !text-white hover:!bg-[#171717] hover:!text-white"
-            active-class="!bg-[#171717] !text-white hover:!bg-[#171717] hover:!text-white"
+            class="rounded-xl px-3 py-3 text-sm font-medium text-[#52616a] transition-colors duration-200 hover:bg-[#eee7db] hover:text-[#172c3b]"
+            exact-active-class="!bg-[#172c3b] !text-white hover:!bg-[#172c3b] hover:!text-white"
+            active-class="!bg-[#172c3b] !text-white hover:!bg-[#172c3b] hover:!text-white"
             @click="mobileMenuOpen = false"
           >
             {{ link.label }}
@@ -330,11 +336,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .liquid-glass-nav {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  border-radius: 29px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+  background: rgba(250, 246, 238, .97);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(23, 44, 59, .12);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(9, 23, 34, .1);
 }
+nav a[aria-current="page"] { background: #172c3b; color: #f5f0e7 !important; border-radius: 8px; box-shadow: none; }
 </style>

@@ -240,19 +240,18 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[800px] py-6 sm:py-8 lg:py-10">
-    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+  <div class="customer-page max-w-[960px]">
 
     <div class="relative z-10">
       <!-- Header -->
-      <div class="mb-6 text-center">
-        <p class="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#929292]">
+      <div class="customer-page-heading mb-6">
+        <p class="customer-eyebrow font-semibold uppercase">
           CREATE ORDER
         </p>
-        <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
+        <h1 class="text-3xl font-semibold leading-tight text-[#172c3b]">
           สั่งทำภาพ
         </h1>
-        <p class="mt-1.5 text-[14px] font-medium text-[#666666]">
+        <p class="customer-intro mt-2">
           กรอกข้อมูลเพื่อสร้างคำสั่งงานภาพดิจิทัล
         </p>
       </div>
@@ -266,10 +265,10 @@ onBeforeUnmount(() => {
       <!-- Loading State -->
       <div
         v-else-if="loadingData"
-        class="rounded-[24px] border border-black/5 bg-white/40 p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl"
+        class="rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
       >
-        <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-black/10 border-t-[#171717]" />
-        <p class="text-[14px] font-medium text-[#666666]">
+        <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#172c3b]/15 border-t-[#172c3b]" />
+        <p class="text-[14px] font-medium text-[#52616a]">
           กำลังโหลดข้อมูล...
         </p>
       </div>
@@ -277,9 +276,9 @@ onBeforeUnmount(() => {
       <!-- Error State -->
       <div
         v-else-if="dataError"
-        class="rounded-[24px] border border-black/5 bg-[#FDEEEE]/80 p-8 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl"
+        class="rounded-[14px] border border-[#172c3b]/10 bg-[#FDEEEE]/80 p-8 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
       >
-        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/80 shadow-sm">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#fcf9f3] shadow-sm">
           <svg class="h-6 w-6 text-[#B93B3B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
         <p class="mb-1 text-[15px] font-bold text-[#B93B3B]">
@@ -295,7 +294,7 @@ onBeforeUnmount(() => {
         <!-- Gallery Reference Block -->
         <div
           v-if="galleryReference"
-          class="mb-6 overflow-hidden rounded-[24px] border border-black/5 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)] sm:flex"
+          class="mb-6 overflow-hidden rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-[0_4px_24px_rgba(0,0,0,0.02)] sm:flex"
         >
           <!-- Thumbnail -->
           <div class="relative h-32 shrink-0 bg-neutral-100 sm:h-auto sm:w-48 flex items-center justify-center overflow-hidden">
@@ -309,14 +308,14 @@ onBeforeUnmount(() => {
           <div class="flex flex-1 flex-col justify-between p-5 sm:p-6">
             <div>
               <div class="mb-3">
-                <span class="rounded-full border border-black/5 bg-neutral-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                <span class="rounded-full border border-[#172c3b]/10 bg-neutral-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
                   อ้างอิงจากผลงานที่เลือก
                 </span>
               </div>
-              <h3 class="mb-1 text-[18px] font-bold text-black leading-tight">
+              <h3 class="mb-1 text-[18px] font-bold text-[#172c3b] leading-tight">
                 {{ galleryReference.imageTitle }}
               </h3>
-              <p class="text-[13px] font-medium text-neutral-500">
+              <p class="text-[13px] font-medium text-[#52616a]">
                 {{ galleryReference.workTypeName || 'General' }}
               </p>
 
@@ -324,14 +323,14 @@ onBeforeUnmount(() => {
                 <span
                   v-for="tag in galleryReference.imageTags.split(',')"
                   :key="tag"
-                  class="text-[12.5px] font-medium text-neutral-400"
+                  class="text-[12.5px] font-medium text-[#69777f]"
                 >
                   #{{ tag.trim() }}
                 </span>
               </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
-              <p class="text-[12.5px] font-medium text-neutral-500">
+            <div class="mt-4 pt-4 border-t border-[#172c3b]/10 flex items-center justify-between">
+              <p class="text-[12.5px] font-medium text-[#52616a]">
                 ใช้รายละเอียดของผลงานนี้เป็นแนวทางเริ่มต้น คุณสามารถปรับรายละเอียดคำสั่งงานได้
               </p>
               <button
@@ -346,11 +345,12 @@ onBeforeUnmount(() => {
 
         <!-- Stepper Navbar -->
         <div class="mb-6 flex justify-center">
-          <div class="flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-black/5 bg-white/40 p-2 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl hide-scrollbar sm:gap-4 sm:px-6 sm:p-3">
+          <div class="customer-stepper flex max-w-full items-center gap-2 overflow-x-auto rounded-2xl border border-[#172c3b]/10 bg-[#fcf9f3] p-2 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hide-scrollbar sm:gap-4 sm:px-6 sm:p-3">
             <template v-for="(label, idx) in stepLabels" :key="idx">
               <button
-                class="flex items-center gap-2.5 rounded-full px-2 py-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]/20"
+                class="flex items-center gap-2.5 rounded-full px-2 py-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#172c3b]/20"
                 :class="idx + 1 <= currentStep ? 'cursor-pointer' : 'cursor-default opacity-50'"
+                :aria-label="label"
                 :aria-current="idx + 1 === currentStep ? 'step' : undefined"
                 @click="goToStep(idx + 1)"
               >
@@ -358,25 +358,25 @@ onBeforeUnmount(() => {
                   class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-bold transition-colors duration-300"
                   :class="
                     idx + 1 < currentStep
-                      ? 'bg-[#171717] text-white'
+                      ? 'bg-[#172c3b] text-white'
                       : idx + 1 === currentStep
-                        ? 'border-2 border-[#171717] bg-white text-[#171717]'
-                        : 'border-2 border-black/10 bg-[#f8f8f8] text-[#929292]'
+                        ? 'border-2 border-[#172c3b] bg-[#fcf9f3] text-[#172c3b]'
+                        : 'border-2 border-[#172c3b]/15 bg-[#e5e9e1] text-[#69777f]'
                   "
                 >
                   <svg v-if="idx + 1 < currentStep" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                   <span v-else>{{ idx + 1 }}</span>
                 </div>
-                <span class="hidden text-[13px] font-bold transition-colors duration-300 sm:block" :class="idx + 1 <= currentStep ? 'text-[#171717]' : 'text-[#929292]'">{{ label }}</span>
+                <span class="hidden text-[13px] font-bold transition-colors duration-300 sm:block" :class="idx + 1 <= currentStep ? 'text-[#172c3b]' : 'text-[#69777f]'">{{ label }}</span>
               </button>
               <!-- Connector -->
-              <div v-if="idx < stepLabels.length - 1" class="h-px w-6 transition-colors duration-300 sm:w-10" :class="idx + 1 < currentStep ? 'bg-[#171717]' : 'bg-black/10'" />
+              <div v-if="idx < stepLabels.length - 1" class="h-px w-6 transition-colors duration-300 sm:w-10" :class="idx + 1 < currentStep ? 'bg-[#172c3b]' : 'bg-black/10'" />
             </template>
           </div>
         </div>
 
         <!-- Card container -->
-        <div class="overflow-hidden rounded-[24px] border border-black/5 bg-white/40 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl">
+        <div class="overflow-hidden rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
           <StepWorkType
             v-show="currentStep === 1"
             v-model="selectedWorkTypeId"
@@ -410,10 +410,10 @@ onBeforeUnmount(() => {
           />
 
           <!-- Navigation Buttons -->
-          <div class="flex flex-col-reverse gap-3 border-t border-black/5 bg-white/60 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col-reverse gap-3 border-t border-[#172c3b]/10 bg-[#eee7db] p-6 sm:flex-row sm:items-center sm:justify-between">
             <button
               v-if="currentStep > 1"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-black/10 bg-white/80 px-[18px] text-[14px] font-semibold text-[#171717] transition hover:border-black/20 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#171717]/20"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-[18px] text-[14px] font-semibold text-[#172c3b] transition hover:border-black/20 hover:bg-[#fcf9f3] focus:outline-none focus:ring-2 focus:ring-[#172c3b]/20"
               @click="prevStep"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
@@ -424,8 +424,8 @@ onBeforeUnmount(() => {
             <button
               v-if="currentStep < totalSteps"
               :disabled="!canGoNext"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed"
-              :class="canGoNext ? 'bg-[#171717] text-white shadow-md hover:bg-black' : 'bg-black/5 text-[#929292]'"
+              class="customer-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#172c3b]/20 disabled:cursor-not-allowed"
+              :class="canGoNext ? 'bg-[#172c3b] text-white shadow-md hover:bg-[#294655]' : 'bg-black/5 text-[#69777f]'"
               @click="nextStep"
             >
               ถัดไป
@@ -434,8 +434,8 @@ onBeforeUnmount(() => {
             <button
               v-else
               :disabled="submitting || !acceptedDisclaimer"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed"
-              :class="submitting || !acceptedDisclaimer ? 'bg-black/5 text-[#929292]' : 'bg-[#171717] text-white shadow-md hover:bg-black'"
+              class="customer-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-[18px] text-[14px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#172c3b]/20 disabled:cursor-not-allowed"
+              :class="submitting || !acceptedDisclaimer ? 'bg-black/5 text-[#69777f]' : 'bg-[#172c3b] text-white shadow-md hover:bg-[#294655]'"
               @click="submitOrder"
             >
               <span v-if="submitting" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -449,11 +449,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.dashboard-grid {
-  background-size: 48px 48px;
-  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
-}
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

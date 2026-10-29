@@ -169,28 +169,26 @@ const clearFilters = () => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <!-- Subtle Grid background -->
-    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+  <div class="customer-page">
 
     <div class="relative z-10">
       <!-- Header -->
-      <div class="mb-6 rounded-[24px] border border-black/5 bg-white/40 p-6 backdrop-blur-xl sm:p-8">
+      <div class="customer-page-heading mb-6">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-[#929292]">
+            <p class="customer-eyebrow font-semibold uppercase">
               MY ORDERS
             </p>
-            <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
+            <h1 class="text-3xl font-semibold leading-tight text-[#172c3b]">
               งานของฉัน
             </h1>
-            <p class="mt-2 text-[15px] font-medium text-[#666666]">
+            <p class="customer-intro mt-2">
               ติดตามสถานะคำสั่งงาน ชำระเงิน เลือกผลงาน และเปิดรายละเอียดงานทั้งหมดของคุณ
             </p>
           </div>
           <NuxtLink
             to="/customer/orders/create"
-            class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-black/20"
+            class="customer-primary inline-flex h-11 items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-black/20"
           >
             สั่งงานใหม่
           </NuxtLink>
@@ -198,34 +196,35 @@ const clearFilters = () => {
       </div>
 
       <!-- Filter + Search Toolbar -->
-      <div class="mb-6 flex flex-col gap-4 rounded-[20px] border border-black/5 bg-white/60 p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl xl:flex-row xl:items-center xl:justify-between">
+      <div class="customer-toolbar mb-6 flex flex-col gap-4 rounded-[12px] border border-[#172c3b]/10 bg-[#eee7db] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] xl:flex-row xl:items-center xl:justify-between">
         <div class="flex max-w-full min-w-0 gap-2 overflow-x-auto pb-1 xl:overflow-visible xl:pb-0 hide-scrollbar">
           <button
             v-for="group in filterGroups"
             :key="group.value"
             class="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition"
             :class="selectedGroup === group.value
-              ? 'bg-[#171717] text-white shadow-md'
-              : 'border border-black/[0.04] bg-white/80 text-[#666666] hover:border-black/10 hover:bg-white hover:text-[#171717]'"
+              ? 'bg-[#172c3b] text-white shadow-md'
+              : 'border border-[#172c3b]/10 bg-[#fcf9f3] text-[#52616a] hover:border-[#172c3b]/15 hover:bg-[#fcf9f3] hover:text-[#172c3b]'"
             @click="selectedGroup = group.value"
           >
             <span>{{ group.label }}</span>
             <span
               class="rounded-full px-2 py-0.5 text-[11px] font-bold"
-              :class="selectedGroup === group.value ? 'bg-white/20 text-white' : 'bg-[#F3F3F1] text-[#929292]'"
+              :class="selectedGroup === group.value ? 'bg-white/20 text-white' : 'bg-[#eee7db] text-[#69777f]'"
             >
               {{ getGroupCount(group) }}
             </span>
           </button>
         </div>
-        <div class="flex w-full max-w-full min-w-0 items-center gap-2 rounded-xl border border-black/5 bg-white/80 px-4 py-2 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-colors focus-within:border-black/10 focus-within:bg-white xl:w-[320px] xl:shrink-0">
-          <svg class="h-4 w-4 shrink-0 text-[#929292]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex w-full max-w-full min-w-0 items-center gap-2 rounded-xl border border-[#172c3b]/10 bg-[#fcf9f3] px-4 py-2 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-colors focus-within:border-[#172c3b]/15 focus-within:bg-[#fcf9f3] xl:w-[320px] xl:shrink-0">
+          <svg class="h-4 w-4 shrink-0 text-[#69777f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="search"
-            class="w-full bg-transparent text-[13px] font-medium text-[#171717] outline-none placeholder:text-[#929292]"
+            aria-label="ค้นหาคำสั่งงาน"
+            class="w-full bg-transparent text-[13px] font-medium text-[#172c3b] outline-none placeholder:text-[#69777f]"
             placeholder="ค้นหาเลขงาน ประเภทงาน แพ็กเกจ"
           >
         </div>
@@ -233,19 +232,19 @@ const clearFilters = () => {
 
       <div class="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]">
         <!-- Main Order List -->
-        <main class="min-w-0 self-start rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
+        <main class="min-w-0 self-start rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
           <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 class="text-[20px] font-semibold leading-tight text-[#171717]">
+              <h2 class="text-[20px] font-semibold leading-tight text-[#172c3b]">
                 รายการงาน
               </h2>
-              <p class="mt-1 text-[13px] font-medium text-[#666666]">
-                แสดง {{ filteredOrders.length }} รายการจากข้อมูลคำสั่งงานที่โหลดอยู่
+              <p class="mt-1 text-[13px] font-medium text-[#52616a]">
+                พบ {{ filteredOrders.length }} คำสั่งงาน
               </p>
             </div>
             <button
               v-if="hasClientFilter"
-              class="self-start rounded-xl border border-black/10 bg-white/60 px-3.5 py-2 text-xs font-semibold text-[#171717] transition hover:border-black/20 hover:bg-white sm:self-auto"
+              class="self-start rounded-xl border border-[#172c3b]/15 bg-[#eee7db] px-3.5 py-2 text-xs font-semibold text-[#172c3b] transition hover:border-black/20 hover:bg-[#fcf9f3] sm:self-auto"
               @click="clearFilters"
             >
               ล้างตัวกรอง
@@ -253,38 +252,38 @@ const clearFilters = () => {
           </div>
 
           <div v-if="loading" class="space-y-4">
-            <div v-for="idx in 5" :key="idx" class="h-24 animate-pulse rounded-[16px] border border-black/[0.04] bg-white/50" />
+            <div v-for="idx in 5" :key="idx" class="h-24 animate-pulse rounded-[12px] border border-[#172c3b]/10 bg-[#eee7db]" />
           </div>
 
-          <div v-else-if="error" class="rounded-[16px] border border-black/[0.04] bg-[#FDEEEE]/80 p-6 text-center backdrop-blur-sm">
+          <div v-else-if="error" class="rounded-[12px] border border-[#172c3b]/10 bg-[#FDEEEE]/80 p-6 text-center">
             <p class="text-sm font-semibold text-[#B93B3B]">
               เกิดข้อผิดพลาด
             </p>
             <p class="mt-1 text-[13px] font-medium text-[#B93B3B]">
               {{ error }}
             </p>
-            <button class="mt-4 h-11 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white transition hover:bg-black" @click="() => fetchOrders(currentPage)">
+            <button class="customer-primary mt-4 h-11 rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white transition hover:bg-[#294655]" @click="() => fetchOrders(currentPage)">
               โหลดอีกครั้ง
             </button>
           </div>
 
-          <div v-else-if="filteredOrders.length === 0" class="rounded-[16px] border border-dashed border-black/10 bg-[#f8f8f8]/50 p-10 text-center">
-            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#171717] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
+          <div v-else-if="filteredOrders.length === 0" class="rounded-[12px] border border-dashed border-[#172c3b]/15 bg-[#e5e9e1]/50 p-10 text-center">
+            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#fcf9f3] text-[#172c3b] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
               </svg>
             </div>
-            <h3 class="text-[15px] font-semibold text-[#171717]">
+            <h3 class="text-[15px] font-semibold text-[#172c3b]">
               ไม่มีงานในรายการนี้
             </h3>
-            <p class="mx-auto mt-1.5 max-w-md text-[13px] font-medium leading-relaxed text-[#666666]">
+            <p class="mx-auto mt-1.5 max-w-md text-[13px] font-medium leading-relaxed text-[#52616a]">
               ลองล้างตัวกรองหรือเริ่มสร้างคำสั่งงานใหม่ แล้วงานของคุณจะแสดงที่นี่
             </p>
             <div class="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-              <button v-if="hasClientFilter" class="inline-flex h-11 items-center justify-center rounded-xl border border-black/10 bg-white/60 px-[18px] text-sm font-semibold text-[#171717] transition hover:border-black/20 hover:bg-white" @click="clearFilters">
+              <button v-if="hasClientFilter" class="inline-flex h-11 items-center justify-center rounded-xl border border-[#172c3b]/15 bg-[#eee7db] px-[18px] text-sm font-semibold text-[#172c3b] transition hover:border-black/20 hover:bg-[#fcf9f3]" @click="clearFilters">
                 ล้างตัวกรอง
               </button>
-              <NuxtLink to="/customer/orders/create" class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-black">
+              <NuxtLink to="/customer/orders/create" class="customer-primary inline-flex h-11 items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#294655]">
                 สั่งงานแรกของคุณ
               </NuxtLink>
             </div>
@@ -295,25 +294,25 @@ const clearFilters = () => {
               v-for="order in filteredOrders"
               :key="order.orderId"
               :to="`/customer/orders/${order.orderId}`"
-              class="group grid min-w-0 gap-4 rounded-[16px] border border-black/5 bg-white/80 p-4 transition duration-200 hover:-translate-y-px hover:border-black/10 hover:bg-white hover:shadow-md sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center"
+              class="group grid min-w-0 gap-4 rounded-[12px] border border-[#172c3b]/10 bg-[#fcf9f3] p-4 transition duration-200 hover:-translate-y-px hover:border-[#172c3b]/15 hover:bg-[#fcf9f3] hover:shadow-md sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center"
             >
               <!-- Thumbnail icon -->
-              <div class="relative hidden sm:flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-[14px] bg-[#f8f8f8] text-[#171717] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
-                <svg class="h-6 w-6 text-[#171717]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="relative hidden sm:flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-[14px] bg-[#e5e9e1] text-[#172c3b] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
+                <svg class="h-6 w-6 text-[#172c3b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.5-4.5a2 2 0 012.8 0L16 16m-2-2l1.5-1.5a2 2 0 012.8 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
 
               <div class="min-w-0">
                 <div class="mb-1 flex flex-wrap items-baseline gap-2.5">
-                  <h3 class="truncate text-[15px] font-bold text-[#171717] group-hover:text-black">
+                  <h3 class="truncate text-[15px] font-bold text-[#172c3b] group-hover:text-[#172c3b]">
                     #COOS-{{ Math.abs(order.orderId) }}
                   </h3>
                   <span class="text-[11px] font-bold uppercase tracking-wider" :class="getStatusMeta(order.orderStatus).tone">
                     {{ getStatusMeta(order.orderStatus).label }}
                   </span>
                 </div>
-                <p class="text-[13px] font-medium text-[#666666]">
+                <p class="text-[13px] font-medium text-[#52616a]">
                   {{ order.workTypeName }} · {{ order.packageName }} · ส่งงาน {{ formatDate(order.orderRequiredDate) }}
                 </p>
                 <div class="mt-2.5 flex items-center gap-3">
@@ -324,7 +323,7 @@ const clearFilters = () => {
                       :style="{ width: `${getStatusMeta(order.orderStatus).progress}%` }"
                     />
                   </div>
-                  <span class="min-w-[40px] text-right text-[11px] font-bold text-[#929292]">
+                  <span class="min-w-[40px] text-right text-[11px] font-bold text-[#69777f]">
                     {{ getStatusMeta(order.orderStatus).progress }}%
                   </span>
                 </div>
@@ -332,10 +331,10 @@ const clearFilters = () => {
 
               <div class="flex min-w-0 items-center justify-between gap-4 sm:min-w-[120px] sm:flex-col sm:items-end sm:gap-2">
                 <div class="text-left sm:text-right">
-                  <p class="text-[15px] font-semibold text-[#171717]">
+                  <p class="text-[15px] font-semibold text-[#172c3b]">
                     {{ formatPrice(order.orderTotalPrice) }}
                   </p>
-                  <p class="text-[11px] font-medium text-[#929292]">
+                  <p class="text-[11px] font-medium text-[#69777f]">
                     ราคาสุทธิ
                   </p>
                 </div>
@@ -346,6 +345,7 @@ const clearFilters = () => {
             </NuxtLink>
           </div>
 
+          <div class="customer-pagination">
           <Pagination
             v-if="!loading && !error && filteredOrders.length > 0 && !hasClientFilter"
             :current-page="currentPage"
@@ -354,16 +354,17 @@ const clearFilters = () => {
             :limit="limit"
             @page-change="handlePageChange"
           />
+          </div>
         </main>
 
         <!-- Right Summary Sidebar -->
         <aside class="min-w-0 space-y-6">
-          <section class="rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
+          <section class="rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
             <div class="mb-5">
-              <h2 class="text-[20px] font-semibold leading-tight text-[#171717]">
+              <h2 class="text-[20px] font-semibold leading-tight text-[#172c3b]">
                 สรุปงานของฉัน
               </h2>
-              <p class="mt-1 text-[13px] font-medium text-[#666666]">
+              <p class="mt-1 text-[13px] font-medium text-[#52616a]">
                 ตัวเลขจากรายการคำสั่งงานจริง
               </p>
             </div>
@@ -371,24 +372,24 @@ const clearFilters = () => {
               <div
                 v-for="item in summaryCards"
                 :key="item.label"
-                class="flex items-center justify-between rounded-[16px] border border-black/5 bg-white/80 px-4 py-3.5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]"
+                class="flex items-center justify-between rounded-[12px] border border-[#172c3b]/10 bg-[#fcf9f3] px-4 py-3.5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]"
               >
-                <span class="text-[13px] font-medium text-[#666666]">{{ item.label }}</span>
-                <span class="text-[17px] font-bold text-[#171717]">{{ item.value }}</span>
+                <span class="text-[13px] font-medium text-[#52616a]">{{ item.label }}</span>
+                <span class="text-[17px] font-bold text-[#172c3b]">{{ item.value }}</span>
               </div>
             </div>
           </section>
 
-          <section class="rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
-            <p class="text-[20px] font-semibold leading-tight text-[#171717]">
+          <section class="rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
+            <p class="text-[20px] font-semibold leading-tight text-[#172c3b]">
               พร้อมสร้างงานใหม่?
             </p>
-            <p class="mt-2 text-[13px] font-medium leading-relaxed text-[#666666]">
-              เลือกบริการและส่งรายละเอียดงานใหม่ได้จากแบบฟอร์มเดิมของระบบ
+            <p class="mt-2 text-[13px] font-medium leading-relaxed text-[#52616a]">
+              เลือกประเภทภาพและแพ็กเกจ แล้วส่งไอเดียให้ทีมสร้างสรรค์ดูแลต่อ
             </p>
             <NuxtLink
               to="/customer/orders/create"
-              class="mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-[14px] font-semibold text-white shadow-md transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-black/20"
+              class="customer-primary mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-[14px] font-semibold text-white shadow-md transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-black/20"
             >
               สั่งงานใหม่
             </NuxtLink>
@@ -400,11 +401,6 @@ const clearFilters = () => {
 </template>
 
 <style scoped>
-.dashboard-grid {
-  background-size: 48px 48px;
-  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
-}
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

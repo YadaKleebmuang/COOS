@@ -338,28 +338,27 @@ const changePassword = async () => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+  <div class="customer-page">
     <div class="relative z-10">
       <!-- Header -->
-      <div class="mb-6 text-center">
-        <p class="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#929292]">
+      <div class="customer-page-heading mb-6">
+        <p class="customer-eyebrow font-semibold uppercase">
           CUSTOMER PROFILE
         </p>
-        <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
+        <h1 class="text-3xl font-semibold leading-tight text-[#172c3b]">
           แก้ไขข้อมูลโปรไฟล์
         </h1>
-        <p class="mt-1.5 text-[14px] font-medium text-[#666666]">
+        <p class="customer-intro mt-2">
           อัปเดตข้อมูลส่วนตัว ช่องทางการติดต่อ และรูปโปรไฟล์ของคุณ
         </p>
       </div>
 
     <div
       v-if="loading"
-      class="mt-6 rounded-[24px] border border-black/5 bg-white/60 p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
+      class="mt-6 rounded-[14px] border border-[#172c3b]/10 bg-[#eee7db] p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
     >
-      <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#F3F3F1] border-t-[#171717]" />
-      <p class="text-sm font-medium text-[#666666]">
+      <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#eee7db] border-t-[#172c3b]" />
+      <p class="text-sm font-medium text-[#52616a]">
         กำลังโหลดข้อมูลโปรไฟล์...
       </p>
     </div>
@@ -368,14 +367,14 @@ const changePassword = async () => {
       v-else
       class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]"
     >
-      <aside class="self-start rounded-[24px] border border-black/5 bg-white/60 p-6 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md">
-        <p class="mb-5 text-xs font-medium uppercase tracking-[0.22em] text-[#929292]">
+      <aside class="customer-callout self-start rounded-[14px] border border-[#172c3b]/10 bg-[#eee7db] p-6 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <p class="mb-5 text-xs font-medium uppercase tracking-[0.22em] text-[#69777f]">
           รูปโปรไฟล์
         </p>
 
         <div class="mx-auto w-fit">
           <div class="relative">
-            <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-black/5 bg-white/60 shadow-[0_4px_14px_rgba(0,0,0,0.04)] backdrop-blur-md">
+            <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-[#172c3b]/10 bg-[#eee7db] shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
               <img
                 v-if="previewImageUrl"
                 :src="previewImageUrl"
@@ -390,12 +389,12 @@ const changePassword = async () => {
               >
               <div
                 v-else
-                class="text-[40px] font-semibold uppercase text-[#929292]"
+                class="text-[40px] font-semibold uppercase text-[#69777f]"
               >
                 {{ profileForm.userFirstName[0] || 'C' }}
               </div>
             </div>
-            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#171717] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#292929] focus-within:ring-2 focus-within:ring-[#756CE8]/25" :class="{ 'opacity-50 cursor-not-allowed': isUploadingAvatar }">
+            <label class="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#172c3b] text-white shadow-[0_4px_14px_rgba(0,0,0,0.14)] transition hover:bg-[#294655] focus-within:ring-2 focus-within:ring-[#d97945]/25" :class="{ 'opacity-50 cursor-not-allowed': isUploadingAvatar }">
               <svg
                 class="h-4 w-4"
                 fill="none"
@@ -430,18 +429,18 @@ const changePassword = async () => {
         </div>
 
         <div class="mt-5">
-          <p class="break-words text-lg font-semibold leading-[1.45] text-[#171717]">
+          <p class="break-words text-lg font-semibold leading-[1.45] text-[#172c3b]">
             {{ profileForm.userFirstName || 'Customer' }} {{ profileForm.userLastName }}
           </p>
           <p
-            class="mt-1 truncate text-sm leading-[1.5] text-[#666666]"
+            class="mt-1 truncate text-sm leading-[1.5] text-[#52616a]"
             :title="profileForm.userEmail"
           >
             {{ profileForm.userEmail || '-' }}
           </p>
         </div>
 
-        <label class="mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-black/[0.08] bg-white px-4 text-sm font-semibold text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-black/[0.12] hover:bg-[#F3F3F1] focus-within:ring-2 focus-within:ring-[#756CE8]/25">
+        <label class="mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-black/[0.08] bg-[#fcf9f3] px-4 text-sm font-semibold text-[#172c3b] shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-black/[0.12] hover:bg-[#eee7db] focus-within:ring-2 focus-within:ring-[#d97945]/25">
           เปลี่ยนรูปโปรไฟล์
           <input
             type="file"
@@ -454,14 +453,14 @@ const changePassword = async () => {
 
       <div class="space-y-6">
         <form
-          class="rounded-[24px] border border-black/5 bg-white/60 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
+          class="rounded-[14px] border border-[#172c3b]/10 bg-[#eee7db] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           @submit.prevent="saveProfile"
         >
-          <div class="mb-5 border-b border-black/[0.06] pb-4">
-            <h2 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          <div class="mb-5 border-b border-[#172c3b]/10 pb-4">
+            <h2 class="text-base font-semibold leading-[1.45] text-[#172c3b]">
               ข้อมูลส่วนตัวทั่วไป
             </h2>
-            <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+            <p class="mt-1 text-sm leading-[1.6] text-[#52616a]">
               ข้อมูลนี้ใช้สำหรับการติดต่อและการประสานงานคำสั่งซื้อ
             </p>
           </div>
@@ -470,43 +469,43 @@ const changePassword = async () => {
             <div>
               <label
                 for="userFirstName"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >ชื่อจริง</label>
               <input
                 id="userFirstName"
                 v-model="profileForm.userFirstName"
                 required
                 type="text"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
             <div>
               <label
                 for="userLastName"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >นามสกุล</label>
               <input
                 id="userLastName"
                 v-model="profileForm.userLastName"
                 required
                 type="text"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
 
             <div class="sm:col-span-2">
               <label
                 for="userEmail"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >อีเมล</label>
               <input
                 id="userEmail"
                 :value="profileForm.userEmail"
                 disabled
                 type="email"
-                class="h-11 w-full cursor-not-allowed rounded-xl border border-black/5 bg-black/[0.03] px-4 text-[14px] font-medium text-[#666666] outline-none disabled:opacity-100"
+                class="h-11 w-full cursor-not-allowed rounded-xl border border-[#172c3b]/10 bg-black/[0.03] px-4 text-[14px] font-medium text-[#52616a] outline-none disabled:opacity-100"
               >
-              <p class="mt-2 text-xs leading-[1.5] text-[#929292]">
+              <p class="mt-2 text-xs leading-[1.5] text-[#69777f]">
                 อีเมลเป็นข้อมูลสำหรับเข้าสู่ระบบ จึงไม่สามารถแก้ไขได้จากหน้านี้
               </p>
             </div>
@@ -514,8 +513,8 @@ const changePassword = async () => {
             <div>
               <label
                 for="userPhone"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์โทรศัพท์ <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
+              >เบอร์โทรศัพท์ <span class="text-[#69777f] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="userPhone"
                 v-model="profileForm.userPhone"
@@ -523,14 +522,14 @@ const changePassword = async () => {
                 inputmode="numeric"
                 maxlength="10"
                 @input="profileForm.userPhone = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
             <div>
               <label
                 for="tel"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
-              >เบอร์ติดต่อช่องทางด่วน <span class="text-[#9A9A95] font-normal">(ไม่บังคับ)</span></label>
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
+              >เบอร์ติดต่อช่องทางด่วน <span class="text-[#69777f] font-normal">(ไม่บังคับ)</span></label>
               <input
                 id="tel"
                 v-model="profileForm.tel"
@@ -538,53 +537,53 @@ const changePassword = async () => {
                 inputmode="numeric"
                 maxlength="10"
                 @input="profileForm.tel = ($event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 10)"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
 
             <div class="sm:col-span-2">
               <label
                 for="userAddress"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >ที่อยู่จัดส่ง / ที่อยู่ติดต่อ</label>
               <textarea
                 id="userAddress"
                 v-model="profileForm.userAddress"
                 rows="3"
-                class="w-full resize-none rounded-xl border border-black/10 bg-white/80 px-4 py-3 text-[14px] font-medium leading-[1.6] text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="w-full resize-none rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 py-3 text-[14px] font-medium leading-[1.6] text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               />
             </div>
           </div>
 
-          <div class="mt-6 border-t border-black/[0.06] pt-5">
-            <h3 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          <div class="mt-6 border-t border-[#172c3b]/10 pt-5">
+            <h3 class="text-base font-semibold leading-[1.45] text-[#172c3b]">
               ช่องทางโซเชียลสำหรับการส่งงาน
             </h3>
             <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label
                   for="facebook"
-                  class="mb-2 block text-sm font-semibold text-[#171717]"
+                  class="mb-2 block text-sm font-semibold text-[#172c3b]"
                 >Facebook</label>
                 <input
                   id="facebook"
                   v-model="profileForm.facebook"
                   type="text"
                   placeholder="ชื่อ Facebook"
-                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                  class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
                 >
               </div>
               <div>
                 <label
                   for="line"
-                  class="mb-2 block text-sm font-semibold text-[#171717]"
+                  class="mb-2 block text-sm font-semibold text-[#172c3b]"
                 >LINE ID</label>
                 <input
                   id="line"
                   v-model="profileForm.line"
                   type="text"
                   placeholder="ไลน์ไอดี"
-                  class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                  class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
                 >
               </div>
             </div>
@@ -611,7 +610,7 @@ const changePassword = async () => {
             <button
               :disabled="saving"
               type="submit"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed disabled:opacity-60"
+              class="customer-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-[#172c3b]/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span
                 v-if="saving"
@@ -623,14 +622,14 @@ const changePassword = async () => {
         </form>
 
         <form
-          class="rounded-[24px] border border-black/5 bg-white/60 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
+          class="rounded-[14px] border border-[#172c3b]/10 bg-[#eee7db] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           @submit.prevent="changePassword"
         >
-          <div class="mb-5 border-b border-black/[0.06] pb-4">
-            <h2 class="text-base font-semibold leading-[1.45] text-[#171717]">
+          <div class="mb-5 border-b border-[#172c3b]/10 pb-4">
+            <h2 class="text-base font-semibold leading-[1.45] text-[#172c3b]">
               เปลี่ยนรหัสผ่าน
             </h2>
-            <p class="mt-1 text-sm leading-[1.6] text-[#666666]">
+            <p class="mt-1 text-sm leading-[1.6] text-[#52616a]">
               ใช้รหัสผ่านเดิมเพื่อยืนยันตัวตนก่อนตั้งรหัสผ่านใหม่
             </p>
           </div>
@@ -639,7 +638,7 @@ const changePassword = async () => {
             <div class="sm:col-span-2">
               <label
                 for="oldPassword"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >รหัสผ่านเดิม</label>
               <input
                 id="oldPassword"
@@ -647,13 +646,13 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="รหัสผ่านเดิม"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
             <div>
               <label
                 for="newPassword"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >รหัสผ่านใหม่</label>
               <input
                 id="newPassword"
@@ -661,13 +660,13 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="รหัสผ่านใหม่"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
             <div>
               <label
                 for="confirmPassword"
-                class="mb-2 block text-sm font-semibold text-[#171717]"
+                class="mb-2 block text-sm font-semibold text-[#172c3b]"
               >ยืนยันรหัสผ่านใหม่</label>
               <input
                 id="confirmPassword"
@@ -675,7 +674,7 @@ const changePassword = async () => {
                 required
                 type="password"
                 placeholder="ยืนยันรหัสผ่านใหม่"
-                class="h-11 w-full rounded-xl border border-black/10 bg-white/80 px-4 text-[14px] font-medium text-[#171717] outline-none transition placeholder:text-[#929292] hover:border-black/[0.15] focus:border-[#171717]/30 focus:bg-white focus:ring-2 focus:ring-[#171717]/10"
+                class="h-11 w-full rounded-xl border border-[#172c3b]/15 bg-[#fcf9f3] px-4 text-[14px] font-medium text-[#172c3b] outline-none transition placeholder:text-[#69777f] hover:border-black/[0.15] focus:border-[#172c3b]/30 focus:bg-[#fcf9f3] focus:ring-2 focus:ring-[#172c3b]/10"
               >
             </div>
           </div>
@@ -701,7 +700,7 @@ const changePassword = async () => {
             <button
               :disabled="passwordSaving"
               type="submit"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#292929] focus:outline-none focus:ring-2 focus:ring-[#171717]/20 disabled:cursor-not-allowed disabled:opacity-60"
+              class="customer-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-[#172c3b]/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span
                 v-if="passwordSaving"
@@ -716,11 +715,3 @@ const changePassword = async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.dashboard-grid {
-  background-size: 48px 48px;
-  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
-}
-</style>

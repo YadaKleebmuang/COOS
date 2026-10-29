@@ -214,35 +214,33 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1280px] py-6 sm:py-8 lg:py-10">
-    <!-- Subtle Grid background -->
-    <div class="dashboard-grid pointer-events-none fixed inset-0 z-0" />
+  <div class="customer-page">
 
     <div class="relative z-10">
       <!-- Header & Summary Section -->
-      <div class="mb-8 rounded-[24px] border border-black/5 bg-white/40 p-6 backdrop-blur-xl sm:p-8">
+      <div class="customer-page-heading mb-8">
       <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-[#929292]">
+          <p class="customer-eyebrow font-semibold uppercase">
             COOS STUDIO
           </p>
-          <h1 class="text-3xl font-semibold leading-tight text-[#171717]">
+          <h1 class="text-3xl font-semibold leading-tight text-[#172c3b]">
             สวัสดีค่ะ, {{ displayName }}
           </h1>
-          <p class="mt-2 text-[15px] font-medium text-[#666666]">
-            ยินดีต้อนรับเข้าสู่ COOS STUDIO จัดการงานแต่งภาพและติดตามสถานะได้จากที่เดียว
+          <p class="customer-intro mt-2">
+            พื้นที่สำหรับทุกไอเดียของคุณ เริ่มงานใหม่ ติดตามความคืบหน้า และรับผลงานได้ในที่เดียว
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <NuxtLink
             to="/customer/orders/create"
-            class="inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-black/20"
+            class="customer-primary inline-flex h-11 items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.04)] transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-black/20"
           >
             สั่งงานใหม่
           </NuxtLink>
           <NuxtLink
             to="/customer/orders"
-            class="inline-flex h-11 items-center justify-center rounded-xl border border-black/10 bg-white/60 px-[18px] text-sm font-semibold text-[#171717] transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-black/10"
+            class="customer-secondary inline-flex h-11 items-center justify-center rounded-xl border border-[#172c3b]/15 bg-[#eee7db] px-[18px] text-sm font-semibold text-[#172c3b] transition hover:bg-[#fcf9f3] focus:outline-none focus:ring-2 focus:ring-black/10"
           >
             ดูงานทั้งหมด
           </NuxtLink>
@@ -257,20 +255,20 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
         <div
           v-for="idx in 4"
           :key="idx"
-          class="h-28 animate-pulse rounded-2xl border border-black/[0.04] bg-white/50"
+          class="h-28 animate-pulse rounded-2xl border border-[#172c3b]/10 bg-[#eee7db]"
         />
       </div>
 
       <!-- Error State -->
       <div
         v-else-if="error"
-        class="rounded-2xl border border-black/[0.04] bg-[#FDEEEE]/80 p-6 text-center backdrop-blur-sm"
+        class="rounded-2xl border border-[#172c3b]/10 bg-[#FDEEEE]/80 p-6 text-center"
       >
         <p class="text-sm font-medium text-[#B93B3B]">
           {{ error }}
         </p>
         <button
-          class="mt-4 h-11 rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white transition hover:bg-black"
+          class="customer-primary mt-4 h-11 rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white transition hover:bg-[#294655]"
           @click="fetchDashboardData"
         >
           โหลดอีกครั้ง
@@ -285,10 +283,10 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
         <div
           v-for="item in stats"
           :key="item.label"
-          class="rounded-2xl border border-black/[0.04] bg-white/80 p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-md"
+          class="customer-metric rounded-2xl border border-[#172c3b]/10 bg-[#fcf9f3] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
         >
           <div class="mb-3 flex items-center gap-2.5">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#f8f8f8] text-[#171717] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
+            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#e5e9e1] text-[#172c3b] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
               <svg
                 class="h-4 w-4"
                 fill="none"
@@ -303,15 +301,15 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
                 />
               </svg>
             </span>
-            <p class="text-xs font-medium text-[#666666]">
+            <p class="text-xs font-medium text-[#52616a]">
               {{ item.label }}
             </p>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <p class="text-2xl font-bold tracking-tight text-[#171717]">
+            <p class="text-2xl font-bold tracking-tight text-[#172c3b]">
               {{ item.value }}
             </p>
-            <p class="text-xs font-medium text-[#929292]">
+            <p class="text-xs font-medium text-[#69777f]">
               {{ item.unit }}
             </p>
           </div>
@@ -320,19 +318,19 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
     </div>
 
     <div class="mt-6 grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]">
-      <section class="min-w-0 self-start rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
+      <section class="min-w-0 self-start rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
         <div class="mb-6 flex items-center justify-between gap-4">
           <div>
-            <h2 class="text-[20px] font-semibold leading-tight text-[#171717]">
+            <h2 class="text-[20px] font-semibold leading-tight text-[#172c3b]">
               งานกำลังดำเนินการ
             </h2>
-            <p class="mt-1 text-[13px] font-medium text-[#666666]">
+            <p class="mt-1 text-[13px] font-medium text-[#52616a]">
               รายการล่าสุดจากข้อมูลคำสั่งงานจริงของคุณ
             </p>
           </div>
           <NuxtLink
             to="/customer/orders"
-            class="text-[13px] font-semibold text-[#171717] transition hover:text-black"
+            class="text-[13px] font-semibold text-[#172c3b] transition hover:text-[#172c3b]"
           >
             ดูทั้งหมด →
           </NuxtLink>
@@ -345,23 +343,23 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
           <div
             v-for="idx in 4"
             :key="idx"
-            class="h-[88px] animate-pulse rounded-[16px] bg-white/50"
+            class="h-[88px] animate-pulse rounded-[12px] bg-[#eee7db]"
           />
         </div>
 
         <div
           v-else-if="activeOrders.length === 0"
-          class="rounded-[16px] border border-dashed border-black/10 bg-[#f8f8f8]/50 p-10 text-center"
+          class="rounded-[12px] border border-dashed border-[#172c3b]/15 bg-[#e5e9e1]/50 p-10 text-center"
         >
-          <p class="text-base font-semibold text-[#171717]">
+          <p class="text-base font-semibold text-[#172c3b]">
             ยังไม่มีงานที่กำลังดำเนินการ
           </p>
-          <p class="mt-2 text-sm leading-[1.6] text-[#666666]">
+          <p class="mt-2 text-sm leading-[1.6] text-[#52616a]">
             เริ่มสร้างคำสั่งงานแรกของคุณ แล้วสถานะจะมาแสดงที่นี่
           </p>
           <NuxtLink
             to="/customer/orders/create"
-            class="mt-5 inline-flex h-11 items-center justify-center rounded-xl bg-[#171717] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-black"
+            class="customer-primary mt-5 inline-flex h-11 items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-sm font-semibold text-white shadow-md transition hover:bg-[#294655]"
           >
             สั่งงานแรกของคุณ
           </NuxtLink>
@@ -375,11 +373,11 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
             v-for="order in activeOrders"
             :key="order.orderId"
             :to="`/customer/orders/${order.orderId}`"
-            class="group grid min-w-0 gap-4 rounded-[16px] border border-black/[0.04] bg-white/80 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] backdrop-blur-sm transition duration-200 hover:-translate-y-px hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center"
+            class="group grid min-w-0 gap-4 rounded-[12px] border border-[#172c3b]/10 bg-[#fcf9f3] p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition duration-200 hover:-translate-y-px hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,0,0,0.04)] sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center"
           >
-            <div class="flex h-14 w-14 items-center justify-center rounded-[14px] bg-[#f8f8f8] text-[#171717] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
+            <div class="flex h-14 w-14 items-center justify-center rounded-[14px] bg-[#e5e9e1] text-[#172c3b] shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
               <svg
-                class="h-6 w-6 text-[#171717]"
+                class="h-6 w-6 text-[#172c3b]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -395,7 +393,7 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
 
             <div class="min-w-0">
               <div class="mb-1 flex flex-wrap items-center gap-2">
-                <h3 class="truncate text-[15px] font-bold text-[#171717]">
+                <h3 class="truncate text-[15px] font-bold text-[#172c3b]">
                   {{ order.workTypeName }}
                 </h3>
                 <span
@@ -405,28 +403,28 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
                   {{ getStatusMeta(order.orderStatus).label }}
                 </span>
               </div>
-              <p class="mb-2 truncate text-[13px] font-medium text-[#666666]">
+              <p class="mb-2 truncate text-[13px] font-medium text-[#52616a]">
                 #COOS-{{ Math.abs(order.orderId) }} • {{ order.packageName }} • ส่งงาน {{ formatDate(order.orderRequiredDate) }}
               </p>
               <div class="flex items-center gap-3">
-                <div class="h-1 w-32 overflow-hidden rounded-full bg-[#EEEEEC]">
+                <div class="h-1 w-32 overflow-hidden rounded-full bg-[#ded7cb]">
                   <div
                     class="h-full rounded-full transition-all"
                     :class="getProgressFillClass(order.orderStatus)"
                     :style="{ width: `${getStatusMeta(order.orderStatus).progress}%` }"
                   />
                 </div>
-                <span class="text-[11px] font-bold text-[#929292]">
+                <span class="text-[11px] font-bold text-[#69777f]">
                   {{ getStatusMeta(order.orderStatus).progress }}%
                 </span>
               </div>
             </div>
 
             <div class="flex min-w-0 items-center justify-between gap-3 sm:min-w-[120px] sm:flex-col sm:items-end">
-              <p class="text-[15px] font-bold text-[#171717]">
+              <p class="text-[15px] font-bold text-[#172c3b]">
                 {{ formatPrice(order.orderTotalPrice) }}
               </p>
-              <span class="inline-flex items-center justify-center rounded-xl bg-[#F3F3F1] px-4 py-2 text-[12px] font-semibold text-[#171717] transition group-hover:bg-[#171717] group-hover:text-white">
+              <span class="inline-flex items-center justify-center rounded-xl bg-[#eee7db] px-4 py-2 text-[12px] font-semibold text-[#172c3b] transition group-hover:bg-[#172c3b] group-hover:text-white">
                 ดูรายละเอียด
               </span>
             </div>
@@ -435,13 +433,13 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
       </section>
 
       <aside class="min-w-0 space-y-6">
-        <section class="rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
+        <section class="rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
           <div class="mb-5 flex items-center justify-between">
             <div>
-              <h2 class="text-[18px] font-semibold leading-tight text-[#171717]">
+              <h2 class="text-[18px] font-semibold leading-tight text-[#172c3b]">
                 ขั้นตอนการทำงาน
               </h2>
-              <p class="mt-1 text-[13px] font-medium text-[#666666]">
+              <p class="mt-1 text-[13px] font-medium text-[#52616a]">
                 {{ latestOrder ? `อ้างอิงงาน #COOS-${Math.abs(latestOrder.orderId)}` : 'รอคำสั่งงานแรกของคุณ' }}
               </p>
             </div>
@@ -457,8 +455,8 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
                 <span
                   class="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ring-4 ring-white/60"
                   :class="{
-                    'bg-[#171717] text-white': getWorkflowState(step.status) === 'done' || getWorkflowState(step.status) === 'current',
-                    'bg-[#E5E5E5] text-[#929292]': getWorkflowState(step.status) === 'pending'
+                    'bg-[#172c3b] text-white': getWorkflowState(step.status) === 'done' || getWorkflowState(step.status) === 'current',
+                    'bg-[#E5E5E5] text-[#69777f]': getWorkflowState(step.status) === 'pending'
                   }"
                 >
                   <svg
@@ -475,7 +473,7 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  <span v-else-if="getWorkflowState(step.status) === 'current'" class="h-2 w-2 rounded-full bg-white" />
+                  <span v-else-if="getWorkflowState(step.status) === 'current'" class="h-2 w-2 rounded-full bg-[#fcf9f3]" />
                 </span>
                 <span
                   v-if="idx < workflowSteps.length - 1"
@@ -485,11 +483,11 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
               <div class="pb-2 pt-[2px]">
                 <p
                   class="text-[14px] font-bold leading-none"
-                  :class="getWorkflowState(step.status) === 'pending' ? 'text-[#929292]' : 'text-[#171717]'"
+                  :class="getWorkflowState(step.status) === 'pending' ? 'text-[#69777f]' : 'text-[#172c3b]'"
                 >
                   {{ step.label }}
                 </p>
-                <p class="mt-1.5 text-[12px] font-medium text-[#929292]">
+                <p class="mt-1.5 text-[12px] font-medium text-[#69777f]">
                   {{ getStatusMeta(step.status).label }}
                 </p>
               </div>
@@ -497,29 +495,29 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
           </div>
         </section>
 
-        <section class="rounded-[24px] border border-black/5 bg-white/40 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] backdrop-blur-xl sm:p-8">
+        <section class="rounded-[14px] border border-[#172c3b]/10 bg-[#fcf9f3] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sm:p-8">
           <div class="mb-4">
-            <h2 class="text-[18px] font-semibold leading-tight text-[#171717]">
+            <h2 class="text-[18px] font-semibold leading-tight text-[#172c3b]">
               การดำเนินการของคุณ
             </h2>
           </div>
 
           <div
             v-if="actionableOrder"
-            class="rounded-[16px] border border-black/[0.04] bg-white/80 p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] backdrop-blur-sm"
+            class="rounded-[12px] border border-[#172c3b]/10 bg-[#fcf9f3] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
           >
             <p class="text-[11px] font-bold uppercase tracking-wider text-[#B93B3B]">
               ต้องดำเนินการต่อ
             </p>
-            <p class="mt-1 text-[17px] font-bold text-[#171717]">
+            <p class="mt-1 text-[17px] font-bold text-[#172c3b]">
               {{ getStatusMeta(actionableOrder.orderStatus).actionLabel }}
             </p>
-            <p class="mt-1 text-[13px] font-medium text-[#666666]">
+            <p class="mt-1 text-[13px] font-medium text-[#52616a]">
               #COOS-{{ Math.abs(actionableOrder.orderId) }} • {{ actionableOrder.workTypeName }}
             </p>
             <NuxtLink
               :to="`/customer/orders/${actionableOrder.orderId}`"
-              class="mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[#171717] px-[18px] text-[14px] font-semibold text-white shadow-md transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-black/20"
+              class="customer-primary mt-5 flex h-11 w-full items-center justify-center rounded-xl bg-[#172c3b] px-[18px] text-[14px] font-semibold text-white shadow-md transition hover:bg-[#294655] focus:outline-none focus:ring-2 focus:ring-black/20"
             >
               เปิดออเดอร์นี้
             </NuxtLink>
@@ -527,12 +525,12 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
 
           <div
             v-else
-            class="rounded-[16px] border border-dashed border-black/10 bg-[#f8f8f8]/50 p-6 text-center"
+            class="rounded-[12px] border border-dashed border-[#172c3b]/15 bg-[#e5e9e1]/50 p-6 text-center"
           >
-            <p class="text-[14px] font-semibold text-[#171717]">
+            <p class="text-[14px] font-semibold text-[#172c3b]">
               ไม่มีงานที่ต้องดำเนินการตอนนี้
             </p>
-            <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-[#666666]">
+            <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-[#52616a]">
               เมื่อมีงานรอชำระเงินหรือรอเลือกภาพ ระบบจะแสดงที่นี่
             </p>
           </div>
@@ -542,11 +540,3 @@ const getWorkflowState = (stepStatus: OrderStatus) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.dashboard-grid {
-  background-size: 48px 48px;
-  background-image: linear-gradient(to right, rgba(20, 20, 20, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(20, 20, 20, 0.05) 1px, transparent 1px);
-}
-</style>
